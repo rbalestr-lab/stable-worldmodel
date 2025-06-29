@@ -1,0 +1,78 @@
+Installation for XFree86 (X.Org)
+--------------------------------
+
+Unpack the archive file containing fonts in some temporal directory, for
+example /tmp :
+
+cd /tmp
+tar xzvf cm_unicode-VERSION-pfb.tar.gz
+cd cm-unicode-VERSION
+
+where VERSION is version number of this font pack.
+Then create cm-unicode/ directory at the place, where your X stores fonts, for example 
+/usr/share/fonts :
+
+mkdir -p /usr/share/fonts/cm-unicode
+
+You should become root to do it. Then copy font files there:
+
+cp *.afm /usr/share/fonts/cm-unicode/
+cp *.pfb /usr/share/fonts/cm-unicode/
+
+If you are using XFree86 prior to 4.3 you shoul also copy fonts.scale there.
+Then change directory to /usr/share/fonts/cm-unicode/ :
+
+cd /usr/share/fonts/cm-unicode/
+
+and do
+
+mkfontscale # if you are using XFree86-4.3 or later or recent X.Org
+mkfontdir
+
+Currently mkfontscale and mkfontdir may produce errors, so copy
+fonts.dir and fonts.scale files supplied into 
+/usr/share/fonts/cm-unicode/
+
+Then add  
+FontPath     "/usr/share/fonts/cm-unicode/"  
+to "Files" Section of /etc/X11/xorg.conf (/etc/X11/XF86Config). On the
+next run X.Org (XFree86) will load these  fonts.
+
+If you are using fontconfig (X.Org, XFree86-4.3, may be installed on 
+XFree86-4.2) you should add a line
+<dir>/usr/share/fonts/cm-unicode</dir>
+to /etc/fonts/fonts.conf or better to /etc/fonts/local.conf then run
+
+fc-cache
+
+
+Installation for ghostscript 
+----------------------------
+(Optional, modern versions of ghostscript retreive information from fontconfig)
+
+
+Assuming that you have rather new ghostscript version like 7.x go to
+default ghostscript font directory, typically /usr/share/ghostscript/fonts, then
+add links to fonts installed for X or copy them:
+
+cd /usr/share/ghostscript/fonts
+ln -s /usr/share/fonts/cm-unicode/*.afm .
+ln -s /usr/share/fonts/cm-unicode/*.pfb .
+
+Then go to the ghostscript library directory, for example 
+
+cd /usr/share/ghostscript/?.??/lib
+
+where ?.?? is ghostscript version. Copy Fontmap.CMU from tarball:
+
+cp /tmp/cm_unicode-VERSION/Fontmap.CMU .
+
+Then add following line to Fontmap file:
+
+(Fontmap.CMU) .runlibfile
+
+Note that pdfwriter from ghostscript versions prior to 8.x does not
+understand characters not existing in the encoding. These fonts were
+tested with ps2pdf script from AFPL ghostscript-8.14.
+
+That's all.

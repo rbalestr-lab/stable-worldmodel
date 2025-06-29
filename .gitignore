@@ -1,4 +1,13 @@
 # Byte-compiled / optimized / DLL files
+core.*
+*.pdf
+*.gif
+*.jpg
+*.png
+*.mp4
+figures/
+old_experiments/
+toy_experiments/
 __pycache__/
 *.py[cod]
 *$py.class

@@ -1,0 +1,6 @@
+* Some accented Latin characters are missing.
+
+* Add bitmap built in fonts to opentype ones particularly regular (help from
+  volunteers is needed). CMUTypewriter-Regular now contains some bitmap fonts.
+  
+* Add anchors

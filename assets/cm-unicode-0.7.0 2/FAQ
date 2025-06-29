@@ -1,0 +1,55 @@
+How to add new glyphs to existing scripts?
+
+   Usually one wants to add accented glyphs. In that case fontforge
+   script commands (for example, AddAccent, BuildComposite) may be used.
+   Fontforge can produce more or less satisfactory character. It may be
+   adjusted by fontforge preferences. For such simple batch editions it
+   has not to build everything from scratch. You can create simple
+   fontforge script, for example:
+   
+#!/usr/local/bin/fontforge
+fontname=$1
+Open(fontname+".sfd")
+SetPref("AccentOffsetPercent",5)
+SetPref("AccentCenterLowest",0)
+SetPref("CharCenterHighest",0)
+Select("imacron")
+BuildAccented()
+Save(fontname+"-my.sfd")                                                               
+Close()
+Quit()
+
+   You may insert here if commands for specific fonts:
+
+if (font_var == "bl")
+ SetPref("CharCenterHighest",1)
+else
+ ...
+
+   Look at mergefonts.pe for more examples.
+   Then run it with name of some sfd font file from
+   cm-unicode-*-sfd.tar.bz2 without sfd extension, e. g.
+
+$fontforge -script aaa.ff `basename cmunrm.sfd .sfd`
+
+   Then send me required commands from  this script, I shall include them
+   into mergefonts.pe
+
+   If you are dissatisfied by the quality of glyph created by the
+   fontforge or you created totally new glyph:
+   
+   Create new font with glyphs will be added to cm-unicode and their
+   dependencies, when these glyphs contain references.
+   
+   Save this font with additions with filename containing some prefix
+   and cm-unicode suffix (basename of sfd file from
+   cm-unicode-*-sfd.tar.bz2 without initial "cmun"), e. g.: aaarm.sfd
+   
+   And send me these sfd files.
+
+How to print using opentype fonts from KDE 3.5?
+
+   At first install the fonts for ghostscript.
+   As a workaround for printing with Qt 3.3 call Fontmap.CMU.alias after
+   Fontmap.CMU in ghostscript's Fontmap file. It would substitute some
+   fonts.

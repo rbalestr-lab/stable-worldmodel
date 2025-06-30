@@ -32,7 +32,9 @@ setup(
         "d4rl",
         "gymnasium[other]",
         "gymnasium[mujoco]",
+        "gymnasium[toy-text]",
         "gymnasium-robotics",
+        "shimmy[gym-v26]",
         "imageio[ffmpeg]",
         "tensorboard",
         "loguru",
@@ -41,5 +43,7 @@ setup(
         "av",
         "prettytable",
         "nevergrad",
+        "jax",
+        "flax",
     ],
 )

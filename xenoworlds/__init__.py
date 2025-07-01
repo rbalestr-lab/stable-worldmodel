@@ -6,3 +6,4 @@ from .agent import Agent
 from .wm import DummyWorldModel
 from . import wrappers
 from .utils import set_state
+from . import data

@@ -1,5 +1,36 @@
 from .world import World
 
+import requests
+from PIL import Image
+from io import BytesIO
+
+
+def create_pil_image_from_url(image_url):
+    """
+    Creates a PIL Image object from a given image URL.
+
+    Args:
+        image_url (str): The URL of the image.
+
+    Returns:
+        PIL.Image.Image: The PIL Image object, or None if an error occurs.
+    """
+    try:
+        response = requests.get(image_url)
+        response.raise_for_status()  # Raise an exception for bad status codes (4xx or 5xx)
+
+        image_data = BytesIO(response.content)
+        img = Image.open(image_data)
+        return img
+    except requests.exceptions.RequestException as e:
+        print(image_url)
+        print(f"Error downloading image from URL: {e}")
+        return None
+    except IOError as e:
+        print(image_url)
+        print(f"Error opening image data with PIL: {e}")
+        return None
+
 
 def set_state(world: World, state):
     if isinstance(world, World):

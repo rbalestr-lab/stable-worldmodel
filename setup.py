@@ -9,6 +9,8 @@ setup(
     description="Description of my package",
     packages=find_packages(),
     install_requires=[
+        "numpy",
+        "pygame",
         "torch",
         "torchvision",
         "torchaudio",

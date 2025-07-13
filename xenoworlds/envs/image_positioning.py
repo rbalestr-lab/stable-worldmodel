@@ -368,7 +368,9 @@ if __name__ == "__main__":
         resolution=224,
         images=images,
         background_power_decay=2,
+        max_episode_steps=20,
     )  #
+    xenoworlds.collect.random_action(env, num_episodes=1)
     env = RecordVideo(
         env,
         video_folder="cartpole-agent",  # Folder to save videos

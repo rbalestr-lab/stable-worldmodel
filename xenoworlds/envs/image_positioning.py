@@ -370,6 +370,7 @@ if __name__ == "__main__":
         background_power_decay=2,
         max_episode_steps=20,
     )  #
+    env = gym.wrappers.AddRenderObservation(env, render_only=False)
     xenoworlds.collect.random_action(env, num_episodes=1)
     env = RecordVideo(
         env,

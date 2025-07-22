@@ -8,8 +8,24 @@ import torch
 import torchvision.transforms.v2 as transforms
 from .world import World
 
+## -- Policy
+### BasePolicy(env, planner)
+### RandomPolicy
+### OptimalPolicy (Expert)
+### PlanningPolicy (wm, solver)
 
-class Agent:
+
+## -- Solver (For Planning)
+### GradientSolver
+### CEMSolver (navergrad, evotorch, mppi) MPC
+
+## -- Evaluator / Collector
+### Evaluator(env, policy)
+
+### DataSetUpload (download using stable_ssl)
+
+
+class Agent:  ### Evaluator(env, policy)
     def __init__(self, planner: BasePlanner, world: World):
         self.world = world
         self.planner = planner

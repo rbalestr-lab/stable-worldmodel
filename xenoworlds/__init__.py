@@ -14,3 +14,8 @@ register(
     id="xenoworlds/ImagePositioning-v1",
     entry_point="xenoworlds.envs.image_positioning:ImagePositioning",
 )
+
+register(
+    id="xenoworlds/PushT-v1",
+    entry_point="xenoworlds.envs.pusht:PushT",
+)

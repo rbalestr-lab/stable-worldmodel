@@ -38,7 +38,7 @@ def optimal_action(env, num_episodes=100, seed=None):
 
     dataset = env.create_dataset(
         dataset_id=env.unwrapped.spec.id,
-        algorithm_name="Random-Policy",
+        algorithm_name="Expert-Policy",
         # code_permalink="https://github.com/Farama-Foundation/Minari",
         # author="Farama",
         # author_email="contact@farama.org",

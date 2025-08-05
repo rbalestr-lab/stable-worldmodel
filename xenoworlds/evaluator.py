@@ -1,4 +1,4 @@
-from .solver import *
+from .solver import BaseSolver
 from .world import World
 
 ### DataSetUpload (download using stable_ssl)

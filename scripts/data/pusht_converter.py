@@ -1,5 +1,5 @@
 import minari
-from pusht_dataset import PushTDataset
+from scripts.data.pusht_dataset import PushTDataset
 
 
 class PushTDatasetCallback(minari.StepDataCallback):

@@ -18,9 +18,10 @@ if __name__ == "__main__":
     ]
 
     env = gym.make(
-        "xenoworlds/PushT",
+        "xenoworlds/PushT-v1",
         render_mode="rgb_array",
         resolution=224,
+        with_velocity=True,
     )
 
     wrapped_env = env

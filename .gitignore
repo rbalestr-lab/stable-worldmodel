@@ -207,3 +207,4 @@ cython_debug/
 logs/
 .vscode/
 *.sh
+multirun/

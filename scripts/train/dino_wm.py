@@ -1,15 +1,16 @@
+import hydra
 import lightning as pl
 import minari
 import stable_ssl as ssl
 import torch
-from stable_ssl.data import transforms
+from einops import rearrange, repeat
 from loguru import logger as logging
+from stable_ssl.data import transforms
+from torch.nn import functional as F
 from torch.utils.data import DataLoader
 from transformers import AutoConfig, AutoModel
-from xenoworlds.predictor import CausalPredictor
 
-from torch.nn import functional as F
-from einops import rearrange, repeat
+from xenoworlds.predictor import CausalPredictor
 
 
 class Config:
@@ -256,7 +257,8 @@ def get_world_model(action_dim, proprio_dim):
     return world_model
 
 
-def run():
+@hydra.main(version_base=None, config_path="./", config_name="slurm")
+def run(cfg):
     """Run training of predictor"""
     data, action_dim, proprio_dim = get_data()
     world_model = get_world_model(action_dim, proprio_dim)

@@ -209,3 +209,5 @@ logs/
 *.sh
 multirun/
 outputs/
+dino_wm_ckpt/
+wandb/

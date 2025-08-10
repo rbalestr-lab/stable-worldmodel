@@ -13,14 +13,14 @@ class Evaluator:
         # sample goal
         self.goal_dist = goal_dist
 
-    def run(self, episodes=1, max_steps=100):
+    def run(self, episodes=1):
         # todo return interested logging data
         data = {}
 
         for episode in range(episodes):
             # sample goals and get their representations
-            goals = self.goal_dist.sample()
-            goals = self.solver.world_model.encode(goals).unsqueeze(0)
+            goals = None  # self.goal_dist.sample()
+            # goals = self.solver.world_model.encode(goals).unsqueeze(0)
 
             for states, rewards in self.world:
                 # get action from the policy wih optional goal specification
@@ -31,9 +31,7 @@ class Evaluator:
                 # apply actions in the env
                 # for a in actions.unbind(0):
                 #     self.world.step(a.numpy())
-
-                # todo assert action has the right shape
-                self.world.step(actions.numpy())
+                self.world.step(actions)
 
             print(f"Episode {episode + 1} finished ")
 

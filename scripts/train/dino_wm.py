@@ -83,14 +83,27 @@ def get_data():
     num_steps = Config.num_hist + Config.num_pred
 
     # -- make transform operations
-    mean = [0.485, 0.456, 0.406]
-    std = [0.229, 0.224, 0.225]
+    # mean = [0.485, 0.456, 0.406]
+    # std = [0.229, 0.224, 0.225]
+    # transform = transforms.Compose(
+    #     transforms.ToImage(
+    #         mean=mean,
+    #         std=std,
+    #         source="observations.pixels",
+    #         target="observations.pixels",
+    #     ),
+    # )
+
+    # from https://github.com/gaoyuezhou/dino_wm/blob/main/datasets/img_transforms.py
+    trans_key = "observations.pixels"
     transform = transforms.Compose(
+        transforms.Resize(Config.img_size, source=trans_key, target=trans_key),
+        transforms.CenterCrop(Config.img_size, source=trans_key, target=trans_key),
         transforms.ToImage(
-            mean=mean,
-            std=std,
-            source="observations.pixels",
-            target="observations.pixels",
+            mean=[0.5, 0.5, 0.5],
+            std=[0.5, 0.5, 0.5],
+            source=trans_key,
+            target=trans_key,
         ),
     )
 
@@ -280,7 +293,6 @@ def setup_pl_logger(cfg):
         entity=cfg.wandb.entity,
         resume="allow" if wandb_run_id else None,
         id=wandb_run_id,
-        save_dir="outputs",
     )
 
     wandb_logger.log_hyperparams(OmegaConf.to_container(cfg))
@@ -307,7 +319,12 @@ def run(cfg):
 
     # checkpoint callback
     checkpoint_callback = ModelCheckpoint(
-        dirpath="outputs/checkpoints/", save_top_k=1, monitor="val_loss", mode="min"
+        dirpath="checkpoints/", save_top_k=1, monitor="val_loss", mode="min"
+    )
+
+    checkpoint_callback = ModelCheckpoint(
+        dirpath="checkpoints/",
+        filename="dino_wm",
     )
 
     trainer = pl.Trainer(
@@ -317,13 +334,13 @@ def run(cfg):
         logger=wandb_logger,
         limit_train_batches=limit_train_size,
         callbacks=[checkpoint_callback],
+        enable_checkpointing=True,
     )
 
     manager = ssl.Manager(
         trainer=trainer,
         module=world_model,
         data=data,
-        ckpt_path="last",
     )
 
     manager()

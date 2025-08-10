@@ -108,7 +108,9 @@ def get_data():
     )
 
     # -- load dataset
-    minari_dataset = minari.load_dataset("xenoworlds/PushT-v1", download=True)
+    minari_dataset = minari.load_dataset(
+        "dinowm/pusht_noise-v0", download=True
+    )  # xenoworlds/PushT-v1
     dataset = ssl.data.MinariStepsDataset(
         minari_dataset, num_steps=num_steps, transform=transform
     )

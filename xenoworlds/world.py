@@ -20,6 +20,7 @@ class World:
             render_mode="rgb_array",
             max_episode_steps=max_episode_steps,
         )
+
         logging.info("WORLD INITIALIZED")
         logging.info(f"ACTION SPACE: {self.envs.action_space}")
         logging.info(f"OBSERVATION SPACE: {self.envs.observation_space}")

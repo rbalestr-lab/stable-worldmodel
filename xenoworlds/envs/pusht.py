@@ -381,7 +381,7 @@ class PushT(gym.Env):
         action_scale=100,
         with_velocity=True,
         with_target=True,
-        shape="Z",  # shape can be "T" <- the original shape, "I", "L", "Z", "square" and "small_tee"
+        shape="T",  # shape can be "T" <- the original shape, "I", "L", "Z", "square" and "small_tee"
         color="LightSlateGray",
         render_mode="rgb_array",
     ):

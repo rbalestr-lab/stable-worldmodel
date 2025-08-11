@@ -7,24 +7,21 @@ from .world import World
 ### Evaluator(env, policy)
 class Evaluator:
     # the role of evaluator is to determine perf of the policy in the env
-    def __init__(self, world: World, policy: BasePolicy, goal_dist=None):
+    def __init__(self, world: World, policy: BasePolicy):
         self.world = world
         self.policy = policy
-        self.goal_dist = goal_dist  # todo make a goal wrappe for the env
 
     def run(self, episodes=1):
         # todo return interested logging data
         data = {}
 
         for episode in range(episodes):
-            # sample goals and get their representations
-            goals = None  # self.goal_dist.sample()
-            # goals = self.solver.world_model.encode(goals).unsqueeze(0)
-
-            for states, rewards in self.world:
+            for obs, rewards in self.world:
                 # get action from the policy wih optional goal specification
-                pixels = torch.from_numpy(states["pixels"])  # get the state
-                actions = self.policy.get_action(pixels, goals=goals)
+                pixels = torch.from_numpy(obs["pixels"])  # get the state
+                goal = torch.from_numpy(obs["goal"]) if "goal" in obs else None
+
+                actions = self.policy.get_action(pixels, goals=goal)
 
                 # actions = actions.squeeze(0) if actions.ndim == 2 else actions
                 # apply actions in the env

@@ -362,7 +362,11 @@ def pymunk_to_shapely(body, shapes):
 
 
 class PushT(gym.Env):
-    metadata = {"render.modes": ["human", "rgb_array"], "video.frames_per_second": 10}
+    metadata = {
+        "render_modes": ["human", "rgb_array"],
+        "video.frames_per_second": 10,
+        "render_fps": 10,
+    }
     reward_range = (0.0, 1.0)
 
     def __init__(
@@ -375,9 +379,9 @@ class PushT(gym.Env):
         reset_to_state=None,
         relative=True,
         action_scale=100,
-        with_velocity=False,
+        with_velocity=True,
         with_target=True,
-        shape="T",  # shape can be "T" <- the original shape, "I", "L", "Z", "square" and "small_tee"
+        shape="Z",  # shape can be "T" <- the original shape, "I", "L", "Z", "square" and "small_tee"
         color="LightSlateGray",
         render_mode="rgb_array",
     ):
@@ -403,6 +407,9 @@ class PushT(gym.Env):
         #     dtype=np.float64,
         # )
 
+        velocity_low_var = 2 * [float("-inf")] if with_velocity else []
+        velocity_high_var = 2 * [float("inf")] if with_velocity else []
+
         self.observation_space = spaces.Dict({
             "proprio": spaces.Box(
                 low=0,
@@ -411,16 +418,21 @@ class PushT(gym.Env):
                 dtype=np.float64,
             ),
             "state": spaces.Box(
-                low=np.array([0, 0, 0, 0, 0]),
-                high=np.array([512, 512, 512, 512, np.pi * 2]),
+                low=np.array([0, 0, 0, 0, 0] + velocity_low_var),
+                high=np.array([512, 512, 512, 512, np.pi * 2] + velocity_high_var),
+                dtype=np.float64,
+            ),
+            "goal": spaces.Box(
+                low=np.array([0, 0, 0, 0, 0] + velocity_low_var),
+                high=np.array([512, 512, 512, 512, np.pi * 2] + velocity_high_var),
                 dtype=np.float64,
             ),
         })
 
         # positional goal for agent
         self.action_space = spaces.Box(
-            low=np.array([0, 0], dtype=np.float64),
-            high=np.array([ws, ws], dtype=np.float64),
+            low=np.array([-1, -1], dtype=np.float64),
+            high=np.array([1, 1], dtype=np.float64),
             shape=(2,),
             dtype=np.float64,
         )
@@ -446,10 +458,30 @@ class PushT(gym.Env):
         self.render_buffer = None
         self.latest_action = None
 
+        self.goal = None
+
         self.with_velocity = with_velocity
         self.with_target = with_target
         self.reset_to_state = reset_to_state
         self.coverage_arr = []
+
+    def sample_state(self):
+        # sample a state from the environment
+        rs = self.random_state
+
+        state = [
+            rs.randint(50, 450),  # agent x
+            rs.randint(50, 450),  # agent y
+            rs.randint(100, 400),  # block x
+            rs.randint(100, 400),  # block y
+            # rs.randn() * 2 * np.pi - np.pi,  # block angle
+            rs.uniform(0, 2 * np.pi),  # fix to sample properly in [0, 2pi]
+        ]
+
+        if self.with_velocity:
+            state += [0, 0]  # agent velocity x, agent velocity y
+
+        return np.array(state)
 
     def reset(self, seed=None, options=None):
         self.seed(seed)
@@ -459,37 +491,26 @@ class PushT(gym.Env):
         if self.damping is not None:
             self.space.damping = self.damping
 
-        # use legacy RandomState for compatibility
+        # sample state
         state = self.reset_to_state
         if state is None:
-            rs = self.random_state
-            if self.with_velocity:
-                state = np.array([
-                    rs.randint(50, 450),
-                    rs.randint(50, 450),
-                    rs.randint(100, 400),
-                    rs.randint(100, 400),
-                    rs.randn() * 2 * np.pi - np.pi,
-                    0,  # set random velocity to 0
-                    0,  # set random velocity to 0
-                ])
-            else:
-                state = np.array([
-                    rs.randint(50, 450),
-                    rs.randint(50, 450),
-                    rs.randint(100, 400),
-                    rs.randint(100, 400),
-                    rs.randn() * 2 * np.pi - np.pi,
-                ])
+            state = self.sample_state()
         self._set_state(state)
 
+        # sample goal_state
+        self.goal = self.sample_state()
         self.coverage_arr = []
         state = self._get_obs()
         # visual = self._render_frame("rgb_array")
         proprio = state[:2]
         if self.with_velocity:
             proprio = np.concatenate((proprio, state[5:]))
-        observation = {"proprio": proprio, "state": state}
+
+        # cast as double precision
+        proprio = proprio.astype(np.float64)
+        state = state.astype(np.float64)
+
+        observation = {"proprio": proprio, "state": state, "goal": self.goal}
 
         info = self._get_info()
         info["max_coverage"] = 0
@@ -532,17 +553,22 @@ class PushT(gym.Env):
         state = self._get_obs()
         # visual = self._render_frame("rgb_array")
         # visual = self._render_frame("rgb_array")
+
         proprio = state[:2]
         if self.with_velocity:
             proprio = np.concatenate((proprio, state[5:]))
-        observation = {"proprio": proprio, "state": state}
+
+        # cast as double precision
+        proprio = proprio.astype(np.float64)
+        state = state.astype(np.float64)
+
+        observation = {"proprio": proprio, "state": state, "goal": self.goal}
         # observation = (
         #     einops.rearrange(observation, "H W C -> 1 C H W") / 255.0
         # )  # VCHW, range [0, 1]
         info = self._get_info()
         info["max_coverage"] = 0
         info["final_coverage"] = self.coverage_arr[-1]
-
         truncated = False
         return observation, reward, done, truncated, info
 

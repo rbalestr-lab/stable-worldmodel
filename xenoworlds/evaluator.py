@@ -10,8 +10,7 @@ class Evaluator:
     def __init__(self, world: World, policy: BasePolicy, goal_dist=None):
         self.world = world
         self.policy = policy
-        # sample goal
-        self.goal_dist = goal_dist
+        self.goal_dist = goal_dist  # todo make a goal wrappe for the env
 
     def run(self, episodes=1):
         # todo return interested logging data
@@ -31,11 +30,19 @@ class Evaluator:
                 # apply actions in the env
                 # for a in actions.unbind(0):
                 #     self.world.step(a.numpy())
+
+                # make actions double precision (np array)
+                actions = (
+                    actions.double().numpy()
+                    if isinstance(actions, torch.Tensor)
+                    else actions
+                )
+
                 self.world.step(actions)
 
             print(f"Episode {episode + 1} finished ")
+            self.world.close()
 
-        self.world.close()
         return data
 
 

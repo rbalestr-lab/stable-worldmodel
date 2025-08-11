@@ -3,6 +3,9 @@ import xenoworlds
 if __name__ == "__main__":
     wrappers = [
         lambda x: xenoworlds.wrappers.RecordVideo(x, video_folder="./videos"),
+        lambda x: xenoworlds.wrappers.AddRenderObservation(
+            x, render_only=False, render_key="goal_pixels", obs_key="goal"
+        ),
         lambda x: xenoworlds.wrappers.AddRenderObservation(x, render_only=False),
         lambda x: xenoworlds.wrappers.TransformObservation(x),
     ]
@@ -26,4 +29,3 @@ if __name__ == "__main__":
     evaluator = xenoworlds.Evaluator(world, random_policy)
     data = evaluator.run(episodes=5)
     # data will be a dict with all the collected metrics
-    world.close()

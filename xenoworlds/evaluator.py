@@ -16,12 +16,13 @@ class Evaluator:
         data = {}
 
         for episode in range(episodes):
-            for obs, rewards in self.world:
-                # get action from the policy wih optional goal specification
-                pixels = torch.from_numpy(obs["pixels"])  # get the state
-                goal = torch.from_numpy(obs["goal"]) if "goal" in obs else None
+            for states, rewards in self.world:
+                # -- get observations and goal images
+                obs = torch.from_numpy(states["pixels"])
+                goal_obs = torch.from_numpy(states["goal_pixels"])
 
-                actions = self.policy.get_action(pixels, goals=goal)
+                # -- get actions from the policy
+                actions = self.policy.get_action(obs, goals=goal_obs)
 
                 # actions = actions.squeeze(0) if actions.ndim == 2 else actions
                 # apply actions in the env
@@ -35,12 +36,16 @@ class Evaluator:
                     else actions
                 )
 
+                # TODO SHOULD GET SOME DATA FROM THE ENV TO KNOW HOW GOOD
                 self.world.step(actions)
 
             print(f"Episode {episode + 1} finished ")
             self.world.close()
 
         return data
+
+    def sample_goal(self):
+        pass
 
 
 ### DataSetUpload (download using stable_ssl)

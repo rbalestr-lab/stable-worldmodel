@@ -381,6 +381,7 @@ class PushT(gym.Env):
         action_scale=100,
         with_velocity=True,
         with_target=True,
+        resample_goal_every_k_steps=-1,  # TODO
         shape="T",  # shape can be "T" <- the original shape, "I", "L", "Z", "square" and "small_tee"
         color="LightSlateGray",
         render_mode="rgb_array",
@@ -398,6 +399,8 @@ class PushT(gym.Env):
         self.legacy = legacy
         self.relative = relative  # relative action space
         self.action_scale = action_scale
+
+        self.resample_goal_every_k_steps = resample_goal_every_k_steps
 
         # agent_pos, block_pos, block_angle
         # self.observation_space = spaces.Box(
@@ -483,6 +486,20 @@ class PushT(gym.Env):
 
         return np.array(state)
 
+    def eval_state(self, goal_state, cur_state):
+        """
+        Return True if the goal is reached
+        [agent_x, agent_y, T_x, T_y, angle, agent_vx, agent_vy]
+        from: https://github.com/gaoyuezhou/dino_wm/blob/main/env/pusht/pusht_wrapper.py
+        """
+        # if position difference is < 20, and angle difference < np.pi/9, then success
+        pos_diff = np.linalg.norm(goal_state[:4] - cur_state[:4])
+        angle_diff = np.abs(goal_state[4] - cur_state[4])
+        angle_diff = np.minimum(angle_diff, 2 * np.pi - angle_diff)
+        success = pos_diff < 20 and angle_diff < np.pi / 9
+        state_dist = np.linalg.norm(goal_state - cur_state)
+        return success, state_dist
+
     def reset(self, seed=None, options=None):
         self.seed(seed)
         self._setup()
@@ -521,6 +538,10 @@ class PushT(gym.Env):
         dt = 1.0 / self.sim_hz
         self.n_contact_points = 0
         n_steps = self.sim_hz // self.control_hz
+
+        # TODO reset the goal if changed
+        # if self.resample_goal_every_k_steps %
+
         if action is not None:
             action = np.array(action) * self.action_scale
             if self.relative:
@@ -566,9 +587,14 @@ class PushT(gym.Env):
         # observation = (
         #     einops.rearrange(observation, "H W C -> 1 C H W") / 255.0
         # )  # VCHW, range [0, 1]
+
+        success, state_dist = self.eval_state(self.goal, state)
         info = self._get_info()
         info["max_coverage"] = 0
         info["final_coverage"] = self.coverage_arr[-1]
+        info["success"] = success
+        info["state_dist"] = state_dist
+
         truncated = False
         return observation, reward, done, truncated, info
 

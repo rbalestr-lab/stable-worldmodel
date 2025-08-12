@@ -6,6 +6,9 @@ if __name__ == "__main__":
         lambda x: xenoworlds.wrappers.AddRenderObservation(
             x, render_only=False, render_key="goal_pixels", obs_key="goal"
         ),
+        lambda x: xenoworlds.wrappers.TransformObservation(
+            x, source_key="goal_pixels", target_key="goal_pixels"
+        ),
         lambda x: xenoworlds.wrappers.AddRenderObservation(x, render_only=False),
         lambda x: xenoworlds.wrappers.TransformObservation(x),
     ]

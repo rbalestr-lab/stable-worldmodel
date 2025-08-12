@@ -21,6 +21,9 @@ class Evaluator:
                 obs = torch.from_numpy(states["pixels"])
                 goal_obs = torch.from_numpy(states["goal_pixels"])
 
+                # for k, v in states.items():
+                #     print(f"State {k}: {v.shape}")
+
                 # -- get actions from the policy
                 actions = self.policy.get_action(obs, goals=goal_obs)
 

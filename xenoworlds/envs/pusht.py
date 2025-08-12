@@ -381,7 +381,6 @@ class PushT(gym.Env):
         action_scale=100,
         with_velocity=True,
         with_target=True,
-        resample_goal_every_k_steps=-1,  # TODO
         shape="T",  # shape can be "T" <- the original shape, "I", "L", "Z", "square" and "small_tee"
         color="LightSlateGray",
         render_mode="rgb_array",
@@ -400,8 +399,6 @@ class PushT(gym.Env):
         self.relative = relative  # relative action space
         self.action_scale = action_scale
 
-        self.resample_goal_every_k_steps = resample_goal_every_k_steps
-
         # agent_pos, block_pos, block_angle
         # self.observation_space = spaces.Box(
         #     low=np.array([0, 0, 0, 0, 0], dtype=np.float64),
@@ -415,19 +412,18 @@ class PushT(gym.Env):
 
         self.observation_space = spaces.Dict({
             "proprio": spaces.Box(
-                low=0,
-                high=512,
-                shape=(2 if not with_velocity else 4,),
+                low=np.array([0, 0] + velocity_low_var),
+                high=np.array([ws, ws] + velocity_high_var),
                 dtype=np.float64,
             ),
             "state": spaces.Box(
                 low=np.array([0, 0, 0, 0, 0] + velocity_low_var),
-                high=np.array([512, 512, 512, 512, np.pi * 2] + velocity_high_var),
+                high=np.array([ws, ws, ws, ws, np.pi * 2] + velocity_high_var),
                 dtype=np.float64,
             ),
             "goal": spaces.Box(
                 low=np.array([0, 0, 0, 0, 0] + velocity_low_var),
-                high=np.array([512, 512, 512, 512, np.pi * 2] + velocity_high_var),
+                high=np.array([ws, ws, ws, ws, np.pi * 2] + velocity_high_var),
                 dtype=np.float64,
             ),
         })
@@ -484,7 +480,7 @@ class PushT(gym.Env):
         if self.with_velocity:
             state += [0, 0]  # agent velocity x, agent velocity y
 
-        return np.array(state)
+        return np.array(state, dtype=np.float64)
 
     def eval_state(self, goal_state, cur_state):
         """
@@ -520,12 +516,9 @@ class PushT(gym.Env):
         state = self._get_obs()
         # visual = self._render_frame("rgb_array")
         proprio = state[:2]
-        if self.with_velocity:
-            proprio = np.concatenate((proprio, state[5:]))
 
-        # cast as double precision
-        proprio = proprio.astype(np.float64)
-        state = state.astype(np.float64)
+        if self.with_velocity:
+            proprio = np.concatenate((proprio, state[-2:]))
 
         observation = {"proprio": proprio, "state": state, "goal": self.goal}
 
@@ -538,9 +531,6 @@ class PushT(gym.Env):
         dt = 1.0 / self.sim_hz
         self.n_contact_points = 0
         n_steps = self.sim_hz // self.control_hz
-
-        # TODO reset the goal if changed
-        # if self.resample_goal_every_k_steps %
 
         if action is not None:
             action = np.array(action) * self.action_scale
@@ -577,11 +567,7 @@ class PushT(gym.Env):
 
         proprio = state[:2]
         if self.with_velocity:
-            proprio = np.concatenate((proprio, state[5:]))
-
-        # cast as double precision
-        proprio = proprio.astype(np.float64)
-        state = state.astype(np.float64)
+            proprio = np.concatenate((proprio, state[-2:]))
 
         observation = {"proprio": proprio, "state": state, "goal": self.goal}
         # observation = (
@@ -594,7 +580,6 @@ class PushT(gym.Env):
         info["final_coverage"] = self.coverage_arr[-1]
         info["success"] = success
         info["state_dist"] = state_dist
-
         truncated = False
         return observation, reward, done, truncated, info
 
@@ -617,20 +602,16 @@ class PushT(gym.Env):
         return TeleopAgent(act)
 
     def _get_obs(self):
+        obs = (
+            tuple(self.agent.position)
+            + tuple(self.block.position)
+            + (self.block.angle % (2 * np.pi),)
+        )
+
         if self.with_velocity:
-            obs = np.array(
-                tuple(self.agent.position)
-                + tuple(self.block.position)
-                + (self.block.angle % (2 * np.pi),)
-                + tuple(self.agent.velocity)
-            ).astype(np.float32)
-        else:
-            obs = np.array(
-                tuple(self.agent.position)
-                + tuple(self.block.position)
-                + (self.block.angle % (2 * np.pi),)
-            ).astype(np.float32)
-        return obs
+            obs += tuple(self.agent.velocity)
+
+        return np.array(obs, dtype=np.float64)
 
     def _get_goal_pose_body(self, pose):
         mass = 1
@@ -730,7 +711,7 @@ class PushT(gym.Env):
         pos_agent = state[:2]
         pos_block = state[2:4]
         rot_block = state[4]
-        vel_block = tuple(state[5:]) if self.with_velocity else (0, 0)
+        vel_block = tuple(state[-2:]) if self.with_velocity else (0, 0)
         self.agent.velocity = vel_block
         self.agent.position = pos_agent
         # setting angle rotates with respect to center of mass

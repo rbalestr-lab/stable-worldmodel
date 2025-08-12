@@ -3,17 +3,21 @@ import xenoworlds
 if __name__ == "__main__":
     wrappers = [
         lambda x: xenoworlds.wrappers.RecordVideo(x, video_folder="./videos"),
-        lambda x: xenoworlds.wrappers.AddRenderObservation(
-            x, render_only=False, render_key="goal_pixels", obs_key="goal"
-        ),
-        lambda x: xenoworlds.wrappers.TransformObservation(
-            x, source_key="goal_pixels", target_key="goal_pixels"
-        ),
         lambda x: xenoworlds.wrappers.AddRenderObservation(x, render_only=False),
         lambda x: xenoworlds.wrappers.TransformObservation(x),
     ]
+
+    goal_wrappers = [
+        lambda x: xenoworlds.wrappers.AddRenderObservation(x, render_only=False),
+        lambda x: xenoworlds.wrappers.TransformObservation(x),
+    ]
+
     world = xenoworlds.World(
-        "xenoworlds/PushT-v1", num_envs=1, wrappers=wrappers, max_episode_steps=500
+        "xenoworlds/PushT-v1",
+        num_envs=1,
+        wrappers=wrappers,
+        max_episode_steps=500,
+        goal_wrappers=goal_wrappers,
     )
 
     world_model = xenoworlds.DummyWorldModel(

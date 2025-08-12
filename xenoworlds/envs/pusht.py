@@ -421,11 +421,6 @@ class PushT(gym.Env):
                 high=np.array([ws, ws, ws, ws, np.pi * 2] + velocity_high_var),
                 dtype=np.float64,
             ),
-            "goal": spaces.Box(
-                low=np.array([0, 0, 0, 0, 0] + velocity_low_var),
-                high=np.array([ws, ws, ws, ws, np.pi * 2] + velocity_high_var),
-                dtype=np.float64,
-            ),
         })
 
         # positional goal for agent
@@ -457,8 +452,6 @@ class PushT(gym.Env):
         self.render_buffer = None
         self.latest_action = None
 
-        self.goal = None
-
         self.with_velocity = with_velocity
         self.with_target = with_target
         self.reset_to_state = reset_to_state
@@ -482,20 +475,6 @@ class PushT(gym.Env):
 
         return np.array(state, dtype=np.float64)
 
-    def eval_state(self, goal_state, cur_state):
-        """
-        Return True if the goal is reached
-        [agent_x, agent_y, T_x, T_y, angle, agent_vx, agent_vy]
-        from: https://github.com/gaoyuezhou/dino_wm/blob/main/env/pusht/pusht_wrapper.py
-        """
-        # if position difference is < 20, and angle difference < np.pi/9, then success
-        pos_diff = np.linalg.norm(goal_state[:4] - cur_state[:4])
-        angle_diff = np.abs(goal_state[4] - cur_state[4])
-        angle_diff = np.minimum(angle_diff, 2 * np.pi - angle_diff)
-        success = pos_diff < 20 and angle_diff < np.pi / 9
-        state_dist = np.linalg.norm(goal_state - cur_state)
-        return success, state_dist
-
     def reset(self, seed=None, options=None):
         self.seed(seed)
         self._setup()
@@ -510,8 +489,6 @@ class PushT(gym.Env):
             state = self.sample_state()
         self._set_state(state)
 
-        # sample goal_state
-        self.goal = self.sample_state()
         self.coverage_arr = []
         state = self._get_obs()
         # visual = self._render_frame("rgb_array")
@@ -520,7 +497,7 @@ class PushT(gym.Env):
         if self.with_velocity:
             proprio = np.concatenate((proprio, state[-2:]))
 
-        observation = {"proprio": proprio, "state": state, "goal": self.goal}
+        observation = {"proprio": proprio, "state": state}
 
         info = self._get_info()
         info["max_coverage"] = 0
@@ -569,17 +546,14 @@ class PushT(gym.Env):
         if self.with_velocity:
             proprio = np.concatenate((proprio, state[-2:]))
 
-        observation = {"proprio": proprio, "state": state, "goal": self.goal}
+        observation = {"proprio": proprio, "state": state}
         # observation = (
         #     einops.rearrange(observation, "H W C -> 1 C H W") / 255.0
         # )  # VCHW, range [0, 1]
 
-        success, state_dist = self.eval_state(self.goal, state)
         info = self._get_info()
         info["max_coverage"] = 0
         info["final_coverage"] = self.coverage_arr[-1]
-        info["success"] = success
-        info["state_dist"] = state_dist
         truncated = False
         return observation, reward, done, truncated, info
 

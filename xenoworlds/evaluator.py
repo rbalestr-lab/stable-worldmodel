@@ -16,10 +16,10 @@ class Evaluator:
         data = {}
 
         for episode in range(episodes):
-            for states, rewards in self.world:
+            for states, goal_states, rewards in self.world:
                 # -- get observations and goal images
                 obs = torch.from_numpy(states["pixels"])
-                goal_obs = torch.from_numpy(states["goal_pixels"])
+                goal_obs = torch.from_numpy(goal_states["pixels"])
 
                 # for k, v in states.items():
                 #     print(f"State {k}: {v.shape}")
@@ -50,5 +50,17 @@ class Evaluator:
     def sample_goal(self):
         pass
 
-
-### DataSetUpload (download using stable_ssl)
+    ### DataSetUpload (download using stable_ssl)
+    # def eval_state(self, goal_state, cur_state):
+    #     """
+    #     Return True if the goal is reached
+    #     [agent_x, agent_y, T_x, T_y, angle, agent_vx, agent_vy]
+    #     from: https://github.com/gaoyuezhou/dino_wm/blob/main/env/pusht/pusht_wrapper.py
+    #     """
+    #     # if position difference is < 20, and angle difference < np.pi/9, then success
+    #     pos_diff = np.linalg.norm(goal_state[:4] - cur_state[:4])
+    #     angle_diff = np.abs(goal_state[4] - cur_state[4])
+    #     angle_diff = np.minimum(angle_diff, 2 * np.pi - angle_diff)
+    #     success = pos_diff < 20 and angle_diff < np.pi / 9
+    #     state_dist = np.linalg.norm(goal_state - cur_state)
+    #     return success, state_dist

@@ -609,6 +609,32 @@ class PushT(gym.Env):
         }
         return info
 
+    def set_background(self, image):
+        """image can be a file path, pathlib.Path, or a BytesIO"""
+        # Load to a Surface; no display needed
+        self._bg_raw = image
+        self._bg_cache = None  # invalidate cache when a new image is set
+
+    def _get_background_for_canvas(self, canvas):
+        """Convert/scale the raw background to match the canvas only when needed."""
+        if getattr(self, "_bg_raw", None) is None:
+            return None
+        if (
+            getattr(self, "_bg_cache", None) is not None
+            and self._bg_cache.get_size() == canvas.get_size()
+        ):
+            return self._bg_cache
+
+        base = (
+            self._bg_raw.convert_alpha()
+            if self._bg_raw.get_alpha()
+            else self._bg_raw.convert(canvas)
+        )
+        scaled = pygame.transform.smoothscale(base, canvas.get_size())
+        self._bg_cache = scaled.convert(canvas)
+
+        return self._bg_cache
+
     def _render_frame(self, mode):
         if self.window is None and mode == "human":
             pygame.init()
@@ -618,7 +644,13 @@ class PushT(gym.Env):
             self.clock = pygame.time.Clock()
 
         canvas = pygame.Surface((self.window_size, self.window_size))
-        canvas.fill((255, 255, 255))
+
+        bg = self._get_background_for_canvas(canvas)
+        if bg is not None:
+            canvas.blit(bg, (0, 0))
+        else:
+            canvas.fill((255, 255, 255))  # fallback to white
+
         self.screen = canvas
 
         draw_options = DrawOptions(canvas)
@@ -739,6 +771,7 @@ class PushT(gym.Env):
             self._add_segment((506, 5), (506, 506), 2),
             self._add_segment((5, 506), (506, 506), 2),
         ]
+
         self.space.add(*walls)
 
         # Add agent, block, and goal zone.
@@ -767,22 +800,22 @@ class PushT(gym.Env):
         )  # https://htmlcolorcodes.com/color-names
         return shape
 
-    def add_circle(self, position, radius):
+    def add_circle(self, position, radius, color="RoyalBlue", scale=1):
         body = pymunk.Body(body_type=pymunk.Body.KINEMATIC)
         body.position = position
         body.friction = 1
-        shape = pymunk.Circle(body, radius)
-        shape.color = pygame.Color("RoyalBlue")
+        shape = pymunk.Circle(body, radius * scale)
+        shape.color = pygame.Color(color)
         self.space.add(body, shape)
         return body
 
-    def add_box(self, position, height, width):
+    def add_box(self, position, height, width, color="LightSlateGray", scale=1):
         mass = 1
-        inertia = pymunk.moment_for_box(mass, (height, width))
+        inertia = pymunk.moment_for_box(mass, (height * scale, width * scale))
         body = pymunk.Body(mass, inertia)
         body.position = position
-        shape = pymunk.Poly.create_box(body, (height, width))
-        shape.color = pygame.Color("LightSlateGray")
+        shape = pymunk.Poly.create_box(body, (height * scale, width * scale))
+        shape.color = pygame.Color(color)
         self.space.add(body, shape)
         return body
 
@@ -1059,6 +1092,8 @@ class PushT(gym.Env):
             return self.add_tee(*args, **kwargs)
         elif shape == "Z":
             return self.add_Z(*args, **kwargs)
+        elif shape == "o":
+            return self.add_circle(*args, **kwargs)
         elif shape == "square":
             return self.add_square(*args, **kwargs)
         elif shape == "I":

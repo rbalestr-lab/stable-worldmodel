@@ -54,6 +54,10 @@ class World:
     def single_action_space(self):
         return self.envs.single_action_space
 
+    @property
+    def single_observation_space(self):
+        return self.envs.single_observation_space
+
     def close(self, **kwargs):
         return self.envs.close(**kwargs)
 

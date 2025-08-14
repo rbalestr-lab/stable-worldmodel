@@ -55,9 +55,14 @@ class GDSolver(BaseSolver):
         self.register_parameter("init", torch.nn.Parameter(init_action))
 
     def solve(
-        self, states: torch.Tensor, action_space, goals: torch.Tensor, init_action=None
+        self, states: dict, action_space, goals: dict, init_action=None
     ) -> torch.Tensor:
         """Solve the planning optimization problem using gradient descent."""
+
+        goal_pixel = torch.from_numpy(goals["pixels"]).float()
+        goals = self.world_model.encode_goal(goal_pixel)
+
+        # TODO need history of steps to improve planning
 
         # reinitialize the initial action if provided, otherwise sample from the action space
         with torch.no_grad():
@@ -76,7 +81,11 @@ class GDSolver(BaseSolver):
             optim.zero_grad(set_to_none=True)
 
         logging.info(f"Final gradient solver loss: {loss.item()}")
-        return self.init.detach()
+
+        ACTION_MEAN = torch.tensor([-0.0087, 0.0068])
+        ACTION_STD = torch.tensor([0.2019, 0.2002])
+        mpc_actions = self.init.detach() * ACTION_STD + ACTION_MEAN
+        return mpc_actions.numpy()
 
 
 # TODO implement dino-wm cem solver

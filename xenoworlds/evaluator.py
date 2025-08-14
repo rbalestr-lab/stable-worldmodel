@@ -18,14 +18,13 @@ class Evaluator:
         for episode in range(episodes):
             for states, goal_states, rewards in self.world:
                 # -- get observations and goal images
-                obs = torch.from_numpy(states["pixels"])
-                goal_obs = torch.from_numpy(goal_states["pixels"])
+                # goal_obs = torch.from_numpy(goal_states["pixels"])
 
                 # for k, v in states.items():
                 #     print(f"State {k}: {v.shape}")
 
                 # -- get actions from the policy
-                actions = self.policy.get_action(obs, goals=goal_obs)
+                actions = self.policy.get_action(states, goal_states=goal_states)
 
                 # actions = actions.squeeze(0) if actions.ndim == 2 else actions
                 # apply actions in the env

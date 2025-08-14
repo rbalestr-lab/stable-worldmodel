@@ -349,3 +349,8 @@ class ShapeDeform(BaseDeform):
                 self.env.unwrapped.agent = new_body
             elif known_label == "block":
                 self.env.unwrapped.block = new_body
+
+
+# todo add TextureDeform
+# todo add NoisyActionDeform
+# todo add step_idx dependence scheduler

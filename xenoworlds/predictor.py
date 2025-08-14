@@ -40,9 +40,11 @@ class Attention(nn.Module):
             else nn.Identity()
         )
 
-        self.register_buffer(
-            "temp_mask", self.generate_mask_matrix(num_patches, num_frames)
-        )
+        # self.register_buffer(
+        #     "temp_mask", self.generate_mask_matrix(num_patches, num_frames)
+        # )
+
+        self.bias = self.generate_mask_matrix(num_patches, num_frames).to("cuda")
 
     def forward(self, x):
         B, T, C = x.size()
@@ -52,7 +54,7 @@ class Attention(nn.Module):
         q, k, v = map(lambda t: rearrange(t, "b n (h d) -> b h n d", h=self.heads), qkv)
 
         dots = torch.matmul(q, k.transpose(-1, -2)) * self.scale
-        dots = dots.masked_fill(self.temp_mask[:, :, :T, :T] == 0, float("-inf"))
+        dots = dots.masked_fill(self.bias[:, :, :T, :T] == 0, float("-inf"))
 
         attn = self.attend(dots)
         attn = self.dropout(attn)

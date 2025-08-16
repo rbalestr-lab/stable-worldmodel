@@ -2,9 +2,8 @@ import os
 
 from gymnasium.envs.registration import register
 
-from . import collect, data, policy, solver, wrappers, predictor
+from . import collect, data, policy, solver, wrappers, wm
 from .utils import create_pil_image_from_url, set_state
-from .wm import DummyWorldModel
 from .world import World
 from .evaluator import Evaluator
 from .env_trans import BackgroundDeform, ColorDeform, ShapeDeform

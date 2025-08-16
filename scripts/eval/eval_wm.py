@@ -37,7 +37,7 @@ if __name__ == "__main__":
         goal_wrappers=goal_wrappers,
     )
 
-    world_model = xenoworlds.DummyWorldModel(
+    world_model = xenoworlds.wm.DummyWorldModel(
         image_shape=(3, 224, 224), action_dim=world.single_action_space.shape[0]
     )
 

@@ -7,24 +7,31 @@ from .world import World
 ### Evaluator(env, policy)
 class Evaluator:
     # the role of evaluator is to determine perf of the policy in the env
-    def __init__(self, world: World, policy: BasePolicy):
+    def __init__(self, world: World, policy: BasePolicy, device="cpu"):
         self.world = world
         self.policy = policy
+        self.device = device
+
+    def prepare_obs(self, obs):
+        """Prepare observations for the policy."""
+        # torchify observations and move to device
+        obs = {k: torch.from_numpy(v).to(self.device) for k, v in obs.items()}
+        # unbind the temporal dimension
+        obs = {k: v.unsqueeze(1) for k, v in obs.items()}
+        return obs
 
     def run(self, episodes=1):
         # todo return interested logging data
         data = {}
 
         for episode in range(episodes):
-            for states, goal_states, rewards in self.world:
-                # -- get observations and goal images
-                # goal_obs = torch.from_numpy(goal_states["pixels"])
-
-                # for k, v in states.items():
-                #     print(f"State {k}: {v.shape}")
+            for obs, goal_obs, rewards in self.world:
+                # preprocess obs for pytorch
+                obs = self.prepare_obs(obs)
+                goal_obs = self.prepare_obs(goal_obs)
 
                 # -- get actions from the policy
-                actions = self.policy.get_action(states, goal_states=goal_states)
+                actions = self.policy.get_action(obs, goal_obs)
 
                 # actions = actions.squeeze(0) if actions.ndim == 2 else actions
                 # apply actions in the env
@@ -45,9 +52,6 @@ class Evaluator:
             self.world.close()
 
         return data
-
-    def sample_goal(self):
-        pass
 
     ### DataSetUpload (download using stable_ssl)
     # def eval_state(self, goal_state, cur_state):

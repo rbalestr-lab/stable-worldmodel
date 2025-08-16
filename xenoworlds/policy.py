@@ -12,8 +12,8 @@ class BasePolicy:
     def __init__(self, env):
         raise NotImplementedError
 
-    def get_action(self, states, goal_states, **kwargs):
-        """Get action from the policy given the state"""
+    def get_action(self, obs, goal_obs, **kwargs):
+        """Get action from the policy given the observation"""
         raise NotImplementedError
 
 
@@ -21,7 +21,7 @@ class RandomPolicy(BasePolicy):
     def __init__(self, env):
         self.env = env
 
-    def get_action(self, states, goal_states, **kwargs):
+    def get_action(self, obs, goal_obs, **kwargs):
         return self.env.action_space.sample()
 
 
@@ -29,7 +29,7 @@ class OptimalPolicy(BasePolicy):
     def __init__(self, env):
         self.env = env
 
-    def get_action(self, states, goal_states, **kwargs):
+    def get_action(self, obs, goal_obs, **kwargs):
         # Implement optimal policy logic here
         pass
 
@@ -39,5 +39,5 @@ class PlanningPolicy(BasePolicy):
         self.env = env
         self.solver = planning_solver  # leverage to determine the best action
 
-    def get_action(self, states, goal_states, **kwargs):
-        return self.solver(states, self.env.action_space, goal_states)
+    def get_action(self, obs, goal_obs, **kwargs):
+        return self.solver(obs, self.env.action_space, goal_obs)

@@ -61,7 +61,7 @@ class BaseDeform(gym.Wrapper):
         self._step = 0
         reset_res = self.env.reset(**kwargs)
         if self.apply_on_reset or self.should_update:
-            print(f"Applying deformation at step {self._step}")
+            print(f"{self._step}")
             self.deform()
         return reset_res
 

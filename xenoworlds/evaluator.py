@@ -1,6 +1,7 @@
 import torch
 from .policy import BasePolicy
 from .world import World
+import numpy as np
 
 
 ## -- Evaluator / Collector
@@ -12,6 +13,7 @@ class Evaluator:
         self.policy = policy
         self.device = device
 
+    # TODO move ths to the policy class
     def prepare_obs(self, obs):
         """Prepare observations for the policy."""
         # torchify observations and move to device
@@ -25,13 +27,17 @@ class Evaluator:
         data = {}
 
         for episode in range(episodes):
+            actions = np.empty((0), dtype=np.float32)
             for obs, goal_obs, rewards in self.world:
                 # preprocess obs for pytorch
                 obs = self.prepare_obs(obs)
                 goal_obs = self.prepare_obs(goal_obs)
 
                 # -- get actions from the policy
-                actions = self.policy.get_action(obs, goal_obs)
+                if actions.size == 0:
+                    actions = self.policy.get_action(obs, goal_obs)
+
+                exec_action, actions = actions[:, 0], actions[:, 1:]
 
                 # actions = actions.squeeze(0) if actions.ndim == 2 else actions
                 # apply actions in the env
@@ -39,14 +45,23 @@ class Evaluator:
                 #     self.world.step(a.numpy())
 
                 # make actions double precision (np array)
-                actions = (
-                    actions.double().numpy()
-                    if isinstance(actions, torch.Tensor)
-                    else actions
+                exec_action = (
+                    exec_action.double().numpy()
+                    if isinstance(exec_action, torch.Tensor)
+                    else exec_action
                 )
 
+                # print(obs["proprio"].cpu().numpy())
+                # print(goal_obs["proprio"].cpu().numpy())
+                # print("===============")
+
+                # print(exec_action)
+
+                # assert action is between -1 and 1
+                assert np.all(np.abs(exec_action) <= 1.0), "Action out of bound [-1, 1]"
+
                 # TODO SHOULD GET SOME DATA FROM THE ENV TO KNOW HOW GOOD
-                self.world.step(actions)
+                self.world.step(exec_action)
 
             print(f"Episode {episode + 1} finished ")
             self.world.close()

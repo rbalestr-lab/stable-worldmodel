@@ -1,7 +1,7 @@
 import torch
 from loguru import logger as logging
 from transformers import AutoConfig, AutoModel
-
+import torchvision.transforms.v2 as transforms
 import xenoworlds
 
 
@@ -57,9 +57,10 @@ def get_world_model(action_dim, proprio_dim, device="cpu"):
     encoder = xenoworlds.wm.DinoV2Encoder(
         "dinov2_vits14", feature_key="x_norm_patchtokens"
     )
-    emb_dim = 384  # config.hidden_size
-    patch_size = 16  # config.patch_size they used 16!
-    num_patches = (Config.img_size // patch_size) ** 2
+
+    emb_dim = encoder.emb_dim  # 384 for vits14
+    patch_size = 16  # 16 size for create 14 patches
+    num_patches = (Config.img_size // patch_size) ** 2  # 256 for 224×224
 
     logging.info(f"Encoder: {encoder}, emb_dim: {emb_dim}, num_patches: {num_patches}")
 
@@ -99,11 +100,20 @@ def get_world_model(action_dim, proprio_dim, device="cpu"):
         f"Proprio dim: {proprio_dim}, proprio emb dim: {Config.proprio_emb_dim}"
     )
 
-    # NOTE: can add a decoder here if needed
+    decoder = xenoworlds.wm.VQVAE(
+        channel=384,
+        n_embed=2048,
+        n_res_block=4,
+        n_res_channel=128,
+        quantize=False,
+        emb_dim=384,
+    )
+    logging.info(f"Decoder: {decoder}")
 
     load_ckpt(action_encoder, "dino_wm_ckpt/pusht/checkpoints/action_encoder.pth")
     load_ckpt(proprio_encoder, "dino_wm_ckpt/pusht/checkpoints/proprio_encoder.pth")
     load_ckpt(predictor, "dino_wm_ckpt/pusht/checkpoints/predictor.pth")
+    load_ckpt(decoder, "dino_wm_ckpt/pusht/checkpoints/decoder.pth")
 
     # -- world model as a stable_ssl module
     world_model = xenoworlds.wm.DINOWM(
@@ -111,13 +121,19 @@ def get_world_model(action_dim, proprio_dim, device="cpu"):
         predictor=predictor,
         action_encoder=action_encoder,
         proprio_encoder=proprio_encoder,
+        decoder=decoder,
         action_dim=action_dim,
         proprio_dim=proprio_dim,
         action_emb_dim=Config.action_emb_dim,
         proprio_emb_dim=Config.proprio_emb_dim,
         history_size=Config.num_hist,
+        image_size=Config.img_size,
         frameskip=Config.frameskip,
         device=device,
+        action_mean=Config.action_mean,
+        action_std=Config.action_std,
+        proprio_mean=Config.proprio_mean,
+        proprio_std=Config.proprio_std,
     ).to(device)
 
     return world_model
@@ -130,26 +146,56 @@ def run():
     device = "cuda" if torch.cuda.is_available() else "cpu"
 
     # -- make transform operations
-    mean = [0.485, 0.456, 0.406]
-    std = [0.229, 0.224, 0.225]
+    # mean = [0.485, 0.456, 0.406]
+    # std = [0.229, 0.224, 0.225]
+
+    def default_transform(img_size=224):
+        return transforms.Compose([
+            transforms.ToImage(),
+            transforms.Lambda(lambda img: torch.tensor(img)),
+            transforms.Lambda(lambda img: img / 255.0),
+            transforms.Resize(img_size),
+            transforms.CenterCrop(img_size),
+            transforms.Normalize([0.5, 0.5, 0.5], [0.5, 0.5, 0.5]),
+        ])
+
+    def noise_fn():
+        import numpy as np
+
+        return np.random.randint(0, 255, (512, 512, 3), dtype=np.uint8)
 
     wrappers = [
+        lambda x: xenoworlds.BackgroundDeform(
+            x,
+            image="https://cs.brown.edu/media/filer_public/ba/c4/bac4b1d3-99b3-4b07-b755-8664f7ca7e85/img-20240706-wa0029.jpg",
+            noise_fn=noise_fn,
+        ),
+        lambda x: xenoworlds.ColorDeform(
+            x,
+            target=["agent", "goal", "block"],
+            every_k_steps=-1,
+        ),
         lambda x: xenoworlds.wrappers.RecordVideo(x, video_folder="./videos"),
         lambda x: xenoworlds.wrappers.AddRenderObservation(x, render_only=False),
-        lambda x: xenoworlds.wrappers.TransformObservation(x, mean=mean, std=std),
+        lambda x: xenoworlds.wrappers.TransformObservation(
+            x, transform=default_transform()
+        ),
     ]
 
     goal_wrappers = [
         lambda x: xenoworlds.wrappers.AddRenderObservation(x, render_only=False),
-        lambda x: xenoworlds.wrappers.TransformObservation(x),
+        lambda x: xenoworlds.wrappers.TransformObservation(
+            x, transform=default_transform()
+        ),
     ]
 
     world = xenoworlds.World(
         "xenoworlds/PushT-v1",
         num_envs=1,
         wrappers=wrappers,
-        max_episode_steps=100,
+        max_episode_steps=25,
         goal_wrappers=goal_wrappers,
+        seed=2312,
     )
 
     action_dim = world.single_action_space.shape[-1]
@@ -157,34 +203,43 @@ def run():
 
     print(f"Action space dim: {action_dim}")
     print(f"Proprioceptive space dim: {proprio_dim}")
-
     world_model = get_world_model(action_dim, proprio_dim, device=device)
 
     print(f"World model: {world_model}")
-
-    # world_model = xenoworlds.DummyWorldModel(
-    #     image_shape=(3, 224, 224), action_dim=world.single_action_space.shape[0]
-    # )
 
     # -- create a random policy
     # policy = xenoworlds.policy.RandomPolicy(world)
     planning_solver = xenoworlds.solver.GDSolver(
         world_model,
-        n_steps=100,
+        n_steps=1000,
         action_space=world.action_space,
         horizon=Config.horizon,
+        action_noise=0,
     )
     policy = xenoworlds.policy.PlanningPolicy(world, planning_solver)
 
+    # random_solver = xenoworlds.solver.RandomSolver(
+    #     world_model,
+    #     horizon=Config.horizon,
+    # )
+
+    # policy = xenoworlds.policy.PlanningPolicy(world, random_solver)
+
     # -- run evaluation
     evaluator = xenoworlds.evaluator.Evaluator(world, policy, device=device)
-    data = evaluator.run(episodes=2)
+    data = evaluator.run(episodes=1)
 
     # data will be a dict with all the collected metrics
-
     # # visualize a rollout video (e.g. for debugging purposes)
     # xenoworlds.utils.save_rollout_videos(data["frames_list"])
 
 
 if __name__ == "__main__":
     run()
+
+
+# ====== DEBUG IDEAS =======
+# 1. make the sure the decoder decode stuff that makes sense
+# 2. check everything is normalized properly
+# 3. check the solver algorithm
+# TODO: clean normalization

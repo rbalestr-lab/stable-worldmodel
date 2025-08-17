@@ -2,6 +2,8 @@ import gymnasium as gym
 import numpy as np
 from loguru import logger as logging
 
+from torchvision import transforms
+
 
 class World:
     def __init__(
@@ -10,7 +12,7 @@ class World:
         num_envs,
         wrappers: list,
         goal_wrappers: list = None,
-        seed: int = 42,
+        seed: int = 2349867,
         max_episode_steps: int = 100,
         sample_goal_every_k_steps: int = -1,
     ):
@@ -61,13 +63,29 @@ class World:
     def close(self, **kwargs):
         return self.envs.close(**kwargs)
 
+    # TEMOPORARY, need to delete!!!
+    def denormalize(self, x):
+        # x is (B,C,H,W) in [-1,1]
+        return (x * 0.5) + 0.5
+
     def __iter__(self):
         self.terminations = np.array([False] * self.num_envs)
         self.truncations = np.array([False] * self.num_envs)
         self.rewards = None
         logging.info(f"Resetting the ({self.num_envs}) world(s)!")
         self.states, finfos = self.envs.reset(seed=self.seed)
-        self.goal_states, _ = self.goal_envs.reset(seed=self.seed)
+        self.goal_states, _ = self.goal_envs.reset(seed=self.goal_seed)
+
+        # save goal pixels as png image
+        to_pil = transforms.ToPILImage()  # expects CxHxW (uint8) or HxWxC (uint8)
+        goal_pixels = self.goal_states["pixels"]  # (B, C, H, W), dtype=torch.uint8
+        goal_pixels = goal_pixels.transpose(0, 2, 3, 1)
+        goal_pixels = (self.denormalize(goal_pixels) * 255.0).astype(np.uint8)
+
+        for i in range(goal_pixels.shape[0]):
+            img = to_pil(goal_pixels[i])  # one image from batch
+            img.save(f"./videos/goal_{i}.png")
+
         return self
 
     def __next__(self):

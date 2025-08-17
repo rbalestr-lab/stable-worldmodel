@@ -1,7 +1,14 @@
 import torch
 from torch import nn
 from einops import rearrange, repeat
+from torchvision import transforms
+from torch.nn import functional as F
 
+import sys
+
+sys.path.append("..")
+from einops import rearrange
+from torch import distributed as dist
 
 torch.hub._validate_not_a_forked_repo = lambda a, b, c: True
 
@@ -13,6 +20,7 @@ class DINOWM(torch.nn.Module):
         predictor,
         action_encoder,
         proprio_encoder,
+        image_size,
         frameskip,
         history_size,
         action_dim,
@@ -21,6 +29,7 @@ class DINOWM(torch.nn.Module):
         proprio_emb_dim,
         device="cpu",
         # boring ...
+        decoder=None,
         action_mean=0,
         action_std=1,
         proprio_mean=0,
@@ -30,6 +39,7 @@ class DINOWM(torch.nn.Module):
         self.device = device
         self.backbone = encoder
         self.predictor = predictor
+        self.decoder = decoder
         self.action_encoder = action_encoder
         self.proprio_encoder = proprio_encoder
 
@@ -48,6 +58,13 @@ class DINOWM(torch.nn.Module):
         self.action_std = action_std
         self.proprio_mean = proprio_mean
         self.proprio_std = proprio_std
+
+        decoder_scale = 16  # from vqvae
+        num_side_patches = image_size // decoder_scale
+        self.encoder_image_size = num_side_patches * encoder.patch_size
+        self.encoder_transform = transforms.Compose([
+            transforms.Resize(self.encoder_image_size)
+        ])
 
     def forward(self, obs, actions):
         z = self.encode(obs, actions)
@@ -78,6 +95,7 @@ class DINOWM(torch.nn.Module):
         return self.action_encoder(actions)
 
     def encode_proprio(self, proprio):
+        proprio = self.normalize_proprio(proprio.cpu()).to(self.device)
         return self.proprio_encoder(proprio)
 
     def encode_obs(self, obs):
@@ -94,11 +112,11 @@ class DINOWM(torch.nn.Module):
         pixels = rearrange(pixels, "b t ... -> (b t) ...")
         proprio = obs["proprio"].float()  # (B, T, P)
 
-        # ? transform pixels ?
-
         # -- pixels embeddings
+        pixels = self.encoder_transform(pixels)  # split into patches
         z_pixels = self.backbone(pixels)
-        z_pixels = z_pixels[:, 1:, :]  # drop cls token
+
+        # z_pixels = z_pixels[:, 1:, :]  # drop cls token
         z_pixels = rearrange(z_pixels, "(b t) p d -> b t p d", b=B)
 
         # -- proprio embeddings
@@ -173,7 +191,7 @@ class DINOWM(torch.nn.Module):
     def replace_actions_from_z(self, z, act):
         """Replace the action embeddings in the latent state z with the provided actions."""
         n_patches = z.shape[2]
-        z_act = self.encode_act(act)
+        z_act = self.encode_action(act)
         act_tiled = repeat(z_act.unsqueeze(2), "b t 1 a -> b t p a", p=n_patches)
         # z (B, T, P, d) with d = dim + proprio_emb_dim + action_emb_dim
         # replace the last 'action_emb_dim' dims of z with the action embeddings
@@ -199,6 +217,20 @@ class DINOWM(torch.nn.Module):
         z_obs = {"pixels": z_pixels, "proprio": z_proprio}
         return z_obs, z_act
 
+    def decode_obs(self, z_obs):
+        """
+        input :   z: (b, num_frames, num_patches, emb_dim)
+        output: obs: (b, num_frames, 3, img_size, img_size)
+        """
+        b, num_frames, num_patches, emb_dim = z_obs["pixels"].shape
+        pixels, diff = self.decoder(z_obs["pixels"])  # (b*num_frames, 3, 224, 224)
+        pixels = rearrange(pixels, "(b t) c h w -> b t c h w", t=num_frames)
+        obs = {
+            "pixels": pixels,
+            "proprio": z_obs["proprio"],  # Note: no decoder for proprio for now!
+        }
+        return obs, diff
+
     def rollout(self, obs_0, actions):
         """Rollout the world model given an initial observation and a sequence of actions.
 
@@ -211,33 +243,32 @@ class DINOWM(torch.nn.Module):
         z: predicted latent states (B, n+t+1, n_patches, D)
         """
 
-        n_obs = len(obs_0["pixels"])
+        n_obs = obs_0["pixels"].shape[1]
 
         act_0 = actions[:, :n_obs]
         action = actions[:, n_obs:]
 
         z = self.encode(obs_0, act_0)
-        t = 0
 
         # simulate action taken in the world model
         n_steps = action.shape[1]
+
         for t in range(n_steps):
             # predict next state based on the history size
-            z_pred = self.predict(z[:, -self.history_size :])  # (B, hist_size, P, D)
-            z_new = z_pred[:, -1:, :, :]  # (B, 1, P, D)
 
-            print(f"Step {t + 1}/{n_steps} - z_new shape: {z_new.shape}")
+            z_pred = self.predict(z[:, -self.history_size :])  # (B, hist_size, P, D)
+            z_new = z_pred[:, -1:, ...]  # (B, 1, P, D)
 
             # update z_new with the new action
-            next_action = action[:, t + 1, :]  # (B, action_dim)
+            next_action = action[:, t : t + 1, :]  # (B, action_dim)
             z_new = self.replace_actions_from_z(z_new, next_action)
             z = torch.cat([z, z_new], dim=1)  # (B, n+t, P, D)
 
         # predict n+t+1 state
         z_pred = self.predict(z[:, -self.history_size :])
-        z_new = z_pred[:, -1:, :, :]
+        z_new = z_pred[:, -1:, ...]
         z = torch.cat([z, z_new], dim=1)  # (B, n+t+1, P, D)
-        z_obs, _ = self.split_embeddings(z)
+        z_obs, z = self.split_embeddings(z)
 
         return z_obs, z
 
@@ -276,6 +307,7 @@ class DinoV2Encoder(nn.Module):
 
     def forward(self, x):
         emb = self.base_model.forward_features(x)[self.feature_key]
+
         if self.latent_ndim == 1:
             emb = emb.unsqueeze(1)  # dummy patch dim
         return emb
@@ -453,3 +485,223 @@ class Transformer(nn.Module):
             x = ff(x) + x
 
         return self.norm(x)
+
+
+def get_world_size():
+    if not dist.is_available():
+        return 1
+
+    if not dist.is_initialized():
+        return 1
+
+    return dist.get_world_size()
+
+
+def all_reduce(tensor, op=dist.ReduceOp.SUM):
+    world_size = get_world_size()
+
+    if world_size == 1:
+        return tensor
+
+    dist.all_reduce(tensor, op=op)
+
+    return tensor
+
+
+class Quantize(nn.Module):
+    def __init__(self, dim, n_embed, decay=0.99, eps=1e-5):
+        super().__init__()
+
+        self.dim = dim
+        self.n_embed = n_embed
+        self.decay = decay
+        self.eps = eps
+
+        embed = torch.randn(dim, n_embed)
+        self.register_buffer("embed", embed)
+        self.register_buffer("cluster_size", torch.zeros(n_embed))
+        self.register_buffer("embed_avg", embed.clone())
+
+    def forward(self, input):
+        flatten = input.reshape(-1, self.dim)
+        dist = (
+            flatten.pow(2).sum(1, keepdim=True)
+            - 2 * flatten @ self.embed
+            + self.embed.pow(2).sum(0, keepdim=True)
+        )
+        _, embed_ind = (-dist).max(1)
+        embed_onehot = F.one_hot(embed_ind, self.n_embed).type(flatten.dtype)
+        embed_ind = embed_ind.view(*input.shape[:-1])
+        quantize = self.embed_code(embed_ind)
+
+        if self.training:
+            embed_onehot_sum = embed_onehot.sum(0)
+            embed_sum = flatten.transpose(0, 1) @ embed_onehot
+
+            all_reduce(embed_onehot_sum)
+            all_reduce(embed_sum)
+
+            self.cluster_size.data.mul_(self.decay).add_(
+                embed_onehot_sum, alpha=1 - self.decay
+            )
+            self.embed_avg.data.mul_(self.decay).add_(embed_sum, alpha=1 - self.decay)
+            n = self.cluster_size.sum()
+            cluster_size = (
+                (self.cluster_size + self.eps) / (n + self.n_embed * self.eps) * n
+            )
+            embed_normalized = self.embed_avg / cluster_size.unsqueeze(0)
+            self.embed.data.copy_(embed_normalized)
+
+        diff = (quantize.detach() - input).pow(2).mean()
+        quantize = input + (quantize - input).detach()
+
+        return quantize, diff, embed_ind
+
+    def embed_code(self, embed_id):
+        return F.embedding(embed_id, self.embed.transpose(0, 1))
+
+
+class ResBlock(nn.Module):
+    def __init__(self, in_channel, channel):
+        super().__init__()
+
+        self.conv = nn.Sequential(
+            nn.ReLU(),
+            nn.Conv2d(in_channel, channel, 3, padding=1),
+            nn.ReLU(inplace=True),
+            nn.Conv2d(channel, in_channel, 1),
+        )
+
+    def forward(self, input):
+        out = self.conv(input)
+        out += input
+
+        return out
+
+
+class Encoder(nn.Module):
+    def __init__(self, in_channel, channel, n_res_block, n_res_channel, stride):
+        super().__init__()
+
+        if stride == 4:
+            blocks = [
+                nn.Conv2d(in_channel, channel // 2, 4, stride=2, padding=1),
+                nn.ReLU(inplace=True),
+                nn.Conv2d(channel // 2, channel, 4, stride=2, padding=1),
+                nn.ReLU(inplace=True),
+                nn.Conv2d(channel, channel, 3, padding=1),
+            ]
+
+        elif stride == 2:
+            blocks = [
+                nn.Conv2d(in_channel, channel // 2, 4, stride=2, padding=1),
+                nn.ReLU(inplace=True),
+                nn.Conv2d(channel // 2, channel, 3, padding=1),
+            ]
+
+        for i in range(n_res_block):
+            blocks.append(ResBlock(channel, n_res_channel))
+
+        blocks.append(nn.ReLU(inplace=True))
+
+        self.blocks = nn.Sequential(*blocks)
+
+    def forward(self, input):
+        return self.blocks(input)
+
+
+class Decoder(nn.Module):
+    def __init__(
+        self, in_channel, out_channel, channel, n_res_block, n_res_channel, stride
+    ):
+        super().__init__()
+
+        blocks = [nn.Conv2d(in_channel, channel, 3, padding=1)]
+
+        for i in range(n_res_block):
+            blocks.append(ResBlock(channel, n_res_channel))
+
+        blocks.append(nn.ReLU(inplace=True))
+
+        if stride == 4:
+            blocks.extend([
+                nn.ConvTranspose2d(channel, channel // 2, 4, stride=2, padding=1),
+                nn.ReLU(inplace=True),
+                nn.ConvTranspose2d(channel // 2, out_channel, 4, stride=2, padding=1),
+            ])
+
+        elif stride == 2:
+            blocks.append(
+                nn.ConvTranspose2d(channel, out_channel, 4, stride=2, padding=1)
+            )
+
+        self.blocks = nn.Sequential(*blocks)
+
+    def forward(self, input):
+        return self.blocks(input)
+
+
+class VQVAE(nn.Module):
+    def __init__(
+        self,
+        in_channel=3,
+        channel=128,
+        n_res_block=2,
+        n_res_channel=32,
+        emb_dim=64,
+        n_embed=512,
+        decay=0.99,
+        quantize=True,
+    ):
+        super().__init__()
+
+        self.quantize = quantize
+        self.quantize_b = Quantize(emb_dim, n_embed)
+
+        if not quantize:
+            for param in self.quantize_b.parameters():
+                param.requires_grad = False
+
+        self.upsample_b = Decoder(
+            emb_dim, emb_dim, channel, n_res_block, n_res_channel, stride=4
+        )
+        self.dec = Decoder(
+            emb_dim,
+            in_channel,
+            channel,
+            n_res_block,
+            n_res_channel,
+            stride=4,
+        )
+        self.info = f"in_channel: {in_channel}, channel: {channel}, n_res_block: {n_res_block}, n_res_channel: {n_res_channel}, emb_dim: {emb_dim}, n_embed: {n_embed}, decay: {decay}"
+
+    def forward(self, input):
+        """
+        input: (b, t, num_patches, emb_dim)
+        """
+        num_patches = input.shape[2]
+        num_side_patches = int(num_patches**0.5)
+        input = rearrange(
+            input, "b t (h w) e -> (b t) h w e", h=num_side_patches, w=num_side_patches
+        )
+
+        if self.quantize:
+            quant_b, diff_b, id_b = self.quantize_b(input)
+        else:
+            quant_b, diff_b = input, torch.zeros(1).to(input.device)
+
+        quant_b = quant_b.permute(0, 3, 1, 2)
+        diff_b = diff_b.unsqueeze(0)
+        dec = self.decode(quant_b)
+        return dec, diff_b  # diff is 0 if no quantization
+
+    def decode(self, quant_b):
+        upsample_b = self.upsample_b(quant_b)
+        dec = self.dec(upsample_b)  # quant: (128, 64, 64)
+        return dec
+
+    def decode_code(self, code_b):  # not used (only used in sample.py in original repo)
+        quant_b = self.quantize_b.embed_code(code_b)
+        quant_b = quant_b.permute(0, 3, 1, 2)
+        dec = self.decode(quant_b)
+        return dec

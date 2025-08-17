@@ -6,6 +6,12 @@
 wget https://osf.io/xvzs4/download -O ckpt.zip && unzip ckpt.zip && rm ckpt.zip
 ```
 
+## DinWM PushT Dataset
+
+```bash
+wget https://osf.io/k2d8w/download -O dinowm_pushT.zip && unzip dinowm_pushT.zip && rm dinowm_pushT.zip
+```
+
 ## Installation
 
 Follow the below isntruction (if you are not using conda, adjust accordingly)

@@ -425,8 +425,8 @@ class PushT(gym.Env):
 
         # positional goal for agent
         self.action_space = spaces.Box(
-            low=np.array([-1, -1], dtype=np.float64),
-            high=np.array([1, 1], dtype=np.float64),
+            low=np.array([0, 0], dtype=np.float64),
+            high=np.array([ws, ws], dtype=np.float64),
             shape=(2,),
             dtype=np.float64,
         )
@@ -469,6 +469,15 @@ class PushT(gym.Env):
             # rs.randn() * 2 * np.pi - np.pi,  # block angle
             rs.uniform(0, 2 * np.pi),  # fix to sample properly in [0, 2pi]
         ]
+
+        # state = [
+        #     rs.randint(50, 150),  # agent x
+        #     rs.randint(50, 150),  # agent y
+        #     rs.randint(50, 150),  # block x
+        #     rs.randint(50, 150),  # block y
+        #     # rs.randn() * 2 * np.pi - np.pi,  # block angle
+        #     rs.uniform(0, 2 * np.pi),  # fix to sample properly in [0, 2pi]
+        # ]
 
         if self.with_velocity:
             state += [0, 0]  # agent velocity x, agent velocity y

@@ -165,16 +165,16 @@ def run():
         return np.random.randint(0, 255, (512, 512, 3), dtype=np.uint8)
 
     wrappers = [
-        lambda x: xenoworlds.BackgroundDeform(
-            x,
-            image="https://cs.brown.edu/media/filer_public/ba/c4/bac4b1d3-99b3-4b07-b755-8664f7ca7e85/img-20240706-wa0029.jpg",
-            noise_fn=noise_fn,
-        ),
-        lambda x: xenoworlds.ColorDeform(
-            x,
-            target=["agent", "goal", "block"],
-            every_k_steps=-1,
-        ),
+        # lambda x: xenoworlds.BackgroundDeform(
+        #     x,
+        #     image="https://cs.brown.edu/media/filer_public/ba/c4/bac4b1d3-99b3-4b07-b755-8664f7ca7e85/img-20240706-wa0029.jpg",
+        #     noise_fn=noise_fn,
+        # ),
+        # lambda x: xenoworlds.ColorDeform(
+        #     x,
+        #     target=["agent", "goal", "block"],
+        #     every_k_steps=-1,
+        # ),
         lambda x: xenoworlds.wrappers.RecordVideo(x, video_folder="./videos"),
         lambda x: xenoworlds.wrappers.AddRenderObservation(x, render_only=False),
         lambda x: xenoworlds.wrappers.TransformObservation(
@@ -195,7 +195,7 @@ def run():
         wrappers=wrappers,
         max_episode_steps=25,
         goal_wrappers=goal_wrappers,
-        seed=2312,
+        seed=torch.randint(0, 10000, (1,)).item(),
     )
 
     action_dim = world.single_action_space.shape[-1]
@@ -209,14 +209,14 @@ def run():
 
     # -- create a random policy
     # policy = xenoworlds.policy.RandomPolicy(world)
-    planning_solver = xenoworlds.solver.GDSolver(
-        world_model,
-        n_steps=1000,
-        action_space=world.action_space,
-        horizon=Config.horizon,
-        action_noise=0,
-    )
-    policy = xenoworlds.policy.PlanningPolicy(world, planning_solver)
+    # planning_solver = xenoworlds.solver.GDSolver(
+    #     world_model,
+    #     n_steps=1000,
+    #     action_space=world.action_space,
+    #     horizon=Config.horizon,
+    #     action_noise=0,
+    # )
+    # policy = xenoworlds.policy.PlanningPolicy(world, planning_solver)
 
     # random_solver = xenoworlds.solver.RandomSolver(
     #     world_model,
@@ -224,6 +224,24 @@ def run():
     # )
 
     # policy = xenoworlds.policy.PlanningPolicy(world, random_solver)
+
+    cem_solver = xenoworlds.solver.CEMSolver(
+        world_model,
+        horizon=Config.horizon,
+        num_samples=300,
+        var_scale=1.0,
+        opt_steps=30,
+        action_dim=action_dim * Config.frameskip,
+        topk=30,
+        device=device,
+    )
+
+    cem_solver = xenoworlds.solver.MPCWrapper(
+        cem_solver,
+        n_mpc_actions=1,  # Config.frameskip
+    )
+
+    policy = xenoworlds.policy.PlanningPolicy(world, cem_solver)
 
     # -- run evaluation
     evaluator = xenoworlds.evaluator.Evaluator(world, policy, device=device)

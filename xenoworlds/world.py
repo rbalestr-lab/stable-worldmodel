@@ -1,7 +1,7 @@
 import gymnasium as gym
 import numpy as np
+import torch
 from loguru import logger as logging
-
 from torchvision import transforms
 
 
@@ -39,7 +39,10 @@ class World:
         logging.info(f"OBSERVATION SPACE: {self.envs.observation_space}")
         self.num_envs = num_envs
         self.seed = seed
-        self.goal_seed = seed + 2344
+
+        rng = torch.Generator()
+        rng.manual_seed(seed)
+        self.goal_seed = torch.randint(0, 2**32 - 1, (1,), generator=rng).item()
 
         # note if sample_goal_every_k_steps is set to -1, will sample goal once per episode
         # TODO implement sample_goal_every_k_steps

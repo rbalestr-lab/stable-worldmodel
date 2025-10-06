@@ -1,3 +1,7 @@
+import os
+os.environ['MUJOCO_GL'] = 'egl'
+import ogbench
+
 if __name__ == "__main__":
     import stable_worldmodel as swm
 
@@ -6,10 +10,17 @@ if __name__ == "__main__":
     ######################
 
     world = swm.World(
-        "swm/SimplePointMaze-v0",
-        num_envs=7,
-        image_shape=(224, 224),
-        render_mode="rgb_array",
+        "swm/OGBCube-v0",
+        num_envs=1,
+        image_shape=(64, 64),
+        # render_mode="rgb_array",
+        max_episode_steps=200,
+        
+        env_type='single',
+        ob_type='pixels',
+        width=64,
+        height=64,
+        visualize_info=False,
     )
 
     print("Available variations: ", world.single_variation_space.names())
@@ -20,15 +31,15 @@ if __name__ == "__main__":
 
     world.set_policy(swm.policy.RandomPolicy())
     world.record_dataset(
-        "simple-pointmaze",
+        "ogbench-cube-single",
         episodes=10,
         seed=2347,
-        options=dict(variation=("walls.number", "walls.shape", "walls.positions")),
+        options=dict(variation=("cube.color", "cube.size", "agent.color")),
     )
     world.record_video(
         "./",
         seed=2347,
-        options=dict(variation=("walls.number", "walls.shape", "walls.positions")),
+        options=dict(variation=("cube.color", "cube.size", "agent.color")),
     )
 
     ################
@@ -38,7 +49,7 @@ if __name__ == "__main__":
     # pre-train world model
     swm.pretraining(
         "scripts/train/dummy.py",
-        "++dump_object=True dataset_name=simple-pointmaze output_model_name=dummy_test",
+        "++dump_object=True dataset_name=ogbench-cube-single output_model_name=dummy_test",
     )
 
     ################

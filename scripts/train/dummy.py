@@ -7,7 +7,7 @@ import torch
 import torchvision
 
 from torch.utils.data import DataLoader
-from transformers import AutoConfig, AutoModelForImageClassification
+# from transformers import AutoConfig, AutoModelForImageClassification
 from lightning.pytorch.callbacks import ModelCheckpoint
 from pathlib import Path
 

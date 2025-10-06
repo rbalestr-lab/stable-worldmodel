@@ -1,3 +1,4 @@
+from dataclasses import dataclass
 from pathlib import Path
 
 import hydra
@@ -13,27 +14,38 @@ from transformers import AutoModel
 import stable_worldmodel as swm
 
 
+@dataclass
+class Config:
+    dataset_name: str
+    img_size: int = 224
+    batch_size: int = 32
+    num_workers: int = 4
+
+
 def get_data(dataset_name):
     """Return data and action space dim for training predictor."""
-    # -- make transform operations
-    mean = [0.485, 0.456, 0.406]
-    std = [0.229, 0.224, 0.225]
+
+    # == image transformations
+    def get_img_pipeling(key, target, img_size=224):
+        return spt.data.transforms.Compose(
+            spt.data.transforms.ToImage(
+                **spt.data.dataset_stat.ImageNet,
+                source=key,
+                target=target,
+            ),
+            spt.data.transforms.Resize(img_size, source=key, target=target),
+            spt.data.transforms.CenterCrop(img_size, source=key, target=target),
+        )
+
+    IMG_SIZE = 224
     transform = spt.data.transforms.Compose(
-        spt.data.transforms.ToImage(
-            mean=mean,
-            std=std,
-            source="pixels",
-            target="pixels",
-        ),
-        spt.data.transforms.ToImage(
-            mean=mean,
-            std=std,
-            source="goal",
-            target="goal",
-        ),
+        get_img_pipeling("pixels", "pixels", IMG_SIZE),
+        get_img_pipeling("goal", "goal", IMG_SIZE),
     )
 
-    # -- load dataset
+    # == action transformations
+
+    # == load dataset
     data_dir = swm.data.get_cache_dir()
     dataset = swm.data.StepsDataset(
         "parquet",
@@ -64,18 +76,18 @@ def forward(self, batch, stage):
     proprio_key = "proprio" if "proprio" in batch else None
     batch = self.model.encode(
         batch,
-        target="embedding",
+        target="embed",
         pixels_key="pixels",
         proprio_key=proprio_key,
         action_key="action",
     )
 
     # predictions
-    embedding = batch["embedding"][:, : self.model.history_size, :, :]  # (B, history_size, P, d)
+    embedding = batch["embed"][:, : self.model.history_size, :, :]  # (B, history_size, P, d)
     pred_embedding = self.model.predict(embedding)
 
     # targets values
-    target_embedding = batch["embedding"][:, self.model.num_pred :, :, :]  # (B, T-history_size, P, d)
+    target_embedding = batch["embed"][:, self.model.num_pred :, :, :]  # (B, T-history_size, P, d)
 
     # == pixels loss
     pixels_dim = batch["pixels_embed"].shape[-1]

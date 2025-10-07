@@ -1,24 +1,19 @@
+import os
+import re
+import shutil
+from functools import lru_cache
 from pathlib import Path
-import numpy as np
+from typing import Any, TypedDict
 
+import gymnasium as gym
+import numpy as np
 import stable_pretraining as spt
 import torch
-import os
-import gymnasium as gym
-
-from dataclasses import dataclass, asdict
-from functools import lru_cache
-
-from typing import Any, Dict, List, Optional, Tuple, TypedDict
-
-from torch.utils.data import default_collate
 from datasets import load_dataset
+from rich import print
+from torch.utils.data import default_collate
 
 import stable_worldmodel as swm
-import shutil
-from rich import print
-
-import re
 
 
 class StepsDataset(spt.data.HFDataset):
@@ -37,39 +32,46 @@ class StepsDataset(spt.data.HFDataset):
         self.num_steps = num_steps
         self.frameskip = frameskip
 
-        assert "episode_idx" in self.dataset.column_names, (
-            "Dataset must have 'episode_idx' column"
-        )
-        assert "step_idx" in self.dataset.column_names, (
-            "Dataset must have 'step_idx' column"
-        )
+        assert "episode_idx" in self.dataset.column_names, "Dataset must have 'episode_idx' column"
+        assert "step_idx" in self.dataset.column_names, "Dataset must have 'step_idx' column"
+        assert "action" in self.dataset.column_names, "Dataset must have 'action' column"
 
-        self.episodes = np.unique(self.dataset["episode_idx"])
-        self.slices = {e: self.num_slice(e) for e in self.episodes}
-        self.cum_slices = np.cumsum([0] + [self.slices[e] for e in self.episodes])
+        # Setup HF dataset
 
         self.torch_exclude_column = torch_exclude_column
 
         # TODO: add assert for basic column name
 
-        cols = [
-            c for c in self.dataset.column_names if c not in self.torch_exclude_column
+        # load the dataset with pytorch format
+        cols = [c for c in self.dataset.column_names if c not in self.torch_exclude_column]
+        self.dataset = self.dataset.with_format("torch", columns=cols, output_all_columns=True)
+
+        # get number of episodes
+        ep_indices = self.dataset["episode_idx"]
+        self.episodes = np.unique(ep_indices)
+
+        # get dataset indices of each episode
+        self.episode_slices = {e: self.get_episode_slice(e, ep_indices) for e in self.episodes}
+
+        # start index for each episode
+        valid_samples_per_ep = [
+            max(0, len(ep_slice) - self.num_steps * self.frameskip + 1) for ep_slice in self.episode_slices.values()
         ]
-        self.dataset = self.dataset.with_format(
-            "torch", columns=cols, output_all_columns=True
-        )
+        self.cum_slices = np.cumsum([0] + valid_samples_per_ep)
 
-    def num_slice(self, episode_idx):
+        # map from sample to their episode
+        self.idx_to_ep = np.searchsorted(self.cum_slices, torch.arange(len(self)), side="right") - 1
+
+    def get_episode_slice(self, episode_idx, episode_indices):
         """Return number of possible slices for a given episode index"""
-        idx = np.nonzero(self.dataset["episode_idx"] == episode_idx)[0][0].item()
-        episode_len = self.dataset["episode_len"][idx]
-        num_slices = 1 + (episode_len - self.num_steps * self.frameskip)
+        indices = np.flatnonzero(episode_indices == episode_idx)
 
-        assert num_slices > 0, (
-            f"Episode {episode_idx} is too short for {self.num_steps} steps with {self.frameskip} frameskip (len={episode_len})"
-        )
+        if len(indices) <= (self.num_steps * self.frameskip):
+            raise ValueError(
+                f"Episode {episode_idx} is too short ({len(indices)} steps) for {self.num_steps} steps with {self.frameskip} frameskip"
+            )
 
-        return num_slices
+        return indices
 
     def process_sample(self, sample):
         if self._trainer is not None:
@@ -87,52 +89,40 @@ class StepsDataset(spt.data.HFDataset):
         return int(self.cum_slices[-1])
 
     def __getitem__(self, idx):
-        # find which episode this idx belongs to
-        ep_idx = np.searchsorted(self.cum_slices, idx, side="right") - 1
-        episode = self.episodes[ep_idx]
+        ep = self.idx_to_ep[idx]
+        episode_indices = self.episode_slices[ep]  # indices for this episode
 
-        # find local slice within episode
-        local_idx = idx - self.cum_slices[ep_idx]
+        offset = idx - self.cum_slices[ep]  # position within the episode
+        start = offset
+        stop = start + self.num_steps * self.frameskip
 
-        # get dataset indices for this slice
-        ep_mask = (
-            torch.nonzero(self.dataset["episode_idx"] == episode).squeeze().tolist()
-        )
+        # actions indices, covering the whole window (every frame in between)
+        idx_slice = episode_indices[start:stop]
 
-        # starting step index inside this episode
-        start_step = local_idx
+        # pre select and transform data
+        raw_info = [self.transform(self.dataset[i]) for i in idx_slice]
+        raw_steps = default_collate(raw_info)
 
-        # slice steps with frameskip
-        slice_idx = [
-            ep_mask[start_step + i] for i in range(self.num_steps * self.frameskip)
-        ]
-
-        # transform the data
-        raw = [self.transform(self.dataset[i]) for i in slice_idx]
-        raw_steps = default_collate(raw)
-
-        # add the frameskip
         steps = {}
         for k, v in raw_steps.items():
+            if k == "action":
+                steps[k] = v
+                continue
             steps[k] = v[:: self.frameskip]
 
-        # process actions
-        actions = raw_steps["action"]
-        if self.frameskip > 1:
-            actions = actions.reshape(self.num_steps, -1)
-
-        steps["action"] = actions
+        # reshape actions after transform!
+        steps["action"] = steps["action"].reshape(self.num_steps, -1)
 
         return steps
 
 
 #####################
-### CLI Info ####
+###   CLI Info   ####
 #####################
 
 
 class SpaceInfo(TypedDict, total=False):
-    shape: Tuple[int, ...]
+    shape: tuple[int, ...]
     type: str
     dtype: str
     low: Any
@@ -142,8 +132,8 @@ class SpaceInfo(TypedDict, total=False):
 
 class VariationInfo(TypedDict):
     has_variation: bool
-    type: Optional[str]
-    names: Optional[List[str]]
+    type: str | None
+    names: list[str] | None
 
 
 class WorldInfo(TypedDict):
@@ -151,7 +141,7 @@ class WorldInfo(TypedDict):
     observation_space: SpaceInfo
     action_space: SpaceInfo
     variation: VariationInfo
-    config: Dict[str, Any]
+    config: dict[str, Any]
 
 
 def get_cache_dir() -> str:
@@ -167,9 +157,7 @@ def list_datasets():
 
 
 def list_models():
-    pattern = re.compile(
-        r"^(.*?)(?=_(?:weights(?:-[^.]*)?|object)\.ckpt$)", re.IGNORECASE
-    )
+    pattern = re.compile(r"^(.*?)(?=_(?:weights(?:-[^.]*)?|object)\.ckpt$)", re.IGNORECASE)
 
     cache_dir = get_cache_dir()
     models = set()
@@ -195,7 +183,9 @@ def dataset_info(name):
 
     dataset.set_format("numpy")
 
-    assert_msg = lambda col: (f"Dataset must have '{col}' column")
+    def assert_msg(col):
+        return f"Dataset must have '{col}' column"  # type: ignore
+
     assert "episode_idx" in dataset.column_names, assert_msg("episode_idx")
     assert "step_idx" in dataset.column_names, assert_msg("step_idx")
     assert "episode_len" in dataset.column_names, assert_msg("episode_len")
@@ -212,14 +202,8 @@ def dataset_info(name):
         "action_shape": dataset["action"][0].shape,
         "goal_shape": dataset["goal"][0].shape,
         "variation": {
-            "has_variation": any(
-                col.startswith("variation.") for col in dataset.column_names
-            ),
-            "names": [
-                col.removeprefix("variation.")
-                for col in dataset.column_names
-                if col.startswith("variation.")
-            ],
+            "has_variation": any(col.startswith("variation.") for col in dataset.column_names),
+            "names": [col.removeprefix("variation.") for col in dataset.column_names if col.startswith("variation.")],
         },
     }
 
@@ -227,10 +211,10 @@ def dataset_info(name):
 
 
 def list_worlds():
-    return sorted(list(swm.WORLDS))
+    return sorted(swm.WORLDS)
 
 
-def _space_meta(space) -> SpaceInfo | Dict[str, SpaceInfo] | List[SpaceInfo]:
+def _space_meta(space) -> SpaceInfo | dict[str, SpaceInfo] | list[SpaceInfo]:
     if isinstance(space, gym.spaces.Dict):
         return {k: _space_meta(v) for k, v in space.spaces.items()}
 
@@ -257,13 +241,11 @@ def _space_meta(space) -> SpaceInfo | Dict[str, SpaceInfo] | List[SpaceInfo]:
 def world_info(
     name: str,
     *,
-    image_shape: Tuple[int, int] = (224, 224),
+    image_shape: tuple[int, int] = (224, 224),
     render_mode: str = "rgb_array",
 ) -> WorldInfo:
     if name not in swm.WORLDS:
-        raise ValueError(
-            f"World '{name}' not found. Available: {', '.join(list_worlds())}"
-        )
+        raise ValueError(f"World '{name}' not found. Available: {', '.join(list_worlds())}")
     world = None
 
     try:
@@ -312,9 +294,7 @@ def delete_dataset(name):
             raise ValueError(f"Dataset {name} does not exist at {dataset_path}")
 
         # remove cache files
-        dataset = load_dataset(
-            "parquet", data_files=str(Path(dataset_path, "*.parquet"))
-        )
+        dataset = load_dataset("parquet", data_files=str(Path(dataset_path, "*.parquet")))
         dataset.cleanup_cache_files()
 
         # delete dataset directory
@@ -337,6 +317,4 @@ def delete_model(name):
                 os.remove(filepath)
                 print(f"🔮 Model {fname} deleted")
             except Exception as e:
-                print(
-                    f"[red]Error occured while deleting model [cyan]{name}[/cyan]: {e}[/red]"
-                )
+                print(f"[red]Error occurred while deleting model [cyan]{name}[/cyan]: {e}[/red]")

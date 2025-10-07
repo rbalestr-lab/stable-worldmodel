@@ -4,12 +4,19 @@ import os
 import shlex
 import subprocess
 import sys
-from typing import Any, Iterable
+from collections.abc import Iterable
+from typing import Any
 
 from loguru import logger as logging
 
 
-def pretraining(script_path: str, args: str = "") -> int:
+def pretraining(
+    script_path: str,
+    dataset_name: str,
+    output_model_name: str,
+    dump_object: bool = True,
+    args: str = "",
+) -> int:
     """Run a pretraining script as a subprocess with optional command-line arguments.
 
     This function checks if the specified script exists, constructs a command to run it with the provided arguments,
@@ -17,6 +24,9 @@ def pretraining(script_path: str, args: str = "") -> int:
 
     Args:
         script_path (str): The path to the pretraining script to be executed.
+        dataset_name (str): The name of the dataset to be used in pretraining.
+        output_model_name (str): The name to save the output model.
+        dump_object (bool, optional): Whether to dump the model object after training. Defaults to
         args (str, optional): A string of command-line arguments to pass to the script. Defaults to an empty string.
 
     Returns:
@@ -29,11 +39,11 @@ def pretraining(script_path: str, args: str = "") -> int:
     if not os.path.isfile(script_path):
         raise ValueError(f"Script {script_path} does not exist.")
 
-    logging.info(
-        f"🏃🏃🏃 Running pretraining script: {script_path} with args: {args} 🏃🏃🏃"
-    )
+    logging.info(f"🏃🏃🏃 Running pretraining script: {script_path} with args: {args} 🏃🏃🏃")
     env = os.environ.copy()
     env.setdefault("PYTHONUNBUFFERED", "1")
+
+    args = f"{args} ++dump_object={dump_object} dataset_name={dataset_name} output_model_name={output_model_name}"
     cmd = [sys.executable, script_path] + shlex.split(args)
     try:
         subprocess.run(cmd, env=env, check=True)

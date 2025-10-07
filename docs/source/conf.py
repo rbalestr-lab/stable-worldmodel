@@ -1,12 +1,12 @@
 import os
 import sys
 
+
 sys.path.insert(0, os.path.abspath("../.."))
 
 from datetime import date
-from stable_worldmodel.__about__ import (
-    __version__,
-)  # Import the version from __about__.py
+
+from stable_worldmodel import __version__
 
 
 project = "stable-worldmodel"
@@ -14,7 +14,7 @@ copyright = "2025, Randall Balestriero, Dan Haramati, Lucas Maes"
 author = "Randall Balestriero, Dan Haramati, Lucas Maes"
 
 # The full version, including alpha/beta/rc tags
-release = __version__  # Set release to the version from __about__.py
+release = __version__
 
 current_year = date.today().year
 copyright = f"{current_year}"
@@ -78,9 +78,7 @@ exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
 # }
 
 # how to define macros: https://docs.mathjax.org/en/latest/input/tex/macros.html
-mathjax3_config = {
-    "tex": {"equationNumbers": {"autoNumber": "AMS", "useLabelIds": True}}
-}
+mathjax3_config = {"tex": {"equationNumbers": {"autoNumber": "AMS", "useLabelIds": True}}}
 
 # bibliography
 bibtex_bibfiles = ["references.bib"]

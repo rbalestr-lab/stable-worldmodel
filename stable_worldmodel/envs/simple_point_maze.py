@@ -1,12 +1,19 @@
 from collections.abc import Sequence
+
 import gymnasium as gym
+import matplotlib.pyplot as plt
 
 # from gymnasium import spaces
 import numpy as np
-import matplotlib.pyplot as plt
-from matplotlib.patches import Rectangle, Circle
+from loguru import logger as logging
+from matplotlib.patches import Circle, Rectangle
 
 import stable_worldmodel as swm
+
+
+DEFAULT_VARIATIONS = {
+    "agent.position",
+}
 
 
 class SimplePointMazeEnv(gym.Env):
@@ -43,36 +50,22 @@ class SimplePointMazeEnv(gym.Env):
 
         #### variation space
 
-        wall_pos_high = np.array([[self.width, self.height]], dtype=np.float32).repeat(
-            max_walls, axis=0
-        )
-        wall_pos_low = np.array([[0.0, 0.0]], dtype=np.float32).repeat(
-            max_walls, axis=0
-        )
+        wall_pos_high = np.array([[self.width, self.height]], dtype=np.float32).repeat(max_walls, axis=0)
+        wall_pos_low = np.array([[0.0, 0.0]], dtype=np.float32).repeat(max_walls, axis=0)
 
-        wall_size_low = np.array(
-            [[wall_min_size, wall_min_size]], dtype=np.float32
-        ).repeat(max_walls, axis=0)
-        wall_size_high = np.array(
-            [[wall_max_size, wall_max_size]], dtype=np.float32
-        ).repeat(max_walls, axis=0)
+        wall_size_low = np.array([[wall_min_size, wall_min_size]], dtype=np.float32).repeat(max_walls, axis=0)
+        wall_size_high = np.array([[wall_max_size, wall_max_size]], dtype=np.float32).repeat(max_walls, axis=0)
 
         # random init walls shape
-        rng = np.random.default_rng(42)
-        init_wall_shape = rng.uniform(
-            low=wall_size_low, high=wall_size_high, size=(max_walls, 2)
-        ).astype(np.float32)
-        init_wall_positions = rng.uniform(low=1, high=3.5, size=(max_walls, 2)).astype(
-            np.float32
-        )
+        rng = np.random.default_rng(234232)
+        init_wall_shape = rng.uniform(low=wall_size_low, high=wall_size_high, size=(max_walls, 2)).astype(np.float32)
+        init_wall_positions = rng.uniform(low=1, high=3.5, size=(max_walls, 2)).astype(np.float32)
 
         self.variation_space = swm.spaces.Dict(
             {
                 "agent": swm.spaces.Dict(
                     {
-                        "color": swm.spaces.RGBBox(
-                            init_value=np.array([255, 0, 0], dtype=np.uint8)
-                        ),
+                        "color": swm.spaces.RGBBox(init_value=np.array([255, 0, 0], dtype=np.uint8)),
                         "radius": swm.spaces.Box(
                             low=0.05,
                             high=0.5,
@@ -86,9 +79,7 @@ class SimplePointMazeEnv(gym.Env):
                             init_value=np.array([0.5, 0.5], dtype=np.float32),
                             shape=(2,),
                             dtype=np.float32,
-                            constrain_fn=lambda v: not self._collides(
-                                v, entity="agent"
-                            ),
+                            constrain_fn=lambda v: not self._collides(v, entity="agent"),
                         ),
                         "speed": swm.spaces.Box(
                             low=0.05,
@@ -101,9 +92,7 @@ class SimplePointMazeEnv(gym.Env):
                 ),
                 "goal": swm.spaces.Dict(
                     {
-                        "color": swm.spaces.RGBBox(
-                            init_value=np.array([0, 255, 0], dtype=np.uint8)
-                        ),
+                        "color": swm.spaces.RGBBox(init_value=np.array([0, 255, 0], dtype=np.uint8)),
                         "radius": swm.spaces.Box(
                             low=0.05,
                             high=0.5,
@@ -123,12 +112,8 @@ class SimplePointMazeEnv(gym.Env):
                 ),
                 "walls": swm.spaces.Dict(
                     {
-                        "number": swm.spaces.Discrete(
-                            max_walls - min_walls + 1, start=min_walls, init_value=5
-                        ),
-                        "color": swm.spaces.RGBBox(
-                            init_value=np.array([0, 0, 0], dtype=np.uint8)
-                        ),
+                        "number": swm.spaces.Discrete(max_walls - min_walls + 1, start=min_walls, init_value=5),
+                        "color": swm.spaces.RGBBox(init_value=np.array([0, 0, 0], dtype=np.uint8)),
                         "shape": swm.spaces.Box(
                             low=wall_size_low,
                             high=wall_size_high,
@@ -149,9 +134,7 @@ class SimplePointMazeEnv(gym.Env):
                 ),
                 "background": swm.spaces.Dict(
                     {
-                        "color": swm.spaces.RGBBox(
-                            init_value=np.array([255, 255, 255], dtype=np.uint8)
-                        ),
+                        "color": swm.spaces.RGBBox(init_value=np.array([255, 255, 255], dtype=np.uint8)),
                     }
                 ),
             },
@@ -161,9 +144,7 @@ class SimplePointMazeEnv(gym.Env):
         self.state = self.variation_space["agent"]["position"].value.copy()
 
         # need walls to check validity of default variation values
-        assert self.variation_space.check(), (
-            "Default variation values must be within variation space"
-        )
+        assert self.variation_space.check(), "Default variation values must be within variation space"
 
         self._fig = None
         self._ax = None
@@ -182,20 +163,16 @@ class SimplePointMazeEnv(gym.Env):
 
         self.variation_space.reset()
 
-        if "variation" in options:
-            assert isinstance(options["variation"], Sequence), (
-                "variation option must be a Sequence containing variations names to sample"
-            )
+        if "variation" not in options:
+            options["variation"] = DEFAULT_VARIATIONS
+            logging.warning(f"No variation provided, defaulting to {options['variation']}")
 
-            if len(options["variation"]) == 1 and options["variation"][0] == "all":
-                self.variation_space.sample()
+        elif not isinstance(options["variation"], Sequence):
+            raise ValueError("variation option must be a Sequence containing variations names to sample")
 
-            else:
-                self.variation_space.update(set(options["variation"]))
+        self.variation_space.update(options["variation"])
 
-        assert self.variation_space.check(debug=True), (
-            "Variation values must be within variation space!"
-        )
+        assert self.variation_space.check(debug=True), "Variation values must be within variation space!"
 
         # generate goal frame
         original_state = self.variation_space.value["agent"]["position"].copy()
@@ -241,9 +218,7 @@ class SimplePointMazeEnv(gym.Env):
         radius = self.variation_space.value[entity]["radius"]
         num_walls = self.variation_space.value["walls"]["number"]
         wall_shape = self.variation_space.value["walls"]["shape"]
-        wall_positions = (
-            self.variation_space.value["walls"]["positions"] if walls is None else walls
-        )
+        wall_positions = self.variation_space.value["walls"]["positions"] if walls is None else walls
 
         wx = wall_positions[:num_walls, 0]
         wy = wall_positions[:num_walls, 1]
@@ -276,15 +251,20 @@ class SimplePointMazeEnv(gym.Env):
         x, y = pos[:, 0], pos[:, 1]
         w, h = wh[:, 0], wh[:, 1]
 
-        fits_h = np.all(self.width >= x + w)
-        fits_v = np.all(self.height >= y + h)
+        # Check that walls start within bounds
+        within_bounds_x = np.all((x >= 0) & (x <= self.width))
+        within_bounds_y = np.all((y >= 0) & (y <= self.height))
+
+        # Check that walls fit within bounds (position + size)
+        fits_h = np.all(x + w <= self.width)
+        fits_v = np.all(y + h <= self.height)
 
         agent_pos = self.variation_space.value["agent"]["position"]
         goal_pos = self.variation_space.value["goal"]["position"]
         collide_agent = self._collides(agent_pos, walls=pos, entity="agent")
         collide_goal = self._collides(goal_pos, walls=pos, entity="goal")
 
-        return bool(fits_h and fits_v) and not (collide_agent or collide_goal)
+        return bool(within_bounds_x and within_bounds_y and fits_h and fits_v) and not (collide_agent or collide_goal)
 
     def render(self, mode=None):
         mode = mode or self.render_mode or "human"
@@ -296,9 +276,7 @@ class SimplePointMazeEnv(gym.Env):
         self._ax.set_aspect("equal")
         self._ax.set_xticks([])
         self._ax.set_yticks([])
-        self._ax.set_facecolor(
-            self.variation_space["background"]["color"].value / 255.0
-        )
+        self._ax.set_facecolor(self.variation_space["background"]["color"].value / 255.0)
 
         # Draw walls
         num_walls = self.variation_space["walls"]["number"].value
@@ -322,9 +300,7 @@ class SimplePointMazeEnv(gym.Env):
             goal_pos = self.variation_space["goal"]["position"].value
             goal_radius = self.variation_space["goal"]["radius"].value
             goal_color = self.variation_space["goal"]["color"].value
-            goal = Circle(
-                goal_pos, goal_radius, facecolor=goal_color / 255.0, alpha=0.5
-            )
+            goal = Circle(goal_pos, goal_radius, facecolor=goal_color / 255.0, alpha=0.5)
             self._ax.add_patch(goal)
 
         # Draw agent
@@ -353,7 +329,10 @@ class SimplePointMazeEnv(gym.Env):
             raise NotImplementedError(f"Render mode {mode} not supported.")
 
     def close(self):
-        if self._fig is not None:
-            plt.close(self._fig)
-            self._fig = None
-            self._ax = None
+        try:
+            if self._fig is not None:
+                plt.close(self._fig)
+                self._fig = None
+                self._ax = None
+        except Exception:
+            pass

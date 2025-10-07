@@ -1,27 +1,27 @@
+__version__ = "0.0.1a0"
+
 from gymnasium.envs import registration
-from stable_worldmodel.policy import PlanConfig
-from stable_worldmodel.world import World
-from stable_worldmodel.utils import pretraining
 
 from stable_worldmodel import (
-    solver,
-    envs,
     data,
+    envs,
     policy,
+    solver,
     spaces,
-    wrappers,
     utils,
+    wm,
+    wrappers,
 )
+from stable_worldmodel.policy import PlanConfig
+from stable_worldmodel.utils import pretraining
+from stable_worldmodel.world import World
+
 
 WORLDS = set()
 
 
 def register(id, entry_point):
     registration.register(id=id, entry_point=entry_point)
-
-    if id in WORLDS:
-        raise ValueError(f"World {id} already registered.")
-
     WORLDS.add(id)
 
 
@@ -50,17 +50,13 @@ register(
     entry_point="stable_worldmodel.envs.voidrun:VoidRunEnv",
 )
 
-register(
-    id="swm/OGBCube-v0",
-    entry_point="stable_worldmodel.envs.ogbench_cube:CubeEnv",
-)
-
 __all__ = [
     "World",
     "PlanConfig",
     "pretraining",
     "spaces",
     "utils",
+    "envs",
     "data",
     "policy",
     "solver",

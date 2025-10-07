@@ -1,15 +1,14 @@
+from pathlib import Path
+
 import hydra
 import lightning as pl
 import stable_pretraining as spt
+import torch
+from lightning.pytorch.callbacks import ModelCheckpoint
+from torch.utils.data import DataLoader
+
 import stable_worldmodel as swm
 
-import torch
-import torchvision
-
-from torch.utils.data import DataLoader
-# from transformers import AutoConfig, AutoModelForImageClassification
-from lightning.pytorch.callbacks import ModelCheckpoint
-from pathlib import Path
 
 ##########
 # TODO: need to investigate slow down linked with action dim increase
@@ -93,6 +92,7 @@ def forward(self, batch, stage):
 
 def get_world_model(action_dim):
     """Return stable_spt module with world model"""
+
     world_model = swm.wm.DummyWorldModel((224, 224, 3), action_dim)
     # NOTE: can add a decoder here if needed
 

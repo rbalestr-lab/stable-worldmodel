@@ -1,6 +1,8 @@
 [![PyTorch](https://img.shields.io/badge/PyTorch-ee4c2c?logo=pytorch&logoColor=white)](https://pytorch.org/get-started/locally/)
 [![Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff)
-[![License](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Testing](https://github.com/rbalestr-lab/stable-worldmodel/actions/workflows/testing.yaml/badge.svg)](https://github.com/rbalestr-lab/stable-worldmodel/actions/workflows/testing.yaml)
+![Python 3.10](https://img.shields.io/badge/python-3.10-blue.svg)
+[![License](https://img.shields.io/badge/license-MIT-green.svg)](./LICENSE)
 
 <p align="center">
   <img src="./assets/stable-worldmodel-logo.png" alt="stable-worldmodel logo" width="500px"/>
@@ -19,11 +21,13 @@ A stable library for world model research and evaluation, providing unified inte
 ### Quick Start
 
 1. **Install uv** (fast Python package manager):
+
 ```bash
 pip install uv
 ```
 
 2. **Clone and install the package**:
+
 ```bash
 git clone https://github.com/rbalestr-lab/stable-worldmodel.git
 cd stable-worldmodel
@@ -33,6 +37,7 @@ uv pip install -e .
 ### Development Installation
 
 For development with testing and documentation tools:
+
 ```bash
 uv pip install -e . --group dev --group doc
 ```
@@ -96,6 +101,7 @@ stable_worldmodel/
 ## Testing
 
 Run tests with coverage:
+
 ```bash
 pytest --cov=stable_worldmodel --cov-report=term-missing
 ```
@@ -110,5 +116,10 @@ pytest --cov=stable_worldmodel --cov-report=term-missing
 
 MIT License - see [LICENSE](LICENSE) file for details.
 
+## Citation
 
-
+@inproceedings{tbd,
+title = "TBD",
+author = "",
+booktitle = "",
+}

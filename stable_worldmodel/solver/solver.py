@@ -1,12 +1,13 @@
-import torch
-import gymnasium as gym
 from typing import Protocol, runtime_checkable
+
+import gymnasium as gym
+import torch
 
 
 class Costable(Protocol):
     """Protocol for world model cost functions."""
 
-    def get_cost(info_dict: dict, action_candidates: torch.Tensor) -> torch.Tensor:
+    def get_cost(info_dict: dict, action_candidates: torch.Tensor) -> torch.Tensor:  # pragma: no cover
         """Compute cost for given action candidates based on info dictionary."""
         ...
 

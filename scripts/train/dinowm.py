@@ -120,9 +120,9 @@ def forward(self, batch, stage):
         loss = loss + proprio_loss
 
     batch["loss"] = loss
-
+    prefix = "" if stage == "train" else f"{stage}_"
     # == logging
-    losses_dict = {k: v.item() for k, v in batch.items() if "loss" in k}
+    losses_dict = {f"{prefix}{k}": v.item() for k, v in batch.items() if "loss" in k}
     self.log_dict(losses_dict, on_step=True, on_epoch=True, sync_dist=True)
 
     return batch
@@ -191,6 +191,52 @@ def get_world_model(action_dim):
     world_model = spt.Module(
         model=world_model,
         forward=forward,
+        optim={
+            "encoder_opt": {
+                "modules": "model.backbone",
+                "optimizer": {"type": "AdamW", "lr": 1e-6},
+                "scheduler": {
+                    "type": "OneCycleLR",
+                    "max_lr": 1e-6,
+                    "total_steps": 10000,
+                },
+                "interval": "step",
+                "frequency": 1,
+            },
+            "predictor_opt": {
+                "modules": "model.predictor",
+                "optimizer": {"type": "AdamW", "lr": 5e-4},
+                "scheduler": {
+                    "type": "OneCycleLR",
+                    "max_lr": 5e-4,
+                    "total_steps": 10000,
+                },
+                "interval": "step",
+                "frequency": 1,
+            },
+            "proprio_opt": {
+                "modules": "model.proprio_encoder",
+                "optimizer": {"type": "AdamW", "lr": 5e-4},
+                "scheduler": {
+                    "type": "OneCycleLR",
+                    "max_lr": 5e-4,
+                    "total_steps": 10000,
+                },
+                "interval": "step",
+                "frequency": 1,
+            },
+            "action_opt": {
+                "modules": "model.action_encoder",
+                "optimizer": {"type": "AdamW", "lr": 5e-4},
+                "scheduler": {
+                    "type": "OneCycleLR",
+                    "max_lr": 5e-4,
+                    "total_steps": 10000,
+                },
+                "interval": "step",
+                "frequency": 1,
+            },
+        },
     )
     return world_model
 

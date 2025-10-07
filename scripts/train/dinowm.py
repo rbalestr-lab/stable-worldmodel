@@ -120,7 +120,7 @@ def forward(self, batch, stage):
         loss = loss + proprio_loss
 
     batch["loss"] = loss
-    prefix = "" if stage == "train" else f"{stage}_"
+    prefix = "" if self.training else "val_"
     # == logging
     losses_dict = {f"{prefix}{k}": v.item() for k, v in batch.items() if "loss" in k}
     self.log_dict(losses_dict, on_step=True, on_epoch=True, sync_dist=True)

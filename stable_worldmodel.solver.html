@@ -1,0 +1,1268 @@
+<!doctype html>
+<html class="no-js" lang="en" data-content_root="./">
+  <head><meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="index" title="Index" href="genindex.html"><link rel="search" title="Search" href="search.html">
+        <link rel="prefetch" href="_static/img/logo-light.svg" as="image">
+        <link rel="prefetch" href="_static/img/logo-dark.svg" as="image">
+
+    <link rel="shortcut icon" href="_static/favicon.ico"><!-- Generated with Sphinx 8.2.3 and Furo 2025.09.25 -->
+        <title>stable_worldmodel.solver package - stable-worldmodel Documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=8f2a1f02" />
+    <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?v=580074bf" />
+    <link rel="stylesheet" type="text/css" href="_static/styles/furo-extensions.css?v=8dab3a3b" />
+    <link rel="stylesheet" type="text/css" href="_static/css/custom.css?v=33d9fa98" />
+    <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/fontawesome.min.css" />
+    <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/solid.min.css" />
+    <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/brands.min.css" />
+    
+    
+
+
+<style>
+  body {
+    --color-code-background: #f8f8f8;
+  --color-code-foreground: black;
+  --color-brand-primary: #202123;
+  --color-brand-content: #296cde;
+  --color-inline-code-background: #f8f8f8;
+  --color-brand-visited: #2757dd;
+  
+  }
+  @media not print {
+    body[data-theme="dark"] {
+      --color-code-background: #272822;
+  --color-code-foreground: #f8f8f2;
+  
+    }
+    @media (prefers-color-scheme: dark) {
+      body:not([data-theme="light"]) {
+        --color-code-background: #272822;
+  --color-code-foreground: #f8f8f2;
+  
+      }
+    }
+  }
+</style></head>
+  <body>
+    
+    <script>
+      document.body.dataset.theme = localStorage.getItem("theme") || "auto";
+    </script>
+    
+
+<svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+  <symbol id="svg-toc" viewBox="0 0 24 24">
+    <title>Contents</title>
+    <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 1024 1024">
+      <path d="M408 442h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8zm-8 204c0 4.4 3.6 8 8 8h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56zm504-486H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zm0 632H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zM115.4 518.9L271.7 642c5.8 4.6 14.4.5 14.4-6.9V388.9c0-7.4-8.5-11.5-14.4-6.9L115.4 505.1a8.74 8.74 0 0 0 0 13.8z"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-menu" viewBox="0 0 24 24">
+    <title>Menu</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-menu">
+      <line x1="3" y1="12" x2="21" y2="12"></line>
+      <line x1="3" y1="6" x2="21" y2="6"></line>
+      <line x1="3" y1="18" x2="21" y2="18"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-arrow-right" viewBox="0 0 24 24">
+    <title>Expand</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-chevron-right">
+      <polyline points="9 18 15 12 9 6"></polyline>
+    </svg>
+  </symbol>
+  <symbol id="svg-sun" viewBox="0 0 24 24">
+    <title>Light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="feather-sun">
+      <circle cx="12" cy="12" r="5"></circle>
+      <line x1="12" y1="1" x2="12" y2="3"></line>
+      <line x1="12" y1="21" x2="12" y2="23"></line>
+      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+      <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+      <line x1="1" y1="12" x2="3" y2="12"></line>
+      <line x1="21" y1="12" x2="23" y2="12"></line>
+      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+      <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon" viewBox="0 0 24 24">
+    <title>Dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-moon">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z" />
+    </svg>
+  </symbol>
+  <symbol id="svg-sun-with-moon" viewBox="0 0 24 24">
+    <title>Auto light/dark, in light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path style="opacity: 50%" d="M 5.411 14.504 C 5.471 14.504 5.532 14.504 5.591 14.504 C 3.639 16.319 4.383 19.569 6.931 20.352 C 7.693 20.586 8.512 20.551 9.25 20.252 C 8.023 23.207 4.056 23.725 2.11 21.184 C 0.166 18.642 1.702 14.949 4.874 14.536 C 5.051 14.512 5.231 14.5 5.411 14.5 L 5.411 14.504 Z"/>
+      <line x1="14.5" y1="3.25" x2="14.5" y2="1.25"/>
+      <line x1="14.5" y1="15.85" x2="14.5" y2="17.85"/>
+      <line x1="10.044" y1="5.094" x2="8.63" y2="3.68"/>
+      <line x1="19" y1="14.05" x2="20.414" y2="15.464"/>
+      <line x1="8.2" y1="9.55" x2="6.2" y2="9.55"/>
+      <line x1="20.8" y1="9.55" x2="22.8" y2="9.55"/>
+      <line x1="10.044" y1="14.006" x2="8.63" y2="15.42"/>
+      <line x1="19" y1="5.05" x2="20.414" y2="3.636"/>
+      <circle cx="14.5" cy="9.55" r="3.6"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon-with-sun" viewBox="0 0 24 24">
+    <title>Auto light/dark, in dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path d="M 8.282 7.007 C 8.385 7.007 8.494 7.007 8.595 7.007 C 5.18 10.184 6.481 15.869 10.942 17.24 C 12.275 17.648 13.706 17.589 15 17.066 C 12.851 22.236 5.91 23.143 2.505 18.696 C -0.897 14.249 1.791 7.786 7.342 7.063 C 7.652 7.021 7.965 7 8.282 7 L 8.282 7.007 Z"/>
+      <line style="opacity: 50%" x1="18" y1="3.705" x2="18" y2="2.5"/>
+      <line style="opacity: 50%" x1="18" y1="11.295" x2="18" y2="12.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="4.816" x2="14.464" y2="3.964"/>
+      <line style="opacity: 50%" x1="20.711" y1="10.212" x2="21.563" y2="11.063"/>
+      <line style="opacity: 50%" x1="14.205" y1="7.5" x2="13.001" y2="7.5"/>
+      <line style="opacity: 50%" x1="21.795" y1="7.5" x2="23" y2="7.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="10.184" x2="14.464" y2="11.036"/>
+      <line style="opacity: 50%" x1="20.711" y1="4.789" x2="21.563" y2="3.937"/>
+      <circle style="opacity: 50%" cx="18" cy="7.5" r="2.169"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-pencil" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-pencil-code">
+      <path d="M4 20h4l10.5 -10.5a2.828 2.828 0 1 0 -4 -4l-10.5 10.5v4" />
+      <path d="M13.5 6.5l4 4" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+  <symbol id="svg-eye" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-eye-code">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M10 12a2 2 0 1 0 4 0a2 2 0 0 0 -4 0" />
+      <path
+        d="M11.11 17.958c-3.209 -.307 -5.91 -2.293 -8.11 -5.958c2.4 -4 5.4 -6 9 -6c3.6 0 6.6 2 9 6c-.21 .352 -.427 .688 -.647 1.008" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+</svg>
+
+<input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation" aria-label="Toggle site navigation sidebar">
+<input type="checkbox" class="sidebar-toggle" name="__toc" id="__toc" aria-label="Toggle table of contents sidebar">
+<label class="overlay sidebar-overlay" for="__navigation"></label>
+<label class="overlay toc-overlay" for="__toc"></label>
+
+<a class="skip-to-content muted-link" href="#furo-main-content">Skip to content</a>
+
+
+
+<div class="page">
+  <header class="mobile-header">
+    <div class="header-left">
+      <label class="nav-overlay-icon" for="__navigation">
+        <span class="icon"><svg><use href="#svg-menu"></use></svg></span>
+      </label>
+    </div>
+    <div class="header-center">
+      <a href="index.html"><div class="brand">stable-worldmodel
+Documentation</div></a>
+    </div>
+    <div class="header-right">
+      <div class="theme-toggle-container theme-toggle-header">
+        <button class="theme-toggle" aria-label="Toggle Light / Dark / Auto color theme">
+          <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+          <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+          <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+          <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+        </button>
+      </div>
+      <label class="toc-overlay-icon toc-header-icon" for="__toc">
+        <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
+      </label>
+    </div>
+  </header>
+  <aside class="sidebar-drawer">
+    <div class="sidebar-container">
+      
+      <div class="sidebar-sticky"><a class="sidebar-brand" href="index.html">
+  <div class="sidebar-logo-container">
+    <img class="sidebar-logo only-light" src="_static/img/logo-light.svg" alt="Light Logo"/>
+    <img class="sidebar-logo only-dark" src="_static/img/logo-dark.svg" alt="Dark Logo"/>
+  </div>
+  
+  <span class="sidebar-brand-text">stable-worldmodel
+Documentation</span>
+  
+</a><form class="sidebar-search-container" method="get" action="search.html" role="search">
+  <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
+  <input type="hidden" name="check_keywords" value="yes">
+  <input type="hidden" name="area" value="default">
+</form>
+<div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
+  <p class="caption" role="heading"><span class="caption-text">Development</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/randall-lab/stable-worldmodel">Github</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/randall-lab/stable-worldmodel/tree/main/docs">Contribute to the Docs</a></li>
+</ul>
+
+</div>
+</div>
+
+      </div>
+      
+    </div>
+  </aside>
+  <div class="main">
+    <div class="content">
+      <div class="article-container">
+        <a href="#" class="back-to-top muted-link">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"></path>
+          </svg>
+          <span>Back to top</span>
+        </a>
+        <div class="content-icon-container">
+          <div class="edit-this-page">
+  <a class="muted-link" href="https://github.com/randall-lab/stable-worldmodel/edit/main/docs/stable_worldmodel.solver.rst" rel="edit" title="Edit this page">
+    <svg><use href="#svg-pencil"></use></svg>
+    <span class="visually-hidden">Edit this page</span>
+  </a>
+</div><div class="theme-toggle-container theme-toggle-content">
+            <button class="theme-toggle" aria-label="Toggle Light / Dark / Auto color theme">
+              <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+              <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+              <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+              <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+            </button>
+          </div>
+          <label class="toc-overlay-icon toc-content-icon" for="__toc">
+            <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
+          </label>
+        </div>
+        <article role="main" id="furo-main-content">
+          <section id="stable-worldmodel-solver-package">
+<h1>stable_worldmodel.solver package<a class="headerlink" href="#stable-worldmodel-solver-package" title="Link to this heading">¶</a></h1>
+<section id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Link to this heading">¶</a></h2>
+</section>
+<section id="module-stable_worldmodel.solver.cem">
+<span id="stable-worldmodel-solver-cem-module"></span><h2>stable_worldmodel.solver.cem module<a class="headerlink" href="#module-stable_worldmodel.solver.cem" title="Link to this heading">¶</a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="stable_worldmodel.solver.cem.CEMSolver">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">stable_worldmodel.solver.cem.</span></span><span class="sig-name descname"><span class="pre">CEMSolver</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#stable_worldmodel.solver.solver.Costable" title="stable_worldmodel.solver.solver.Costable"><span class="pre">Costable</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_samples</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">var_scale</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_steps</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">topk</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">device</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'cpu'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/stable_worldmodel/solver/cem.html#CEMSolver"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.solver.cem.CEMSolver" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Cross Entropy Method Solver.</p>
+<p>adapted from <a class="reference external" href="https://github.com/gaoyuezhou/dino_wm/blob/main/planning/cem.py">https://github.com/gaoyuezhou/dino_wm/blob/main/planning/cem.py</a></p>
+<dl class="py property">
+<dt class="sig sig-object py" id="stable_worldmodel.solver.cem.CEMSolver.action_dim">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">action_dim</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#stable_worldmodel.solver.cem.CEMSolver.action_dim" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="stable_worldmodel.solver.cem.CEMSolver.configure">
+<span class="sig-name descname"><span class="pre">configure</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">action_space</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_envs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">config</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="_modules/stable_worldmodel/solver/cem.html#CEMSolver.configure"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.solver.cem.CEMSolver.configure" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="stable_worldmodel.solver.cem.CEMSolver.horizon">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">horizon</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#stable_worldmodel.solver.cem.CEMSolver.horizon" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="stable_worldmodel.solver.cem.CEMSolver.init_action_distrib">
+<span class="sig-name descname"><span class="pre">init_action_distrib</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">actions</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/stable_worldmodel/solver/cem.html#CEMSolver.init_action_distrib"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.solver.cem.CEMSolver.init_action_distrib" title="Link to this definition">¶</a></dt>
+<dd><p>Initialize the action distribution params (mu, sigma) given the initial condition.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>actions</strong> (<em>n_envs</em><em>, </em><em>T</em><em>, </em><em>action_dim</em>) – initial actions, T &lt;= horizon</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="stable_worldmodel.solver.cem.CEMSolver.n_envs">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">n_envs</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#stable_worldmodel.solver.cem.CEMSolver.n_envs" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="stable_worldmodel.solver.cem.CEMSolver.solve">
+<span class="sig-name descname"><span class="pre">solve</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">info_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">init_action</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/stable_worldmodel/solver/cem.html#CEMSolver.solve"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.solver.cem.CEMSolver.solve" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-stable_worldmodel.solver.gd">
+<span id="stable-worldmodel-solver-gd-module"></span><h2>stable_worldmodel.solver.gd module<a class="headerlink" href="#module-stable_worldmodel.solver.gd" title="Link to this heading">¶</a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="stable_worldmodel.solver.gd.GDSolver">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">stable_worldmodel.solver.gd.</span></span><span class="sig-name descname"><span class="pre">GDSolver</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#stable_worldmodel.solver.solver.Costable" title="stable_worldmodel.solver.solver.Costable"><span class="pre">Costable</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_steps</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">action_noise</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">device</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'cpu'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/stable_worldmodel/solver/gd.html#GDSolver"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.solver.gd.GDSolver" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code></p>
+<p>Gradient Descent Solver.</p>
+<dl class="py property">
+<dt class="sig sig-object py" id="stable_worldmodel.solver.gd.GDSolver.action_dim">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">action_dim</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#stable_worldmodel.solver.gd.GDSolver.action_dim" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="stable_worldmodel.solver.gd.GDSolver.configure">
+<span class="sig-name descname"><span class="pre">configure</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">action_space</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_envs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">config</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="_modules/stable_worldmodel/solver/gd.html#GDSolver.configure"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.solver.gd.GDSolver.configure" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="stable_worldmodel.solver.gd.GDSolver.horizon">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">horizon</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#stable_worldmodel.solver.gd.GDSolver.horizon" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="stable_worldmodel.solver.gd.GDSolver.init_action">
+<span class="sig-name descname"><span class="pre">init_action</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">actions</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/stable_worldmodel/solver/gd.html#GDSolver.init_action"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.solver.gd.GDSolver.init_action" title="Link to this definition">¶</a></dt>
+<dd><p>Initialize the action tensor for the solver.</p>
+<p>set self.init - initial action sequences (n_envs, horizon, action_dim)</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="stable_worldmodel.solver.gd.GDSolver.n_envs">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">n_envs</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#stable_worldmodel.solver.gd.GDSolver.n_envs" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="stable_worldmodel.solver.gd.GDSolver.solve">
+<span class="sig-name descname"><span class="pre">solve</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">info_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">init_action</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tensor</span></span></span><a class="reference internal" href="_modules/stable_worldmodel/solver/gd.html#GDSolver.solve"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.solver.gd.GDSolver.solve" title="Link to this definition">¶</a></dt>
+<dd><p>Solve the planning optimization problem using gradient descent.</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="stable-worldmodel-solver-mppi-module">
+<h2>stable_worldmodel.solver.mppi module<a class="headerlink" href="#stable-worldmodel-solver-mppi-module" title="Link to this heading">¶</a></h2>
+</section>
+<section id="module-stable_worldmodel.solver.random">
+<span id="stable-worldmodel-solver-random-module"></span><h2>stable_worldmodel.solver.random module<a class="headerlink" href="#module-stable_worldmodel.solver.random" title="Link to this heading">¶</a></h2>
+<p>Random action sampling solver for planning problems.</p>
+<p>This module provides a baseline solver that samples random actions from the
+action space without any optimization. It serves as a simple baseline for
+comparison with more sophisticated planning algorithms like CEM, gradient
+descent, or MPPI.</p>
+<dl class="simple">
+<dt>The RandomSolver is useful for:</dt><dd><ul class="simple">
+<li><p>Establishing performance baselines in model-based planning experiments</p></li>
+<li><p>Testing environment and policy infrastructure without complex optimization</p></li>
+<li><p>Quick debugging of planning pipelines</p></li>
+<li><p>Ablation studies comparing random vs. optimized action selection</p></li>
+</ul>
+</dd>
+<dt>Classes:</dt><dd><p>RandomSolver: Samples random actions uniformly from the action space.</p>
+</dd>
+</dl>
+<p>Typical usage example:</p>
+<blockquote>
+<div><p>Basic usage with stable-worldmodel:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">stable_worldmodel</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">swm</span>
+
+<span class="c1"># Create world and solver</span>
+<span class="n">world</span> <span class="o">=</span> <span class="n">swm</span><span class="o">.</span><span class="n">World</span><span class="p">(</span><span class="s2">&quot;swm/SimplePointMaze-v0&quot;</span><span class="p">,</span> <span class="n">num_envs</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
+<span class="n">solver</span> <span class="o">=</span> <span class="n">swm</span><span class="o">.</span><span class="n">solver</span><span class="o">.</span><span class="n">RandomSolver</span><span class="p">()</span>
+
+<span class="c1"># Configure planning</span>
+<span class="n">config</span> <span class="o">=</span> <span class="n">swm</span><span class="o">.</span><span class="n">PlanConfig</span><span class="p">(</span><span class="n">horizon</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">receding_horizon</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">action_block</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+<span class="c1"># Create policy and evaluate</span>
+<span class="n">policy</span> <span class="o">=</span> <span class="n">swm</span><span class="o">.</span><span class="n">policy</span><span class="o">.</span><span class="n">WorldModelPolicy</span><span class="p">(</span><span class="n">solver</span><span class="o">=</span><span class="n">solver</span><span class="p">,</span> <span class="n">config</span><span class="o">=</span><span class="n">config</span><span class="p">)</span>
+<span class="n">world</span><span class="o">.</span><span class="n">set_policy</span><span class="p">(</span><span class="n">policy</span><span class="p">)</span>
+<span class="n">results</span> <span class="o">=</span> <span class="n">world</span><span class="o">.</span><span class="n">evaluate</span><span class="p">(</span><span class="n">episodes</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Direct solver usage:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">stable_worldmodel.solver</span><span class="w"> </span><span class="kn">import</span> <span class="n">RandomSolver</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">gymnasium</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">gym</span>
+
+<span class="c1"># Setup</span>
+<span class="n">env</span> <span class="o">=</span> <span class="n">gym</span><span class="o">.</span><span class="n">make</span><span class="p">(</span><span class="s2">&quot;Pendulum-v1&quot;</span><span class="p">)</span>
+<span class="n">solver</span> <span class="o">=</span> <span class="n">RandomSolver</span><span class="p">()</span>
+
+<span class="n">config</span> <span class="o">=</span> <span class="n">swm</span><span class="o">.</span><span class="n">PlanConfig</span><span class="p">(</span><span class="n">horizon</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">receding_horizon</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">action_block</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">solver</span><span class="o">.</span><span class="n">configure</span><span class="p">(</span><span class="n">action_space</span><span class="o">=</span><span class="n">env</span><span class="o">.</span><span class="n">action_space</span><span class="p">,</span> <span class="n">n_envs</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">config</span><span class="o">=</span><span class="n">config</span><span class="p">)</span>
+
+<span class="c1"># Generate random actions</span>
+<span class="n">result</span> <span class="o">=</span> <span class="n">solver</span><span class="o">.</span><span class="n">solve</span><span class="p">({})</span>
+<span class="n">actions</span> <span class="o">=</span> <span class="n">result</span><span class="p">[</span><span class="s2">&quot;actions&quot;</span><span class="p">]</span>  <span class="c1"># Shape: (1, 10, action_dim)</span>
+</pre></div>
+</div>
+</div></blockquote>
+<dl class="py class">
+<dt class="sig sig-object py" id="stable_worldmodel.solver.random.RandomSolver">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">stable_worldmodel.solver.random.</span></span><span class="sig-name descname"><span class="pre">RandomSolver</span></span><a class="reference internal" href="_modules/stable_worldmodel/solver/random.html#RandomSolver"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.solver.random.RandomSolver" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Random action sampling solver for model-based planning.</p>
+<p>This solver generates action sequences by uniformly sampling from the action
+space without any optimization or cost evaluation. Unlike optimization-based
+solvers (CEM, GD, MPPI), it does not require a world model or cost function,
+making it extremely fast and simple to use.</p>
+<p>The solver is primarily intended as a baseline for evaluating the performance
+gains of model-based planning. Random action selection typically performs
+poorly on complex tasks but can be surprisingly effective in simple or
+stochastic environments.</p>
+<dl class="simple">
+<dt>Key features:</dt><dd><ul class="simple">
+<li><p><strong>Zero computation cost</strong>: No forward passes through world models</p></li>
+<li><p><strong>Parallel sampling</strong>: Generates actions for multiple environments simultaneously</p></li>
+<li><p><strong>Action blocking</strong>: Supports repeating actions for temporal abstraction</p></li>
+<li><p><strong>Warm-starting</strong>: Can extend partial action sequences</p></li>
+<li><p><strong>API compatible</strong>: Works with WorldModelPolicy and other solver-based policies</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Variables<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>n_envs</strong> (<em>int</em>) – Number of parallel environments being planned for.</p></li>
+<li><p><strong>action_dim</strong> (<em>int</em>) – Total action dimensionality (base_dim × action_block).</p></li>
+<li><p><strong>horizon</strong> (<em>int</em>) – Number of planning steps in the action sequence.</p></li>
+</ul>
+</dd>
+</dl>
+<p class="rubric">Example</p>
+<p>Using with stable-worldmodel’s World and Policy classes:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">stable_worldmodel</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">swm</span>
+
+<span class="c1"># Create environment</span>
+<span class="n">world</span> <span class="o">=</span> <span class="n">swm</span><span class="o">.</span><span class="n">World</span><span class="p">(</span><span class="s2">&quot;swm/SimplePointMaze-v0&quot;</span><span class="p">,</span> <span class="n">num_envs</span><span class="o">=</span><span class="mi">8</span><span class="p">)</span>
+
+<span class="c1"># Setup random solver policy</span>
+<span class="n">config</span> <span class="o">=</span> <span class="n">swm</span><span class="o">.</span><span class="n">PlanConfig</span><span class="p">(</span>
+    <span class="n">horizon</span><span class="o">=</span><span class="mi">15</span><span class="p">,</span>  <span class="c1"># Plan 15 steps ahead</span>
+    <span class="n">receding_horizon</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>  <span class="c1"># Replan every 5 steps</span>
+    <span class="n">action_block</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>  <span class="c1"># No action repetition</span>
+<span class="p">)</span>
+<span class="n">solver</span> <span class="o">=</span> <span class="n">swm</span><span class="o">.</span><span class="n">solver</span><span class="o">.</span><span class="n">RandomSolver</span><span class="p">()</span>
+<span class="n">policy</span> <span class="o">=</span> <span class="n">swm</span><span class="o">.</span><span class="n">policy</span><span class="o">.</span><span class="n">WorldModelPolicy</span><span class="p">(</span><span class="n">solver</span><span class="o">=</span><span class="n">solver</span><span class="p">,</span> <span class="n">config</span><span class="o">=</span><span class="n">config</span><span class="p">)</span>
+
+<span class="c1"># Evaluate</span>
+<span class="n">world</span><span class="o">.</span><span class="n">set_policy</span><span class="p">(</span><span class="n">policy</span><span class="p">)</span>
+<span class="n">results</span> <span class="o">=</span> <span class="n">world</span><span class="o">.</span><span class="n">evaluate</span><span class="p">(</span><span class="n">episodes</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="mi">42</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Baseline reward: </span><span class="si">{</span><span class="n">results</span><span class="p">[</span><span class="s1">&#39;mean_reward&#39;</span><span class="p">]</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Standalone usage for custom planning loops:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">stable_worldmodel.solver</span><span class="w"> </span><span class="kn">import</span> <span class="n">RandomSolver</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">gymnasium</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">gym</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
+
+<span class="n">env</span> <span class="o">=</span> <span class="n">gym</span><span class="o">.</span><span class="n">make</span><span class="p">(</span><span class="s2">&quot;Hopper-v4&quot;</span><span class="p">,</span> <span class="n">render_mode</span><span class="o">=</span><span class="s2">&quot;rgb_array&quot;</span><span class="p">)</span>
+<span class="n">solver</span> <span class="o">=</span> <span class="n">RandomSolver</span><span class="p">()</span>
+
+<span class="c1"># Configure</span>
+<span class="n">config</span> <span class="o">=</span> <span class="n">swm</span><span class="o">.</span><span class="n">PlanConfig</span><span class="p">(</span><span class="n">horizon</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span> <span class="n">receding_horizon</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">action_block</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+<span class="n">solver</span><span class="o">.</span><span class="n">configure</span><span class="p">(</span><span class="n">action_space</span><span class="o">=</span><span class="n">env</span><span class="o">.</span><span class="n">action_space</span><span class="p">,</span> <span class="n">n_envs</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">config</span><span class="o">=</span><span class="n">config</span><span class="p">)</span>
+
+<span class="c1"># Generate and execute actions</span>
+<span class="n">obs</span><span class="p">,</span> <span class="n">info</span> <span class="o">=</span> <span class="n">env</span><span class="o">.</span><span class="n">reset</span><span class="p">()</span>
+<span class="n">result</span> <span class="o">=</span> <span class="n">solver</span><span class="o">.</span><span class="n">solve</span><span class="p">(</span><span class="n">info_dict</span><span class="o">=</span><span class="p">{})</span>
+<span class="n">actions</span> <span class="o">=</span> <span class="n">result</span><span class="p">[</span><span class="s2">&quot;actions&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>  <span class="c1"># Get first env&#39;s actions</span>
+
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">config</span><span class="o">.</span><span class="n">receding_horizon</span><span class="p">):</span>
+    <span class="n">action</span> <span class="o">=</span> <span class="n">actions</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">numpy</span><span class="p">()</span>
+    <span class="n">obs</span><span class="p">,</span> <span class="n">reward</span><span class="p">,</span> <span class="n">done</span><span class="p">,</span> <span class="n">truncated</span><span class="p">,</span> <span class="n">info</span> <span class="o">=</span> <span class="n">env</span><span class="o">.</span><span class="n">step</span><span class="p">(</span><span class="n">action</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">done</span> <span class="ow">or</span> <span class="n">truncated</span><span class="p">:</span>
+        <span class="k">break</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>This solver ignores the <code class="docutils literal notranslate"><span class="pre">info_dict</span></code> parameter in <code class="docutils literal notranslate"><span class="pre">solve()</span></code> since it
+doesn’t use state information or world models. The parameter is kept for
+API consistency with optimization-based solvers.</p>
+</div>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#stable_worldmodel.solver.CEMSolver" title="stable_worldmodel.solver.CEMSolver"><code class="xref py py-class docutils literal notranslate"><span class="pre">CEMSolver</span></code></a>: Cross-Entropy Method optimizer</p></li>
+<li><p><a class="reference internal" href="#stable_worldmodel.solver.GDSolver" title="stable_worldmodel.solver.GDSolver"><code class="xref py py-class docutils literal notranslate"><span class="pre">GDSolver</span></code></a>: Gradient descent optimizer</p></li>
+<li><p><code class="xref py py-class docutils literal notranslate"><span class="pre">MPPISolver</span></code>: Model Predictive Path Integral optimizer</p></li>
+</ul>
+</div>
+<dl class="py method">
+<dt class="sig sig-object py" id="stable_worldmodel.solver.random.RandomSolver.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/stable_worldmodel/solver/random.html#RandomSolver.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.solver.random.RandomSolver.__init__" title="Link to this definition">¶</a></dt>
+<dd><p>Initialize an unconfigured RandomSolver.</p>
+<p>Creates a solver instance that must be configured via <code class="docutils literal notranslate"><span class="pre">configure()</span></code>
+before calling <code class="docutils literal notranslate"><span class="pre">solve()</span></code>. This two-step initialization allows the
+policy framework to instantiate solvers before environment details
+are available.</p>
+<p class="rubric">Example</p>
+<p>Typical initialization pattern:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">solver</span> <span class="o">=</span> <span class="n">RandomSolver</span><span class="p">()</span>  <span class="c1"># Create</span>
+<span class="n">solver</span><span class="o">.</span><span class="n">configure</span><span class="p">(</span><span class="o">...</span><span class="p">)</span>  <span class="c1"># Configure with env specs</span>
+<span class="n">result</span> <span class="o">=</span> <span class="n">solver</span><span class="o">.</span><span class="n">solve</span><span class="p">({})</span>  <span class="c1"># Use</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="stable_worldmodel.solver.random.RandomSolver.action_dim">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">action_dim</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#stable_worldmodel.solver.random.RandomSolver.action_dim" title="Link to this definition">¶</a></dt>
+<dd><p>Total action dimensionality including action blocking.</p>
+<p>Equals base_action_dim x action_block. For example, if the environment
+has 3D continuous actions and action_block=5, this returns 15.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="stable_worldmodel.solver.random.RandomSolver.configure">
+<span class="sig-name descname"><span class="pre">configure</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">action_space</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_envs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">config</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="_modules/stable_worldmodel/solver/random.html#RandomSolver.configure"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.solver.random.RandomSolver.configure" title="Link to this definition">¶</a></dt>
+<dd><p>Configure the solver with environment and planning specifications.</p>
+<p>Must be called before <code class="docutils literal notranslate"><span class="pre">solve()</span></code> to set up the action space dimensions,
+number of parallel environments, and planning configuration (horizon,
+action blocking, etc.).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>action_space</strong> – Gymnasium action space defining valid actions.
+Must have a <code class="docutils literal notranslate"><span class="pre">sample()</span></code> method and <code class="docutils literal notranslate"><span class="pre">shape</span></code> attribute.
+Typically <code class="docutils literal notranslate"><span class="pre">env.action_space</span></code> or <code class="docutils literal notranslate"><span class="pre">env.single_action_space</span></code>.</p></li>
+<li><p><strong>n_envs</strong> (<em>int</em>) – Number of parallel environments to plan for.
+Action sequences will be generated for each environment
+independently. Must be ≥ 1.</p></li>
+<li><p><strong>config</strong> – <p>Planning configuration object (typically <code class="docutils literal notranslate"><span class="pre">swm.PlanConfig</span></code>)
+with required attributes:</p>
+<blockquote>
+<div><ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">horizon</span></code> (int): Number of planning steps. Each step
+corresponds to one action selection point.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">action_block</span></code> (int): Number of environment steps per
+planning step. Actions are repeated this many times.</p></li>
+</ul>
+</div></blockquote>
+</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>AttributeError</strong> – If config is missing required attributes.</p></li>
+<li><p><strong>ValueError</strong> – If n_envs &lt; 1 or horizon &lt; 1.</p></li>
+</ul>
+</dd>
+</dl>
+<p class="rubric">Example</p>
+<p>Configure for vectorized environment:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">stable_worldmodel</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">swm</span>
+
+<span class="n">world</span> <span class="o">=</span> <span class="n">swm</span><span class="o">.</span><span class="n">World</span><span class="p">(</span><span class="s2">&quot;swm/SimplePointMaze-v0&quot;</span><span class="p">,</span> <span class="n">num_envs</span><span class="o">=</span><span class="mi">8</span><span class="p">)</span>
+<span class="n">solver</span> <span class="o">=</span> <span class="n">swm</span><span class="o">.</span><span class="n">solver</span><span class="o">.</span><span class="n">RandomSolver</span><span class="p">()</span>
+
+<span class="n">config</span> <span class="o">=</span> <span class="n">swm</span><span class="o">.</span><span class="n">PlanConfig</span><span class="p">(</span><span class="n">horizon</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">receding_horizon</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">action_block</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">solver</span><span class="o">.</span><span class="n">configure</span><span class="p">(</span>
+    <span class="n">action_space</span><span class="o">=</span><span class="n">world</span><span class="o">.</span><span class="n">envs</span><span class="o">.</span><span class="n">single_action_space</span><span class="p">,</span>
+    <span class="n">n_envs</span><span class="o">=</span><span class="n">world</span><span class="o">.</span><span class="n">num_envs</span><span class="p">,</span>
+    <span class="n">config</span><span class="o">=</span><span class="n">config</span><span class="p">,</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The solver extracts <code class="docutils literal notranslate"><span class="pre">action_space.shape[1:]</span></code> as the base action
+dimensionality, assuming the first dimension is the batch/environment
+dimension in vectorized action spaces.</p>
+</div>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="stable_worldmodel.solver.random.RandomSolver.horizon">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">horizon</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#stable_worldmodel.solver.random.RandomSolver.horizon" title="Link to this definition">¶</a></dt>
+<dd><p>Planning horizon in steps (number of action selections).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="stable_worldmodel.solver.random.RandomSolver.n_envs">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">n_envs</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#stable_worldmodel.solver.random.RandomSolver.n_envs" title="Link to this definition">¶</a></dt>
+<dd><p>Number of parallel environments the solver plans for.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="stable_worldmodel.solver.random.RandomSolver.solve">
+<span class="sig-name descname"><span class="pre">solve</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">info_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">init_action</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">dict</span></span></span><a class="reference internal" href="_modules/stable_worldmodel/solver/random.html#RandomSolver.solve"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.solver.random.RandomSolver.solve" title="Link to this definition">¶</a></dt>
+<dd><p>Generate random action sequences for the planning horizon.</p>
+<p>Samples random actions uniformly from the action space to create action
+sequences for each environment. If partial action sequences are provided
+via <code class="docutils literal notranslate"><span class="pre">init_action</span></code>, only the remaining steps are sampled and concatenated.</p>
+<p>This method does not use <code class="docutils literal notranslate"><span class="pre">info_dict</span></code> since random sampling doesn’t
+require state information, but the parameter is kept for API consistency
+with optimization-based solvers that do use environment state.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>info_dict</strong> (<em>dict</em>) – Environment state information dictionary. Not used
+by RandomSolver but required for solver API consistency. Other
+solvers may use fields like ‘state’, ‘observation’, ‘latent’, etc.</p></li>
+<li><p><strong>init_action</strong> (<em>torch.Tensor</em><em>, </em><em>optional</em>) – Partial action sequence to
+warm-start planning. Shape: <code class="docutils literal notranslate"><span class="pre">(n_envs,</span> <span class="pre">k,</span> <span class="pre">action_dim)</span></code> where
+<code class="docutils literal notranslate"><span class="pre">k</span> <span class="pre">&lt;</span> <span class="pre">horizon</span></code>. The solver samples actions for the remaining
+<code class="docutils literal notranslate"><span class="pre">(horizon</span> <span class="pre">-</span> <span class="pre">k)</span></code> steps and concatenates them. Useful for
+receding horizon planning where previous plans are reused.
+Defaults to None (sample full horizon).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><dl class="simple">
+<dt>Dictionary with a single key:</dt><dd><ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">'actions'</span></code> (torch.Tensor): Random action sequences with shape
+<code class="docutils literal notranslate"><span class="pre">(n_envs,</span> <span class="pre">horizon,</span> <span class="pre">action_dim)</span></code>. Values are sampled uniformly
+from the action space bounds.</p></li>
+</ul>
+</dd>
+</dl>
+</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+<p class="rubric">Example</p>
+<p>Generate full random action sequence:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">solver</span><span class="o">.</span><span class="n">configure</span><span class="p">(</span><span class="n">action_space</span><span class="o">=</span><span class="n">env</span><span class="o">.</span><span class="n">action_space</span><span class="p">,</span> <span class="n">n_envs</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">config</span><span class="o">=</span><span class="n">config</span><span class="p">)</span>
+<span class="n">result</span> <span class="o">=</span> <span class="n">solver</span><span class="o">.</span><span class="n">solve</span><span class="p">(</span><span class="n">info_dict</span><span class="o">=</span><span class="p">{})</span>
+<span class="n">actions</span> <span class="o">=</span> <span class="n">result</span><span class="p">[</span><span class="s2">&quot;actions&quot;</span><span class="p">]</span>  <span class="c1"># Shape: (4, horizon, action_dim)</span>
+</pre></div>
+</div>
+<p>Warm-start with partial sequence (receding horizon planning):</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># First planning step: full horizon</span>
+<span class="n">result1</span> <span class="o">=</span> <span class="n">solver</span><span class="o">.</span><span class="n">solve</span><span class="p">({})</span>
+<span class="n">actions1</span> <span class="o">=</span> <span class="n">result1</span><span class="p">[</span><span class="s2">&quot;actions&quot;</span><span class="p">]</span>  <span class="c1"># (4, 10, action_dim)</span>
+
+<span class="c1"># Execute first 5 actions, then replan</span>
+<span class="n">executed</span> <span class="o">=</span> <span class="n">actions1</span><span class="p">[:,</span> <span class="p">:</span><span class="mi">5</span><span class="p">,</span> <span class="p">:]</span>
+<span class="n">remaining</span> <span class="o">=</span> <span class="n">actions1</span><span class="p">[:,</span> <span class="mi">5</span><span class="p">:,</span> <span class="p">:]</span>  <span class="c1"># Use as warm-start</span>
+
+<span class="c1"># Second planning step: extend remaining actions</span>
+<span class="n">result2</span> <span class="o">=</span> <span class="n">solver</span><span class="o">.</span><span class="n">solve</span><span class="p">({},</span> <span class="n">init_action</span><span class="o">=</span><span class="n">remaining</span><span class="p">)</span>
+<span class="n">actions2</span> <span class="o">=</span> <span class="n">result2</span><span class="p">[</span><span class="s2">&quot;actions&quot;</span><span class="p">]</span>  <span class="c1"># (4, 10, action_dim) - new last 5 steps</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The sampling uses <code class="docutils literal notranslate"><span class="pre">action_space.sample()</span></code> which respects the space’s
+bounds (e.g., Box low/high limits). For continuous spaces, this typically
+produces uniform distributions. For discrete spaces, it samples uniformly
+over valid discrete values.</p>
+</div>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-stable_worldmodel.solver.solver">
+<span id="stable-worldmodel-solver-solver-module"></span><h2>stable_worldmodel.solver.solver module<a class="headerlink" href="#module-stable_worldmodel.solver.solver" title="Link to this heading">¶</a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="stable_worldmodel.solver.solver.Costable">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">stable_worldmodel.solver.solver.</span></span><span class="sig-name descname"><span class="pre">Costable</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/stable_worldmodel/solver/solver.html#Costable"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.solver.solver.Costable" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Protocol</span></code></p>
+<p>Protocol for world model cost functions.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="stable_worldmodel.solver.solver.Costable.get_cost">
+<span class="sig-name descname"><span class="pre">get_cost</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">action_candidates</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tensor</span></span></span><a class="reference internal" href="_modules/stable_worldmodel/solver/solver.html#Costable.get_cost"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.solver.solver.Costable.get_cost" title="Link to this definition">¶</a></dt>
+<dd><p>Compute cost for given action candidates based on info dictionary.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="stable_worldmodel.solver.solver.Solver">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">stable_worldmodel.solver.solver.</span></span><span class="sig-name descname"><span class="pre">Solver</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/stable_worldmodel/solver/solver.html#Solver"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.solver.solver.Solver" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Protocol</span></code></p>
+<p>Protocol for planning solvers.</p>
+<dl class="py property">
+<dt class="sig sig-object py" id="stable_worldmodel.solver.solver.Solver.action_dim">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">action_dim</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#stable_worldmodel.solver.solver.Solver.action_dim" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="stable_worldmodel.solver.solver.Solver.configure">
+<span class="sig-name descname"><span class="pre">configure</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">action_space</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Space</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_envs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">config</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="_modules/stable_worldmodel/solver/solver.html#Solver.configure"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.solver.solver.Solver.configure" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="stable_worldmodel.solver.solver.Solver.horizon">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">horizon</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#stable_worldmodel.solver.solver.Solver.horizon" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="stable_worldmodel.solver.solver.Solver.n_envs">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">n_envs</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#stable_worldmodel.solver.solver.Solver.n_envs" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="stable_worldmodel.solver.solver.Solver.solve">
+<span class="sig-name descname"><span class="pre">solve</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">info_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">init_action</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tensor</span></span></span><a class="reference internal" href="_modules/stable_worldmodel/solver/solver.html#Solver.solve"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.solver.solver.Solver.solve" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-stable_worldmodel.solver">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-stable_worldmodel.solver" title="Link to this heading">¶</a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="stable_worldmodel.solver.CEMSolver">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">stable_worldmodel.solver.</span></span><span class="sig-name descname"><span class="pre">CEMSolver</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#stable_worldmodel.solver.solver.Costable" title="stable_worldmodel.solver.solver.Costable"><span class="pre">Costable</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_samples</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">var_scale</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_steps</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">topk</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">device</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'cpu'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/stable_worldmodel/solver/cem.html#CEMSolver"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.solver.CEMSolver" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Cross Entropy Method Solver.</p>
+<p>adapted from <a class="reference external" href="https://github.com/gaoyuezhou/dino_wm/blob/main/planning/cem.py">https://github.com/gaoyuezhou/dino_wm/blob/main/planning/cem.py</a></p>
+<dl class="py property">
+<dt class="sig sig-object py" id="stable_worldmodel.solver.CEMSolver.action_dim">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">action_dim</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#stable_worldmodel.solver.CEMSolver.action_dim" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="stable_worldmodel.solver.CEMSolver.configure">
+<span class="sig-name descname"><span class="pre">configure</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">action_space</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_envs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">config</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="_modules/stable_worldmodel/solver/cem.html#CEMSolver.configure"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.solver.CEMSolver.configure" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="stable_worldmodel.solver.CEMSolver.horizon">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">horizon</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#stable_worldmodel.solver.CEMSolver.horizon" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="stable_worldmodel.solver.CEMSolver.init_action_distrib">
+<span class="sig-name descname"><span class="pre">init_action_distrib</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">actions</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/stable_worldmodel/solver/cem.html#CEMSolver.init_action_distrib"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.solver.CEMSolver.init_action_distrib" title="Link to this definition">¶</a></dt>
+<dd><p>Initialize the action distribution params (mu, sigma) given the initial condition.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>actions</strong> (<em>n_envs</em><em>, </em><em>T</em><em>, </em><em>action_dim</em>) – initial actions, T &lt;= horizon</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="stable_worldmodel.solver.CEMSolver.n_envs">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">n_envs</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#stable_worldmodel.solver.CEMSolver.n_envs" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="stable_worldmodel.solver.CEMSolver.solve">
+<span class="sig-name descname"><span class="pre">solve</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">info_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">init_action</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/stable_worldmodel/solver/cem.html#CEMSolver.solve"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.solver.CEMSolver.solve" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="stable_worldmodel.solver.GDSolver">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">stable_worldmodel.solver.</span></span><span class="sig-name descname"><span class="pre">GDSolver</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#stable_worldmodel.solver.solver.Costable" title="stable_worldmodel.solver.solver.Costable"><span class="pre">Costable</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_steps</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">action_noise</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">device</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'cpu'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/stable_worldmodel/solver/gd.html#GDSolver"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.solver.GDSolver" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code></p>
+<p>Gradient Descent Solver.</p>
+<dl class="py property">
+<dt class="sig sig-object py" id="stable_worldmodel.solver.GDSolver.action_dim">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">action_dim</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#stable_worldmodel.solver.GDSolver.action_dim" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="stable_worldmodel.solver.GDSolver.configure">
+<span class="sig-name descname"><span class="pre">configure</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">action_space</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_envs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">config</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="_modules/stable_worldmodel/solver/gd.html#GDSolver.configure"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.solver.GDSolver.configure" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="stable_worldmodel.solver.GDSolver.horizon">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">horizon</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#stable_worldmodel.solver.GDSolver.horizon" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="stable_worldmodel.solver.GDSolver.init_action">
+<span class="sig-name descname"><span class="pre">init_action</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">actions</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/stable_worldmodel/solver/gd.html#GDSolver.init_action"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.solver.GDSolver.init_action" title="Link to this definition">¶</a></dt>
+<dd><p>Initialize the action tensor for the solver.</p>
+<p>set self.init - initial action sequences (n_envs, horizon, action_dim)</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="stable_worldmodel.solver.GDSolver.n_envs">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">n_envs</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#stable_worldmodel.solver.GDSolver.n_envs" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="stable_worldmodel.solver.GDSolver.solve">
+<span class="sig-name descname"><span class="pre">solve</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">info_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">init_action</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tensor</span></span></span><a class="reference internal" href="_modules/stable_worldmodel/solver/gd.html#GDSolver.solve"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.solver.GDSolver.solve" title="Link to this definition">¶</a></dt>
+<dd><p>Solve the planning optimization problem using gradient descent.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="stable_worldmodel.solver.RandomSolver">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">stable_worldmodel.solver.</span></span><span class="sig-name descname"><span class="pre">RandomSolver</span></span><a class="reference internal" href="_modules/stable_worldmodel/solver/random.html#RandomSolver"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.solver.RandomSolver" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Random action sampling solver for model-based planning.</p>
+<p>This solver generates action sequences by uniformly sampling from the action
+space without any optimization or cost evaluation. Unlike optimization-based
+solvers (CEM, GD, MPPI), it does not require a world model or cost function,
+making it extremely fast and simple to use.</p>
+<p>The solver is primarily intended as a baseline for evaluating the performance
+gains of model-based planning. Random action selection typically performs
+poorly on complex tasks but can be surprisingly effective in simple or
+stochastic environments.</p>
+<dl class="simple">
+<dt>Key features:</dt><dd><ul class="simple">
+<li><p><strong>Zero computation cost</strong>: No forward passes through world models</p></li>
+<li><p><strong>Parallel sampling</strong>: Generates actions for multiple environments simultaneously</p></li>
+<li><p><strong>Action blocking</strong>: Supports repeating actions for temporal abstraction</p></li>
+<li><p><strong>Warm-starting</strong>: Can extend partial action sequences</p></li>
+<li><p><strong>API compatible</strong>: Works with WorldModelPolicy and other solver-based policies</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Variables<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>n_envs</strong> (<em>int</em>) – Number of parallel environments being planned for.</p></li>
+<li><p><strong>action_dim</strong> (<em>int</em>) – Total action dimensionality (base_dim × action_block).</p></li>
+<li><p><strong>horizon</strong> (<em>int</em>) – Number of planning steps in the action sequence.</p></li>
+</ul>
+</dd>
+</dl>
+<p class="rubric">Example</p>
+<p>Using with stable-worldmodel’s World and Policy classes:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">stable_worldmodel</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">swm</span>
+
+<span class="c1"># Create environment</span>
+<span class="n">world</span> <span class="o">=</span> <span class="n">swm</span><span class="o">.</span><span class="n">World</span><span class="p">(</span><span class="s2">&quot;swm/SimplePointMaze-v0&quot;</span><span class="p">,</span> <span class="n">num_envs</span><span class="o">=</span><span class="mi">8</span><span class="p">)</span>
+
+<span class="c1"># Setup random solver policy</span>
+<span class="n">config</span> <span class="o">=</span> <span class="n">swm</span><span class="o">.</span><span class="n">PlanConfig</span><span class="p">(</span>
+    <span class="n">horizon</span><span class="o">=</span><span class="mi">15</span><span class="p">,</span>  <span class="c1"># Plan 15 steps ahead</span>
+    <span class="n">receding_horizon</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>  <span class="c1"># Replan every 5 steps</span>
+    <span class="n">action_block</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>  <span class="c1"># No action repetition</span>
+<span class="p">)</span>
+<span class="n">solver</span> <span class="o">=</span> <span class="n">swm</span><span class="o">.</span><span class="n">solver</span><span class="o">.</span><span class="n">RandomSolver</span><span class="p">()</span>
+<span class="n">policy</span> <span class="o">=</span> <span class="n">swm</span><span class="o">.</span><span class="n">policy</span><span class="o">.</span><span class="n">WorldModelPolicy</span><span class="p">(</span><span class="n">solver</span><span class="o">=</span><span class="n">solver</span><span class="p">,</span> <span class="n">config</span><span class="o">=</span><span class="n">config</span><span class="p">)</span>
+
+<span class="c1"># Evaluate</span>
+<span class="n">world</span><span class="o">.</span><span class="n">set_policy</span><span class="p">(</span><span class="n">policy</span><span class="p">)</span>
+<span class="n">results</span> <span class="o">=</span> <span class="n">world</span><span class="o">.</span><span class="n">evaluate</span><span class="p">(</span><span class="n">episodes</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="mi">42</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Baseline reward: </span><span class="si">{</span><span class="n">results</span><span class="p">[</span><span class="s1">&#39;mean_reward&#39;</span><span class="p">]</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Standalone usage for custom planning loops:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">stable_worldmodel.solver</span><span class="w"> </span><span class="kn">import</span> <span class="n">RandomSolver</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">gymnasium</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">gym</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
+
+<span class="n">env</span> <span class="o">=</span> <span class="n">gym</span><span class="o">.</span><span class="n">make</span><span class="p">(</span><span class="s2">&quot;Hopper-v4&quot;</span><span class="p">,</span> <span class="n">render_mode</span><span class="o">=</span><span class="s2">&quot;rgb_array&quot;</span><span class="p">)</span>
+<span class="n">solver</span> <span class="o">=</span> <span class="n">RandomSolver</span><span class="p">()</span>
+
+<span class="c1"># Configure</span>
+<span class="n">config</span> <span class="o">=</span> <span class="n">swm</span><span class="o">.</span><span class="n">PlanConfig</span><span class="p">(</span><span class="n">horizon</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span> <span class="n">receding_horizon</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">action_block</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+<span class="n">solver</span><span class="o">.</span><span class="n">configure</span><span class="p">(</span><span class="n">action_space</span><span class="o">=</span><span class="n">env</span><span class="o">.</span><span class="n">action_space</span><span class="p">,</span> <span class="n">n_envs</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">config</span><span class="o">=</span><span class="n">config</span><span class="p">)</span>
+
+<span class="c1"># Generate and execute actions</span>
+<span class="n">obs</span><span class="p">,</span> <span class="n">info</span> <span class="o">=</span> <span class="n">env</span><span class="o">.</span><span class="n">reset</span><span class="p">()</span>
+<span class="n">result</span> <span class="o">=</span> <span class="n">solver</span><span class="o">.</span><span class="n">solve</span><span class="p">(</span><span class="n">info_dict</span><span class="o">=</span><span class="p">{})</span>
+<span class="n">actions</span> <span class="o">=</span> <span class="n">result</span><span class="p">[</span><span class="s2">&quot;actions&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>  <span class="c1"># Get first env&#39;s actions</span>
+
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">config</span><span class="o">.</span><span class="n">receding_horizon</span><span class="p">):</span>
+    <span class="n">action</span> <span class="o">=</span> <span class="n">actions</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">numpy</span><span class="p">()</span>
+    <span class="n">obs</span><span class="p">,</span> <span class="n">reward</span><span class="p">,</span> <span class="n">done</span><span class="p">,</span> <span class="n">truncated</span><span class="p">,</span> <span class="n">info</span> <span class="o">=</span> <span class="n">env</span><span class="o">.</span><span class="n">step</span><span class="p">(</span><span class="n">action</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">done</span> <span class="ow">or</span> <span class="n">truncated</span><span class="p">:</span>
+        <span class="k">break</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>This solver ignores the <code class="docutils literal notranslate"><span class="pre">info_dict</span></code> parameter in <code class="docutils literal notranslate"><span class="pre">solve()</span></code> since it
+doesn’t use state information or world models. The parameter is kept for
+API consistency with optimization-based solvers.</p>
+</div>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#stable_worldmodel.solver.CEMSolver" title="stable_worldmodel.solver.CEMSolver"><code class="xref py py-class docutils literal notranslate"><span class="pre">CEMSolver</span></code></a>: Cross-Entropy Method optimizer</p></li>
+<li><p><a class="reference internal" href="#stable_worldmodel.solver.GDSolver" title="stable_worldmodel.solver.GDSolver"><code class="xref py py-class docutils literal notranslate"><span class="pre">GDSolver</span></code></a>: Gradient descent optimizer</p></li>
+<li><p><code class="xref py py-class docutils literal notranslate"><span class="pre">MPPISolver</span></code>: Model Predictive Path Integral optimizer</p></li>
+</ul>
+</div>
+<dl class="py method">
+<dt class="sig sig-object py" id="stable_worldmodel.solver.RandomSolver.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/stable_worldmodel/solver/random.html#RandomSolver.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.solver.RandomSolver.__init__" title="Link to this definition">¶</a></dt>
+<dd><p>Initialize an unconfigured RandomSolver.</p>
+<p>Creates a solver instance that must be configured via <code class="docutils literal notranslate"><span class="pre">configure()</span></code>
+before calling <code class="docutils literal notranslate"><span class="pre">solve()</span></code>. This two-step initialization allows the
+policy framework to instantiate solvers before environment details
+are available.</p>
+<p class="rubric">Example</p>
+<p>Typical initialization pattern:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">solver</span> <span class="o">=</span> <span class="n">RandomSolver</span><span class="p">()</span>  <span class="c1"># Create</span>
+<span class="n">solver</span><span class="o">.</span><span class="n">configure</span><span class="p">(</span><span class="o">...</span><span class="p">)</span>  <span class="c1"># Configure with env specs</span>
+<span class="n">result</span> <span class="o">=</span> <span class="n">solver</span><span class="o">.</span><span class="n">solve</span><span class="p">({})</span>  <span class="c1"># Use</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="stable_worldmodel.solver.RandomSolver.action_dim">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">action_dim</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#stable_worldmodel.solver.RandomSolver.action_dim" title="Link to this definition">¶</a></dt>
+<dd><p>Total action dimensionality including action blocking.</p>
+<p>Equals base_action_dim x action_block. For example, if the environment
+has 3D continuous actions and action_block=5, this returns 15.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="stable_worldmodel.solver.RandomSolver.configure">
+<span class="sig-name descname"><span class="pre">configure</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">action_space</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_envs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">config</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="_modules/stable_worldmodel/solver/random.html#RandomSolver.configure"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.solver.RandomSolver.configure" title="Link to this definition">¶</a></dt>
+<dd><p>Configure the solver with environment and planning specifications.</p>
+<p>Must be called before <code class="docutils literal notranslate"><span class="pre">solve()</span></code> to set up the action space dimensions,
+number of parallel environments, and planning configuration (horizon,
+action blocking, etc.).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>action_space</strong> – Gymnasium action space defining valid actions.
+Must have a <code class="docutils literal notranslate"><span class="pre">sample()</span></code> method and <code class="docutils literal notranslate"><span class="pre">shape</span></code> attribute.
+Typically <code class="docutils literal notranslate"><span class="pre">env.action_space</span></code> or <code class="docutils literal notranslate"><span class="pre">env.single_action_space</span></code>.</p></li>
+<li><p><strong>n_envs</strong> (<em>int</em>) – Number of parallel environments to plan for.
+Action sequences will be generated for each environment
+independently. Must be ≥ 1.</p></li>
+<li><p><strong>config</strong> – <p>Planning configuration object (typically <code class="docutils literal notranslate"><span class="pre">swm.PlanConfig</span></code>)
+with required attributes:</p>
+<blockquote>
+<div><ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">horizon</span></code> (int): Number of planning steps. Each step
+corresponds to one action selection point.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">action_block</span></code> (int): Number of environment steps per
+planning step. Actions are repeated this many times.</p></li>
+</ul>
+</div></blockquote>
+</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>AttributeError</strong> – If config is missing required attributes.</p></li>
+<li><p><strong>ValueError</strong> – If n_envs &lt; 1 or horizon &lt; 1.</p></li>
+</ul>
+</dd>
+</dl>
+<p class="rubric">Example</p>
+<p>Configure for vectorized environment:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">stable_worldmodel</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">swm</span>
+
+<span class="n">world</span> <span class="o">=</span> <span class="n">swm</span><span class="o">.</span><span class="n">World</span><span class="p">(</span><span class="s2">&quot;swm/SimplePointMaze-v0&quot;</span><span class="p">,</span> <span class="n">num_envs</span><span class="o">=</span><span class="mi">8</span><span class="p">)</span>
+<span class="n">solver</span> <span class="o">=</span> <span class="n">swm</span><span class="o">.</span><span class="n">solver</span><span class="o">.</span><span class="n">RandomSolver</span><span class="p">()</span>
+
+<span class="n">config</span> <span class="o">=</span> <span class="n">swm</span><span class="o">.</span><span class="n">PlanConfig</span><span class="p">(</span><span class="n">horizon</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">receding_horizon</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">action_block</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">solver</span><span class="o">.</span><span class="n">configure</span><span class="p">(</span>
+    <span class="n">action_space</span><span class="o">=</span><span class="n">world</span><span class="o">.</span><span class="n">envs</span><span class="o">.</span><span class="n">single_action_space</span><span class="p">,</span>
+    <span class="n">n_envs</span><span class="o">=</span><span class="n">world</span><span class="o">.</span><span class="n">num_envs</span><span class="p">,</span>
+    <span class="n">config</span><span class="o">=</span><span class="n">config</span><span class="p">,</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The solver extracts <code class="docutils literal notranslate"><span class="pre">action_space.shape[1:]</span></code> as the base action
+dimensionality, assuming the first dimension is the batch/environment
+dimension in vectorized action spaces.</p>
+</div>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="stable_worldmodel.solver.RandomSolver.horizon">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">horizon</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#stable_worldmodel.solver.RandomSolver.horizon" title="Link to this definition">¶</a></dt>
+<dd><p>Planning horizon in steps (number of action selections).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="stable_worldmodel.solver.RandomSolver.n_envs">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">n_envs</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#stable_worldmodel.solver.RandomSolver.n_envs" title="Link to this definition">¶</a></dt>
+<dd><p>Number of parallel environments the solver plans for.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="stable_worldmodel.solver.RandomSolver.solve">
+<span class="sig-name descname"><span class="pre">solve</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">info_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">init_action</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">dict</span></span></span><a class="reference internal" href="_modules/stable_worldmodel/solver/random.html#RandomSolver.solve"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.solver.RandomSolver.solve" title="Link to this definition">¶</a></dt>
+<dd><p>Generate random action sequences for the planning horizon.</p>
+<p>Samples random actions uniformly from the action space to create action
+sequences for each environment. If partial action sequences are provided
+via <code class="docutils literal notranslate"><span class="pre">init_action</span></code>, only the remaining steps are sampled and concatenated.</p>
+<p>This method does not use <code class="docutils literal notranslate"><span class="pre">info_dict</span></code> since random sampling doesn’t
+require state information, but the parameter is kept for API consistency
+with optimization-based solvers that do use environment state.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>info_dict</strong> (<em>dict</em>) – Environment state information dictionary. Not used
+by RandomSolver but required for solver API consistency. Other
+solvers may use fields like ‘state’, ‘observation’, ‘latent’, etc.</p></li>
+<li><p><strong>init_action</strong> (<em>torch.Tensor</em><em>, </em><em>optional</em>) – Partial action sequence to
+warm-start planning. Shape: <code class="docutils literal notranslate"><span class="pre">(n_envs,</span> <span class="pre">k,</span> <span class="pre">action_dim)</span></code> where
+<code class="docutils literal notranslate"><span class="pre">k</span> <span class="pre">&lt;</span> <span class="pre">horizon</span></code>. The solver samples actions for the remaining
+<code class="docutils literal notranslate"><span class="pre">(horizon</span> <span class="pre">-</span> <span class="pre">k)</span></code> steps and concatenates them. Useful for
+receding horizon planning where previous plans are reused.
+Defaults to None (sample full horizon).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><dl class="simple">
+<dt>Dictionary with a single key:</dt><dd><ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">'actions'</span></code> (torch.Tensor): Random action sequences with shape
+<code class="docutils literal notranslate"><span class="pre">(n_envs,</span> <span class="pre">horizon,</span> <span class="pre">action_dim)</span></code>. Values are sampled uniformly
+from the action space bounds.</p></li>
+</ul>
+</dd>
+</dl>
+</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+<p class="rubric">Example</p>
+<p>Generate full random action sequence:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">solver</span><span class="o">.</span><span class="n">configure</span><span class="p">(</span><span class="n">action_space</span><span class="o">=</span><span class="n">env</span><span class="o">.</span><span class="n">action_space</span><span class="p">,</span> <span class="n">n_envs</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">config</span><span class="o">=</span><span class="n">config</span><span class="p">)</span>
+<span class="n">result</span> <span class="o">=</span> <span class="n">solver</span><span class="o">.</span><span class="n">solve</span><span class="p">(</span><span class="n">info_dict</span><span class="o">=</span><span class="p">{})</span>
+<span class="n">actions</span> <span class="o">=</span> <span class="n">result</span><span class="p">[</span><span class="s2">&quot;actions&quot;</span><span class="p">]</span>  <span class="c1"># Shape: (4, horizon, action_dim)</span>
+</pre></div>
+</div>
+<p>Warm-start with partial sequence (receding horizon planning):</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># First planning step: full horizon</span>
+<span class="n">result1</span> <span class="o">=</span> <span class="n">solver</span><span class="o">.</span><span class="n">solve</span><span class="p">({})</span>
+<span class="n">actions1</span> <span class="o">=</span> <span class="n">result1</span><span class="p">[</span><span class="s2">&quot;actions&quot;</span><span class="p">]</span>  <span class="c1"># (4, 10, action_dim)</span>
+
+<span class="c1"># Execute first 5 actions, then replan</span>
+<span class="n">executed</span> <span class="o">=</span> <span class="n">actions1</span><span class="p">[:,</span> <span class="p">:</span><span class="mi">5</span><span class="p">,</span> <span class="p">:]</span>
+<span class="n">remaining</span> <span class="o">=</span> <span class="n">actions1</span><span class="p">[:,</span> <span class="mi">5</span><span class="p">:,</span> <span class="p">:]</span>  <span class="c1"># Use as warm-start</span>
+
+<span class="c1"># Second planning step: extend remaining actions</span>
+<span class="n">result2</span> <span class="o">=</span> <span class="n">solver</span><span class="o">.</span><span class="n">solve</span><span class="p">({},</span> <span class="n">init_action</span><span class="o">=</span><span class="n">remaining</span><span class="p">)</span>
+<span class="n">actions2</span> <span class="o">=</span> <span class="n">result2</span><span class="p">[</span><span class="s2">&quot;actions&quot;</span><span class="p">]</span>  <span class="c1"># (4, 10, action_dim) - new last 5 steps</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The sampling uses <code class="docutils literal notranslate"><span class="pre">action_space.sample()</span></code> which respects the space’s
+bounds (e.g., Box low/high limits). For continuous spaces, this typically
+produces uniform distributions. For discrete spaces, it samples uniformly
+over valid discrete values.</p>
+</div>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="stable_worldmodel.solver.Solver">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">stable_worldmodel.solver.</span></span><span class="sig-name descname"><span class="pre">Solver</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/stable_worldmodel/solver/solver.html#Solver"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.solver.Solver" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Protocol</span></code></p>
+<p>Protocol for planning solvers.</p>
+<dl class="py property">
+<dt class="sig sig-object py" id="stable_worldmodel.solver.Solver.action_dim">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">action_dim</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#stable_worldmodel.solver.Solver.action_dim" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="stable_worldmodel.solver.Solver.configure">
+<span class="sig-name descname"><span class="pre">configure</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">action_space</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Space</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_envs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">config</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="_modules/stable_worldmodel/solver/solver.html#Solver.configure"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.solver.Solver.configure" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="stable_worldmodel.solver.Solver.horizon">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">horizon</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#stable_worldmodel.solver.Solver.horizon" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="stable_worldmodel.solver.Solver.n_envs">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">n_envs</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#stable_worldmodel.solver.Solver.n_envs" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="stable_worldmodel.solver.Solver.solve">
+<span class="sig-name descname"><span class="pre">solve</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">info_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">init_action</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tensor</span></span></span><a class="reference internal" href="_modules/stable_worldmodel/solver/solver.html#Solver.solve"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.solver.Solver.solve" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</section>
+</section>
+
+        </article>
+      </div>
+      <footer>
+        
+        <div class="related-pages">
+          
+          
+        </div>
+        <div class="bottom-of-page">
+          <div class="left-details">
+            <div class="copyright">
+                Copyright &#169; 2025
+            </div>
+            Made with <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
+            
+            <a href="https://github.com/pradyunsg/furo">Furo</a>
+            
+          </div>
+          <div class="right-details">
+            <div class="icons">
+              <a class="muted-link fa-brands fa-solid fa-discord" href="https://discord.gg/8M6hT39X" aria-label="Discord"></a>
+              <a class="muted-link fa-brands fa-solid fa-github" href="https://github.com/randall-lab/stable-worldmodel" aria-label="GitHub"></a>
+              
+            </div>
+          </div>
+        </div>
+        
+      </footer>
+    </div>
+    <aside class="toc-drawer">
+      
+      
+      <div class="toc-sticky toc-scroll">
+        <div class="toc-title-container">
+          <span class="toc-title">
+            On this page
+          </span>
+        </div>
+        <div class="toc-tree-container">
+          <div class="toc-tree">
+            <ul>
+<li><a class="reference internal" href="#">stable_worldmodel.solver package</a><ul>
+<li><a class="reference internal" href="#submodules">Submodules</a></li>
+<li><a class="reference internal" href="#module-stable_worldmodel.solver.cem">stable_worldmodel.solver.cem module</a><ul>
+<li><a class="reference internal" href="#stable_worldmodel.solver.cem.CEMSolver"><code class="docutils literal notranslate"><span class="pre">CEMSolver</span></code></a><ul>
+<li><a class="reference internal" href="#stable_worldmodel.solver.cem.CEMSolver.action_dim"><code class="docutils literal notranslate"><span class="pre">CEMSolver.action_dim</span></code></a></li>
+<li><a class="reference internal" href="#stable_worldmodel.solver.cem.CEMSolver.configure"><code class="docutils literal notranslate"><span class="pre">CEMSolver.configure()</span></code></a></li>
+<li><a class="reference internal" href="#stable_worldmodel.solver.cem.CEMSolver.horizon"><code class="docutils literal notranslate"><span class="pre">CEMSolver.horizon</span></code></a></li>
+<li><a class="reference internal" href="#stable_worldmodel.solver.cem.CEMSolver.init_action_distrib"><code class="docutils literal notranslate"><span class="pre">CEMSolver.init_action_distrib()</span></code></a></li>
+<li><a class="reference internal" href="#stable_worldmodel.solver.cem.CEMSolver.n_envs"><code class="docutils literal notranslate"><span class="pre">CEMSolver.n_envs</span></code></a></li>
+<li><a class="reference internal" href="#stable_worldmodel.solver.cem.CEMSolver.solve"><code class="docutils literal notranslate"><span class="pre">CEMSolver.solve()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a class="reference internal" href="#module-stable_worldmodel.solver.gd">stable_worldmodel.solver.gd module</a><ul>
+<li><a class="reference internal" href="#stable_worldmodel.solver.gd.GDSolver"><code class="docutils literal notranslate"><span class="pre">GDSolver</span></code></a><ul>
+<li><a class="reference internal" href="#stable_worldmodel.solver.gd.GDSolver.action_dim"><code class="docutils literal notranslate"><span class="pre">GDSolver.action_dim</span></code></a></li>
+<li><a class="reference internal" href="#stable_worldmodel.solver.gd.GDSolver.configure"><code class="docutils literal notranslate"><span class="pre">GDSolver.configure()</span></code></a></li>
+<li><a class="reference internal" href="#stable_worldmodel.solver.gd.GDSolver.horizon"><code class="docutils literal notranslate"><span class="pre">GDSolver.horizon</span></code></a></li>
+<li><a class="reference internal" href="#stable_worldmodel.solver.gd.GDSolver.init_action"><code class="docutils literal notranslate"><span class="pre">GDSolver.init_action()</span></code></a></li>
+<li><a class="reference internal" href="#stable_worldmodel.solver.gd.GDSolver.n_envs"><code class="docutils literal notranslate"><span class="pre">GDSolver.n_envs</span></code></a></li>
+<li><a class="reference internal" href="#stable_worldmodel.solver.gd.GDSolver.solve"><code class="docutils literal notranslate"><span class="pre">GDSolver.solve()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a class="reference internal" href="#stable-worldmodel-solver-mppi-module">stable_worldmodel.solver.mppi module</a></li>
+<li><a class="reference internal" href="#module-stable_worldmodel.solver.random">stable_worldmodel.solver.random module</a><ul>
+<li><a class="reference internal" href="#stable_worldmodel.solver.random.RandomSolver"><code class="docutils literal notranslate"><span class="pre">RandomSolver</span></code></a><ul>
+<li><a class="reference internal" href="#stable_worldmodel.solver.random.RandomSolver.__init__"><code class="docutils literal notranslate"><span class="pre">RandomSolver.__init__()</span></code></a></li>
+<li><a class="reference internal" href="#stable_worldmodel.solver.random.RandomSolver.action_dim"><code class="docutils literal notranslate"><span class="pre">RandomSolver.action_dim</span></code></a></li>
+<li><a class="reference internal" href="#stable_worldmodel.solver.random.RandomSolver.configure"><code class="docutils literal notranslate"><span class="pre">RandomSolver.configure()</span></code></a></li>
+<li><a class="reference internal" href="#stable_worldmodel.solver.random.RandomSolver.horizon"><code class="docutils literal notranslate"><span class="pre">RandomSolver.horizon</span></code></a></li>
+<li><a class="reference internal" href="#stable_worldmodel.solver.random.RandomSolver.n_envs"><code class="docutils literal notranslate"><span class="pre">RandomSolver.n_envs</span></code></a></li>
+<li><a class="reference internal" href="#stable_worldmodel.solver.random.RandomSolver.solve"><code class="docutils literal notranslate"><span class="pre">RandomSolver.solve()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a class="reference internal" href="#module-stable_worldmodel.solver.solver">stable_worldmodel.solver.solver module</a><ul>
+<li><a class="reference internal" href="#stable_worldmodel.solver.solver.Costable"><code class="docutils literal notranslate"><span class="pre">Costable</span></code></a><ul>
+<li><a class="reference internal" href="#stable_worldmodel.solver.solver.Costable.get_cost"><code class="docutils literal notranslate"><span class="pre">Costable.get_cost()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#stable_worldmodel.solver.solver.Solver"><code class="docutils literal notranslate"><span class="pre">Solver</span></code></a><ul>
+<li><a class="reference internal" href="#stable_worldmodel.solver.solver.Solver.action_dim"><code class="docutils literal notranslate"><span class="pre">Solver.action_dim</span></code></a></li>
+<li><a class="reference internal" href="#stable_worldmodel.solver.solver.Solver.configure"><code class="docutils literal notranslate"><span class="pre">Solver.configure()</span></code></a></li>
+<li><a class="reference internal" href="#stable_worldmodel.solver.solver.Solver.horizon"><code class="docutils literal notranslate"><span class="pre">Solver.horizon</span></code></a></li>
+<li><a class="reference internal" href="#stable_worldmodel.solver.solver.Solver.n_envs"><code class="docutils literal notranslate"><span class="pre">Solver.n_envs</span></code></a></li>
+<li><a class="reference internal" href="#stable_worldmodel.solver.solver.Solver.solve"><code class="docutils literal notranslate"><span class="pre">Solver.solve()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a class="reference internal" href="#module-stable_worldmodel.solver">Module contents</a><ul>
+<li><a class="reference internal" href="#stable_worldmodel.solver.CEMSolver"><code class="docutils literal notranslate"><span class="pre">CEMSolver</span></code></a><ul>
+<li><a class="reference internal" href="#stable_worldmodel.solver.CEMSolver.action_dim"><code class="docutils literal notranslate"><span class="pre">CEMSolver.action_dim</span></code></a></li>
+<li><a class="reference internal" href="#stable_worldmodel.solver.CEMSolver.configure"><code class="docutils literal notranslate"><span class="pre">CEMSolver.configure()</span></code></a></li>
+<li><a class="reference internal" href="#stable_worldmodel.solver.CEMSolver.horizon"><code class="docutils literal notranslate"><span class="pre">CEMSolver.horizon</span></code></a></li>
+<li><a class="reference internal" href="#stable_worldmodel.solver.CEMSolver.init_action_distrib"><code class="docutils literal notranslate"><span class="pre">CEMSolver.init_action_distrib()</span></code></a></li>
+<li><a class="reference internal" href="#stable_worldmodel.solver.CEMSolver.n_envs"><code class="docutils literal notranslate"><span class="pre">CEMSolver.n_envs</span></code></a></li>
+<li><a class="reference internal" href="#stable_worldmodel.solver.CEMSolver.solve"><code class="docutils literal notranslate"><span class="pre">CEMSolver.solve()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#stable_worldmodel.solver.GDSolver"><code class="docutils literal notranslate"><span class="pre">GDSolver</span></code></a><ul>
+<li><a class="reference internal" href="#stable_worldmodel.solver.GDSolver.action_dim"><code class="docutils literal notranslate"><span class="pre">GDSolver.action_dim</span></code></a></li>
+<li><a class="reference internal" href="#stable_worldmodel.solver.GDSolver.configure"><code class="docutils literal notranslate"><span class="pre">GDSolver.configure()</span></code></a></li>
+<li><a class="reference internal" href="#stable_worldmodel.solver.GDSolver.horizon"><code class="docutils literal notranslate"><span class="pre">GDSolver.horizon</span></code></a></li>
+<li><a class="reference internal" href="#stable_worldmodel.solver.GDSolver.init_action"><code class="docutils literal notranslate"><span class="pre">GDSolver.init_action()</span></code></a></li>
+<li><a class="reference internal" href="#stable_worldmodel.solver.GDSolver.n_envs"><code class="docutils literal notranslate"><span class="pre">GDSolver.n_envs</span></code></a></li>
+<li><a class="reference internal" href="#stable_worldmodel.solver.GDSolver.solve"><code class="docutils literal notranslate"><span class="pre">GDSolver.solve()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#stable_worldmodel.solver.RandomSolver"><code class="docutils literal notranslate"><span class="pre">RandomSolver</span></code></a><ul>
+<li><a class="reference internal" href="#stable_worldmodel.solver.RandomSolver.__init__"><code class="docutils literal notranslate"><span class="pre">RandomSolver.__init__()</span></code></a></li>
+<li><a class="reference internal" href="#stable_worldmodel.solver.RandomSolver.action_dim"><code class="docutils literal notranslate"><span class="pre">RandomSolver.action_dim</span></code></a></li>
+<li><a class="reference internal" href="#stable_worldmodel.solver.RandomSolver.configure"><code class="docutils literal notranslate"><span class="pre">RandomSolver.configure()</span></code></a></li>
+<li><a class="reference internal" href="#stable_worldmodel.solver.RandomSolver.horizon"><code class="docutils literal notranslate"><span class="pre">RandomSolver.horizon</span></code></a></li>
+<li><a class="reference internal" href="#stable_worldmodel.solver.RandomSolver.n_envs"><code class="docutils literal notranslate"><span class="pre">RandomSolver.n_envs</span></code></a></li>
+<li><a class="reference internal" href="#stable_worldmodel.solver.RandomSolver.solve"><code class="docutils literal notranslate"><span class="pre">RandomSolver.solve()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#stable_worldmodel.solver.Solver"><code class="docutils literal notranslate"><span class="pre">Solver</span></code></a><ul>
+<li><a class="reference internal" href="#stable_worldmodel.solver.Solver.action_dim"><code class="docutils literal notranslate"><span class="pre">Solver.action_dim</span></code></a></li>
+<li><a class="reference internal" href="#stable_worldmodel.solver.Solver.configure"><code class="docutils literal notranslate"><span class="pre">Solver.configure()</span></code></a></li>
+<li><a class="reference internal" href="#stable_worldmodel.solver.Solver.horizon"><code class="docutils literal notranslate"><span class="pre">Solver.horizon</span></code></a></li>
+<li><a class="reference internal" href="#stable_worldmodel.solver.Solver.n_envs"><code class="docutils literal notranslate"><span class="pre">Solver.n_envs</span></code></a></li>
+<li><a class="reference internal" href="#stable_worldmodel.solver.Solver.solve"><code class="docutils literal notranslate"><span class="pre">Solver.solve()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+          </div>
+        </div>
+      </div>
+      
+      
+    </aside>
+  </div>
+</div><script src="_static/documentation_options.js?v=c2d0de4b"></script>
+    <script src="_static/doctools.js?v=9bcbadda"></script>
+    <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/scripts/furo.js?v=46bd48cc"></script>
+    </body>
+</html>

@@ -1,0 +1,933 @@
+<!doctype html>
+<html class="no-js" lang="en" data-content_root="../../">
+  <head><meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="../../genindex.html"><link rel="search" title="Search" href="../../search.html">
+        <link rel="prefetch" href="../../_static/img/logo-light.svg" as="image">
+        <link rel="prefetch" href="../../_static/img/logo-dark.svg" as="image">
+
+    <link rel="shortcut icon" href="../../_static/favicon.ico"><!-- Generated with Sphinx 8.2.3 and Furo 2025.09.25 -->
+        <title>stable_worldmodel.world - stable-worldmodel Documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=8f2a1f02" />
+    <link rel="stylesheet" type="text/css" href="../../_static/styles/furo.css?v=580074bf" />
+    <link rel="stylesheet" type="text/css" href="../../_static/styles/furo-extensions.css?v=8dab3a3b" />
+    <link rel="stylesheet" type="text/css" href="../../_static/css/custom.css?v=33d9fa98" />
+    <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/fontawesome.min.css" />
+    <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/solid.min.css" />
+    <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/brands.min.css" />
+    
+    
+
+
+<style>
+  body {
+    --color-code-background: #f8f8f8;
+  --color-code-foreground: black;
+  --color-brand-primary: #202123;
+  --color-brand-content: #296cde;
+  --color-inline-code-background: #f8f8f8;
+  --color-brand-visited: #2757dd;
+  
+  }
+  @media not print {
+    body[data-theme="dark"] {
+      --color-code-background: #272822;
+  --color-code-foreground: #f8f8f2;
+  
+    }
+    @media (prefers-color-scheme: dark) {
+      body:not([data-theme="light"]) {
+        --color-code-background: #272822;
+  --color-code-foreground: #f8f8f2;
+  
+      }
+    }
+  }
+</style></head>
+  <body>
+    
+    <script>
+      document.body.dataset.theme = localStorage.getItem("theme") || "auto";
+    </script>
+    
+
+<svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+  <symbol id="svg-toc" viewBox="0 0 24 24">
+    <title>Contents</title>
+    <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 1024 1024">
+      <path d="M408 442h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8zm-8 204c0 4.4 3.6 8 8 8h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56zm504-486H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zm0 632H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zM115.4 518.9L271.7 642c5.8 4.6 14.4.5 14.4-6.9V388.9c0-7.4-8.5-11.5-14.4-6.9L115.4 505.1a8.74 8.74 0 0 0 0 13.8z"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-menu" viewBox="0 0 24 24">
+    <title>Menu</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-menu">
+      <line x1="3" y1="12" x2="21" y2="12"></line>
+      <line x1="3" y1="6" x2="21" y2="6"></line>
+      <line x1="3" y1="18" x2="21" y2="18"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-arrow-right" viewBox="0 0 24 24">
+    <title>Expand</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-chevron-right">
+      <polyline points="9 18 15 12 9 6"></polyline>
+    </svg>
+  </symbol>
+  <symbol id="svg-sun" viewBox="0 0 24 24">
+    <title>Light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="feather-sun">
+      <circle cx="12" cy="12" r="5"></circle>
+      <line x1="12" y1="1" x2="12" y2="3"></line>
+      <line x1="12" y1="21" x2="12" y2="23"></line>
+      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+      <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+      <line x1="1" y1="12" x2="3" y2="12"></line>
+      <line x1="21" y1="12" x2="23" y2="12"></line>
+      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+      <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon" viewBox="0 0 24 24">
+    <title>Dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-moon">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z" />
+    </svg>
+  </symbol>
+  <symbol id="svg-sun-with-moon" viewBox="0 0 24 24">
+    <title>Auto light/dark, in light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path style="opacity: 50%" d="M 5.411 14.504 C 5.471 14.504 5.532 14.504 5.591 14.504 C 3.639 16.319 4.383 19.569 6.931 20.352 C 7.693 20.586 8.512 20.551 9.25 20.252 C 8.023 23.207 4.056 23.725 2.11 21.184 C 0.166 18.642 1.702 14.949 4.874 14.536 C 5.051 14.512 5.231 14.5 5.411 14.5 L 5.411 14.504 Z"/>
+      <line x1="14.5" y1="3.25" x2="14.5" y2="1.25"/>
+      <line x1="14.5" y1="15.85" x2="14.5" y2="17.85"/>
+      <line x1="10.044" y1="5.094" x2="8.63" y2="3.68"/>
+      <line x1="19" y1="14.05" x2="20.414" y2="15.464"/>
+      <line x1="8.2" y1="9.55" x2="6.2" y2="9.55"/>
+      <line x1="20.8" y1="9.55" x2="22.8" y2="9.55"/>
+      <line x1="10.044" y1="14.006" x2="8.63" y2="15.42"/>
+      <line x1="19" y1="5.05" x2="20.414" y2="3.636"/>
+      <circle cx="14.5" cy="9.55" r="3.6"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon-with-sun" viewBox="0 0 24 24">
+    <title>Auto light/dark, in dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path d="M 8.282 7.007 C 8.385 7.007 8.494 7.007 8.595 7.007 C 5.18 10.184 6.481 15.869 10.942 17.24 C 12.275 17.648 13.706 17.589 15 17.066 C 12.851 22.236 5.91 23.143 2.505 18.696 C -0.897 14.249 1.791 7.786 7.342 7.063 C 7.652 7.021 7.965 7 8.282 7 L 8.282 7.007 Z"/>
+      <line style="opacity: 50%" x1="18" y1="3.705" x2="18" y2="2.5"/>
+      <line style="opacity: 50%" x1="18" y1="11.295" x2="18" y2="12.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="4.816" x2="14.464" y2="3.964"/>
+      <line style="opacity: 50%" x1="20.711" y1="10.212" x2="21.563" y2="11.063"/>
+      <line style="opacity: 50%" x1="14.205" y1="7.5" x2="13.001" y2="7.5"/>
+      <line style="opacity: 50%" x1="21.795" y1="7.5" x2="23" y2="7.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="10.184" x2="14.464" y2="11.036"/>
+      <line style="opacity: 50%" x1="20.711" y1="4.789" x2="21.563" y2="3.937"/>
+      <circle style="opacity: 50%" cx="18" cy="7.5" r="2.169"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-pencil" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-pencil-code">
+      <path d="M4 20h4l10.5 -10.5a2.828 2.828 0 1 0 -4 -4l-10.5 10.5v4" />
+      <path d="M13.5 6.5l4 4" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+  <symbol id="svg-eye" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-eye-code">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M10 12a2 2 0 1 0 4 0a2 2 0 0 0 -4 0" />
+      <path
+        d="M11.11 17.958c-3.209 -.307 -5.91 -2.293 -8.11 -5.958c2.4 -4 5.4 -6 9 -6c3.6 0 6.6 2 9 6c-.21 .352 -.427 .688 -.647 1.008" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+</svg>
+
+<input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation" aria-label="Toggle site navigation sidebar">
+<input type="checkbox" class="sidebar-toggle" name="__toc" id="__toc" aria-label="Toggle table of contents sidebar">
+<label class="overlay sidebar-overlay" for="__navigation"></label>
+<label class="overlay toc-overlay" for="__toc"></label>
+
+<a class="skip-to-content muted-link" href="#furo-main-content">Skip to content</a>
+
+
+
+<div class="page">
+  <header class="mobile-header">
+    <div class="header-left">
+      <label class="nav-overlay-icon" for="__navigation">
+        <span class="icon"><svg><use href="#svg-menu"></use></svg></span>
+      </label>
+    </div>
+    <div class="header-center">
+      <a href="../../index.html"><div class="brand">stable-worldmodel
+Documentation</div></a>
+    </div>
+    <div class="header-right">
+      <div class="theme-toggle-container theme-toggle-header">
+        <button class="theme-toggle" aria-label="Toggle Light / Dark / Auto color theme">
+          <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+          <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+          <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+          <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+        </button>
+      </div>
+      <label class="toc-overlay-icon toc-header-icon no-toc" for="__toc">
+        <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
+      </label>
+    </div>
+  </header>
+  <aside class="sidebar-drawer">
+    <div class="sidebar-container">
+      
+      <div class="sidebar-sticky"><a class="sidebar-brand" href="../../index.html">
+  <div class="sidebar-logo-container">
+    <img class="sidebar-logo only-light" src="../../_static/img/logo-light.svg" alt="Light Logo"/>
+    <img class="sidebar-logo only-dark" src="../../_static/img/logo-dark.svg" alt="Dark Logo"/>
+  </div>
+  
+  <span class="sidebar-brand-text">stable-worldmodel
+Documentation</span>
+  
+</a><form class="sidebar-search-container" method="get" action="../../search.html" role="search">
+  <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
+  <input type="hidden" name="check_keywords" value="yes">
+  <input type="hidden" name="area" value="default">
+</form>
+<div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
+  <p class="caption" role="heading"><span class="caption-text">Development</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/randall-lab/stable-worldmodel">Github</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/randall-lab/stable-worldmodel/tree/main/docs">Contribute to the Docs</a></li>
+</ul>
+
+</div>
+</div>
+
+      </div>
+      
+    </div>
+  </aside>
+  <div class="main">
+    <div class="content">
+      <div class="article-container">
+        <a href="#" class="back-to-top muted-link">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"></path>
+          </svg>
+          <span>Back to top</span>
+        </a>
+        <div class="content-icon-container">
+          <div class="theme-toggle-container theme-toggle-content">
+            <button class="theme-toggle" aria-label="Toggle Light / Dark / Auto color theme">
+              <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+              <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+              <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+              <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+            </button>
+          </div>
+          <label class="toc-overlay-icon toc-content-icon no-toc" for="__toc">
+            <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
+          </label>
+        </div>
+        <article role="main" id="furo-main-content">
+          <h1>Source code for stable_worldmodel.world</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span><span class="w"> </span><span class="nn">collections.abc</span><span class="w"> </span><span class="kn">import</span> <span class="n">Callable</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">datasets</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">gymnasium</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">gym</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">datasets</span><span class="w"> </span><span class="kn">import</span> <span class="n">Dataset</span><span class="p">,</span> <span class="n">Features</span><span class="p">,</span> <span class="n">Image</span><span class="p">,</span> <span class="n">Value</span><span class="p">,</span> <span class="n">load_dataset</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">loguru</span><span class="w"> </span><span class="kn">import</span> <span class="n">logger</span> <span class="k">as</span> <span class="n">logging</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">rich</span><span class="w"> </span><span class="kn">import</span> <span class="nb">print</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">stable_worldmodel</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">swm</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">.wrappers</span><span class="w"> </span><span class="kn">import</span> <span class="n">MegaWrapper</span><span class="p">,</span> <span class="n">VariationWrapper</span>
+
+
+<div class="viewcode-block" id="World">
+<a class="viewcode-back" href="../../stable_worldmodel.html#stable_worldmodel.world.World">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">World</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;A high-level environment manager for vectorized gym environments with support for</span>
+<span class="sd">    goal-conditioned tasks, video recording, dataset generation, and evaluation.</span>
+
+<span class="sd">    The `World` class wraps multiple parallel environments using Gymnasium’s vectorized API and</span>
+<span class="sd">    integrates with custom wrappers (e.g., `MegaWrapper`) to handle image-based observations and goals.</span>
+<span class="sd">    It provides utility methods for recording trajectories, saving datasets in HuggingFace Datasets .parquet format,</span>
+<span class="sd">    evaluating policies, and exporting video rollouts.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    env_name : str</span>
+<span class="sd">        The name of the Gymnasium environment to instantiate.</span>
+<span class="sd">    num_envs : int</span>
+<span class="sd">        Number of parallel environments to run.</span>
+<span class="sd">    image_shape : tuple[int]</span>
+<span class="sd">        Shape of image observations (C, H, W).</span>
+<span class="sd">    image_transform : callable, optional</span>
+<span class="sd">        Transformation function applied to image observations.</span>
+<span class="sd">    goal_shape : tuple[int], optional</span>
+<span class="sd">        Shape of goal image observations.</span>
+<span class="sd">    goal_transform : callable, optional</span>
+<span class="sd">        Transformation function applied to goal observations.</span>
+<span class="sd">    seed : int, default=2349867</span>
+<span class="sd">        Random seed for environment initialization and goal sampling.</span>
+<span class="sd">    max_episode_steps : int, default=100</span>
+<span class="sd">        Maximum number of steps per episode.</span>
+<span class="sd">    **kwargs : dict</span>
+<span class="sd">        Additional keyword arguments passed to `gym.make_vec`.</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">    ----------</span>
+<span class="sd">    envs : gym.vector.VectorEnv</span>
+<span class="sd">        Vectorized environments wrapped with `MegaWrapper`.</span>
+<span class="sd">    goal_envs : gym.vector.VectorEnv</span>
+<span class="sd">        Separate vectorized environments for goal sampling.</span>
+<span class="sd">    seed : int</span>
+<span class="sd">        Random seed for reproducibility.</span>
+<span class="sd">    goal_seed : int</span>
+<span class="sd">        Secondary random seed for sampling goals.</span>
+<span class="sd">    policy : object</span>
+<span class="sd">        Policy instance with `get_action` and `set_env` methods.</span>
+
+<span class="sd">    Properties</span>
+<span class="sd">    ----------</span>
+<span class="sd">    num_envs : int</span>
+<span class="sd">        Number of environments in the vectorized setup.</span>
+<span class="sd">    observation_space : gym.Space</span>
+<span class="sd">        Observation space of the environments.</span>
+<span class="sd">    action_space : gym.Space</span>
+<span class="sd">        Action space of the environments.</span>
+<span class="sd">    single_action_space : gym.Space</span>
+<span class="sd">        Action space for a single environment.</span>
+<span class="sd">    single_observation_space : gym.Space</span>
+<span class="sd">        Observation space for a single environment.</span>
+
+<span class="sd">    Methods:</span>
+<span class="sd">    -------</span>
+<span class="sd">    close(**kwargs)</span>
+<span class="sd">        Closes all managed environments.</span>
+<span class="sd">    denormalize(x)</span>
+<span class="sd">        Converts normalized images in [-1, 1] back to [0, 1].</span>
+<span class="sd">    set_policy(policy)</span>
+<span class="sd">        Assigns a policy object for interaction.</span>
+<span class="sd">    reset(seed=None, options=None)</span>
+<span class="sd">        Resets the environments and returns initial states and infos.</span>
+<span class="sd">    step()</span>
+<span class="sd">        Steps all environments using the current policy’s actions.</span>
+<span class="sd">    __iter__()</span>
+<span class="sd">        Prepares the iterator by resetting environments.</span>
+<span class="sd">    __next__()</span>
+<span class="sd">        Iterates over environment states until all episodes are done.</span>
+<span class="sd">    record_video(video_path, max_steps=500, fps=30, seed=None, options=None)</span>
+<span class="sd">        Records a rollout video for each environment.</span>
+<span class="sd">    record_dataset(dataset_name, episodes=10, seed=None, options=None)</span>
+<span class="sd">        Collects episodes into a HuggingFace Dataset and saves as Parquet shards.</span>
+<span class="sd">    record_video_from_dataset(video_path, dataset_name, episode_idx, max_steps=500, fps=30, num_proc=4)</span>
+<span class="sd">        Replays stored dataset episodes and exports them as videos.</span>
+<span class="sd">    evaluate(episodes=10, eval_keys=None, seed=None, options=None)</span>
+<span class="sd">        Evaluates the policy across multiple episodes and computes metrics.</span>
+
+<span class="sd">    Notes:</span>
+<span class="sd">    -----</span>
+<span class="sd">    - Supports parallelized rollout collection with episode tracking.</span>
+<span class="sd">    - Integrates tightly with HuggingFace Datasets for storage and replay.</span>
+<span class="sd">    - Provides success-rate evaluation with optional custom metrics.</span>
+<span class="sd">    - Video export uses `imageio` with `libx264` encoding.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">env_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">num_envs</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+        <span class="n">image_shape</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">,</span>
+        <span class="n">goal_shape</span><span class="p">:</span> <span class="nb">tuple</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">goal_transform</span><span class="p">:</span> <span class="n">Callable</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">image_transform</span><span class="p">:</span> <span class="n">Callable</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">seed</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">2349867</span><span class="p">,</span>
+        <span class="n">max_episode_steps</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">100</span><span class="p">,</span>
+        <span class="n">verbose</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">envs</span> <span class="o">=</span> <span class="n">gym</span><span class="o">.</span><span class="n">make_vec</span><span class="p">(</span>
+            <span class="n">env_name</span><span class="p">,</span>
+            <span class="n">num_envs</span><span class="o">=</span><span class="n">num_envs</span><span class="p">,</span>
+            <span class="n">vectorization_mode</span><span class="o">=</span><span class="s2">&quot;sync&quot;</span><span class="p">,</span>
+            <span class="n">wrappers</span><span class="o">=</span><span class="p">[</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">MegaWrapper</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">image_shape</span><span class="p">,</span> <span class="n">image_transform</span><span class="p">,</span> <span class="n">goal_shape</span><span class="p">,</span> <span class="n">goal_transform</span><span class="p">)],</span>
+            <span class="n">max_episode_steps</span><span class="o">=</span><span class="n">max_episode_steps</span><span class="p">,</span>
+            <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">envs</span> <span class="o">=</span> <span class="n">VariationWrapper</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">envs</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">verbose</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;🌍🌍🌍 World </span><span class="si">{</span><span class="n">env_name</span><span class="si">}</span><span class="s2"> initialized 🌍🌍🌍&quot;</span><span class="p">)</span>
+
+            <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;🕹️ 🕹️ 🕹️ Action space 🕹️ 🕹️ 🕹️&quot;</span><span class="p">)</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">envs</span><span class="o">.</span><span class="n">action_space</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+            <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;👁️ 👁️ 👁️ Observation space 👁️ 👁️ 👁️&quot;</span><span class="p">)</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">envs</span><span class="o">.</span><span class="n">observation_space</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">envs</span><span class="o">.</span><span class="n">variation_space</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;⚗️ ⚗️ ⚗️ Variation space ⚗️ ⚗️ ⚗️&quot;</span><span class="p">)</span>
+                <span class="nb">print</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">envs</span><span class="o">.</span><span class="n">variation_space</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">logging</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;No variation space provided!&quot;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">seed</span> <span class="o">=</span> <span class="n">seed</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">num_envs</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">envs</span><span class="o">.</span><span class="n">num_envs</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">observation_space</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">envs</span><span class="o">.</span><span class="n">observation_space</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">action_space</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">envs</span><span class="o">.</span><span class="n">action_space</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">variation_space</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">envs</span><span class="o">.</span><span class="n">variation_space</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">single_variation_space</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">envs</span><span class="o">.</span><span class="n">single_variation_space</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">single_action_space</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">envs</span><span class="o">.</span><span class="n">single_action_space</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">single_observation_space</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">envs</span><span class="o">.</span><span class="n">single_observation_space</span>
+
+<div class="viewcode-block" id="World.close">
+<a class="viewcode-back" href="../../stable_worldmodel.html#stable_worldmodel.world.World.close">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">close</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">envs</span><span class="o">.</span><span class="n">close</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="World.step">
+<a class="viewcode-back" href="../../stable_worldmodel.html#stable_worldmodel.world.World.step">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">step</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Advance all environments by one step using the current policy.&quot;&quot;&quot;</span>
+        <span class="c1"># note: reset happens before because of auto-reset, should fix that</span>
+        <span class="n">actions</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">policy</span><span class="o">.</span><span class="n">get_action</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">infos</span><span class="p">)</span>
+        <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">states</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">rewards</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">terminateds</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">truncateds</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">infos</span><span class="p">)</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">envs</span><span class="o">.</span><span class="n">step</span><span class="p">(</span><span class="n">actions</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="World.reset">
+<a class="viewcode-back" href="../../stable_worldmodel.html#stable_worldmodel.world.World.reset">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">reset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">options</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Reset all environments.&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">states</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">infos</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">envs</span><span class="o">.</span><span class="n">reset</span><span class="p">(</span><span class="n">seed</span><span class="o">=</span><span class="n">seed</span><span class="p">,</span> <span class="n">options</span><span class="o">=</span><span class="n">options</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="World.set_policy">
+<a class="viewcode-back" href="../../stable_worldmodel.html#stable_worldmodel.world.World.set_policy">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">set_policy</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">policy</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Attach a policy to the world and provide it the env context.&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">policy</span> <span class="o">=</span> <span class="n">policy</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">policy</span><span class="o">.</span><span class="n">set_env</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">envs</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">policy</span><span class="p">,</span> <span class="s2">&quot;seed&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">policy</span><span class="o">.</span><span class="n">seed</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">policy</span><span class="o">.</span><span class="n">set_seed</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">policy</span><span class="o">.</span><span class="n">seed</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="World.record_video">
+<a class="viewcode-back" href="../../stable_worldmodel.html#stable_worldmodel.world.World.record_video">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">record_video</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">video_path</span><span class="p">,</span> <span class="n">max_steps</span><span class="o">=</span><span class="mi">500</span><span class="p">,</span> <span class="n">fps</span><span class="o">=</span><span class="mi">30</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">options</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Record rollout videos for each environment under the current policy.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        video_path : str or Path</span>
+<span class="sd">            Directory to which MP4 files will be written; one file per env named ``env_{i}.mp4``.</span>
+<span class="sd">        max_steps : int, default=500</span>
+<span class="sd">            Maximum number of steps to record per environment.</span>
+<span class="sd">        fps : int, default=30</span>
+<span class="sd">            Frames per second for the output video.</span>
+<span class="sd">        seed : int, optional</span>
+<span class="sd">            Seed to use for the initial reset prior to recording.</span>
+<span class="sd">        options : dict, optional</span>
+<span class="sd">            Env reset options.</span>
+
+<span class="sd">        Notes:</span>
+<span class="sd">        -----</span>
+<span class="sd">        - If ``infos`` contains ``&quot;goal&quot;``, the goal image is vertically stacked</span>
+<span class="sd">          beneath the observation pixels in the output frames.</span>
+<span class="sd">        - Uses ``imageio.get_writer(..., codec=&quot;libx264&quot;)`` for MP4 encoding.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="kn">import</span><span class="w"> </span><span class="nn">imageio</span>
+
+        <span class="n">out</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="n">imageio</span><span class="o">.</span><span class="n">get_writer</span><span class="p">(</span>
+                <span class="n">Path</span><span class="p">(</span><span class="n">video_path</span><span class="p">)</span> <span class="o">/</span> <span class="sa">f</span><span class="s2">&quot;env_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">.mp4&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;output.mp4&quot;</span><span class="p">,</span>
+                <span class="n">fps</span><span class="o">=</span><span class="n">fps</span><span class="p">,</span>
+                <span class="n">codec</span><span class="o">=</span><span class="s2">&quot;libx264&quot;</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">num_envs</span><span class="p">)</span>
+        <span class="p">]</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">reset</span><span class="p">(</span><span class="n">seed</span><span class="p">,</span> <span class="n">options</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">o</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">out</span><span class="p">):</span>
+            <span class="k">if</span> <span class="s2">&quot;goal&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">infos</span><span class="p">:</span>
+                <span class="n">frame</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">infos</span><span class="p">[</span><span class="s2">&quot;pixels&quot;</span><span class="p">][</span><span class="n">i</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">infos</span><span class="p">[</span><span class="s2">&quot;goal&quot;</span><span class="p">][</span><span class="n">i</span><span class="p">]])</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">frame</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">infos</span><span class="p">[</span><span class="s2">&quot;pixels&quot;</span><span class="p">][</span><span class="n">i</span><span class="p">]</span>
+            <span class="n">o</span><span class="o">.</span><span class="n">append_data</span><span class="p">(</span><span class="n">frame</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">max_steps</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">step</span><span class="p">()</span>
+            <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">o</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">out</span><span class="p">):</span>
+                <span class="k">if</span> <span class="s2">&quot;goal&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">infos</span><span class="p">:</span>
+                    <span class="n">frame</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">infos</span><span class="p">[</span><span class="s2">&quot;pixels&quot;</span><span class="p">][</span><span class="n">i</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">infos</span><span class="p">[</span><span class="s2">&quot;goal&quot;</span><span class="p">][</span><span class="n">i</span><span class="p">]])</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">frame</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">infos</span><span class="p">[</span><span class="s2">&quot;pixels&quot;</span><span class="p">][</span><span class="n">i</span><span class="p">]</span>
+                <span class="n">o</span><span class="o">.</span><span class="n">append_data</span><span class="p">(</span><span class="n">frame</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">terminateds</span><span class="p">)</span> <span class="ow">or</span> <span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">truncateds</span><span class="p">):</span>
+                <span class="k">break</span>
+        <span class="p">[</span><span class="n">o</span><span class="o">.</span><span class="n">close</span><span class="p">()</span> <span class="k">for</span> <span class="n">o</span> <span class="ow">in</span> <span class="n">out</span><span class="p">]</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Video saved to </span><span class="si">{</span><span class="n">video_path</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="World.record_dataset">
+<a class="viewcode-back" href="../../stable_worldmodel.html#stable_worldmodel.world.World.record_dataset">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">record_dataset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dataset_name</span><span class="p">,</span> <span class="n">episodes</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">cache_dir</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">options</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Collect episodes with the current policy and save them as a HuggingFace Dataset (Parquet shards).</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        dataset_name : str</span>
+<span class="sd">            Name of the dataset directory under the stable_worldmodel cache dir.</span>
+<span class="sd">        episodes : int, default=10</span>
+<span class="sd">            Number of *complete* episodes to record (across all envs, total).</span>
+<span class="sd">        seed : int, optional</span>
+<span class="sd">            Base seed used for the initial reset; subsequent resets for per-env continuation</span>
+<span class="sd">            derive unique seeds from this value.</span>
+<span class="sd">        options : dict, optional</span>
+<span class="sd">            Env reset options.</span>
+
+<span class="sd">        Side Effects</span>
+<span class="sd">        ------------</span>
+<span class="sd">        - Creates ``{cache_dir}/{dataset_name}/data_shard_{NNNNN}.parquet`` files.</span>
+<span class="sd">        - Appends only *complete* episodes to the shard (partial episodes are dropped).</span>
+<span class="sd">        - Re-indexes ``episode_idx`` to be contiguous across shards.</span>
+
+<span class="sd">        Dataset Schema</span>
+<span class="sd">        --------------</span>
+<span class="sd">        The resulting dataset includes (at minimum):</span>
+<span class="sd">            - ``pixels`` : :class:`datasets.Image`</span>
+<span class="sd">            - ``episode_idx`` : :class:`datasets.Value(&quot;int32&quot;)`</span>
+<span class="sd">            - ``step_idx`` : :class:`datasets.Value(&quot;int32&quot;)`</span>
+<span class="sd">            - ``episode_len`` : :class:`datasets.Value(&quot;int32&quot;)`</span>
+
+<span class="sd">        If available, it may also include:</span>
+<span class="sd">            - ``goal`` : :class:`datasets.Image`</span>
+<span class="sd">            - ``action`` : array-like feature shaped like the env action space</span>
+<span class="sd">            - Per-step scalar/vector fields exposed by the wrapper in ``infos``</span>
+
+<span class="sd">        Notes:</span>
+<span class="sd">        -----</span>
+<span class="sd">        - The function handles action shifting to ensure alignment with continuing episodes.</span>
+<span class="sd">        - Sharding logic ensures a new shard index is chosen if prior shards exist.</span>
+<span class="sd">        - Only the first ``episodes`` fully completed episodes are persisted for the new shard.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">cache_dir</span> <span class="o">=</span> <span class="n">cache_dir</span> <span class="ow">or</span> <span class="n">swm</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">get_cache_dir</span><span class="p">()</span>
+        <span class="n">dataset_path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">cache_dir</span><span class="p">,</span> <span class="n">dataset_name</span><span class="p">)</span>
+        <span class="n">dataset_path</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+        <span class="n">hf_dataset</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">recorded_episodes</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">dataset_path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">dataset_path</span><span class="p">)</span>
+        <span class="n">dataset_path</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">terminateds</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">num_envs</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">truncateds</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">num_envs</span><span class="p">)</span>
+        <span class="n">episode_idx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">num_envs</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">reset</span><span class="p">(</span><span class="n">seed</span><span class="p">,</span> <span class="n">options</span><span class="p">)</span>  <span class="c1"># &lt;- incr global seed by num_envs</span>
+        <span class="n">root_seed</span> <span class="o">=</span> <span class="n">seed</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_envs</span> <span class="k">if</span> <span class="n">seed</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="kc">None</span>
+
+        <span class="n">records</span> <span class="o">=</span> <span class="p">{</span><span class="n">key</span><span class="p">:</span> <span class="nb">list</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">infos</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">key</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">!=</span> <span class="s2">&quot;_&quot;</span><span class="p">}</span>
+
+        <span class="n">records</span><span class="p">[</span><span class="s2">&quot;episode_idx&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">episode_idx</span><span class="p">)</span>
+        <span class="n">records</span><span class="p">[</span><span class="s2">&quot;policy&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">policy</span><span class="o">.</span><span class="n">type</span><span class="p">]</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_envs</span>
+
+        <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+            <span class="c1"># take before step to handle the auto-reset</span>
+            <span class="n">truncations_before</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">truncateds</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+            <span class="n">terminations_before</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">terminateds</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+
+            <span class="c1"># take step</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">step</span><span class="p">()</span>
+
+            <span class="c1"># start new episode for done envs</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">num_envs</span><span class="p">):</span>
+                <span class="k">if</span> <span class="n">terminations_before</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="ow">or</span> <span class="n">truncations_before</span><span class="p">[</span><span class="n">i</span><span class="p">]:</span>
+                    <span class="c1"># re-reset env with seed and options (no supported by auto-reset)</span>
+                    <span class="n">new_seed</span> <span class="o">=</span> <span class="n">root_seed</span> <span class="o">+</span> <span class="n">recorded_episodes</span> <span class="k">if</span> <span class="n">seed</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="kc">None</span>
+
+                    <span class="c1"># determine new episode idx</span>
+                    <span class="n">next_ep_idx</span> <span class="o">=</span> <span class="n">episode_idx</span><span class="o">.</span><span class="n">max</span><span class="p">()</span> <span class="o">+</span> <span class="mi">1</span>
+                    <span class="n">episode_idx</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">next_ep_idx</span>
+                    <span class="n">recorded_episodes</span> <span class="o">+=</span> <span class="mi">1</span>
+
+                    <span class="n">states</span><span class="p">,</span> <span class="n">infos</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">envs</span><span class="o">.</span><span class="n">envs</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">reset</span><span class="p">(</span><span class="n">seed</span><span class="o">=</span><span class="n">new_seed</span><span class="p">,</span> <span class="n">options</span><span class="o">=</span><span class="n">options</span><span class="p">)</span>
+
+                    <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">infos</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">infos</span><span class="p">[</span><span class="n">k</span><span class="p">][</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">v</span>
+
+            <span class="k">if</span> <span class="n">recorded_episodes</span> <span class="o">&gt;=</span> <span class="n">episodes</span><span class="p">:</span>
+                <span class="k">break</span>
+
+            <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">infos</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">key</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;_&quot;</span><span class="p">:</span>
+                    <span class="k">continue</span>
+
+                <span class="c1"># shift actions</span>
+                <span class="k">if</span> <span class="n">key</span> <span class="o">==</span> <span class="s2">&quot;action&quot;</span><span class="p">:</span>
+                    <span class="n">n_action</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">infos</span><span class="p">[</span><span class="n">key</span><span class="p">])</span>
+                    <span class="n">last_episode</span> <span class="o">=</span> <span class="n">records</span><span class="p">[</span><span class="s2">&quot;episode_idx&quot;</span><span class="p">][</span><span class="o">-</span><span class="n">n_action</span><span class="p">:]</span>
+                    <span class="n">action_mask</span> <span class="o">=</span> <span class="p">(</span><span class="n">last_episode</span> <span class="o">==</span> <span class="n">episode_idx</span><span class="p">)[:,</span> <span class="kc">None</span><span class="p">]</span>
+
+                    <span class="c1"># override last actions of continuing episodes</span>
+                    <span class="n">records</span><span class="p">[</span><span class="n">key</span><span class="p">][</span><span class="o">-</span><span class="n">n_action</span><span class="p">:]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span>
+                        <span class="n">action_mask</span><span class="p">,</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">infos</span><span class="p">[</span><span class="n">key</span><span class="p">],</span>
+                        <span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">,</span>
+                    <span class="p">)</span>
+
+                    <span class="c1"># add new dummy action</span>
+                    <span class="n">action_shape</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">infos</span><span class="p">[</span><span class="n">key</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span>
+                    <span class="n">action_dtype</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">single_action_space</span><span class="o">.</span><span class="n">dtype</span>
+                    <span class="n">dummy_block</span> <span class="o">=</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">full</span><span class="p">(</span><span class="n">action_shape</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">action_dtype</span><span class="p">)</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">num_envs</span><span class="p">)]</span>
+                    <span class="n">records</span><span class="p">[</span><span class="n">key</span><span class="p">]</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">dummy_block</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">records</span><span class="p">[</span><span class="n">key</span><span class="p">]</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">infos</span><span class="p">[</span><span class="n">key</span><span class="p">]))</span>
+
+            <span class="n">records</span><span class="p">[</span><span class="s2">&quot;episode_idx&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">episode_idx</span><span class="p">))</span>
+            <span class="n">records</span><span class="p">[</span><span class="s2">&quot;policy&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">extend</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">policy</span><span class="o">.</span><span class="n">type</span><span class="p">]</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_envs</span><span class="p">)</span>
+
+        <span class="c1"># add the episode length</span>
+        <span class="n">counts</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">bincount</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">records</span><span class="p">[</span><span class="s2">&quot;episode_idx&quot;</span><span class="p">]),</span> <span class="n">minlength</span><span class="o">=</span><span class="nb">max</span><span class="p">(</span><span class="n">records</span><span class="p">[</span><span class="s2">&quot;episode_idx&quot;</span><span class="p">])</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="n">records</span><span class="p">[</span><span class="s2">&quot;episode_len&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">counts</span><span class="p">[</span><span class="n">ep</span><span class="p">])</span> <span class="k">for</span> <span class="n">ep</span> <span class="ow">in</span> <span class="n">records</span><span class="p">[</span><span class="s2">&quot;episode_idx&quot;</span><span class="p">]]</span>
+
+        <span class="c1"># determine feature</span>
+        <span class="n">features</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;pixels&quot;</span><span class="p">:</span> <span class="n">Image</span><span class="p">(),</span>
+            <span class="s2">&quot;episode_idx&quot;</span><span class="p">:</span> <span class="n">Value</span><span class="p">(</span><span class="s2">&quot;int32&quot;</span><span class="p">),</span>
+            <span class="s2">&quot;step_idx&quot;</span><span class="p">:</span> <span class="n">Value</span><span class="p">(</span><span class="s2">&quot;int32&quot;</span><span class="p">),</span>
+            <span class="s2">&quot;episode_len&quot;</span><span class="p">:</span> <span class="n">Value</span><span class="p">(</span><span class="s2">&quot;int32&quot;</span><span class="p">),</span>
+        <span class="p">}</span>
+
+        <span class="k">if</span> <span class="s2">&quot;goal&quot;</span> <span class="ow">in</span> <span class="n">records</span><span class="p">:</span>
+            <span class="n">features</span><span class="p">[</span><span class="s2">&quot;goal&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">Image</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">records</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">features</span><span class="p">:</span>
+                <span class="k">continue</span>
+            <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">records</span><span class="p">[</span><span class="n">k</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span> <span class="ow">is</span> <span class="nb">str</span><span class="p">:</span>
+                <span class="n">state_feature</span> <span class="o">=</span> <span class="n">Value</span><span class="p">(</span><span class="s2">&quot;string&quot;</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">records</span><span class="p">[</span><span class="n">k</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">ndim</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="n">state_feature</span> <span class="o">=</span> <span class="n">datasets</span><span class="o">.</span><span class="n">Sequence</span><span class="p">(</span>
+                    <span class="n">feature</span><span class="o">=</span><span class="n">Value</span><span class="p">(</span><span class="n">dtype</span><span class="o">=</span><span class="n">records</span><span class="p">[</span><span class="n">k</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">dtype</span><span class="o">.</span><span class="n">name</span><span class="p">),</span>
+                    <span class="n">length</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">records</span><span class="p">[</span><span class="n">k</span><span class="p">][</span><span class="mi">0</span><span class="p">]),</span>
+                <span class="p">)</span>
+            <span class="k">elif</span> <span class="mi">2</span> <span class="o">&lt;=</span> <span class="n">records</span><span class="p">[</span><span class="n">k</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">ndim</span> <span class="o">&lt;=</span> <span class="mi">6</span><span class="p">:</span>
+                <span class="n">feature_cls</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">datasets</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;Array</span><span class="si">{</span><span class="n">records</span><span class="p">[</span><span class="n">k</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">ndim</span><span class="si">}</span><span class="s2">D&quot;</span><span class="p">)</span>
+                <span class="n">state_feature</span> <span class="o">=</span> <span class="n">feature_cls</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="n">records</span><span class="p">[</span><span class="n">k</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">records</span><span class="p">[</span><span class="n">k</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">dtype</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">state_feature</span> <span class="o">=</span> <span class="n">Value</span><span class="p">(</span><span class="n">records</span><span class="p">[</span><span class="n">k</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">dtype</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+            <span class="n">features</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">state_feature</span>
+
+        <span class="n">features</span> <span class="o">=</span> <span class="n">Features</span><span class="p">(</span><span class="n">features</span><span class="p">)</span>
+
+        <span class="c1"># make dataset</span>
+        <span class="n">hf_dataset</span> <span class="o">=</span> <span class="n">Dataset</span><span class="o">.</span><span class="n">from_dict</span><span class="p">(</span><span class="n">records</span><span class="p">,</span> <span class="n">features</span><span class="o">=</span><span class="n">features</span><span class="p">)</span>
+
+        <span class="c1"># determine shard index and num episode recorded so far</span>
+        <span class="n">shard_idx</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="n">dataset_path</span> <span class="o">/</span> <span class="sa">f</span><span class="s2">&quot;data_shard_</span><span class="si">{</span><span class="n">shard_idx</span><span class="si">:</span><span class="s2">05d</span><span class="si">}</span><span class="s2">.parquet&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">is_file</span><span class="p">():</span>
+                <span class="k">break</span>
+            <span class="n">shard_idx</span> <span class="o">+=</span> <span class="mi">1</span>
+
+        <span class="n">episode_counter</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">if</span> <span class="n">shard_idx</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">shard_dataset</span> <span class="o">=</span> <span class="n">load_dataset</span><span class="p">(</span>
+                <span class="s2">&quot;parquet&quot;</span><span class="p">,</span>
+                <span class="n">split</span><span class="o">=</span><span class="s2">&quot;train&quot;</span><span class="p">,</span>
+                <span class="n">data_files</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">dataset_path</span> <span class="o">/</span> <span class="sa">f</span><span class="s2">&quot;data_shard_</span><span class="si">{</span><span class="n">shard_idx</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mi">1</span><span class="si">:</span><span class="s2">05d</span><span class="si">}</span><span class="s2">.parquet&quot;</span><span class="p">),</span>
+            <span class="p">)</span>
+            <span class="n">episode_counter</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">shard_dataset</span><span class="p">[</span><span class="s2">&quot;episode_idx&quot;</span><span class="p">])</span> <span class="o">+</span> <span class="mi">1</span>
+
+        <span class="c1"># flush incomplete episode</span>
+        <span class="n">ep_col</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">hf_dataset</span><span class="p">[</span><span class="s2">&quot;episode_idx&quot;</span><span class="p">])</span>
+        <span class="n">non_complete_episodes</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">episode_idx</span><span class="p">[</span><span class="o">~</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">terminateds</span> <span class="o">|</span> <span class="bp">self</span><span class="o">.</span><span class="n">truncateds</span><span class="p">)])</span>
+        <span class="n">keep_episode</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nonzero</span><span class="p">(</span><span class="o">~</span><span class="n">np</span><span class="o">.</span><span class="n">isin</span><span class="p">(</span><span class="n">ep_col</span><span class="p">,</span> <span class="n">non_complete_episodes</span><span class="p">))[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+        <span class="n">hf_dataset</span> <span class="o">=</span> <span class="n">hf_dataset</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="n">keep_episode</span><span class="p">)</span>
+
+        <span class="c1"># re-index remaining episode starting from the last shard episode number</span>
+        <span class="n">unique_eps</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">hf_dataset</span><span class="p">[</span><span class="s2">&quot;episode_idx&quot;</span><span class="p">])</span>
+        <span class="n">id_map</span> <span class="o">=</span> <span class="p">{</span><span class="n">old</span><span class="p">:</span> <span class="n">new</span> <span class="k">for</span> <span class="n">new</span><span class="p">,</span> <span class="n">old</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">unique_eps</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="n">episode_counter</span><span class="p">)}</span>
+        <span class="n">hf_dataset</span> <span class="o">=</span> <span class="n">hf_dataset</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">row</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;episode_idx&quot;</span><span class="p">:</span> <span class="n">id_map</span><span class="p">[</span><span class="n">row</span><span class="p">[</span><span class="s2">&quot;episode_idx&quot;</span><span class="p">]]})</span>
+
+        <span class="c1"># flush all extra episode saved for the current shard</span>
+        <span class="n">hf_dataset</span> <span class="o">=</span> <span class="n">hf_dataset</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="k">lambda</span> <span class="n">row</span><span class="p">:</span> <span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="s2">&quot;episode_idx&quot;</span><span class="p">]</span> <span class="o">-</span> <span class="n">episode_counter</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">episodes</span><span class="p">)</span>
+
+        <span class="n">hf_dataset</span><span class="o">.</span><span class="n">to_parquet</span><span class="p">(</span><span class="n">dataset_path</span> <span class="o">/</span> <span class="sa">f</span><span class="s2">&quot;data_shard_</span><span class="si">{</span><span class="n">shard_idx</span><span class="si">:</span><span class="s2">05d</span><span class="si">}</span><span class="s2">.parquet&quot;</span><span class="p">)</span>
+
+        <span class="c1"># display info</span>
+        <span class="n">final_num_episodes</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">hf_dataset</span><span class="p">[</span><span class="s2">&quot;episode_idx&quot;</span><span class="p">])</span>
+        <span class="n">episode_range</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">final_num_episodes</span><span class="o">.</span><span class="n">min</span><span class="p">()</span><span class="o">.</span><span class="n">item</span><span class="p">(),</span>
+            <span class="n">final_num_episodes</span><span class="o">.</span><span class="n">max</span><span class="p">()</span><span class="o">.</span><span class="n">item</span><span class="p">(),</span>
+        <span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;Dataset saved to </span><span class="si">{</span><span class="n">shard_idx</span><span class="si">}</span><span class="s2">th shard file (</span><span class="si">{</span><span class="n">dataset_path</span><span class="si">}</span><span class="s2">) with </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">final_num_episodes</span><span class="p">)</span><span class="si">}</span><span class="s2"> episodes, range: </span><span class="si">{</span><span class="n">episode_range</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="World.record_video_from_dataset">
+<a class="viewcode-back" href="../../stable_worldmodel.html#stable_worldmodel.world.World.record_video_from_dataset">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">record_video_from_dataset</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">video_path</span><span class="p">,</span>
+        <span class="n">dataset_name</span><span class="p">,</span>
+        <span class="n">episode_idx</span><span class="p">,</span>
+        <span class="n">max_steps</span><span class="o">=</span><span class="mi">500</span><span class="p">,</span>
+        <span class="n">fps</span><span class="o">=</span><span class="mi">30</span><span class="p">,</span>
+        <span class="n">num_proc</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span>
+        <span class="n">cache_dir</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Replay stored dataset episodes and export them as MP4 videos.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        video_path : str or Path</span>
+<span class="sd">            Directory to which MP4 files will be written; one file per requested episode</span>
+<span class="sd">            named ``episode_{idx}.mp4``.</span>
+<span class="sd">        dataset_name : str</span>
+<span class="sd">            Name of the dataset directory under the stable_worldmodel cache dir.</span>
+<span class="sd">        episode_idx : int or list[int]</span>
+<span class="sd">            Episode index or indices to render from the dataset.</span>
+<span class="sd">        max_steps : int, default=500</span>
+<span class="sd">            Maximum number of steps to render per episode (truncates longer episodes).</span>
+<span class="sd">        fps : int, default=30</span>
+<span class="sd">            Frames per second for the output video(s).</span>
+<span class="sd">        num_proc : int, default=4</span>
+<span class="sd">            Degree of parallelism for dataset filtering.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="kn">import</span><span class="w"> </span><span class="nn">imageio</span>
+
+        <span class="n">cache_dir</span> <span class="o">=</span> <span class="n">cache_dir</span> <span class="ow">or</span> <span class="n">swm</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">get_cache_dir</span><span class="p">()</span>
+        <span class="n">dataset_path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">cache_dir</span><span class="p">,</span> <span class="n">dataset_name</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="n">dataset_path</span><span class="o">.</span><span class="n">is_dir</span><span class="p">(),</span> <span class="sa">f</span><span class="s2">&quot;Dataset </span><span class="si">{</span><span class="n">dataset_name</span><span class="si">}</span><span class="s2"> not found in cache dir </span><span class="si">{</span><span class="n">swm</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">get_cache_dir</span><span class="p">()</span><span class="si">}</span><span class="s2">&quot;</span>
+
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">episode_idx</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
+            <span class="n">episode_idx</span> <span class="o">=</span> <span class="p">[</span><span class="n">episode_idx</span><span class="p">]</span>
+
+        <span class="n">out</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="n">imageio</span><span class="o">.</span><span class="n">get_writer</span><span class="p">(</span>
+                <span class="n">Path</span><span class="p">(</span><span class="n">video_path</span><span class="p">)</span> <span class="o">/</span> <span class="sa">f</span><span class="s2">&quot;episode_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">.mp4&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;output.mp4&quot;</span><span class="p">,</span>
+                <span class="n">fps</span><span class="o">=</span><span class="n">fps</span><span class="p">,</span>
+                <span class="n">codec</span><span class="o">=</span><span class="s2">&quot;libx264&quot;</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">episode_idx</span>
+        <span class="p">]</span>
+
+        <span class="n">dataset</span> <span class="o">=</span> <span class="n">load_dataset</span><span class="p">(</span><span class="s2">&quot;parquet&quot;</span><span class="p">,</span> <span class="n">data_files</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">Path</span><span class="p">(</span><span class="n">dataset_path</span><span class="p">,</span> <span class="s2">&quot;*.parquet&quot;</span><span class="p">)),</span> <span class="n">split</span><span class="o">=</span><span class="s2">&quot;train&quot;</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">o</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">episode_idx</span><span class="p">,</span> <span class="n">out</span><span class="p">):</span>
+            <span class="n">episode</span> <span class="o">=</span> <span class="n">dataset</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="k">lambda</span> <span class="n">ex</span><span class="p">:</span> <span class="n">ex</span><span class="p">[</span><span class="s2">&quot;episode_idx&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="n">i</span><span class="p">,</span> <span class="n">num_proc</span><span class="o">=</span><span class="n">num_proc</span><span class="p">)</span>
+            <span class="n">episode</span> <span class="o">=</span> <span class="n">episode</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="s2">&quot;step_idx&quot;</span><span class="p">)</span>
+            <span class="n">episode_len</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">episode</span><span class="p">)</span>
+
+            <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">episode</span><span class="p">[</span><span class="s2">&quot;episode_len&quot;</span><span class="p">]))</span> <span class="o">==</span> <span class="mi">1</span><span class="p">,</span> <span class="p">(</span>
+                <span class="s2">&quot;&#39;episode_len&#39; contains different values for the same episode&quot;</span>
+            <span class="p">)</span>
+            <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">episode</span><span class="p">)</span> <span class="o">==</span> <span class="n">episode</span><span class="p">[</span><span class="s2">&quot;episode_len&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span> <span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;Episode </span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2"> has </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">episode</span><span class="p">)</span><span class="si">}</span><span class="s2"> steps, but &#39;episode_len&#39; is </span><span class="si">{</span><span class="n">episode</span><span class="p">[</span><span class="s1">&#39;episode_len&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="p">)</span>
+
+            <span class="k">for</span> <span class="n">step_idx</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">min</span><span class="p">(</span><span class="n">episode_len</span><span class="p">,</span> <span class="n">max_steps</span><span class="p">)):</span>
+                <span class="n">frame</span> <span class="o">=</span> <span class="n">episode</span><span class="p">[</span><span class="n">step_idx</span><span class="p">][</span><span class="s2">&quot;pixels&quot;</span><span class="p">]</span>
+                <span class="n">frame</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">frame</span><span class="o">.</span><span class="n">convert</span><span class="p">(</span><span class="s2">&quot;RGB&quot;</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">uint8</span><span class="p">)</span>
+
+                <span class="k">if</span> <span class="s2">&quot;goal&quot;</span> <span class="ow">in</span> <span class="n">episode</span><span class="o">.</span><span class="n">column_names</span><span class="p">:</span>
+                    <span class="n">goal</span> <span class="o">=</span> <span class="n">episode</span><span class="p">[</span><span class="n">step_idx</span><span class="p">][</span><span class="s2">&quot;goal&quot;</span><span class="p">]</span>
+                    <span class="n">goal</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">goal</span><span class="o">.</span><span class="n">convert</span><span class="p">(</span><span class="s2">&quot;RGB&quot;</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">uint8</span><span class="p">)</span>
+                    <span class="n">frame</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">([</span><span class="n">frame</span><span class="p">,</span> <span class="n">goal</span><span class="p">])</span>
+                <span class="n">o</span><span class="o">.</span><span class="n">append_data</span><span class="p">(</span><span class="n">frame</span><span class="p">)</span>
+        <span class="p">[</span><span class="n">o</span><span class="o">.</span><span class="n">close</span><span class="p">()</span> <span class="k">for</span> <span class="n">o</span> <span class="ow">in</span> <span class="n">out</span><span class="p">]</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Video saved to </span><span class="si">{</span><span class="n">video_path</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="World.evaluate">
+<a class="viewcode-back" href="../../stable_worldmodel.html#stable_worldmodel.world.World.evaluate">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">evaluate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">episodes</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">eval_keys</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">options</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Evaluate the current policy across multiple episodes and compute metrics.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        episodes : int, default=10</span>
+<span class="sd">            Number of complete episodes to evaluate.</span>
+<span class="sd">        eval_keys : list[str], optional</span>
+<span class="sd">            Additional keys in ``infos`` to log as episode-wise metrics. Each key will</span>
+<span class="sd">            produce a vector of length ``episodes`` in the returned metrics dict.</span>
+<span class="sd">        seed : int, optional</span>
+<span class="sd">            Base seed for the initial reset; per-env continuation seeds derive from this value.</span>
+<span class="sd">        options : dict, optional</span>
+<span class="sd">            Env reset options.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">        -------</span>
+<span class="sd">        dict</span>
+<span class="sd">            Metrics dictionary with the following entries:</span>
+<span class="sd">            - ``&quot;success_rate&quot;`` : float</span>
+<span class="sd">                Percentage of successful episodes (terminations) in [0, 100].</span>
+<span class="sd">            - ``&quot;episode_successes&quot;`` : np.ndarray, shape (episodes,)</span>
+<span class="sd">                Boolean array indicating success (True) or failure (False) per episode.</span>
+<span class="sd">            - ``&quot;seeds&quot;`` : np.ndarray, shape (episodes,)</span>
+<span class="sd">                The per-episode seeds used for evaluation.</span>
+<span class="sd">            - Additional arrays for each key in ``eval_keys``, each of shape (episodes,).</span>
+
+<span class="sd">        Notes:</span>
+<span class="sd">        -----</span>
+<span class="sd">        Success is counted using the ``terminated`` signal observed prior to an env&#39;s auto-reset.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">metrics</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;success_rate&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+            <span class="s2">&quot;episode_successes&quot;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">episodes</span><span class="p">),</span>
+            <span class="s2">&quot;seeds&quot;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="n">episodes</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">),</span>
+        <span class="p">}</span>
+
+        <span class="k">if</span> <span class="n">eval_keys</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">eval_keys</span><span class="p">:</span>
+                <span class="n">metrics</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">episodes</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">terminateds</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">num_envs</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">truncateds</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">num_envs</span><span class="p">)</span>
+
+        <span class="n">episode_idx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">num_envs</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">reset</span><span class="p">(</span><span class="n">seed</span><span class="p">,</span> <span class="n">options</span><span class="p">)</span>
+        <span class="n">root_seed</span> <span class="o">=</span> <span class="n">seed</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_envs</span> <span class="k">if</span> <span class="n">seed</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="kc">None</span>
+
+        <span class="n">eval_ep_count</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">eval_done</span> <span class="o">=</span> <span class="kc">False</span>
+
+        <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+            <span class="c1"># take before step to handle the auto-reset</span>
+            <span class="n">truncations_before</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">truncateds</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+            <span class="n">terminations_before</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">terminateds</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+
+            <span class="c1"># take step</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">step</span><span class="p">()</span>
+
+            <span class="c1"># start new episode for done envs</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">num_envs</span><span class="p">):</span>
+                <span class="k">if</span> <span class="n">terminations_before</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="ow">or</span> <span class="n">truncations_before</span><span class="p">[</span><span class="n">i</span><span class="p">]:</span>
+                    <span class="c1"># record eval info</span>
+                    <span class="n">ep_idx</span> <span class="o">=</span> <span class="n">episode_idx</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">-</span> <span class="mi">1</span>
+                    <span class="n">metrics</span><span class="p">[</span><span class="s2">&quot;episode_successes&quot;</span><span class="p">][</span><span class="n">ep_idx</span><span class="p">]</span> <span class="o">=</span> <span class="n">terminations_before</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+                    <span class="n">metrics</span><span class="p">[</span><span class="s2">&quot;seeds&quot;</span><span class="p">][</span><span class="n">ep_idx</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">envs</span><span class="o">.</span><span class="n">envs</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">unwrapped</span><span class="o">.</span><span class="n">np_random_seed</span>
+
+                    <span class="n">logging</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
+                        <span class="s2">&quot;EXTRACTED SEED : &quot;</span><span class="p">,</span> <span class="n">metrics</span><span class="p">[</span><span class="s2">&quot;seeds&quot;</span><span class="p">][</span><span class="n">ep_idx</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">envs</span><span class="o">.</span><span class="n">envs</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">unwrapped</span><span class="o">.</span><span class="n">np_random_seed</span>
+                    <span class="p">)</span>
+
+                    <span class="k">if</span> <span class="n">eval_keys</span><span class="p">:</span>
+                        <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">eval_keys</span><span class="p">:</span>
+                            <span class="k">assert</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">infos</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;key </span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2"> not found in infos&quot;</span>
+                            <span class="n">metrics</span><span class="p">[</span><span class="n">key</span><span class="p">][</span><span class="n">ep_idx</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">infos</span><span class="p">[</span><span class="n">key</span><span class="p">][</span><span class="n">i</span><span class="p">]</span>
+
+                    <span class="c1"># break if enough episodes evaluated</span>
+                    <span class="k">if</span> <span class="n">eval_ep_count</span> <span class="o">&gt;=</span> <span class="n">episodes</span><span class="p">:</span>
+                        <span class="n">eval_done</span> <span class="o">=</span> <span class="kc">True</span>
+                        <span class="k">break</span>
+
+                    <span class="c1"># determine new episode idx</span>
+                    <span class="n">next_ep_idx</span> <span class="o">=</span> <span class="n">episode_idx</span><span class="o">.</span><span class="n">max</span><span class="p">()</span> <span class="o">+</span> <span class="mi">1</span>
+                    <span class="n">episode_idx</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">next_ep_idx</span>
+                    <span class="n">eval_ep_count</span> <span class="o">+=</span> <span class="mi">1</span>
+
+                    <span class="c1"># re-reset env with seed and options (no supported by auto-reset)</span>
+                    <span class="n">new_seed</span> <span class="o">=</span> <span class="n">root_seed</span> <span class="o">+</span> <span class="n">eval_ep_count</span> <span class="k">if</span> <span class="n">seed</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="kc">None</span>
+
+                    <span class="n">_</span><span class="p">,</span> <span class="n">infos</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">envs</span><span class="o">.</span><span class="n">envs</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">reset</span><span class="p">(</span><span class="n">seed</span><span class="o">=</span><span class="n">new_seed</span><span class="p">,</span> <span class="n">options</span><span class="o">=</span><span class="n">options</span><span class="p">)</span>
+
+                    <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">infos</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">infos</span><span class="p">[</span><span class="n">k</span><span class="p">][</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">v</span>
+
+            <span class="k">if</span> <span class="n">eval_done</span><span class="p">:</span>
+                <span class="k">break</span>
+
+        <span class="c1"># compute success rate</span>
+        <span class="n">metrics</span><span class="p">[</span><span class="s2">&quot;success_rate&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">metrics</span><span class="p">[</span><span class="s2">&quot;episode_successes&quot;</span><span class="p">]))</span> <span class="o">/</span> <span class="n">episodes</span> <span class="o">*</span> <span class="mf">100.0</span>
+
+        <span class="k">assert</span> <span class="n">eval_ep_count</span> <span class="o">==</span> <span class="n">episodes</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;eval_ep_count </span><span class="si">{</span><span class="n">eval_ep_count</span><span class="si">}</span><span class="s2"> != episodes </span><span class="si">{</span><span class="n">episodes</span><span class="si">}</span><span class="s2">&quot;</span>
+
+        <span class="k">assert</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">metrics</span><span class="p">[</span><span class="s2">&quot;seeds&quot;</span><span class="p">])</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">episodes</span><span class="p">,</span> <span class="s2">&quot;Some episode seeds are identical!&quot;</span>
+
+        <span class="k">return</span> <span class="n">metrics</span></div>
+</div>
+
+</pre></div>
+        </article>
+      </div>
+      <footer>
+        
+        <div class="related-pages">
+          
+          
+        </div>
+        <div class="bottom-of-page">
+          <div class="left-details">
+            <div class="copyright">
+                Copyright &#169; 2025
+            </div>
+            Made with <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
+            
+            <a href="https://github.com/pradyunsg/furo">Furo</a>
+            
+          </div>
+          <div class="right-details">
+            <div class="icons">
+              <a class="muted-link fa-brands fa-solid fa-discord" href="https://discord.gg/8M6hT39X" aria-label="Discord"></a>
+              <a class="muted-link fa-brands fa-solid fa-github" href="https://github.com/randall-lab/stable-worldmodel" aria-label="GitHub"></a>
+              
+            </div>
+          </div>
+        </div>
+        
+      </footer>
+    </div>
+    <aside class="toc-drawer no-toc">
+      
+      
+      
+    </aside>
+  </div>
+</div><script src="../../_static/documentation_options.js?v=c2d0de4b"></script>
+    <script src="../../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/scripts/furo.js?v=46bd48cc"></script>
+    </body>
+</html>

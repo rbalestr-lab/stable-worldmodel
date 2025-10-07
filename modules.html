@@ -1,0 +1,565 @@
+<!doctype html>
+<html class="no-js" lang="en" data-content_root="./">
+  <head><meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="index" title="Index" href="genindex.html"><link rel="search" title="Search" href="search.html">
+        <link rel="prefetch" href="_static/img/logo-light.svg" as="image">
+        <link rel="prefetch" href="_static/img/logo-dark.svg" as="image">
+
+    <link rel="shortcut icon" href="_static/favicon.ico"><!-- Generated with Sphinx 8.2.3 and Furo 2025.09.25 -->
+        <title>stable_worldmodel - stable-worldmodel Documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=8f2a1f02" />
+    <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?v=580074bf" />
+    <link rel="stylesheet" type="text/css" href="_static/styles/furo-extensions.css?v=8dab3a3b" />
+    <link rel="stylesheet" type="text/css" href="_static/css/custom.css?v=33d9fa98" />
+    <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/fontawesome.min.css" />
+    <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/solid.min.css" />
+    <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/brands.min.css" />
+    
+    
+
+
+<style>
+  body {
+    --color-code-background: #f8f8f8;
+  --color-code-foreground: black;
+  --color-brand-primary: #202123;
+  --color-brand-content: #296cde;
+  --color-inline-code-background: #f8f8f8;
+  --color-brand-visited: #2757dd;
+  
+  }
+  @media not print {
+    body[data-theme="dark"] {
+      --color-code-background: #272822;
+  --color-code-foreground: #f8f8f2;
+  
+    }
+    @media (prefers-color-scheme: dark) {
+      body:not([data-theme="light"]) {
+        --color-code-background: #272822;
+  --color-code-foreground: #f8f8f2;
+  
+      }
+    }
+  }
+</style></head>
+  <body>
+    
+    <script>
+      document.body.dataset.theme = localStorage.getItem("theme") || "auto";
+    </script>
+    
+
+<svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+  <symbol id="svg-toc" viewBox="0 0 24 24">
+    <title>Contents</title>
+    <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 1024 1024">
+      <path d="M408 442h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8zm-8 204c0 4.4 3.6 8 8 8h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56zm504-486H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zm0 632H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zM115.4 518.9L271.7 642c5.8 4.6 14.4.5 14.4-6.9V388.9c0-7.4-8.5-11.5-14.4-6.9L115.4 505.1a8.74 8.74 0 0 0 0 13.8z"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-menu" viewBox="0 0 24 24">
+    <title>Menu</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-menu">
+      <line x1="3" y1="12" x2="21" y2="12"></line>
+      <line x1="3" y1="6" x2="21" y2="6"></line>
+      <line x1="3" y1="18" x2="21" y2="18"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-arrow-right" viewBox="0 0 24 24">
+    <title>Expand</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-chevron-right">
+      <polyline points="9 18 15 12 9 6"></polyline>
+    </svg>
+  </symbol>
+  <symbol id="svg-sun" viewBox="0 0 24 24">
+    <title>Light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="feather-sun">
+      <circle cx="12" cy="12" r="5"></circle>
+      <line x1="12" y1="1" x2="12" y2="3"></line>
+      <line x1="12" y1="21" x2="12" y2="23"></line>
+      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+      <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+      <line x1="1" y1="12" x2="3" y2="12"></line>
+      <line x1="21" y1="12" x2="23" y2="12"></line>
+      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+      <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon" viewBox="0 0 24 24">
+    <title>Dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-moon">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z" />
+    </svg>
+  </symbol>
+  <symbol id="svg-sun-with-moon" viewBox="0 0 24 24">
+    <title>Auto light/dark, in light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path style="opacity: 50%" d="M 5.411 14.504 C 5.471 14.504 5.532 14.504 5.591 14.504 C 3.639 16.319 4.383 19.569 6.931 20.352 C 7.693 20.586 8.512 20.551 9.25 20.252 C 8.023 23.207 4.056 23.725 2.11 21.184 C 0.166 18.642 1.702 14.949 4.874 14.536 C 5.051 14.512 5.231 14.5 5.411 14.5 L 5.411 14.504 Z"/>
+      <line x1="14.5" y1="3.25" x2="14.5" y2="1.25"/>
+      <line x1="14.5" y1="15.85" x2="14.5" y2="17.85"/>
+      <line x1="10.044" y1="5.094" x2="8.63" y2="3.68"/>
+      <line x1="19" y1="14.05" x2="20.414" y2="15.464"/>
+      <line x1="8.2" y1="9.55" x2="6.2" y2="9.55"/>
+      <line x1="20.8" y1="9.55" x2="22.8" y2="9.55"/>
+      <line x1="10.044" y1="14.006" x2="8.63" y2="15.42"/>
+      <line x1="19" y1="5.05" x2="20.414" y2="3.636"/>
+      <circle cx="14.5" cy="9.55" r="3.6"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon-with-sun" viewBox="0 0 24 24">
+    <title>Auto light/dark, in dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path d="M 8.282 7.007 C 8.385 7.007 8.494 7.007 8.595 7.007 C 5.18 10.184 6.481 15.869 10.942 17.24 C 12.275 17.648 13.706 17.589 15 17.066 C 12.851 22.236 5.91 23.143 2.505 18.696 C -0.897 14.249 1.791 7.786 7.342 7.063 C 7.652 7.021 7.965 7 8.282 7 L 8.282 7.007 Z"/>
+      <line style="opacity: 50%" x1="18" y1="3.705" x2="18" y2="2.5"/>
+      <line style="opacity: 50%" x1="18" y1="11.295" x2="18" y2="12.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="4.816" x2="14.464" y2="3.964"/>
+      <line style="opacity: 50%" x1="20.711" y1="10.212" x2="21.563" y2="11.063"/>
+      <line style="opacity: 50%" x1="14.205" y1="7.5" x2="13.001" y2="7.5"/>
+      <line style="opacity: 50%" x1="21.795" y1="7.5" x2="23" y2="7.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="10.184" x2="14.464" y2="11.036"/>
+      <line style="opacity: 50%" x1="20.711" y1="4.789" x2="21.563" y2="3.937"/>
+      <circle style="opacity: 50%" cx="18" cy="7.5" r="2.169"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-pencil" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-pencil-code">
+      <path d="M4 20h4l10.5 -10.5a2.828 2.828 0 1 0 -4 -4l-10.5 10.5v4" />
+      <path d="M13.5 6.5l4 4" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+  <symbol id="svg-eye" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-eye-code">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M10 12a2 2 0 1 0 4 0a2 2 0 0 0 -4 0" />
+      <path
+        d="M11.11 17.958c-3.209 -.307 -5.91 -2.293 -8.11 -5.958c2.4 -4 5.4 -6 9 -6c3.6 0 6.6 2 9 6c-.21 .352 -.427 .688 -.647 1.008" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+</svg>
+
+<input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation" aria-label="Toggle site navigation sidebar">
+<input type="checkbox" class="sidebar-toggle" name="__toc" id="__toc" aria-label="Toggle table of contents sidebar">
+<label class="overlay sidebar-overlay" for="__navigation"></label>
+<label class="overlay toc-overlay" for="__toc"></label>
+
+<a class="skip-to-content muted-link" href="#furo-main-content">Skip to content</a>
+
+
+
+<div class="page">
+  <header class="mobile-header">
+    <div class="header-left">
+      <label class="nav-overlay-icon" for="__navigation">
+        <span class="icon"><svg><use href="#svg-menu"></use></svg></span>
+      </label>
+    </div>
+    <div class="header-center">
+      <a href="index.html"><div class="brand">stable-worldmodel
+Documentation</div></a>
+    </div>
+    <div class="header-right">
+      <div class="theme-toggle-container theme-toggle-header">
+        <button class="theme-toggle" aria-label="Toggle Light / Dark / Auto color theme">
+          <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+          <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+          <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+          <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+        </button>
+      </div>
+      <label class="toc-overlay-icon toc-header-icon no-toc" for="__toc">
+        <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
+      </label>
+    </div>
+  </header>
+  <aside class="sidebar-drawer">
+    <div class="sidebar-container">
+      
+      <div class="sidebar-sticky"><a class="sidebar-brand" href="index.html">
+  <div class="sidebar-logo-container">
+    <img class="sidebar-logo only-light" src="_static/img/logo-light.svg" alt="Light Logo"/>
+    <img class="sidebar-logo only-dark" src="_static/img/logo-dark.svg" alt="Dark Logo"/>
+  </div>
+  
+  <span class="sidebar-brand-text">stable-worldmodel
+Documentation</span>
+  
+</a><form class="sidebar-search-container" method="get" action="search.html" role="search">
+  <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
+  <input type="hidden" name="check_keywords" value="yes">
+  <input type="hidden" name="area" value="default">
+</form>
+<div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
+  <p class="caption" role="heading"><span class="caption-text">Development</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/randall-lab/stable-worldmodel">Github</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/randall-lab/stable-worldmodel/tree/main/docs">Contribute to the Docs</a></li>
+</ul>
+
+</div>
+</div>
+
+      </div>
+      
+    </div>
+  </aside>
+  <div class="main">
+    <div class="content">
+      <div class="article-container">
+        <a href="#" class="back-to-top muted-link">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"></path>
+          </svg>
+          <span>Back to top</span>
+        </a>
+        <div class="content-icon-container">
+          <div class="edit-this-page">
+  <a class="muted-link" href="https://github.com/randall-lab/stable-worldmodel/edit/main/docs/modules.rst" rel="edit" title="Edit this page">
+    <svg><use href="#svg-pencil"></use></svg>
+    <span class="visually-hidden">Edit this page</span>
+  </a>
+</div><div class="theme-toggle-container theme-toggle-content">
+            <button class="theme-toggle" aria-label="Toggle Light / Dark / Auto color theme">
+              <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+              <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+              <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+              <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+            </button>
+          </div>
+          <label class="toc-overlay-icon toc-content-icon no-toc" for="__toc">
+            <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
+          </label>
+        </div>
+        <article role="main" id="furo-main-content">
+          <section id="stable-worldmodel">
+<h1>stable_worldmodel<a class="headerlink" href="#stable-worldmodel" title="Link to this heading">¶</a></h1>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="stable_worldmodel.html">stable_worldmodel package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="stable_worldmodel.html#subpackages">Subpackages</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="stable_worldmodel.envs.html">stable_worldmodel.envs package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="stable_worldmodel.envs.html#submodules">Submodules</a></li>
+<li class="toctree-l4"><a class="reference internal" href="stable_worldmodel.envs.html#module-stable_worldmodel.envs.image_positioning">stable_worldmodel.envs.image_positioning module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="stable_worldmodel.envs.html#module-stable_worldmodel.envs.pusht">stable_worldmodel.envs.pusht module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="stable_worldmodel.envs.html#module-stable_worldmodel.envs.simple_point_maze">stable_worldmodel.envs.simple_point_maze module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="stable_worldmodel.envs.html#module-stable_worldmodel.envs.two_room">stable_worldmodel.envs.two_room module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="stable_worldmodel.envs.html#module-stable_worldmodel.envs.utils">stable_worldmodel.envs.utils module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="stable_worldmodel.envs.html#module-stable_worldmodel.envs.voidrun">stable_worldmodel.envs.voidrun module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="stable_worldmodel.envs.html#module-stable_worldmodel.envs">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="stable_worldmodel.solver.html">stable_worldmodel.solver package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="stable_worldmodel.solver.html#submodules">Submodules</a></li>
+<li class="toctree-l4"><a class="reference internal" href="stable_worldmodel.solver.html#module-stable_worldmodel.solver.cem">stable_worldmodel.solver.cem module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="stable_worldmodel.solver.html#module-stable_worldmodel.solver.gd">stable_worldmodel.solver.gd module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="stable_worldmodel.solver.html#stable-worldmodel-solver-mppi-module">stable_worldmodel.solver.mppi module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="stable_worldmodel.solver.html#module-stable_worldmodel.solver.random">stable_worldmodel.solver.random module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="stable_worldmodel.solver.html#module-stable_worldmodel.solver.solver">stable_worldmodel.solver.solver module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="stable_worldmodel.solver.html#module-stable_worldmodel.solver">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="stable_worldmodel.wm.html">stable_worldmodel.wm package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="stable_worldmodel.wm.html#submodules">Submodules</a></li>
+<li class="toctree-l4"><a class="reference internal" href="stable_worldmodel.wm.html#module-stable_worldmodel.wm.dinowm">stable_worldmodel.wm.dinowm module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="stable_worldmodel.wm.html#module-stable_worldmodel.wm.dreamer">stable_worldmodel.wm.dreamer module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="stable_worldmodel.wm.html#module-stable_worldmodel.wm.dummy">stable_worldmodel.wm.dummy module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="stable_worldmodel.wm.html#module-stable_worldmodel.wm.frame">stable_worldmodel.wm.frame module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="stable_worldmodel.wm.html#module-stable_worldmodel.wm.old_dinowm">stable_worldmodel.wm.old_dinowm module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="stable_worldmodel.wm.html#module-stable_worldmodel.wm.tdmpc">stable_worldmodel.wm.tdmpc module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="stable_worldmodel.wm.html#module-stable_worldmodel.wm">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="stable_worldmodel.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="stable_worldmodel.html#module-stable_worldmodel.cli">stable_worldmodel.cli module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="stable_worldmodel.html#stable_worldmodel.cli.common"><code class="docutils literal notranslate"><span class="pre">common()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="stable_worldmodel.html#stable_worldmodel.cli.delete"><code class="docutils literal notranslate"><span class="pre">delete()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="stable_worldmodel.html#stable_worldmodel.cli.display_dataset_info"><code class="docutils literal notranslate"><span class="pre">display_dataset_info()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="stable_worldmodel.html#stable_worldmodel.cli.display_world_info"><code class="docutils literal notranslate"><span class="pre">display_world_info()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="stable_worldmodel.html#stable_worldmodel.cli.list_cmd"><code class="docutils literal notranslate"><span class="pre">list_cmd()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="stable_worldmodel.html#stable_worldmodel.cli.show"><code class="docutils literal notranslate"><span class="pre">show()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="stable_worldmodel.html#module-stable_worldmodel.data">stable_worldmodel.data module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="stable_worldmodel.html#stable_worldmodel.data.SpaceInfo"><code class="docutils literal notranslate"><span class="pre">SpaceInfo</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="stable_worldmodel.html#stable_worldmodel.data.SpaceInfo.dtype"><code class="docutils literal notranslate"><span class="pre">SpaceInfo.dtype</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="stable_worldmodel.html#stable_worldmodel.data.SpaceInfo.high"><code class="docutils literal notranslate"><span class="pre">SpaceInfo.high</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="stable_worldmodel.html#stable_worldmodel.data.SpaceInfo.low"><code class="docutils literal notranslate"><span class="pre">SpaceInfo.low</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="stable_worldmodel.html#stable_worldmodel.data.SpaceInfo.n"><code class="docutils literal notranslate"><span class="pre">SpaceInfo.n</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="stable_worldmodel.html#stable_worldmodel.data.SpaceInfo.shape"><code class="docutils literal notranslate"><span class="pre">SpaceInfo.shape</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="stable_worldmodel.html#stable_worldmodel.data.SpaceInfo.type"><code class="docutils literal notranslate"><span class="pre">SpaceInfo.type</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="stable_worldmodel.html#stable_worldmodel.data.StepsDataset"><code class="docutils literal notranslate"><span class="pre">StepsDataset</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="stable_worldmodel.html#stable_worldmodel.data.StepsDataset.get_episode_slice"><code class="docutils literal notranslate"><span class="pre">StepsDataset.get_episode_slice()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="stable_worldmodel.html#stable_worldmodel.data.StepsDataset.process_sample"><code class="docutils literal notranslate"><span class="pre">StepsDataset.process_sample()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="stable_worldmodel.html#stable_worldmodel.data.VariationInfo"><code class="docutils literal notranslate"><span class="pre">VariationInfo</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="stable_worldmodel.html#stable_worldmodel.data.VariationInfo.has_variation"><code class="docutils literal notranslate"><span class="pre">VariationInfo.has_variation</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="stable_worldmodel.html#stable_worldmodel.data.VariationInfo.names"><code class="docutils literal notranslate"><span class="pre">VariationInfo.names</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="stable_worldmodel.html#stable_worldmodel.data.VariationInfo.type"><code class="docutils literal notranslate"><span class="pre">VariationInfo.type</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="stable_worldmodel.html#stable_worldmodel.data.WorldInfo"><code class="docutils literal notranslate"><span class="pre">WorldInfo</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="stable_worldmodel.html#stable_worldmodel.data.WorldInfo.action_space"><code class="docutils literal notranslate"><span class="pre">WorldInfo.action_space</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="stable_worldmodel.html#stable_worldmodel.data.WorldInfo.config"><code class="docutils literal notranslate"><span class="pre">WorldInfo.config</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="stable_worldmodel.html#stable_worldmodel.data.WorldInfo.name"><code class="docutils literal notranslate"><span class="pre">WorldInfo.name</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="stable_worldmodel.html#stable_worldmodel.data.WorldInfo.observation_space"><code class="docutils literal notranslate"><span class="pre">WorldInfo.observation_space</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="stable_worldmodel.html#stable_worldmodel.data.WorldInfo.variation"><code class="docutils literal notranslate"><span class="pre">WorldInfo.variation</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="stable_worldmodel.html#stable_worldmodel.data.dataset_info"><code class="docutils literal notranslate"><span class="pre">dataset_info()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="stable_worldmodel.html#stable_worldmodel.data.delete_dataset"><code class="docutils literal notranslate"><span class="pre">delete_dataset()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="stable_worldmodel.html#stable_worldmodel.data.delete_model"><code class="docutils literal notranslate"><span class="pre">delete_model()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="stable_worldmodel.html#stable_worldmodel.data.get_cache_dir"><code class="docutils literal notranslate"><span class="pre">get_cache_dir()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="stable_worldmodel.html#stable_worldmodel.data.list_datasets"><code class="docutils literal notranslate"><span class="pre">list_datasets()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="stable_worldmodel.html#stable_worldmodel.data.list_models"><code class="docutils literal notranslate"><span class="pre">list_models()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="stable_worldmodel.html#stable_worldmodel.data.list_worlds"><code class="docutils literal notranslate"><span class="pre">list_worlds()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="stable_worldmodel.html#stable_worldmodel.data.world_info"><code class="docutils literal notranslate"><span class="pre">world_info()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="stable_worldmodel.html#module-stable_worldmodel.policy">stable_worldmodel.policy module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="stable_worldmodel.html#stable_worldmodel.policy.AutoCostModel"><code class="docutils literal notranslate"><span class="pre">AutoCostModel()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="stable_worldmodel.html#stable_worldmodel.policy.BasePolicy"><code class="docutils literal notranslate"><span class="pre">BasePolicy</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="stable_worldmodel.html#stable_worldmodel.policy.BasePolicy.get_action"><code class="docutils literal notranslate"><span class="pre">BasePolicy.get_action()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="stable_worldmodel.html#stable_worldmodel.policy.BasePolicy.set_env"><code class="docutils literal notranslate"><span class="pre">BasePolicy.set_env()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="stable_worldmodel.html#stable_worldmodel.policy.ExpertPolicy"><code class="docutils literal notranslate"><span class="pre">ExpertPolicy</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="stable_worldmodel.html#stable_worldmodel.policy.ExpertPolicy.get_action"><code class="docutils literal notranslate"><span class="pre">ExpertPolicy.get_action()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="stable_worldmodel.html#stable_worldmodel.policy.PlanConfig"><code class="docutils literal notranslate"><span class="pre">PlanConfig</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="stable_worldmodel.html#stable_worldmodel.policy.PlanConfig.action_block"><code class="docutils literal notranslate"><span class="pre">PlanConfig.action_block</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="stable_worldmodel.html#stable_worldmodel.policy.PlanConfig.history_len"><code class="docutils literal notranslate"><span class="pre">PlanConfig.history_len</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="stable_worldmodel.html#stable_worldmodel.policy.PlanConfig.horizon"><code class="docutils literal notranslate"><span class="pre">PlanConfig.horizon</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="stable_worldmodel.html#stable_worldmodel.policy.PlanConfig.plan_len"><code class="docutils literal notranslate"><span class="pre">PlanConfig.plan_len</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="stable_worldmodel.html#stable_worldmodel.policy.PlanConfig.receding_horizon"><code class="docutils literal notranslate"><span class="pre">PlanConfig.receding_horizon</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="stable_worldmodel.html#stable_worldmodel.policy.PlanConfig.warm_start"><code class="docutils literal notranslate"><span class="pre">PlanConfig.warm_start</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="stable_worldmodel.html#stable_worldmodel.policy.RandomPolicy"><code class="docutils literal notranslate"><span class="pre">RandomPolicy</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="stable_worldmodel.html#stable_worldmodel.policy.RandomPolicy.get_action"><code class="docutils literal notranslate"><span class="pre">RandomPolicy.get_action()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="stable_worldmodel.html#stable_worldmodel.policy.RandomPolicy.set_seed"><code class="docutils literal notranslate"><span class="pre">RandomPolicy.set_seed()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="stable_worldmodel.html#stable_worldmodel.policy.WorldModelPolicy"><code class="docutils literal notranslate"><span class="pre">WorldModelPolicy</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="stable_worldmodel.html#stable_worldmodel.policy.WorldModelPolicy.flatten_receding_horizon"><code class="docutils literal notranslate"><span class="pre">WorldModelPolicy.flatten_receding_horizon</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="stable_worldmodel.html#stable_worldmodel.policy.WorldModelPolicy.get_action"><code class="docutils literal notranslate"><span class="pre">WorldModelPolicy.get_action()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="stable_worldmodel.html#stable_worldmodel.policy.WorldModelPolicy.set_env"><code class="docutils literal notranslate"><span class="pre">WorldModelPolicy.set_env()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="stable_worldmodel.html#module-stable_worldmodel.spaces">stable_worldmodel.spaces module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="stable_worldmodel.html#stable_worldmodel.spaces.Box"><code class="docutils literal notranslate"><span class="pre">Box</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="stable_worldmodel.html#stable_worldmodel.spaces.Box.__init__"><code class="docutils literal notranslate"><span class="pre">Box.__init__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="stable_worldmodel.html#stable_worldmodel.spaces.Box.check"><code class="docutils literal notranslate"><span class="pre">Box.check()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="stable_worldmodel.html#stable_worldmodel.spaces.Box.contains"><code class="docutils literal notranslate"><span class="pre">Box.contains()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="stable_worldmodel.html#stable_worldmodel.spaces.Box.init_value"><code class="docutils literal notranslate"><span class="pre">Box.init_value</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="stable_worldmodel.html#stable_worldmodel.spaces.Box.reset"><code class="docutils literal notranslate"><span class="pre">Box.reset()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="stable_worldmodel.html#stable_worldmodel.spaces.Box.sample"><code class="docutils literal notranslate"><span class="pre">Box.sample()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="stable_worldmodel.html#stable_worldmodel.spaces.Box.value"><code class="docutils literal notranslate"><span class="pre">Box.value</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="stable_worldmodel.html#stable_worldmodel.spaces.Dict"><code class="docutils literal notranslate"><span class="pre">Dict</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="stable_worldmodel.html#stable_worldmodel.spaces.Dict.__init__"><code class="docutils literal notranslate"><span class="pre">Dict.__init__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="stable_worldmodel.html#stable_worldmodel.spaces.Dict.check"><code class="docutils literal notranslate"><span class="pre">Dict.check()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="stable_worldmodel.html#stable_worldmodel.spaces.Dict.contains"><code class="docutils literal notranslate"><span class="pre">Dict.contains()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="stable_worldmodel.html#stable_worldmodel.spaces.Dict.init_value"><code class="docutils literal notranslate"><span class="pre">Dict.init_value</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="stable_worldmodel.html#stable_worldmodel.spaces.Dict.names"><code class="docutils literal notranslate"><span class="pre">Dict.names()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="stable_worldmodel.html#stable_worldmodel.spaces.Dict.reset"><code class="docutils literal notranslate"><span class="pre">Dict.reset()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="stable_worldmodel.html#stable_worldmodel.spaces.Dict.sample"><code class="docutils literal notranslate"><span class="pre">Dict.sample()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="stable_worldmodel.html#stable_worldmodel.spaces.Dict.sampling_order"><code class="docutils literal notranslate"><span class="pre">Dict.sampling_order</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="stable_worldmodel.html#stable_worldmodel.spaces.Dict.update"><code class="docutils literal notranslate"><span class="pre">Dict.update()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="stable_worldmodel.html#stable_worldmodel.spaces.Dict.value"><code class="docutils literal notranslate"><span class="pre">Dict.value</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="stable_worldmodel.html#stable_worldmodel.spaces.Discrete"><code class="docutils literal notranslate"><span class="pre">Discrete</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="stable_worldmodel.html#stable_worldmodel.spaces.Discrete.__init__"><code class="docutils literal notranslate"><span class="pre">Discrete.__init__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="stable_worldmodel.html#stable_worldmodel.spaces.Discrete.check"><code class="docutils literal notranslate"><span class="pre">Discrete.check()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="stable_worldmodel.html#stable_worldmodel.spaces.Discrete.contains"><code class="docutils literal notranslate"><span class="pre">Discrete.contains()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="stable_worldmodel.html#stable_worldmodel.spaces.Discrete.init_value"><code class="docutils literal notranslate"><span class="pre">Discrete.init_value</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="stable_worldmodel.html#stable_worldmodel.spaces.Discrete.reset"><code class="docutils literal notranslate"><span class="pre">Discrete.reset()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="stable_worldmodel.html#stable_worldmodel.spaces.Discrete.sample"><code class="docutils literal notranslate"><span class="pre">Discrete.sample()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="stable_worldmodel.html#stable_worldmodel.spaces.Discrete.value"><code class="docutils literal notranslate"><span class="pre">Discrete.value</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="stable_worldmodel.html#stable_worldmodel.spaces.MultiDiscrete"><code class="docutils literal notranslate"><span class="pre">MultiDiscrete</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="stable_worldmodel.html#stable_worldmodel.spaces.MultiDiscrete.__init__"><code class="docutils literal notranslate"><span class="pre">MultiDiscrete.__init__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="stable_worldmodel.html#stable_worldmodel.spaces.MultiDiscrete.check"><code class="docutils literal notranslate"><span class="pre">MultiDiscrete.check()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="stable_worldmodel.html#stable_worldmodel.spaces.MultiDiscrete.contains"><code class="docutils literal notranslate"><span class="pre">MultiDiscrete.contains()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="stable_worldmodel.html#stable_worldmodel.spaces.MultiDiscrete.init_value"><code class="docutils literal notranslate"><span class="pre">MultiDiscrete.init_value</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="stable_worldmodel.html#stable_worldmodel.spaces.MultiDiscrete.reset"><code class="docutils literal notranslate"><span class="pre">MultiDiscrete.reset()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="stable_worldmodel.html#stable_worldmodel.spaces.MultiDiscrete.sample"><code class="docutils literal notranslate"><span class="pre">MultiDiscrete.sample()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="stable_worldmodel.html#stable_worldmodel.spaces.MultiDiscrete.value"><code class="docutils literal notranslate"><span class="pre">MultiDiscrete.value</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="stable_worldmodel.html#stable_worldmodel.spaces.RGBBox"><code class="docutils literal notranslate"><span class="pre">RGBBox</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="stable_worldmodel.html#module-stable_worldmodel.utils">stable_worldmodel.utils module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="stable_worldmodel.html#stable_worldmodel.utils.flatten_dict"><code class="docutils literal notranslate"><span class="pre">flatten_dict()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="stable_worldmodel.html#stable_worldmodel.utils.get_in"><code class="docutils literal notranslate"><span class="pre">get_in()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="stable_worldmodel.html#stable_worldmodel.utils.pretraining"><code class="docutils literal notranslate"><span class="pre">pretraining()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="stable_worldmodel.html#module-stable_worldmodel.world">stable_worldmodel.world module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="stable_worldmodel.html#stable_worldmodel.world.World"><code class="docutils literal notranslate"><span class="pre">World</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="stable_worldmodel.html#stable_worldmodel.world.World.action_space"><code class="docutils literal notranslate"><span class="pre">World.action_space</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="stable_worldmodel.html#stable_worldmodel.world.World.close"><code class="docutils literal notranslate"><span class="pre">World.close()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="stable_worldmodel.html#stable_worldmodel.world.World.evaluate"><code class="docutils literal notranslate"><span class="pre">World.evaluate()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="stable_worldmodel.html#stable_worldmodel.world.World.num_envs"><code class="docutils literal notranslate"><span class="pre">World.num_envs</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="stable_worldmodel.html#stable_worldmodel.world.World.observation_space"><code class="docutils literal notranslate"><span class="pre">World.observation_space</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="stable_worldmodel.html#stable_worldmodel.world.World.record_dataset"><code class="docutils literal notranslate"><span class="pre">World.record_dataset()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="stable_worldmodel.html#stable_worldmodel.world.World.record_video"><code class="docutils literal notranslate"><span class="pre">World.record_video()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="stable_worldmodel.html#stable_worldmodel.world.World.record_video_from_dataset"><code class="docutils literal notranslate"><span class="pre">World.record_video_from_dataset()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="stable_worldmodel.html#stable_worldmodel.world.World.reset"><code class="docutils literal notranslate"><span class="pre">World.reset()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="stable_worldmodel.html#stable_worldmodel.world.World.set_policy"><code class="docutils literal notranslate"><span class="pre">World.set_policy()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="stable_worldmodel.html#stable_worldmodel.world.World.single_action_space"><code class="docutils literal notranslate"><span class="pre">World.single_action_space</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="stable_worldmodel.html#stable_worldmodel.world.World.single_observation_space"><code class="docutils literal notranslate"><span class="pre">World.single_observation_space</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="stable_worldmodel.html#stable_worldmodel.world.World.single_variation_space"><code class="docutils literal notranslate"><span class="pre">World.single_variation_space</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="stable_worldmodel.html#stable_worldmodel.world.World.step"><code class="docutils literal notranslate"><span class="pre">World.step()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="stable_worldmodel.html#stable_worldmodel.world.World.variation_space"><code class="docutils literal notranslate"><span class="pre">World.variation_space</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="stable_worldmodel.html#module-stable_worldmodel.wrappers">stable_worldmodel.wrappers module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="stable_worldmodel.html#stable_worldmodel.wrappers.AddPixelsWrapper"><code class="docutils literal notranslate"><span class="pre">AddPixelsWrapper</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="stable_worldmodel.html#stable_worldmodel.wrappers.AddPixelsWrapper.reset"><code class="docutils literal notranslate"><span class="pre">AddPixelsWrapper.reset()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="stable_worldmodel.html#stable_worldmodel.wrappers.AddPixelsWrapper.step"><code class="docutils literal notranslate"><span class="pre">AddPixelsWrapper.step()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="stable_worldmodel.html#stable_worldmodel.wrappers.EnsureGoalInfoWrapper"><code class="docutils literal notranslate"><span class="pre">EnsureGoalInfoWrapper</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="stable_worldmodel.html#stable_worldmodel.wrappers.EnsureGoalInfoWrapper.reset"><code class="docutils literal notranslate"><span class="pre">EnsureGoalInfoWrapper.reset()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="stable_worldmodel.html#stable_worldmodel.wrappers.EnsureGoalInfoWrapper.step"><code class="docutils literal notranslate"><span class="pre">EnsureGoalInfoWrapper.step()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="stable_worldmodel.html#stable_worldmodel.wrappers.EnsureImageShape"><code class="docutils literal notranslate"><span class="pre">EnsureImageShape</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="stable_worldmodel.html#stable_worldmodel.wrappers.EnsureImageShape.reset"><code class="docutils literal notranslate"><span class="pre">EnsureImageShape.reset()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="stable_worldmodel.html#stable_worldmodel.wrappers.EnsureImageShape.step"><code class="docutils literal notranslate"><span class="pre">EnsureImageShape.step()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="stable_worldmodel.html#stable_worldmodel.wrappers.EnsureInfoKeysWrapper"><code class="docutils literal notranslate"><span class="pre">EnsureInfoKeysWrapper</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="stable_worldmodel.html#stable_worldmodel.wrappers.EnsureInfoKeysWrapper.reset"><code class="docutils literal notranslate"><span class="pre">EnsureInfoKeysWrapper.reset()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="stable_worldmodel.html#stable_worldmodel.wrappers.EnsureInfoKeysWrapper.step"><code class="docutils literal notranslate"><span class="pre">EnsureInfoKeysWrapper.step()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="stable_worldmodel.html#stable_worldmodel.wrappers.EverythingToInfoWrapper"><code class="docutils literal notranslate"><span class="pre">EverythingToInfoWrapper</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="stable_worldmodel.html#stable_worldmodel.wrappers.EverythingToInfoWrapper.reset"><code class="docutils literal notranslate"><span class="pre">EverythingToInfoWrapper.reset()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="stable_worldmodel.html#stable_worldmodel.wrappers.EverythingToInfoWrapper.step"><code class="docutils literal notranslate"><span class="pre">EverythingToInfoWrapper.step()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="stable_worldmodel.html#stable_worldmodel.wrappers.MegaWrapper"><code class="docutils literal notranslate"><span class="pre">MegaWrapper</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="stable_worldmodel.html#stable_worldmodel.wrappers.MegaWrapper.reset"><code class="docutils literal notranslate"><span class="pre">MegaWrapper.reset()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="stable_worldmodel.html#stable_worldmodel.wrappers.MegaWrapper.step"><code class="docutils literal notranslate"><span class="pre">MegaWrapper.step()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="stable_worldmodel.html#stable_worldmodel.wrappers.ResizeGoalWrapper"><code class="docutils literal notranslate"><span class="pre">ResizeGoalWrapper</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="stable_worldmodel.html#stable_worldmodel.wrappers.ResizeGoalWrapper.reset"><code class="docutils literal notranslate"><span class="pre">ResizeGoalWrapper.reset()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="stable_worldmodel.html#stable_worldmodel.wrappers.ResizeGoalWrapper.step"><code class="docutils literal notranslate"><span class="pre">ResizeGoalWrapper.step()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="stable_worldmodel.html#stable_worldmodel.wrappers.VariationWrapper"><code class="docutils literal notranslate"><span class="pre">VariationWrapper</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="stable_worldmodel.html#stable_worldmodel.wrappers.VariationWrapper.envs"><code class="docutils literal notranslate"><span class="pre">VariationWrapper.envs</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="stable_worldmodel.html#module-stable_worldmodel">Module contents</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="stable_worldmodel.html#stable_worldmodel.PlanConfig"><code class="docutils literal notranslate"><span class="pre">PlanConfig</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="stable_worldmodel.html#stable_worldmodel.PlanConfig.action_block"><code class="docutils literal notranslate"><span class="pre">PlanConfig.action_block</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="stable_worldmodel.html#stable_worldmodel.PlanConfig.history_len"><code class="docutils literal notranslate"><span class="pre">PlanConfig.history_len</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="stable_worldmodel.html#stable_worldmodel.PlanConfig.horizon"><code class="docutils literal notranslate"><span class="pre">PlanConfig.horizon</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="stable_worldmodel.html#stable_worldmodel.PlanConfig.plan_len"><code class="docutils literal notranslate"><span class="pre">PlanConfig.plan_len</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="stable_worldmodel.html#stable_worldmodel.PlanConfig.receding_horizon"><code class="docutils literal notranslate"><span class="pre">PlanConfig.receding_horizon</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="stable_worldmodel.html#stable_worldmodel.PlanConfig.warm_start"><code class="docutils literal notranslate"><span class="pre">PlanConfig.warm_start</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="stable_worldmodel.html#stable_worldmodel.World"><code class="docutils literal notranslate"><span class="pre">World</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="stable_worldmodel.html#stable_worldmodel.World.action_space"><code class="docutils literal notranslate"><span class="pre">World.action_space</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="stable_worldmodel.html#stable_worldmodel.World.close"><code class="docutils literal notranslate"><span class="pre">World.close()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="stable_worldmodel.html#stable_worldmodel.World.evaluate"><code class="docutils literal notranslate"><span class="pre">World.evaluate()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="stable_worldmodel.html#stable_worldmodel.World.num_envs"><code class="docutils literal notranslate"><span class="pre">World.num_envs</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="stable_worldmodel.html#stable_worldmodel.World.observation_space"><code class="docutils literal notranslate"><span class="pre">World.observation_space</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="stable_worldmodel.html#stable_worldmodel.World.record_dataset"><code class="docutils literal notranslate"><span class="pre">World.record_dataset()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="stable_worldmodel.html#stable_worldmodel.World.record_video"><code class="docutils literal notranslate"><span class="pre">World.record_video()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="stable_worldmodel.html#stable_worldmodel.World.record_video_from_dataset"><code class="docutils literal notranslate"><span class="pre">World.record_video_from_dataset()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="stable_worldmodel.html#stable_worldmodel.World.reset"><code class="docutils literal notranslate"><span class="pre">World.reset()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="stable_worldmodel.html#stable_worldmodel.World.set_policy"><code class="docutils literal notranslate"><span class="pre">World.set_policy()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="stable_worldmodel.html#stable_worldmodel.World.single_action_space"><code class="docutils literal notranslate"><span class="pre">World.single_action_space</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="stable_worldmodel.html#stable_worldmodel.World.single_observation_space"><code class="docutils literal notranslate"><span class="pre">World.single_observation_space</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="stable_worldmodel.html#stable_worldmodel.World.single_variation_space"><code class="docutils literal notranslate"><span class="pre">World.single_variation_space</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="stable_worldmodel.html#stable_worldmodel.World.step"><code class="docutils literal notranslate"><span class="pre">World.step()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="stable_worldmodel.html#stable_worldmodel.World.variation_space"><code class="docutils literal notranslate"><span class="pre">World.variation_space</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="stable_worldmodel.html#stable_worldmodel.pretraining"><code class="docutils literal notranslate"><span class="pre">pretraining()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</div>
+</section>
+
+        </article>
+      </div>
+      <footer>
+        
+        <div class="related-pages">
+          
+          
+        </div>
+        <div class="bottom-of-page">
+          <div class="left-details">
+            <div class="copyright">
+                Copyright &#169; 2025
+            </div>
+            Made with <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
+            
+            <a href="https://github.com/pradyunsg/furo">Furo</a>
+            
+          </div>
+          <div class="right-details">
+            <div class="icons">
+              <a class="muted-link fa-brands fa-solid fa-discord" href="https://discord.gg/8M6hT39X" aria-label="Discord"></a>
+              <a class="muted-link fa-brands fa-solid fa-github" href="https://github.com/randall-lab/stable-worldmodel" aria-label="GitHub"></a>
+              
+            </div>
+          </div>
+        </div>
+        
+      </footer>
+    </div>
+    <aside class="toc-drawer no-toc">
+      
+      
+      
+    </aside>
+  </div>
+</div><script src="_static/documentation_options.js?v=c2d0de4b"></script>
+    <script src="_static/doctools.js?v=9bcbadda"></script>
+    <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/scripts/furo.js?v=46bd48cc"></script>
+    </body>
+</html>

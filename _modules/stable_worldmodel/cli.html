@@ -1,0 +1,917 @@
+<!doctype html>
+<html class="no-js" lang="en" data-content_root="../../">
+  <head><meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="../../genindex.html"><link rel="search" title="Search" href="../../search.html">
+        <link rel="prefetch" href="../../_static/img/logo-light.svg" as="image">
+        <link rel="prefetch" href="../../_static/img/logo-dark.svg" as="image">
+
+    <link rel="shortcut icon" href="../../_static/favicon.ico"><!-- Generated with Sphinx 8.2.3 and Furo 2025.09.25 -->
+        <title>stable_worldmodel.cli - stable-worldmodel Documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=8f2a1f02" />
+    <link rel="stylesheet" type="text/css" href="../../_static/styles/furo.css?v=580074bf" />
+    <link rel="stylesheet" type="text/css" href="../../_static/styles/furo-extensions.css?v=8dab3a3b" />
+    <link rel="stylesheet" type="text/css" href="../../_static/css/custom.css?v=33d9fa98" />
+    <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/fontawesome.min.css" />
+    <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/solid.min.css" />
+    <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/brands.min.css" />
+    
+    
+
+
+<style>
+  body {
+    --color-code-background: #f8f8f8;
+  --color-code-foreground: black;
+  --color-brand-primary: #202123;
+  --color-brand-content: #296cde;
+  --color-inline-code-background: #f8f8f8;
+  --color-brand-visited: #2757dd;
+  
+  }
+  @media not print {
+    body[data-theme="dark"] {
+      --color-code-background: #272822;
+  --color-code-foreground: #f8f8f2;
+  
+    }
+    @media (prefers-color-scheme: dark) {
+      body:not([data-theme="light"]) {
+        --color-code-background: #272822;
+  --color-code-foreground: #f8f8f2;
+  
+      }
+    }
+  }
+</style></head>
+  <body>
+    
+    <script>
+      document.body.dataset.theme = localStorage.getItem("theme") || "auto";
+    </script>
+    
+
+<svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+  <symbol id="svg-toc" viewBox="0 0 24 24">
+    <title>Contents</title>
+    <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 1024 1024">
+      <path d="M408 442h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8zm-8 204c0 4.4 3.6 8 8 8h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56zm504-486H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zm0 632H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zM115.4 518.9L271.7 642c5.8 4.6 14.4.5 14.4-6.9V388.9c0-7.4-8.5-11.5-14.4-6.9L115.4 505.1a8.74 8.74 0 0 0 0 13.8z"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-menu" viewBox="0 0 24 24">
+    <title>Menu</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-menu">
+      <line x1="3" y1="12" x2="21" y2="12"></line>
+      <line x1="3" y1="6" x2="21" y2="6"></line>
+      <line x1="3" y1="18" x2="21" y2="18"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-arrow-right" viewBox="0 0 24 24">
+    <title>Expand</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-chevron-right">
+      <polyline points="9 18 15 12 9 6"></polyline>
+    </svg>
+  </symbol>
+  <symbol id="svg-sun" viewBox="0 0 24 24">
+    <title>Light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="feather-sun">
+      <circle cx="12" cy="12" r="5"></circle>
+      <line x1="12" y1="1" x2="12" y2="3"></line>
+      <line x1="12" y1="21" x2="12" y2="23"></line>
+      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+      <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+      <line x1="1" y1="12" x2="3" y2="12"></line>
+      <line x1="21" y1="12" x2="23" y2="12"></line>
+      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+      <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon" viewBox="0 0 24 24">
+    <title>Dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-moon">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z" />
+    </svg>
+  </symbol>
+  <symbol id="svg-sun-with-moon" viewBox="0 0 24 24">
+    <title>Auto light/dark, in light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path style="opacity: 50%" d="M 5.411 14.504 C 5.471 14.504 5.532 14.504 5.591 14.504 C 3.639 16.319 4.383 19.569 6.931 20.352 C 7.693 20.586 8.512 20.551 9.25 20.252 C 8.023 23.207 4.056 23.725 2.11 21.184 C 0.166 18.642 1.702 14.949 4.874 14.536 C 5.051 14.512 5.231 14.5 5.411 14.5 L 5.411 14.504 Z"/>
+      <line x1="14.5" y1="3.25" x2="14.5" y2="1.25"/>
+      <line x1="14.5" y1="15.85" x2="14.5" y2="17.85"/>
+      <line x1="10.044" y1="5.094" x2="8.63" y2="3.68"/>
+      <line x1="19" y1="14.05" x2="20.414" y2="15.464"/>
+      <line x1="8.2" y1="9.55" x2="6.2" y2="9.55"/>
+      <line x1="20.8" y1="9.55" x2="22.8" y2="9.55"/>
+      <line x1="10.044" y1="14.006" x2="8.63" y2="15.42"/>
+      <line x1="19" y1="5.05" x2="20.414" y2="3.636"/>
+      <circle cx="14.5" cy="9.55" r="3.6"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon-with-sun" viewBox="0 0 24 24">
+    <title>Auto light/dark, in dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path d="M 8.282 7.007 C 8.385 7.007 8.494 7.007 8.595 7.007 C 5.18 10.184 6.481 15.869 10.942 17.24 C 12.275 17.648 13.706 17.589 15 17.066 C 12.851 22.236 5.91 23.143 2.505 18.696 C -0.897 14.249 1.791 7.786 7.342 7.063 C 7.652 7.021 7.965 7 8.282 7 L 8.282 7.007 Z"/>
+      <line style="opacity: 50%" x1="18" y1="3.705" x2="18" y2="2.5"/>
+      <line style="opacity: 50%" x1="18" y1="11.295" x2="18" y2="12.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="4.816" x2="14.464" y2="3.964"/>
+      <line style="opacity: 50%" x1="20.711" y1="10.212" x2="21.563" y2="11.063"/>
+      <line style="opacity: 50%" x1="14.205" y1="7.5" x2="13.001" y2="7.5"/>
+      <line style="opacity: 50%" x1="21.795" y1="7.5" x2="23" y2="7.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="10.184" x2="14.464" y2="11.036"/>
+      <line style="opacity: 50%" x1="20.711" y1="4.789" x2="21.563" y2="3.937"/>
+      <circle style="opacity: 50%" cx="18" cy="7.5" r="2.169"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-pencil" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-pencil-code">
+      <path d="M4 20h4l10.5 -10.5a2.828 2.828 0 1 0 -4 -4l-10.5 10.5v4" />
+      <path d="M13.5 6.5l4 4" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+  <symbol id="svg-eye" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-eye-code">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M10 12a2 2 0 1 0 4 0a2 2 0 0 0 -4 0" />
+      <path
+        d="M11.11 17.958c-3.209 -.307 -5.91 -2.293 -8.11 -5.958c2.4 -4 5.4 -6 9 -6c3.6 0 6.6 2 9 6c-.21 .352 -.427 .688 -.647 1.008" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+</svg>
+
+<input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation" aria-label="Toggle site navigation sidebar">
+<input type="checkbox" class="sidebar-toggle" name="__toc" id="__toc" aria-label="Toggle table of contents sidebar">
+<label class="overlay sidebar-overlay" for="__navigation"></label>
+<label class="overlay toc-overlay" for="__toc"></label>
+
+<a class="skip-to-content muted-link" href="#furo-main-content">Skip to content</a>
+
+
+
+<div class="page">
+  <header class="mobile-header">
+    <div class="header-left">
+      <label class="nav-overlay-icon" for="__navigation">
+        <span class="icon"><svg><use href="#svg-menu"></use></svg></span>
+      </label>
+    </div>
+    <div class="header-center">
+      <a href="../../index.html"><div class="brand">stable-worldmodel
+Documentation</div></a>
+    </div>
+    <div class="header-right">
+      <div class="theme-toggle-container theme-toggle-header">
+        <button class="theme-toggle" aria-label="Toggle Light / Dark / Auto color theme">
+          <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+          <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+          <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+          <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+        </button>
+      </div>
+      <label class="toc-overlay-icon toc-header-icon no-toc" for="__toc">
+        <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
+      </label>
+    </div>
+  </header>
+  <aside class="sidebar-drawer">
+    <div class="sidebar-container">
+      
+      <div class="sidebar-sticky"><a class="sidebar-brand" href="../../index.html">
+  <div class="sidebar-logo-container">
+    <img class="sidebar-logo only-light" src="../../_static/img/logo-light.svg" alt="Light Logo"/>
+    <img class="sidebar-logo only-dark" src="../../_static/img/logo-dark.svg" alt="Dark Logo"/>
+  </div>
+  
+  <span class="sidebar-brand-text">stable-worldmodel
+Documentation</span>
+  
+</a><form class="sidebar-search-container" method="get" action="../../search.html" role="search">
+  <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
+  <input type="hidden" name="check_keywords" value="yes">
+  <input type="hidden" name="area" value="default">
+</form>
+<div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
+  <p class="caption" role="heading"><span class="caption-text">Development</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/randall-lab/stable-worldmodel">Github</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/randall-lab/stable-worldmodel/tree/main/docs">Contribute to the Docs</a></li>
+</ul>
+
+</div>
+</div>
+
+      </div>
+      
+    </div>
+  </aside>
+  <div class="main">
+    <div class="content">
+      <div class="article-container">
+        <a href="#" class="back-to-top muted-link">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"></path>
+          </svg>
+          <span>Back to top</span>
+        </a>
+        <div class="content-icon-container">
+          <div class="theme-toggle-container theme-toggle-content">
+            <button class="theme-toggle" aria-label="Toggle Light / Dark / Auto color theme">
+              <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+              <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+              <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+              <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+            </button>
+          </div>
+          <label class="toc-overlay-icon toc-content-icon no-toc" for="__toc">
+            <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
+          </label>
+        </div>
+        <article role="main" id="furo-main-content">
+          <h1>Source code for stable_worldmodel.cli</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;Command-line interface for stable-worldmodel.</span>
+
+<span class="sd">This module provides CLI commands for managing and inspecting stable-worldmodel</span>
+<span class="sd">resources including datasets, models, and world environments. The CLI uses the</span>
+<span class="sd">Typer framework with Rich formatting for an enhanced terminal experience.</span>
+
+<span class="sd">Available commands:</span>
+<span class="sd">    - list: List cached models, datasets, or worlds</span>
+<span class="sd">    - show: Display detailed information about datasets or worlds</span>
+<span class="sd">    - delete: Remove models or datasets from cache</span>
+
+<span class="sd">The CLI can be invoked via:</span>
+<span class="sd">    - `stable-worldmodel &lt;command&gt;`</span>
+<span class="sd">    - `swm &lt;command&gt;`</span>
+<span class="sd">    - `python -m stable_worldmodel.cli &lt;command&gt;`</span>
+
+<span class="sd">Typical usage examples:</span>
+
+<span class="sd">    List all cached datasets::</span>
+
+<span class="sd">        $ swm list dataset</span>
+
+<span class="sd">    Show information about a specific world::</span>
+
+<span class="sd">        $ swm show world swm/SimplePointMaze-v0</span>
+
+<span class="sd">    Delete a cached dataset::</span>
+
+<span class="sd">        $ swm delete dataset my-dataset</span>
+
+<span class="sd">    Show version::</span>
+
+<span class="sd">        $ swm --version</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Annotated</span><span class="p">,</span> <span class="n">Any</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">typer</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">rich</span><span class="w"> </span><span class="kn">import</span> <span class="n">box</span><span class="p">,</span> <span class="nb">print</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">rich.console</span><span class="w"> </span><span class="kn">import</span> <span class="n">Console</span><span class="p">,</span> <span class="n">Group</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">rich.panel</span><span class="w"> </span><span class="kn">import</span> <span class="n">Panel</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">rich.rule</span><span class="w"> </span><span class="kn">import</span> <span class="n">Rule</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">rich.table</span><span class="w"> </span><span class="kn">import</span> <span class="n">Table</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">rich.text</span><span class="w"> </span><span class="kn">import</span> <span class="n">Text</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">rich.tree</span><span class="w"> </span><span class="kn">import</span> <span class="n">Tree</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">stable_worldmodel</span><span class="w"> </span><span class="kn">import</span> <span class="n">data</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">.__about__</span><span class="w"> </span><span class="kn">import</span> <span class="n">__version__</span>
+
+
+<span class="n">console</span> <span class="o">=</span> <span class="n">Console</span><span class="p">()</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_summarize</span><span class="p">(</span><span class="n">x</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Summarize array-like data with shape and value range.</span>
+
+<span class="sd">    Attempts to convert input to a numpy array and returns a string describing</span>
+<span class="sd">    its shape, minimum, and maximum values. Falls back to repr() for non-array data.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        x (Any): Data to summarize. Can be any type, but works best with array-like data.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        str: Summary string with shape and range, or repr() if conversion fails.</span>
+
+<span class="sd">    Example:</span>
+<span class="sd">        &gt;&gt;&gt; arr = np.array([1, 2, 3, 4, 5])</span>
+<span class="sd">        &gt;&gt;&gt; _summarize(arr)</span>
+<span class="sd">        &#39;shape=[5], min=1, max=5&#39;</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">a</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+        <span class="k">return</span> <span class="nb">repr</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+    <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;shape=</span><span class="si">{</span><span class="nb">list</span><span class="p">(</span><span class="n">a</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span><span class="si">}</span><span class="s2">, min=</span><span class="si">{</span><span class="n">a</span><span class="o">.</span><span class="n">min</span><span class="p">()</span><span class="si">}</span><span class="s2">, max=</span><span class="si">{</span><span class="n">a</span><span class="o">.</span><span class="n">max</span><span class="p">()</span><span class="si">}</span><span class="s2">&quot;</span> <span class="k">if</span> <span class="n">a</span><span class="o">.</span><span class="n">size</span> <span class="k">else</span> <span class="sa">f</span><span class="s2">&quot;[] shape=</span><span class="si">{</span><span class="nb">list</span><span class="p">(</span><span class="n">a</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_leaf</span><span class="p">(</span><span class="n">m</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Check if a dictionary represents a leaf node in the space hierarchy.</span>
+
+<span class="sd">    A leaf node is identified as a dictionary containing a &#39;type&#39; key, which</span>
+<span class="sd">    indicates it&#39;s a terminal space definition rather than a nested structure.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        m (Any): Object to check, typically a dictionary.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        bool: True if m is a dict with &#39;type&#39; key, False otherwise.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">m</span><span class="p">,</span> <span class="nb">dict</span><span class="p">)</span> <span class="ow">and</span> <span class="s2">&quot;type&quot;</span> <span class="ow">in</span> <span class="n">m</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_leaf_table</span><span class="p">(</span><span class="n">title</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">m</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Table</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Create a Rich table displaying leaf node space properties.</span>
+
+<span class="sd">    Generates a formatted table showing space attributes like type, shape, dtype,</span>
+<span class="sd">    etc. Properties are displayed in a specific order with special formatting for</span>
+<span class="sd">    certain keys.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        title (str): Table title, typically the space name.</span>
+<span class="sd">        m (Dict[str, Any]): Dictionary containing space properties.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        Table: A Rich Table object formatted for display.</span>
+
+<span class="sd">    Note:</span>
+<span class="sd">        Standard keys (type, shape, dtype, n, low, high) are displayed first</span>
+<span class="sd">        in that order, followed by any additional keys alphabetically.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">t</span> <span class="o">=</span> <span class="n">Table</span><span class="p">(</span>
+        <span class="n">title</span><span class="o">=</span><span class="n">title</span><span class="p">,</span>
+        <span class="n">title_style</span><span class="o">=</span><span class="s2">&quot;bold yellow&quot;</span><span class="p">,</span>
+        <span class="n">title_justify</span><span class="o">=</span><span class="s2">&quot;left&quot;</span><span class="p">,</span>
+        <span class="n">box</span><span class="o">=</span><span class="n">box</span><span class="o">.</span><span class="n">MINIMAL_DOUBLE_HEAD</span><span class="p">,</span>
+        <span class="n">show_header</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">pad_edge</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">t</span><span class="o">.</span><span class="n">add_column</span><span class="p">(</span><span class="s2">&quot;k&quot;</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="s2">&quot;bold cyan&quot;</span><span class="p">,</span> <span class="n">no_wrap</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">t</span><span class="o">.</span><span class="n">add_column</span><span class="p">(</span><span class="s2">&quot;v&quot;</span><span class="p">)</span>
+    <span class="n">order</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;type&quot;</span><span class="p">,</span> <span class="s2">&quot;shape&quot;</span><span class="p">,</span> <span class="s2">&quot;dtype&quot;</span><span class="p">,</span> <span class="s2">&quot;n&quot;</span><span class="p">,</span> <span class="s2">&quot;low&quot;</span><span class="p">,</span> <span class="s2">&quot;high&quot;</span><span class="p">]</span>
+    <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">order</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">m</span><span class="p">:</span>
+            <span class="n">v</span> <span class="o">=</span> <span class="n">_summarize</span><span class="p">(</span><span class="n">m</span><span class="p">[</span><span class="n">k</span><span class="p">])</span> <span class="k">if</span> <span class="n">k</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;low&quot;</span><span class="p">,</span> <span class="s2">&quot;high&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">m</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">m</span><span class="p">[</span><span class="n">k</span><span class="p">]</span>
+            <span class="n">t</span><span class="o">.</span><span class="n">add_row</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">v</span><span class="p">))</span>
+    <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">m</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="k">if</span> <span class="n">k</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">order</span><span class="p">:</span>
+            <span class="n">t</span><span class="o">.</span><span class="n">add_row</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">v</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">t</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_build_hierarchy</span><span class="p">(</span><span class="n">flat_names</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="s2">&quot;.&quot;</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Build a nested dictionary hierarchy from flat dotted names.</span>
+
+<span class="sd">    Converts a list of dot-separated names into a nested dictionary structure,</span>
+<span class="sd">    useful for displaying hierarchical space names in tree format.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        flat_names: Iterable of string names with separator-delimited hierarchy.</span>
+<span class="sd">        sep (str, optional): Separator character for splitting names. Defaults to &quot;.&quot;.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        Dict[str, Dict]: Nested dictionary representing the hierarchy.</span>
+
+<span class="sd">    Example:</span>
+<span class="sd">        &gt;&gt;&gt; names = [&quot;agent.pos.x&quot;, &quot;agent.pos.y&quot;, &quot;goal.pos&quot;]</span>
+<span class="sd">        &gt;&gt;&gt; _build_hierarchy(names)</span>
+<span class="sd">        {&#39;agent&#39;: {&#39;pos&#39;: {&#39;x&#39;: {}, &#39;y&#39;: {}}}, &#39;goal&#39;: {&#39;pos&#39;: {}}}</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">root</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">dict</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">flat_names</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">root</span>
+    <span class="k">for</span> <span class="n">raw</span> <span class="ow">in</span> <span class="n">flat_names</span><span class="p">:</span>
+        <span class="n">parts</span> <span class="o">=</span> <span class="p">[</span><span class="n">p</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="nb">str</span><span class="p">(</span><span class="n">raw</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">sep</span><span class="p">)</span> <span class="k">if</span> <span class="n">p</span><span class="p">]</span>
+        <span class="n">cur</span> <span class="o">=</span> <span class="n">root</span>
+        <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">parts</span><span class="p">:</span>
+            <span class="n">cur</span> <span class="o">=</span> <span class="n">cur</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="p">{})</span>
+    <span class="k">return</span> <span class="n">root</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_render_hierarchy</span><span class="p">(</span><span class="n">parent</span><span class="p">:</span> <span class="n">Tree</span><span class="p">,</span> <span class="n">d</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">dict</span><span class="p">]):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Recursively render a hierarchical dictionary as a Rich Tree.</span>
+
+<span class="sd">    Traverses the nested dictionary and adds nodes to the Rich Tree, with</span>
+<span class="sd">    different styling for leaf vs. non-leaf nodes.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        parent (Tree): Parent Rich Tree node to add children to. Can be None</span>
+<span class="sd">            for root level.</span>
+<span class="sd">        d (Dict[str, Dict]): Nested dictionary representing the hierarchy.</span>
+
+<span class="sd">    Note:</span>
+<span class="sd">        Modifies the parent Tree in-place by adding child nodes.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">d</span><span class="p">):</span>
+        <span class="n">is_non_leaf</span> <span class="o">=</span> <span class="nb">bool</span><span class="p">(</span><span class="n">d</span><span class="p">[</span><span class="n">k</span><span class="p">])</span>
+        <span class="n">label</span> <span class="o">=</span> <span class="n">Text</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="s2">&quot;bold cyan&quot;</span><span class="p">)</span> <span class="k">if</span> <span class="n">is_non_leaf</span> <span class="k">else</span> <span class="n">Text</span><span class="p">(</span><span class="n">k</span><span class="p">)</span>
+        <span class="n">child</span> <span class="o">=</span> <span class="n">parent</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">label</span><span class="p">)</span> <span class="k">if</span> <span class="n">parent</span> <span class="k">else</span> <span class="n">Tree</span><span class="p">(</span><span class="n">label</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">is_non_leaf</span><span class="p">:</span>
+            <span class="n">_render_hierarchy</span><span class="p">(</span><span class="n">child</span><span class="p">,</span> <span class="n">d</span><span class="p">[</span><span class="n">k</span><span class="p">])</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_render</span><span class="p">(</span><span class="n">meta</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">|</span> <span class="nb">list</span><span class="p">[</span><span class="n">Any</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span> <span class="n">label</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Render space metadata as a Rich Tree or Table.</span>
+
+<span class="sd">    Creates an appropriate Rich display object (Tree or Table) for the given</span>
+<span class="sd">    metadata structure. Handles nested dictionaries, lists, and leaf nodes.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        meta (Union[Dict[str, Any], List[Any], None]): Space metadata to render.</span>
+<span class="sd">            Can be a nested dictionary, list, or None.</span>
+<span class="sd">        label (str): Label for the root of this metadata section.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        Union[Tree, Table, Text]: Rich display object representing the metadata.</span>
+<span class="sd">            Returns Text for None, Table for leaf nodes, Tree for nested structures.</span>
+
+<span class="sd">    Note:</span>
+<span class="sd">        This function is called recursively to handle nested space definitions.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">meta</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">Text</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">label</span><span class="si">}</span><span class="s2">: &lt;none&gt;&quot;</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="s2">&quot;italic&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">_leaf</span><span class="p">(</span><span class="n">meta</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">_leaf_table</span><span class="p">(</span><span class="n">label</span><span class="p">,</span> <span class="n">meta</span><span class="p">)</span>
+    <span class="n">tree</span> <span class="o">=</span> <span class="n">Tree</span><span class="p">(</span><span class="n">Text</span><span class="p">(</span><span class="n">label</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="s2">&quot;bold yellow&quot;</span><span class="p">))</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">meta</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">meta</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">tree</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">_leaf_table</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span> <span class="k">if</span> <span class="n">_leaf</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="k">else</span> <span class="n">_render</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">k</span><span class="p">))</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">meta</span><span class="p">):</span>
+            <span class="n">title</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;#</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="n">tree</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">_leaf_table</span><span class="p">(</span><span class="n">title</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span> <span class="k">if</span> <span class="n">_leaf</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="k">else</span> <span class="n">_render</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">title</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">tree</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_variation_space</span><span class="p">(</span><span class="n">variation</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span> <span class="n">title</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;Variation Space&quot;</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Create a Rich Tree displaying variation space information.</span>
+
+<span class="sd">    Renders the variation space structure showing available environment variations</span>
+<span class="sd">    and their hierarchical organization.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        variation (Dict[str, Any]): Dictionary containing variation space metadata.</span>
+<span class="sd">            Expected keys include &#39;has_variation&#39; and &#39;names&#39;.</span>
+<span class="sd">        title (str, optional): Title for the variation space tree. Defaults to</span>
+<span class="sd">            &quot;Variation Space&quot;. Empty string creates a minimal display.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        Tree: Rich Tree object displaying the variation space structure.</span>
+
+<span class="sd">    Note:</span>
+<span class="sd">        If the environment has no variations, displays a message instead of</span>
+<span class="sd">        the hierarchical structure.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">vroot</span> <span class="o">=</span> <span class="n">Tree</span><span class="p">(</span><span class="n">Text</span><span class="p">(</span><span class="n">title</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="s2">&quot;bold yellow&quot;</span><span class="p">))</span>
+    <span class="n">void_title</span> <span class="o">=</span> <span class="n">title</span> <span class="o">==</span> <span class="s2">&quot;&quot;</span>
+
+    <span class="c1"># small facts table (aligned titles)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">variation</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;has_variation&quot;</span><span class="p">):</span>
+        <span class="n">text</span> <span class="o">=</span> <span class="s2">&quot;There are no variations 🙁&quot;</span>
+        <span class="k">if</span> <span class="n">void_title</span><span class="p">:</span>
+            <span class="n">vroot</span><span class="o">.</span><span class="n">label</span> <span class="o">=</span> <span class="n">text</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">vroot</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">text</span><span class="p">)</span>
+
+    <span class="k">else</span><span class="p">:</span>
+        <span class="c1"># hierarchical names</span>
+        <span class="n">names</span> <span class="o">=</span> <span class="n">variation</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;names&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="p">[]</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">names</span><span class="p">,</span> <span class="p">(</span><span class="nb">list</span> <span class="o">|</span> <span class="nb">tuple</span><span class="p">))</span> <span class="ow">and</span> <span class="n">names</span><span class="p">:</span>
+            <span class="n">tree_dict</span> <span class="o">=</span> <span class="n">_build_hierarchy</span><span class="p">(</span><span class="n">names</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="s2">&quot;.&quot;</span><span class="p">)</span>
+            <span class="n">_render_hierarchy</span><span class="p">(</span><span class="n">vroot</span><span class="p">,</span> <span class="n">tree_dict</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">vroot</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">Text</span><span class="p">(</span><span class="s2">&quot;names: —&quot;</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="s2">&quot;dim&quot;</span><span class="p">))</span>
+
+    <span class="k">return</span> <span class="n">vroot</span>
+
+
+<div class="viewcode-block" id="display_world_info">
+<a class="viewcode-back" href="../../stable_worldmodel.html#stable_worldmodel.cli.display_world_info">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">display_world_info</span><span class="p">(</span><span class="n">info</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Display world environment information in a formatted panel.</span>
+
+<span class="sd">    Prints a Rich panel showing the world&#39;s observation space, action space,</span>
+<span class="sd">    and variation space in a hierarchical, color-coded format.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        info (Dict[str, Any]): World metadata dictionary containing keys:</span>
+<span class="sd">            - &#39;name&#39;: World environment name</span>
+<span class="sd">            - &#39;observation_space&#39;: Observation space structure</span>
+<span class="sd">            - &#39;action_space&#39;: Action space structure</span>
+<span class="sd">            - &#39;variation&#39;: Variation space structure</span>
+
+<span class="sd">    Example:</span>
+<span class="sd">        &gt;&gt;&gt; from stable_worldmodel import data</span>
+<span class="sd">        &gt;&gt;&gt; info = data.world_info(&quot;swm/SimplePointMaze-v0&quot;)</span>
+<span class="sd">        &gt;&gt;&gt; display_world_info(info)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">root</span> <span class="o">=</span> <span class="n">Tree</span><span class="p">(</span><span class="n">Text</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;World: </span><span class="si">{</span><span class="n">info</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;name&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;&lt;unknown&gt;&#39;</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="s2">&quot;bold green&quot;</span><span class="p">))</span>
+    <span class="n">root</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">_render</span><span class="p">(</span><span class="n">info</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;observation_space&quot;</span><span class="p">),</span> <span class="s2">&quot;Extra Observation Space&quot;</span><span class="p">))</span>
+    <span class="n">root</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">_render</span><span class="p">(</span><span class="n">info</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;action_space&quot;</span><span class="p">),</span> <span class="s2">&quot;Action Space&quot;</span><span class="p">))</span>
+    <span class="n">root</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">_variation_space</span><span class="p">(</span><span class="n">info</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;variation&quot;</span><span class="p">,</span> <span class="p">{})))</span>
+
+    <span class="n">console</span><span class="o">.</span><span class="n">print</span><span class="p">(</span>
+        <span class="n">Panel</span><span class="p">(</span>
+            <span class="n">root</span><span class="p">,</span>
+            <span class="n">title</span><span class="o">=</span><span class="s2">&quot;[b]World Info[/b]&quot;</span><span class="p">,</span>
+            <span class="n">border_style</span><span class="o">=</span><span class="s2">&quot;green&quot;</span><span class="p">,</span>
+            <span class="n">padding</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span>
+            <span class="n">title_align</span><span class="o">=</span><span class="s2">&quot;center&quot;</span><span class="p">,</span>
+        <span class="p">)</span>
+    <span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="display_dataset_info">
+<a class="viewcode-back" href="../../stable_worldmodel.html#stable_worldmodel.cli.display_dataset_info">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">display_dataset_info</span><span class="p">(</span><span class="n">info</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Display dataset information in a formatted panel with tables.</span>
+
+<span class="sd">    Prints a Rich panel showing dataset metadata including columns, episode count,</span>
+<span class="sd">    shapes, and variation information in a two-table layout.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        info (Dict[str, Any]): Dataset metadata dictionary containing keys:</span>
+<span class="sd">            - &#39;name&#39;: Dataset name</span>
+<span class="sd">            - &#39;columns&#39;: List of data columns</span>
+<span class="sd">            - &#39;num_episodes&#39;: Total number of episodes</span>
+<span class="sd">            - &#39;num_steps&#39;: Total number of steps</span>
+<span class="sd">            - &#39;obs_shape&#39;: Observation tensor shape</span>
+<span class="sd">            - &#39;action_shape&#39;: Action tensor shape</span>
+<span class="sd">            - &#39;goal_shape&#39;: Goal tensor shape</span>
+<span class="sd">            - &#39;variation&#39;: Variation space structure</span>
+
+<span class="sd">    Example:</span>
+<span class="sd">        &gt;&gt;&gt; from stable_worldmodel import data</span>
+<span class="sd">        &gt;&gt;&gt; info = data.dataset_info(&quot;simple-pointmaze&quot;)</span>
+<span class="sd">        &gt;&gt;&gt; display_dataset_info(info)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">top_table</span> <span class="o">=</span> <span class="n">Table</span><span class="p">(</span>
+        <span class="n">title</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;Dataset: [bold cyan]</span><span class="si">{</span><span class="n">info</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">[/bold cyan]&quot;</span><span class="p">,</span>
+        <span class="n">box</span><span class="o">=</span><span class="n">box</span><span class="o">.</span><span class="n">SIMPLE_HEAVY</span><span class="p">,</span>
+        <span class="n">show_header</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">pad_edge</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="n">top_table</span><span class="o">.</span><span class="n">add_column</span><span class="p">(</span><span class="s2">&quot;Key&quot;</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="s2">&quot;bold yellow&quot;</span><span class="p">,</span> <span class="n">no_wrap</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">top_table</span><span class="o">.</span><span class="n">add_column</span><span class="p">(</span><span class="s2">&quot;Value&quot;</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="s2">&quot;white&quot;</span><span class="p">)</span>
+    <span class="n">top_table</span><span class="o">.</span><span class="n">add_row</span><span class="p">(</span><span class="s2">&quot;Columns&quot;</span><span class="p">,</span> <span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">info</span><span class="p">[</span><span class="s2">&quot;columns&quot;</span><span class="p">]))</span>
+
+    <span class="n">separator</span> <span class="o">=</span> <span class="n">Rule</span><span class="p">(</span><span class="n">characters</span><span class="o">=</span><span class="s2">&quot;·&quot;</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="s2">&quot;grey62&quot;</span><span class="p">)</span>
+
+    <span class="n">bottom_table</span> <span class="o">=</span> <span class="n">Table</span><span class="p">(</span>
+        <span class="n">box</span><span class="o">=</span><span class="n">box</span><span class="o">.</span><span class="n">SIMPLE_HEAVY</span><span class="p">,</span>
+        <span class="n">show_header</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">pad_edge</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">bottom_table</span><span class="o">.</span><span class="n">add_column</span><span class="p">(</span><span class="s2">&quot;Key&quot;</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="s2">&quot;bold yellow&quot;</span><span class="p">,</span> <span class="n">no_wrap</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">bottom_table</span><span class="o">.</span><span class="n">add_column</span><span class="p">(</span><span class="s2">&quot;Value&quot;</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="s2">&quot;white&quot;</span><span class="p">)</span>
+
+    <span class="n">bottom_table</span><span class="o">.</span><span class="n">add_row</span><span class="p">(</span><span class="s2">&quot;Episodes&quot;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">info</span><span class="p">[</span><span class="s2">&quot;num_episodes&quot;</span><span class="p">]))</span>
+    <span class="n">bottom_table</span><span class="o">.</span><span class="n">add_row</span><span class="p">(</span><span class="s2">&quot;Total Steps&quot;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">info</span><span class="p">[</span><span class="s2">&quot;num_steps&quot;</span><span class="p">]))</span>
+    <span class="n">bottom_table</span><span class="o">.</span><span class="n">add_row</span><span class="p">(</span><span class="s2">&quot;Obs Shape&quot;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">info</span><span class="p">[</span><span class="s2">&quot;obs_shape&quot;</span><span class="p">]))</span>
+    <span class="n">bottom_table</span><span class="o">.</span><span class="n">add_row</span><span class="p">(</span><span class="s2">&quot;Action Shape&quot;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">info</span><span class="p">[</span><span class="s2">&quot;action_shape&quot;</span><span class="p">]))</span>
+    <span class="n">bottom_table</span><span class="o">.</span><span class="n">add_row</span><span class="p">(</span><span class="s2">&quot;Goal Shape&quot;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">info</span><span class="p">[</span><span class="s2">&quot;goal_shape&quot;</span><span class="p">]))</span>
+    <span class="n">bottom_table</span><span class="o">.</span><span class="n">add_row</span><span class="p">(</span><span class="s2">&quot;Variation&quot;</span><span class="p">,</span> <span class="n">_variation_space</span><span class="p">(</span><span class="n">info</span><span class="p">[</span><span class="s2">&quot;variation&quot;</span><span class="p">],</span> <span class="n">title</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">))</span>
+
+    <span class="n">group</span> <span class="o">=</span> <span class="n">Group</span><span class="p">(</span><span class="n">top_table</span><span class="p">,</span> <span class="n">separator</span><span class="p">,</span> <span class="n">bottom_table</span><span class="p">)</span>
+
+    <span class="n">console</span><span class="o">.</span><span class="n">print</span><span class="p">(</span>
+        <span class="n">Panel</span><span class="p">(</span>
+            <span class="n">group</span><span class="p">,</span>
+            <span class="n">border_style</span><span class="o">=</span><span class="s2">&quot;cyan&quot;</span><span class="p">,</span>
+            <span class="n">padding</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span>
+        <span class="p">)</span>
+    <span class="p">)</span></div>
+
+
+
+<span class="c1">##############</span>
+<span class="c1">##   APP    ##</span>
+<span class="c1">##############</span>
+
+
+<span class="n">app</span> <span class="o">=</span> <span class="n">typer</span><span class="o">.</span><span class="n">Typer</span><span class="p">()</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_version_callback</span><span class="p">(</span><span class="n">value</span><span class="p">:</span> <span class="nb">bool</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Display stable-worldmodel version and exit.</span>
+
+<span class="sd">    Typer callback function that prints the installed version when the</span>
+<span class="sd">    --version flag is used.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        value (bool): True if --version flag was provided.</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        typer.Exit: Always exits after displaying version.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">value</span><span class="p">:</span>
+        <span class="n">typer</span><span class="o">.</span><span class="n">echo</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;stable-worldmodel version: </span><span class="si">{</span><span class="n">__version__</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="n">typer</span><span class="o">.</span><span class="n">Exit</span><span class="p">()</span>
+
+
+<div class="viewcode-block" id="common">
+<a class="viewcode-back" href="../../stable_worldmodel.html#stable_worldmodel.cli.common">[docs]</a>
+<span class="nd">@app</span><span class="o">.</span><span class="n">callback</span><span class="p">()</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">common</span><span class="p">(</span>
+    <span class="n">version</span><span class="p">:</span> <span class="n">Annotated</span><span class="p">[</span>
+        <span class="nb">bool</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">typer</span><span class="o">.</span><span class="n">Option</span><span class="p">(</span>
+            <span class="s2">&quot;--version&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;-v&quot;</span><span class="p">,</span>
+            <span class="n">callback</span><span class="o">=</span><span class="n">_version_callback</span><span class="p">,</span>
+            <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Show installed stable-wordlnodel version.&quot;</span><span class="p">,</span>
+        <span class="p">),</span>
+    <span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Common options for all stable-worldmodel commands.</span>
+
+<span class="sd">    This callback provides global options that apply to all CLI commands.</span>
+<span class="sd">    Currently only supports the --version flag.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        version (Optional[bool], optional): If True, display version and exit.</span>
+<span class="sd">            Defaults to None.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">pass</span></div>
+
+
+
+<div class="viewcode-block" id="list_cmd">
+<a class="viewcode-back" href="../../stable_worldmodel.html#stable_worldmodel.cli.list_cmd">[docs]</a>
+<span class="nd">@app</span><span class="o">.</span><span class="n">command</span><span class="p">(</span><span class="s2">&quot;list&quot;</span><span class="p">)</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">list_cmd</span><span class="p">(</span>
+    <span class="n">kind</span><span class="p">:</span> <span class="n">Annotated</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">typer</span><span class="o">.</span><span class="n">Argument</span><span class="p">(</span><span class="n">help</span><span class="o">=</span><span class="s2">&quot;Type to list: &#39;model&#39;, &#39;dataset&#39; or &#39;world&#39;&quot;</span><span class="p">)],</span>
+<span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;List cached stable-worldmodel resources.</span>
+
+<span class="sd">    Displays a table of all cached models, datasets, or worlds stored in the</span>
+<span class="sd">    stable-worldmodel cache directory. Useful for seeing what resources are</span>
+<span class="sd">    available locally.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        kind (str): Type of resource to list. Must be one of:</span>
+<span class="sd">            - &#39;model&#39;: List cached world models</span>
+<span class="sd">            - &#39;dataset&#39;: List cached datasets</span>
+<span class="sd">            - &#39;world&#39;: List registered world environments</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        typer.Abort: If kind is not &#39;model&#39;, &#39;dataset&#39;, or &#39;world&#39;.</span>
+
+<span class="sd">    Example:</span>
+<span class="sd">        List all cached datasets::</span>
+
+<span class="sd">            $ swm list dataset</span>
+
+<span class="sd">        List all available worlds::</span>
+
+<span class="sd">            $ swm list world</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">cache_dir</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">get_cache_dir</span><span class="p">()</span>
+
+    <span class="k">if</span> <span class="n">kind</span> <span class="o">==</span> <span class="s2">&quot;dataset&quot;</span><span class="p">:</span>
+        <span class="n">cached_items</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">list_datasets</span><span class="p">()</span>
+    <span class="k">elif</span> <span class="n">kind</span> <span class="o">==</span> <span class="s2">&quot;model&quot;</span><span class="p">:</span>
+        <span class="n">cached_items</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">list_models</span><span class="p">()</span>
+    <span class="k">elif</span> <span class="n">kind</span> <span class="o">==</span> <span class="s2">&quot;world&quot;</span><span class="p">:</span>
+        <span class="n">cached_items</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">list_worlds</span><span class="p">()</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;[red]Invalid type: must be &#39;model&#39;, &#39;dataset&#39; or &#39;world&#39;[/red]&quot;</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="n">typer</span><span class="o">.</span><span class="n">Abort</span><span class="p">()</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">cached_items</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;[yellow]No cached </span><span class="si">{</span><span class="n">kind</span><span class="si">}</span><span class="s2">s found in </span><span class="si">{</span><span class="n">cache_dir</span><span class="si">}</span><span class="s2">[/yellow]&quot;</span><span class="p">)</span>
+        <span class="k">return</span>
+
+    <span class="n">table</span> <span class="o">=</span> <span class="n">Table</span><span class="p">(</span>
+        <span class="n">title</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;Cached </span><span class="si">{</span><span class="n">kind</span><span class="si">}</span><span class="s2">s in [dim]</span><span class="si">{</span><span class="n">cache_dir</span><span class="si">}</span><span class="s2">[/dim]&quot;</span><span class="p">,</span>
+        <span class="n">header_style</span><span class="o">=</span><span class="s2">&quot;bold cyan&quot;</span><span class="p">,</span>
+        <span class="n">box</span><span class="o">=</span><span class="n">box</span><span class="o">.</span><span class="n">SIMPLE</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">table</span><span class="o">.</span><span class="n">add_column</span><span class="p">(</span><span class="s2">&quot;Name&quot;</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="s2">&quot;green&quot;</span><span class="p">,</span> <span class="n">no_wrap</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">cached_items</span><span class="p">):</span>
+        <span class="n">table</span><span class="o">.</span><span class="n">add_row</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="n">table</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="show">
+<a class="viewcode-back" href="../../stable_worldmodel.html#stable_worldmodel.cli.show">[docs]</a>
+<span class="nd">@app</span><span class="o">.</span><span class="n">command</span><span class="p">()</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">show</span><span class="p">(</span>
+    <span class="n">kind</span><span class="p">:</span> <span class="n">Annotated</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">typer</span><span class="o">.</span><span class="n">Argument</span><span class="p">(</span><span class="n">help</span><span class="o">=</span><span class="s2">&quot;Type to show: &#39;dataset&#39; or &#39;world&#39;&quot;</span><span class="p">)],</span>
+    <span class="n">names</span><span class="p">:</span> <span class="n">Annotated</span><span class="p">[</span><span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span> <span class="n">typer</span><span class="o">.</span><span class="n">Argument</span><span class="p">(</span><span class="n">help</span><span class="o">=</span><span class="s2">&quot;Names of worlds or datasets to show&quot;</span><span class="p">)]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="nb">all</span><span class="p">:</span> <span class="n">Annotated</span><span class="p">[</span>
+        <span class="nb">bool</span><span class="p">,</span>
+        <span class="n">typer</span><span class="o">.</span><span class="n">Option</span><span class="p">(</span><span class="s2">&quot;--all&quot;</span><span class="p">,</span> <span class="s2">&quot;-a&quot;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Show all cached datasets/worlds&quot;</span><span class="p">,</span> <span class="n">is_flag</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span>
+    <span class="p">]</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+<span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Show detailed information about datasets or worlds.</span>
+
+<span class="sd">    Displays comprehensive information about specified datasets or world environments</span>
+<span class="sd">    including their structure, spaces, and variations. Information is presented in</span>
+<span class="sd">    formatted panels with hierarchical trees and tables.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        kind (str): Type of resource to show. Must be either:</span>
+<span class="sd">            - &#39;dataset&#39;: Show dataset information</span>
+<span class="sd">            - &#39;world&#39;: Show world environment information</span>
+<span class="sd">        names (Optional[List[str]], optional): Specific names to display. Can provide</span>
+<span class="sd">            multiple names. Defaults to None.</span>
+<span class="sd">        all (bool, optional): If True, show information for all cached resources of</span>
+<span class="sd">            the specified kind. Defaults to False.</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        typer.Abort: If kind is invalid, no names provided without --all flag,</span>
+<span class="sd">            or if specified names are not found in cache.</span>
+
+<span class="sd">    Example:</span>
+<span class="sd">        Show a specific dataset::</span>
+
+<span class="sd">            $ swm show dataset simple-pointmaze</span>
+
+<span class="sd">        Show multiple datasets::</span>
+
+<span class="sd">            $ swm show dataset dataset1 dataset2</span>
+
+<span class="sd">        Show all cached datasets::</span>
+
+<span class="sd">            $ swm show dataset --all</span>
+
+<span class="sd">        Show a specific world::</span>
+
+<span class="sd">            $ swm show world swm/SimplePointMaze-v0</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">cache_dir</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">get_cache_dir</span><span class="p">()</span>
+
+    <span class="k">if</span> <span class="n">kind</span> <span class="o">==</span> <span class="s2">&quot;dataset&quot;</span><span class="p">:</span>
+        <span class="n">cached_items</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">list_datasets</span><span class="p">()</span>
+        <span class="n">items</span> <span class="o">=</span> <span class="n">names</span> <span class="k">if</span> <span class="ow">not</span> <span class="nb">all</span> <span class="k">else</span> <span class="n">cached_items</span>
+        <span class="n">info_fn</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">dataset_info</span>
+        <span class="n">display_fn</span> <span class="o">=</span> <span class="n">display_dataset_info</span>
+    <span class="k">elif</span> <span class="n">kind</span> <span class="o">==</span> <span class="s2">&quot;world&quot;</span><span class="p">:</span>
+        <span class="n">cached_items</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">list_worlds</span><span class="p">()</span>
+        <span class="n">items</span> <span class="o">=</span> <span class="n">names</span> <span class="k">if</span> <span class="ow">not</span> <span class="nb">all</span> <span class="k">else</span> <span class="n">cached_items</span>
+        <span class="n">info_fn</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">world_info</span>
+        <span class="n">display_fn</span> <span class="o">=</span> <span class="n">display_world_info</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;[red] Invalid type: must be &#39;world&#39; or &#39;dataset&#39; [/red]&quot;</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="n">typer</span><span class="o">.</span><span class="n">Abort</span><span class="p">()</span>
+
+    <span class="n">provided_names</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">names</span> <span class="ow">or</span> <span class="p">[])</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">all</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">provided_names</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span>
+            <span class="s2">&quot;[red]Nothing to show. Use --all or provide one or more NAMES.[/red]&quot;</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="k">raise</span> <span class="n">typer</span><span class="o">.</span><span class="n">Abort</span><span class="p">()</span>
+
+    <span class="n">non_matching_local</span> <span class="o">=</span> <span class="p">[</span><span class="n">item</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">items</span> <span class="k">if</span> <span class="n">item</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">cached_items</span><span class="p">]</span>
+
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">non_matching_local</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">tree</span> <span class="o">=</span> <span class="n">Tree</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;The following </span><span class="si">{</span><span class="n">kind</span><span class="si">}</span><span class="s2">s can&#39;t be found locally at `</span><span class="si">{</span><span class="n">cache_dir</span><span class="si">}</span><span class="s2">`&quot;</span><span class="p">,</span>
+            <span class="n">style</span><span class="o">=</span><span class="s2">&quot;red&quot;</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">non_matching_local</span><span class="p">:</span>
+            <span class="n">tree</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">item</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="s2">&quot;magenta&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">tree</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="n">typer</span><span class="o">.</span><span class="n">Abort</span><span class="p">()</span>
+
+    <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">items</span><span class="p">:</span>
+        <span class="n">display_fn</span><span class="p">(</span><span class="n">info_fn</span><span class="p">(</span><span class="n">item</span><span class="p">))</span></div>
+
+
+
+<div class="viewcode-block" id="delete">
+<a class="viewcode-back" href="../../stable_worldmodel.html#stable_worldmodel.cli.delete">[docs]</a>
+<span class="nd">@app</span><span class="o">.</span><span class="n">command</span><span class="p">()</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">delete</span><span class="p">(</span>
+    <span class="n">kind</span><span class="p">:</span> <span class="n">Annotated</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">typer</span><span class="o">.</span><span class="n">Argument</span><span class="p">(</span><span class="n">help</span><span class="o">=</span><span class="s2">&quot;Type to delete: &#39;model&#39; or &#39;dataset&#39;&quot;</span><span class="p">)],</span>
+    <span class="n">names</span><span class="p">:</span> <span class="n">Annotated</span><span class="p">[</span><span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">typer</span><span class="o">.</span><span class="n">Argument</span><span class="p">(</span><span class="n">help</span><span class="o">=</span><span class="s2">&quot;Names of models or datasets to delete&quot;</span><span class="p">)],</span>
+<span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Delete models or datasets from cache directory.</span>
+
+<span class="sd">    Permanently removes specified models or datasets from the local cache directory.</span>
+<span class="sd">    Requires user confirmation before deletion. This operation cannot be undone.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        kind (str): Type of resource to delete. Must be either:</span>
+<span class="sd">            - &#39;model&#39;: Delete cached world models</span>
+<span class="sd">            - &#39;dataset&#39;: Delete cached datasets</span>
+<span class="sd">        names (List[str]): One or more names of resources to delete. All specified</span>
+<span class="sd">            names must exist in cache.</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        typer.Abort: If kind is invalid, specified names not found in cache,</span>
+<span class="sd">            or user cancels the confirmation prompt.</span>
+
+<span class="sd">    Example:</span>
+<span class="sd">        Delete a single dataset::</span>
+
+<span class="sd">            $ swm delete dataset my-dataset</span>
+
+<span class="sd">        Delete multiple models::</span>
+
+<span class="sd">            $ swm delete model model1 model2</span>
+
+<span class="sd">    Warning:</span>
+<span class="sd">        This operation permanently deletes data and cannot be undone. The command</span>
+<span class="sd">        will prompt for confirmation before proceeding.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">cache_dir</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">get_cache_dir</span><span class="p">()</span>
+
+    <span class="k">if</span> <span class="n">kind</span> <span class="o">==</span> <span class="s2">&quot;dataset&quot;</span><span class="p">:</span>
+        <span class="n">cached_items</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">list_datasets</span><span class="p">()</span>
+        <span class="n">deleter</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">delete_dataset</span>
+    <span class="k">elif</span> <span class="n">kind</span> <span class="o">==</span> <span class="s2">&quot;model&quot;</span><span class="p">:</span>
+        <span class="n">cached_items</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">list_models</span><span class="p">()</span>
+        <span class="n">deleter</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">delete_model</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;[red]Invalid type: must be &#39;model&#39; or &#39;dataset&#39;[/red]&quot;</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="n">typer</span><span class="o">.</span><span class="n">Abort</span><span class="p">()</span>
+
+    <span class="n">non_matching_local</span> <span class="o">=</span> <span class="p">[</span><span class="n">item</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">names</span> <span class="k">if</span> <span class="n">item</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">cached_items</span><span class="p">]</span>
+
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">non_matching_local</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">tree</span> <span class="o">=</span> <span class="n">Tree</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;The following </span><span class="si">{</span><span class="n">kind</span><span class="si">}</span><span class="s2">s can&#39;t be found locally at `</span><span class="si">{</span><span class="n">cache_dir</span><span class="si">}</span><span class="s2">`&quot;</span><span class="p">,</span>
+            <span class="n">style</span><span class="o">=</span><span class="s2">&quot;red&quot;</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">non_matching_local</span><span class="p">:</span>
+            <span class="n">tree</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">item</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="s2">&quot;magenta&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">tree</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="n">typer</span><span class="o">.</span><span class="n">Abort</span><span class="p">()</span>
+
+    <span class="n">typer</span><span class="o">.</span><span class="n">confirm</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Are you sure you want to delete these cached </span><span class="si">{</span><span class="n">kind</span><span class="si">}</span><span class="s2">s?&quot;</span><span class="p">,</span> <span class="n">abort</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">names</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Deleting </span><span class="si">{</span><span class="n">kind</span><span class="si">}</span><span class="s2"> &#39;</span><span class="si">{</span><span class="n">item</span><span class="si">}</span><span class="s2">&#39;...&quot;</span><span class="p">)</span>
+        <span class="n">deleter</span><span class="p">(</span><span class="n">item</span><span class="p">)</span></div>
+
+
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
+    <span class="n">app</span><span class="p">()</span>
+</pre></div>
+        </article>
+      </div>
+      <footer>
+        
+        <div class="related-pages">
+          
+          
+        </div>
+        <div class="bottom-of-page">
+          <div class="left-details">
+            <div class="copyright">
+                Copyright &#169; 2025
+            </div>
+            Made with <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
+            
+            <a href="https://github.com/pradyunsg/furo">Furo</a>
+            
+          </div>
+          <div class="right-details">
+            <div class="icons">
+              <a class="muted-link fa-brands fa-solid fa-discord" href="https://discord.gg/8M6hT39X" aria-label="Discord"></a>
+              <a class="muted-link fa-brands fa-solid fa-github" href="https://github.com/randall-lab/stable-worldmodel" aria-label="GitHub"></a>
+              
+            </div>
+          </div>
+        </div>
+        
+      </footer>
+    </div>
+    <aside class="toc-drawer no-toc">
+      
+      
+      
+    </aside>
+  </div>
+</div><script src="../../_static/documentation_options.js?v=c2d0de4b"></script>
+    <script src="../../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/scripts/furo.js?v=46bd48cc"></script>
+    </body>
+</html>

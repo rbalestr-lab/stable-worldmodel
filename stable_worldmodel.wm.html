@@ -1,0 +1,1266 @@
+<!doctype html>
+<html class="no-js" lang="en" data-content_root="./">
+  <head><meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="index" title="Index" href="genindex.html"><link rel="search" title="Search" href="search.html">
+        <link rel="prefetch" href="_static/img/logo-light.svg" as="image">
+        <link rel="prefetch" href="_static/img/logo-dark.svg" as="image">
+
+    <link rel="shortcut icon" href="_static/favicon.ico"><!-- Generated with Sphinx 8.2.3 and Furo 2025.09.25 -->
+        <title>stable_worldmodel.wm package - stable-worldmodel Documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=8f2a1f02" />
+    <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?v=580074bf" />
+    <link rel="stylesheet" type="text/css" href="_static/styles/furo-extensions.css?v=8dab3a3b" />
+    <link rel="stylesheet" type="text/css" href="_static/css/custom.css?v=33d9fa98" />
+    <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/fontawesome.min.css" />
+    <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/solid.min.css" />
+    <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/brands.min.css" />
+    
+    
+
+
+<style>
+  body {
+    --color-code-background: #f8f8f8;
+  --color-code-foreground: black;
+  --color-brand-primary: #202123;
+  --color-brand-content: #296cde;
+  --color-inline-code-background: #f8f8f8;
+  --color-brand-visited: #2757dd;
+  
+  }
+  @media not print {
+    body[data-theme="dark"] {
+      --color-code-background: #272822;
+  --color-code-foreground: #f8f8f2;
+  
+    }
+    @media (prefers-color-scheme: dark) {
+      body:not([data-theme="light"]) {
+        --color-code-background: #272822;
+  --color-code-foreground: #f8f8f2;
+  
+      }
+    }
+  }
+</style></head>
+  <body>
+    
+    <script>
+      document.body.dataset.theme = localStorage.getItem("theme") || "auto";
+    </script>
+    
+
+<svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+  <symbol id="svg-toc" viewBox="0 0 24 24">
+    <title>Contents</title>
+    <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 1024 1024">
+      <path d="M408 442h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8zm-8 204c0 4.4 3.6 8 8 8h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56zm504-486H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zm0 632H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zM115.4 518.9L271.7 642c5.8 4.6 14.4.5 14.4-6.9V388.9c0-7.4-8.5-11.5-14.4-6.9L115.4 505.1a8.74 8.74 0 0 0 0 13.8z"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-menu" viewBox="0 0 24 24">
+    <title>Menu</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-menu">
+      <line x1="3" y1="12" x2="21" y2="12"></line>
+      <line x1="3" y1="6" x2="21" y2="6"></line>
+      <line x1="3" y1="18" x2="21" y2="18"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-arrow-right" viewBox="0 0 24 24">
+    <title>Expand</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-chevron-right">
+      <polyline points="9 18 15 12 9 6"></polyline>
+    </svg>
+  </symbol>
+  <symbol id="svg-sun" viewBox="0 0 24 24">
+    <title>Light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="feather-sun">
+      <circle cx="12" cy="12" r="5"></circle>
+      <line x1="12" y1="1" x2="12" y2="3"></line>
+      <line x1="12" y1="21" x2="12" y2="23"></line>
+      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+      <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+      <line x1="1" y1="12" x2="3" y2="12"></line>
+      <line x1="21" y1="12" x2="23" y2="12"></line>
+      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+      <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon" viewBox="0 0 24 24">
+    <title>Dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-moon">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z" />
+    </svg>
+  </symbol>
+  <symbol id="svg-sun-with-moon" viewBox="0 0 24 24">
+    <title>Auto light/dark, in light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path style="opacity: 50%" d="M 5.411 14.504 C 5.471 14.504 5.532 14.504 5.591 14.504 C 3.639 16.319 4.383 19.569 6.931 20.352 C 7.693 20.586 8.512 20.551 9.25 20.252 C 8.023 23.207 4.056 23.725 2.11 21.184 C 0.166 18.642 1.702 14.949 4.874 14.536 C 5.051 14.512 5.231 14.5 5.411 14.5 L 5.411 14.504 Z"/>
+      <line x1="14.5" y1="3.25" x2="14.5" y2="1.25"/>
+      <line x1="14.5" y1="15.85" x2="14.5" y2="17.85"/>
+      <line x1="10.044" y1="5.094" x2="8.63" y2="3.68"/>
+      <line x1="19" y1="14.05" x2="20.414" y2="15.464"/>
+      <line x1="8.2" y1="9.55" x2="6.2" y2="9.55"/>
+      <line x1="20.8" y1="9.55" x2="22.8" y2="9.55"/>
+      <line x1="10.044" y1="14.006" x2="8.63" y2="15.42"/>
+      <line x1="19" y1="5.05" x2="20.414" y2="3.636"/>
+      <circle cx="14.5" cy="9.55" r="3.6"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon-with-sun" viewBox="0 0 24 24">
+    <title>Auto light/dark, in dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path d="M 8.282 7.007 C 8.385 7.007 8.494 7.007 8.595 7.007 C 5.18 10.184 6.481 15.869 10.942 17.24 C 12.275 17.648 13.706 17.589 15 17.066 C 12.851 22.236 5.91 23.143 2.505 18.696 C -0.897 14.249 1.791 7.786 7.342 7.063 C 7.652 7.021 7.965 7 8.282 7 L 8.282 7.007 Z"/>
+      <line style="opacity: 50%" x1="18" y1="3.705" x2="18" y2="2.5"/>
+      <line style="opacity: 50%" x1="18" y1="11.295" x2="18" y2="12.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="4.816" x2="14.464" y2="3.964"/>
+      <line style="opacity: 50%" x1="20.711" y1="10.212" x2="21.563" y2="11.063"/>
+      <line style="opacity: 50%" x1="14.205" y1="7.5" x2="13.001" y2="7.5"/>
+      <line style="opacity: 50%" x1="21.795" y1="7.5" x2="23" y2="7.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="10.184" x2="14.464" y2="11.036"/>
+      <line style="opacity: 50%" x1="20.711" y1="4.789" x2="21.563" y2="3.937"/>
+      <circle style="opacity: 50%" cx="18" cy="7.5" r="2.169"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-pencil" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-pencil-code">
+      <path d="M4 20h4l10.5 -10.5a2.828 2.828 0 1 0 -4 -4l-10.5 10.5v4" />
+      <path d="M13.5 6.5l4 4" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+  <symbol id="svg-eye" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-eye-code">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M10 12a2 2 0 1 0 4 0a2 2 0 0 0 -4 0" />
+      <path
+        d="M11.11 17.958c-3.209 -.307 -5.91 -2.293 -8.11 -5.958c2.4 -4 5.4 -6 9 -6c3.6 0 6.6 2 9 6c-.21 .352 -.427 .688 -.647 1.008" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+</svg>
+
+<input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation" aria-label="Toggle site navigation sidebar">
+<input type="checkbox" class="sidebar-toggle" name="__toc" id="__toc" aria-label="Toggle table of contents sidebar">
+<label class="overlay sidebar-overlay" for="__navigation"></label>
+<label class="overlay toc-overlay" for="__toc"></label>
+
+<a class="skip-to-content muted-link" href="#furo-main-content">Skip to content</a>
+
+
+
+<div class="page">
+  <header class="mobile-header">
+    <div class="header-left">
+      <label class="nav-overlay-icon" for="__navigation">
+        <span class="icon"><svg><use href="#svg-menu"></use></svg></span>
+      </label>
+    </div>
+    <div class="header-center">
+      <a href="index.html"><div class="brand">stable-worldmodel
+Documentation</div></a>
+    </div>
+    <div class="header-right">
+      <div class="theme-toggle-container theme-toggle-header">
+        <button class="theme-toggle" aria-label="Toggle Light / Dark / Auto color theme">
+          <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+          <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+          <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+          <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+        </button>
+      </div>
+      <label class="toc-overlay-icon toc-header-icon" for="__toc">
+        <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
+      </label>
+    </div>
+  </header>
+  <aside class="sidebar-drawer">
+    <div class="sidebar-container">
+      
+      <div class="sidebar-sticky"><a class="sidebar-brand" href="index.html">
+  <div class="sidebar-logo-container">
+    <img class="sidebar-logo only-light" src="_static/img/logo-light.svg" alt="Light Logo"/>
+    <img class="sidebar-logo only-dark" src="_static/img/logo-dark.svg" alt="Dark Logo"/>
+  </div>
+  
+  <span class="sidebar-brand-text">stable-worldmodel
+Documentation</span>
+  
+</a><form class="sidebar-search-container" method="get" action="search.html" role="search">
+  <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
+  <input type="hidden" name="check_keywords" value="yes">
+  <input type="hidden" name="area" value="default">
+</form>
+<div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
+  <p class="caption" role="heading"><span class="caption-text">Development</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/randall-lab/stable-worldmodel">Github</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/randall-lab/stable-worldmodel/tree/main/docs">Contribute to the Docs</a></li>
+</ul>
+
+</div>
+</div>
+
+      </div>
+      
+    </div>
+  </aside>
+  <div class="main">
+    <div class="content">
+      <div class="article-container">
+        <a href="#" class="back-to-top muted-link">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"></path>
+          </svg>
+          <span>Back to top</span>
+        </a>
+        <div class="content-icon-container">
+          <div class="edit-this-page">
+  <a class="muted-link" href="https://github.com/randall-lab/stable-worldmodel/edit/main/docs/stable_worldmodel.wm.rst" rel="edit" title="Edit this page">
+    <svg><use href="#svg-pencil"></use></svg>
+    <span class="visually-hidden">Edit this page</span>
+  </a>
+</div><div class="theme-toggle-container theme-toggle-content">
+            <button class="theme-toggle" aria-label="Toggle Light / Dark / Auto color theme">
+              <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+              <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+              <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+              <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+            </button>
+          </div>
+          <label class="toc-overlay-icon toc-content-icon" for="__toc">
+            <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
+          </label>
+        </div>
+        <article role="main" id="furo-main-content">
+          <section id="stable-worldmodel-wm-package">
+<h1>stable_worldmodel.wm package<a class="headerlink" href="#stable-worldmodel-wm-package" title="Link to this heading">¶</a></h1>
+<section id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Link to this heading">¶</a></h2>
+</section>
+<section id="module-stable_worldmodel.wm.dinowm">
+<span id="stable-worldmodel-wm-dinowm-module"></span><h2>stable_worldmodel.wm.dinowm module<a class="headerlink" href="#module-stable_worldmodel.wm.dinowm" title="Link to this heading">¶</a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="stable_worldmodel.wm.dinowm.Attention">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">stable_worldmodel.wm.dinowm.</span></span><span class="sig-name descname"><span class="pre">Attention</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dim</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">heads</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">8</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dim_head</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">64</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dropout</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_patches</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_frames</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/stable_worldmodel/wm/dinowm.html#Attention"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.wm.dinowm.Attention" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="stable_worldmodel.wm.dinowm.Attention.forward">
+<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/stable_worldmodel/wm/dinowm.html#Attention.forward"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.wm.dinowm.Attention.forward" title="Link to this definition">¶</a></dt>
+<dd><p>Define the computation performed at every call.</p>
+<p>Should be overridden by all subclasses.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Although the recipe for forward pass needs to be defined within
+this function, one should call the <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code> instance afterwards
+instead of this since the former takes care of running the
+registered hooks while the latter silently ignores them.</p>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="stable_worldmodel.wm.dinowm.Attention.generate_mask_matrix">
+<span class="sig-name descname"><span class="pre">generate_mask_matrix</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">npatch</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nwindow</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/stable_worldmodel/wm/dinowm.html#Attention.generate_mask_matrix"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.wm.dinowm.Attention.generate_mask_matrix" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="stable_worldmodel.wm.dinowm.CausalPredictor">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">stable_worldmodel.wm.dinowm.</span></span><span class="sig-name descname"><span class="pre">CausalPredictor</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_patches</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_frames</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dim</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">depth</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">heads</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mlp_dim</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pool</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'cls'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dim_head</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">64</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dropout</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">emb_dropout</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/stable_worldmodel/wm/dinowm.html#CausalPredictor"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.wm.dinowm.CausalPredictor" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="stable_worldmodel.wm.dinowm.CausalPredictor.forward">
+<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/stable_worldmodel/wm/dinowm.html#CausalPredictor.forward"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.wm.dinowm.CausalPredictor.forward" title="Link to this definition">¶</a></dt>
+<dd><p>Define the computation performed at every call.</p>
+<p>Should be overridden by all subclasses.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Although the recipe for forward pass needs to be defined within
+this function, one should call the <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code> instance afterwards
+instead of this since the former takes care of running the
+registered hooks while the latter silently ignores them.</p>
+</div>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="stable_worldmodel.wm.dinowm.DINOWM">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">stable_worldmodel.wm.dinowm.</span></span><span class="sig-name descname"><span class="pre">DINOWM</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">encoder</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">predictor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">action_encoder</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">proprio_encoder</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">decoder</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">history_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">3</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_pred</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">device</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'cpu'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/stable_worldmodel/wm/dinowm.html#DINOWM"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.wm.dinowm.DINOWM" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="stable_worldmodel.wm.dinowm.DINOWM.decode">
+<span class="sig-name descname"><span class="pre">decode</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">info</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/stable_worldmodel/wm/dinowm.html#DINOWM.decode"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.wm.dinowm.DINOWM.decode" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="stable_worldmodel.wm.dinowm.DINOWM.encode">
+<span class="sig-name descname"><span class="pre">encode</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">info</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pixels_key</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'pixels'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'embed'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">proprio_key</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">action_key</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/stable_worldmodel/wm/dinowm.html#DINOWM.encode"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.wm.dinowm.DINOWM.encode" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="stable_worldmodel.wm.dinowm.DINOWM.get_cost">
+<span class="sig-name descname"><span class="pre">get_cost</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">info_dict</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">action_candidates</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/stable_worldmodel/wm/dinowm.html#DINOWM.get_cost"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.wm.dinowm.DINOWM.get_cost" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="stable_worldmodel.wm.dinowm.DINOWM.predict">
+<span class="sig-name descname"><span class="pre">predict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">embedding</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/stable_worldmodel/wm/dinowm.html#DINOWM.predict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.wm.dinowm.DINOWM.predict" title="Link to this definition">¶</a></dt>
+<dd><p>predict next latent state
+:param embedding: (B, T, P, d)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>(B, T, P, d)</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>preds</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="stable_worldmodel.wm.dinowm.DINOWM.replace_action_in_embedding">
+<span class="sig-name descname"><span class="pre">replace_action_in_embedding</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">embedding</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">act</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/stable_worldmodel/wm/dinowm.html#DINOWM.replace_action_in_embedding"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.wm.dinowm.DINOWM.replace_action_in_embedding" title="Link to this definition">¶</a></dt>
+<dd><p>Replace the action embeddings in the latent state z with the provided actions.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="stable_worldmodel.wm.dinowm.DINOWM.rollout">
+<span class="sig-name descname"><span class="pre">rollout</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">info</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">action_sequence</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/stable_worldmodel/wm/dinowm.html#DINOWM.rollout"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.wm.dinowm.DINOWM.rollout" title="Link to this definition">¶</a></dt>
+<dd><p>Rollout the world model given an initial observation and a sequence of actions.</p>
+<p>Params:
+obs_start: n current observations (B, n, C, H, W)
+actions: current and predicted actions (B, n+t, action_dim)</p>
+<p>Returns:
+z_obs: dict with latent observations (B, n+t+1, n_patches, D)
+z: predicted latent states (B, n+t+1, n_patches, D)</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="stable_worldmodel.wm.dinowm.DINOWM.split_embedding">
+<span class="sig-name descname"><span class="pre">split_embedding</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">embedding</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">action_dim</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">proprio_dim</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/stable_worldmodel/wm/dinowm.html#DINOWM.split_embedding"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.wm.dinowm.DINOWM.split_embedding" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="stable_worldmodel.wm.dinowm.Decoder">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">stable_worldmodel.wm.dinowm.</span></span><span class="sig-name descname"><span class="pre">Decoder</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">in_channel</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">out_channel</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">channel</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_res_block</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_res_channel</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stride</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/stable_worldmodel/wm/dinowm.html#Decoder"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.wm.dinowm.Decoder" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="stable_worldmodel.wm.dinowm.Decoder.forward">
+<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/stable_worldmodel/wm/dinowm.html#Decoder.forward"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.wm.dinowm.Decoder.forward" title="Link to this definition">¶</a></dt>
+<dd><p>Define the computation performed at every call.</p>
+<p>Should be overridden by all subclasses.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Although the recipe for forward pass needs to be defined within
+this function, one should call the <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code> instance afterwards
+instead of this since the former takes care of running the
+registered hooks while the latter silently ignores them.</p>
+</div>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="stable_worldmodel.wm.dinowm.Embedder">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">stable_worldmodel.wm.dinowm.</span></span><span class="sig-name descname"><span class="pre">Embedder</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">num_frames</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tubelet_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">in_chans</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">8</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">emb_dim</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/stable_worldmodel/wm/dinowm.html#Embedder"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.wm.dinowm.Embedder" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="stable_worldmodel.wm.dinowm.Embedder.forward">
+<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/stable_worldmodel/wm/dinowm.html#Embedder.forward"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.wm.dinowm.Embedder.forward" title="Link to this definition">¶</a></dt>
+<dd><p>Define the computation performed at every call.</p>
+<p>Should be overridden by all subclasses.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Although the recipe for forward pass needs to be defined within
+this function, one should call the <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code> instance afterwards
+instead of this since the former takes care of running the
+registered hooks while the latter silently ignores them.</p>
+</div>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="stable_worldmodel.wm.dinowm.Encoder">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">stable_worldmodel.wm.dinowm.</span></span><span class="sig-name descname"><span class="pre">Encoder</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">in_channel</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">channel</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_res_block</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_res_channel</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stride</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/stable_worldmodel/wm/dinowm.html#Encoder"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.wm.dinowm.Encoder" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="stable_worldmodel.wm.dinowm.Encoder.forward">
+<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/stable_worldmodel/wm/dinowm.html#Encoder.forward"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.wm.dinowm.Encoder.forward" title="Link to this definition">¶</a></dt>
+<dd><p>Define the computation performed at every call.</p>
+<p>Should be overridden by all subclasses.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Although the recipe for forward pass needs to be defined within
+this function, one should call the <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code> instance afterwards
+instead of this since the former takes care of running the
+registered hooks while the latter silently ignores them.</p>
+</div>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="stable_worldmodel.wm.dinowm.FeedForward">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">stable_worldmodel.wm.dinowm.</span></span><span class="sig-name descname"><span class="pre">FeedForward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dim</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hidden_dim</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dropout</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/stable_worldmodel/wm/dinowm.html#FeedForward"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.wm.dinowm.FeedForward" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="stable_worldmodel.wm.dinowm.FeedForward.forward">
+<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/stable_worldmodel/wm/dinowm.html#FeedForward.forward"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.wm.dinowm.FeedForward.forward" title="Link to this definition">¶</a></dt>
+<dd><p>Define the computation performed at every call.</p>
+<p>Should be overridden by all subclasses.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Although the recipe for forward pass needs to be defined within
+this function, one should call the <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code> instance afterwards
+instead of this since the former takes care of running the
+registered hooks while the latter silently ignores them.</p>
+</div>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="stable_worldmodel.wm.dinowm.Quantize">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">stable_worldmodel.wm.dinowm.</span></span><span class="sig-name descname"><span class="pre">Quantize</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dim</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_embed</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">decay</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.99</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">eps</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1e-05</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/stable_worldmodel/wm/dinowm.html#Quantize"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.wm.dinowm.Quantize" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="stable_worldmodel.wm.dinowm.Quantize.embed_code">
+<span class="sig-name descname"><span class="pre">embed_code</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">embed_id</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/stable_worldmodel/wm/dinowm.html#Quantize.embed_code"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.wm.dinowm.Quantize.embed_code" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="stable_worldmodel.wm.dinowm.Quantize.forward">
+<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/stable_worldmodel/wm/dinowm.html#Quantize.forward"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.wm.dinowm.Quantize.forward" title="Link to this definition">¶</a></dt>
+<dd><p>Define the computation performed at every call.</p>
+<p>Should be overridden by all subclasses.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Although the recipe for forward pass needs to be defined within
+this function, one should call the <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code> instance afterwards
+instead of this since the former takes care of running the
+registered hooks while the latter silently ignores them.</p>
+</div>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="stable_worldmodel.wm.dinowm.ResBlock">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">stable_worldmodel.wm.dinowm.</span></span><span class="sig-name descname"><span class="pre">ResBlock</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">in_channel</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">channel</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/stable_worldmodel/wm/dinowm.html#ResBlock"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.wm.dinowm.ResBlock" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="stable_worldmodel.wm.dinowm.ResBlock.forward">
+<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/stable_worldmodel/wm/dinowm.html#ResBlock.forward"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.wm.dinowm.ResBlock.forward" title="Link to this definition">¶</a></dt>
+<dd><p>Define the computation performed at every call.</p>
+<p>Should be overridden by all subclasses.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Although the recipe for forward pass needs to be defined within
+this function, one should call the <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code> instance afterwards
+instead of this since the former takes care of running the
+registered hooks while the latter silently ignores them.</p>
+</div>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="stable_worldmodel.wm.dinowm.Transformer">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">stable_worldmodel.wm.dinowm.</span></span><span class="sig-name descname"><span class="pre">Transformer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dim</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">depth</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">heads</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dim_head</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mlp_dim</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dropout</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_patches</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_frames</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/stable_worldmodel/wm/dinowm.html#Transformer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.wm.dinowm.Transformer" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="stable_worldmodel.wm.dinowm.Transformer.forward">
+<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/stable_worldmodel/wm/dinowm.html#Transformer.forward"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.wm.dinowm.Transformer.forward" title="Link to this definition">¶</a></dt>
+<dd><p>Define the computation performed at every call.</p>
+<p>Should be overridden by all subclasses.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Although the recipe for forward pass needs to be defined within
+this function, one should call the <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code> instance afterwards
+instead of this since the former takes care of running the
+registered hooks while the latter silently ignores them.</p>
+</div>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="stable_worldmodel.wm.dinowm.VQVAE">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">stable_worldmodel.wm.dinowm.</span></span><span class="sig-name descname"><span class="pre">VQVAE</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">in_channel</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">3</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">channel</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">128</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_res_block</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_res_channel</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">32</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">emb_dim</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">64</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_embed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">512</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">decay</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.99</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">quantize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/stable_worldmodel/wm/dinowm.html#VQVAE"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.wm.dinowm.VQVAE" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="stable_worldmodel.wm.dinowm.VQVAE.decode">
+<span class="sig-name descname"><span class="pre">decode</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">quant_b</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/stable_worldmodel/wm/dinowm.html#VQVAE.decode"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.wm.dinowm.VQVAE.decode" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="stable_worldmodel.wm.dinowm.VQVAE.decode_code">
+<span class="sig-name descname"><span class="pre">decode_code</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">code_b</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/stable_worldmodel/wm/dinowm.html#VQVAE.decode_code"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.wm.dinowm.VQVAE.decode_code" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="stable_worldmodel.wm.dinowm.VQVAE.forward">
+<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/stable_worldmodel/wm/dinowm.html#VQVAE.forward"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.wm.dinowm.VQVAE.forward" title="Link to this definition">¶</a></dt>
+<dd><p>input: (b, t, num_patches, emb_dim)</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="stable_worldmodel.wm.dinowm.all_reduce">
+<span class="sig-prename descclassname"><span class="pre">stable_worldmodel.wm.dinowm.</span></span><span class="sig-name descname"><span class="pre">all_reduce</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tensor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">op=&lt;RedOpType.SUM:</span> <span class="pre">0&gt;</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/stable_worldmodel/wm/dinowm.html#all_reduce"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.wm.dinowm.all_reduce" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="stable_worldmodel.wm.dinowm.get_world_size">
+<span class="sig-prename descclassname"><span class="pre">stable_worldmodel.wm.dinowm.</span></span><span class="sig-name descname"><span class="pre">get_world_size</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/stable_worldmodel/wm/dinowm.html#get_world_size"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.wm.dinowm.get_world_size" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="stable_worldmodel.wm.dinowm.transform">
+<span class="sig-prename descclassname"><span class="pre">stable_worldmodel.wm.dinowm.</span></span><span class="sig-name descname"><span class="pre">transform</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">info_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">device</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'cpu'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/stable_worldmodel/wm/dinowm.html#transform"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.wm.dinowm.transform" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</section>
+<section id="module-stable_worldmodel.wm.dreamer">
+<span id="stable-worldmodel-wm-dreamer-module"></span><h2>stable_worldmodel.wm.dreamer module<a class="headerlink" href="#module-stable_worldmodel.wm.dreamer" title="Link to this heading">¶</a></h2>
+</section>
+<section id="module-stable_worldmodel.wm.dummy">
+<span id="stable-worldmodel-wm-dummy-module"></span><h2>stable_worldmodel.wm.dummy module<a class="headerlink" href="#module-stable_worldmodel.wm.dummy" title="Link to this heading">¶</a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="stable_worldmodel.wm.dummy.DummyWorldModel">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">stable_worldmodel.wm.dummy.</span></span><span class="sig-name descname"><span class="pre">DummyWorldModel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">image_shape</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">action_dim</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/stable_worldmodel/wm/dummy.html#DummyWorldModel"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.wm.dummy.DummyWorldModel" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="stable_worldmodel.wm.dummy.DummyWorldModel.encode">
+<span class="sig-name descname"><span class="pre">encode</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">obs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/stable_worldmodel/wm/dummy.html#DummyWorldModel.encode"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.wm.dummy.DummyWorldModel.encode" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="stable_worldmodel.wm.dummy.DummyWorldModel.get_cost">
+<span class="sig-name descname"><span class="pre">get_cost</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">info_dict</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">action_candidates</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/stable_worldmodel/wm/dummy.html#DummyWorldModel.get_cost"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.wm.dummy.DummyWorldModel.get_cost" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="stable_worldmodel.wm.dummy.DummyWorldModel.predict">
+<span class="sig-name descname"><span class="pre">predict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">obs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">actions</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timestep</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/stable_worldmodel/wm/dummy.html#DummyWorldModel.predict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.wm.dummy.DummyWorldModel.predict" title="Link to this definition">¶</a></dt>
+<dd><p>Predict next s_t+H embedding given s_t + action sequence i.e rollout the dynamics model for H steps.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="stable_worldmodel.wm.dummy.transform">
+<span class="sig-prename descclassname"><span class="pre">stable_worldmodel.wm.dummy.</span></span><span class="sig-name descname"><span class="pre">transform</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">info_dict</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/stable_worldmodel/wm/dummy.html#transform"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.wm.dummy.transform" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</section>
+<section id="module-stable_worldmodel.wm.frame">
+<span id="stable-worldmodel-wm-frame-module"></span><h2>stable_worldmodel.wm.frame module<a class="headerlink" href="#module-stable_worldmodel.wm.frame" title="Link to this heading">¶</a></h2>
+</section>
+<section id="module-stable_worldmodel.wm.old_dinowm">
+<span id="stable-worldmodel-wm-old-dinowm-module"></span><h2>stable_worldmodel.wm.old_dinowm module<a class="headerlink" href="#module-stable_worldmodel.wm.old_dinowm" title="Link to this heading">¶</a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="stable_worldmodel.wm.old_dinowm.Attention">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">stable_worldmodel.wm.old_dinowm.</span></span><span class="sig-name descname"><span class="pre">Attention</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dim</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">heads</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">8</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dim_head</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">64</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dropout</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_patches</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_frames</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/stable_worldmodel/wm/old_dinowm.html#Attention"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.wm.old_dinowm.Attention" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="stable_worldmodel.wm.old_dinowm.Attention.forward">
+<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/stable_worldmodel/wm/old_dinowm.html#Attention.forward"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.wm.old_dinowm.Attention.forward" title="Link to this definition">¶</a></dt>
+<dd><p>Define the computation performed at every call.</p>
+<p>Should be overridden by all subclasses.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Although the recipe for forward pass needs to be defined within
+this function, one should call the <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code> instance afterwards
+instead of this since the former takes care of running the
+registered hooks while the latter silently ignores them.</p>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="stable_worldmodel.wm.old_dinowm.Attention.generate_mask_matrix">
+<span class="sig-name descname"><span class="pre">generate_mask_matrix</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">npatch</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nwindow</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/stable_worldmodel/wm/old_dinowm.html#Attention.generate_mask_matrix"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.wm.old_dinowm.Attention.generate_mask_matrix" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="stable_worldmodel.wm.old_dinowm.CausalPredictor">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">stable_worldmodel.wm.old_dinowm.</span></span><span class="sig-name descname"><span class="pre">CausalPredictor</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_patches</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_frames</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dim</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">depth</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">heads</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mlp_dim</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pool</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'cls'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dim_head</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">64</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dropout</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">emb_dropout</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/stable_worldmodel/wm/old_dinowm.html#CausalPredictor"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.wm.old_dinowm.CausalPredictor" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="stable_worldmodel.wm.old_dinowm.CausalPredictor.forward">
+<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/stable_worldmodel/wm/old_dinowm.html#CausalPredictor.forward"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.wm.old_dinowm.CausalPredictor.forward" title="Link to this definition">¶</a></dt>
+<dd><p>Define the computation performed at every call.</p>
+<p>Should be overridden by all subclasses.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Although the recipe for forward pass needs to be defined within
+this function, one should call the <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code> instance afterwards
+instead of this since the former takes care of running the
+registered hooks while the latter silently ignores them.</p>
+</div>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="stable_worldmodel.wm.old_dinowm.DINOWM">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">stable_worldmodel.wm.old_dinowm.</span></span><span class="sig-name descname"><span class="pre">DINOWM</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">encoder</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">predictor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">action_encoder</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">proprio_encoder</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">image_size</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">frameskip</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">history_size</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">action_dim</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">action_emb_dim</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">proprio_dim</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">proprio_emb_dim</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">device</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'cpu'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">decoder</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">action_mean</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">action_std</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">proprio_mean</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">proprio_std</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/stable_worldmodel/wm/old_dinowm.html#DINOWM"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.wm.old_dinowm.DINOWM" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="stable_worldmodel.wm.old_dinowm.DINOWM.decode_obs">
+<span class="sig-name descname"><span class="pre">decode_obs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">z_obs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/stable_worldmodel/wm/old_dinowm.html#DINOWM.decode_obs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.wm.old_dinowm.DINOWM.decode_obs" title="Link to this definition">¶</a></dt>
+<dd><p>input :   z: (b, num_frames, num_patches, emb_dim)
+output: obs: (b, num_frames, 3, img_size, img_size)</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="stable_worldmodel.wm.old_dinowm.DINOWM.denormalize_actions">
+<span class="sig-name descname"><span class="pre">denormalize_actions</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">actions</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/stable_worldmodel/wm/old_dinowm.html#DINOWM.denormalize_actions"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.wm.old_dinowm.DINOWM.denormalize_actions" title="Link to this definition">¶</a></dt>
+<dd><p>Denormalize actions using the defined normalization parameters.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="stable_worldmodel.wm.old_dinowm.DINOWM.denormalize_proprio">
+<span class="sig-name descname"><span class="pre">denormalize_proprio</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">proprio</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/stable_worldmodel/wm/old_dinowm.html#DINOWM.denormalize_proprio"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.wm.old_dinowm.DINOWM.denormalize_proprio" title="Link to this definition">¶</a></dt>
+<dd><p>Denormalize proprioceptive data using the defined normalization parameters.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="stable_worldmodel.wm.old_dinowm.DINOWM.encode">
+<span class="sig-name descname"><span class="pre">encode</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">obs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">actions</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/stable_worldmodel/wm/old_dinowm.html#DINOWM.encode"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.wm.old_dinowm.DINOWM.encode" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="stable_worldmodel.wm.old_dinowm.DINOWM.encode_action">
+<span class="sig-name descname"><span class="pre">encode_action</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">actions</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/stable_worldmodel/wm/old_dinowm.html#DINOWM.encode_action"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.wm.old_dinowm.DINOWM.encode_action" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="stable_worldmodel.wm.old_dinowm.DINOWM.encode_obs">
+<span class="sig-name descname"><span class="pre">encode_obs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">obs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/stable_worldmodel/wm/old_dinowm.html#DINOWM.encode_obs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.wm.old_dinowm.DINOWM.encode_obs" title="Link to this definition">¶</a></dt>
+<dd><p>Preprocess observation from the environment obs dict
+:param states: dict with all the observation modalities (img, proprio, etc)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>encoded latent states for observations</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>z</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="stable_worldmodel.wm.old_dinowm.DINOWM.encode_proprio">
+<span class="sig-name descname"><span class="pre">encode_proprio</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">proprio</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/stable_worldmodel/wm/old_dinowm.html#DINOWM.encode_proprio"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.wm.old_dinowm.DINOWM.encode_proprio" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="stable_worldmodel.wm.old_dinowm.DINOWM.forward">
+<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">obs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">actions</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/stable_worldmodel/wm/old_dinowm.html#DINOWM.forward"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.wm.old_dinowm.DINOWM.forward" title="Link to this definition">¶</a></dt>
+<dd><p>Define the computation performed at every call.</p>
+<p>Should be overridden by all subclasses.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Although the recipe for forward pass needs to be defined within
+this function, one should call the <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code> instance afterwards
+instead of this since the former takes care of running the
+registered hooks while the latter silently ignores them.</p>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="stable_worldmodel.wm.old_dinowm.DINOWM.normalize_actions">
+<span class="sig-name descname"><span class="pre">normalize_actions</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">actions</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/stable_worldmodel/wm/old_dinowm.html#DINOWM.normalize_actions"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.wm.old_dinowm.DINOWM.normalize_actions" title="Link to this definition">¶</a></dt>
+<dd><p>Normalize actions using the defined normalization parameters.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="stable_worldmodel.wm.old_dinowm.DINOWM.normalize_proprio">
+<span class="sig-name descname"><span class="pre">normalize_proprio</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">proprio</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/stable_worldmodel/wm/old_dinowm.html#DINOWM.normalize_proprio"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.wm.old_dinowm.DINOWM.normalize_proprio" title="Link to this definition">¶</a></dt>
+<dd><p>Normalize proprioceptive data using the defined normalization parameters.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="stable_worldmodel.wm.old_dinowm.DINOWM.predict">
+<span class="sig-name descname"><span class="pre">predict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">z</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/stable_worldmodel/wm/old_dinowm.html#DINOWM.predict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.wm.old_dinowm.DINOWM.predict" title="Link to this definition">¶</a></dt>
+<dd><p>predict next latent state
+:param z: (B, T, P, d)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>(B, T, P, d)</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>preds</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="stable_worldmodel.wm.old_dinowm.DINOWM.replace_actions_from_z">
+<span class="sig-name descname"><span class="pre">replace_actions_from_z</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">z</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">act</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/stable_worldmodel/wm/old_dinowm.html#DINOWM.replace_actions_from_z"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.wm.old_dinowm.DINOWM.replace_actions_from_z" title="Link to this definition">¶</a></dt>
+<dd><p>Replace the action embeddings in the latent state z with the provided actions.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="stable_worldmodel.wm.old_dinowm.DINOWM.rollout">
+<span class="sig-name descname"><span class="pre">rollout</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">obs_0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">actions</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/stable_worldmodel/wm/old_dinowm.html#DINOWM.rollout"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.wm.old_dinowm.DINOWM.rollout" title="Link to this definition">¶</a></dt>
+<dd><p>Rollout the world model given an initial observation and a sequence of actions.</p>
+<p>Params:
+obs_start: n current observations (B, n, C, H, W)
+actions: current and predicted actions (B, n+t, action_dim)</p>
+<p>Returns:
+z_obs: dict with latent observations (B, n+t+1, n_patches, D)
+z: predicted latent states (B, n+t+1, n_patches, D)</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="stable_worldmodel.wm.old_dinowm.DINOWM.split_embeddings">
+<span class="sig-name descname"><span class="pre">split_embeddings</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">z</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/stable_worldmodel/wm/old_dinowm.html#DINOWM.split_embeddings"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.wm.old_dinowm.DINOWM.split_embeddings" title="Link to this definition">¶</a></dt>
+<dd><p>Unmerge embedding z into separate modalities.
+:param z:
+:type z: B, T, P, d</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict with separate modalities
+z_act: (B, T, P, action_emb_dim)</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>z_obs</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="stable_worldmodel.wm.old_dinowm.Decoder">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">stable_worldmodel.wm.old_dinowm.</span></span><span class="sig-name descname"><span class="pre">Decoder</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">in_channel</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">out_channel</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">channel</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_res_block</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_res_channel</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stride</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/stable_worldmodel/wm/old_dinowm.html#Decoder"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.wm.old_dinowm.Decoder" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="stable_worldmodel.wm.old_dinowm.Decoder.forward">
+<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/stable_worldmodel/wm/old_dinowm.html#Decoder.forward"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.wm.old_dinowm.Decoder.forward" title="Link to this definition">¶</a></dt>
+<dd><p>Define the computation performed at every call.</p>
+<p>Should be overridden by all subclasses.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Although the recipe for forward pass needs to be defined within
+this function, one should call the <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code> instance afterwards
+instead of this since the former takes care of running the
+registered hooks while the latter silently ignores them.</p>
+</div>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="stable_worldmodel.wm.old_dinowm.DinoV2Encoder">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">stable_worldmodel.wm.old_dinowm.</span></span><span class="sig-name descname"><span class="pre">DinoV2Encoder</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">feature_key</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/stable_worldmodel/wm/old_dinowm.html#DinoV2Encoder"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.wm.old_dinowm.DinoV2Encoder" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="stable_worldmodel.wm.old_dinowm.DinoV2Encoder.forward">
+<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/stable_worldmodel/wm/old_dinowm.html#DinoV2Encoder.forward"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.wm.old_dinowm.DinoV2Encoder.forward" title="Link to this definition">¶</a></dt>
+<dd><p>Define the computation performed at every call.</p>
+<p>Should be overridden by all subclasses.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Although the recipe for forward pass needs to be defined within
+this function, one should call the <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code> instance afterwards
+instead of this since the former takes care of running the
+registered hooks while the latter silently ignores them.</p>
+</div>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="stable_worldmodel.wm.old_dinowm.Embedder">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">stable_worldmodel.wm.old_dinowm.</span></span><span class="sig-name descname"><span class="pre">Embedder</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">num_frames</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tubelet_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">in_chans</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">8</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">emb_dim</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/stable_worldmodel/wm/old_dinowm.html#Embedder"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.wm.old_dinowm.Embedder" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="stable_worldmodel.wm.old_dinowm.Embedder.forward">
+<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/stable_worldmodel/wm/old_dinowm.html#Embedder.forward"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.wm.old_dinowm.Embedder.forward" title="Link to this definition">¶</a></dt>
+<dd><p>Define the computation performed at every call.</p>
+<p>Should be overridden by all subclasses.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Although the recipe for forward pass needs to be defined within
+this function, one should call the <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code> instance afterwards
+instead of this since the former takes care of running the
+registered hooks while the latter silently ignores them.</p>
+</div>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="stable_worldmodel.wm.old_dinowm.Encoder">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">stable_worldmodel.wm.old_dinowm.</span></span><span class="sig-name descname"><span class="pre">Encoder</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">in_channel</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">channel</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_res_block</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_res_channel</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stride</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/stable_worldmodel/wm/old_dinowm.html#Encoder"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.wm.old_dinowm.Encoder" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="stable_worldmodel.wm.old_dinowm.Encoder.forward">
+<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/stable_worldmodel/wm/old_dinowm.html#Encoder.forward"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.wm.old_dinowm.Encoder.forward" title="Link to this definition">¶</a></dt>
+<dd><p>Define the computation performed at every call.</p>
+<p>Should be overridden by all subclasses.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Although the recipe for forward pass needs to be defined within
+this function, one should call the <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code> instance afterwards
+instead of this since the former takes care of running the
+registered hooks while the latter silently ignores them.</p>
+</div>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="stable_worldmodel.wm.old_dinowm.FeedForward">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">stable_worldmodel.wm.old_dinowm.</span></span><span class="sig-name descname"><span class="pre">FeedForward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dim</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hidden_dim</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dropout</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/stable_worldmodel/wm/old_dinowm.html#FeedForward"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.wm.old_dinowm.FeedForward" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="stable_worldmodel.wm.old_dinowm.FeedForward.forward">
+<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/stable_worldmodel/wm/old_dinowm.html#FeedForward.forward"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.wm.old_dinowm.FeedForward.forward" title="Link to this definition">¶</a></dt>
+<dd><p>Define the computation performed at every call.</p>
+<p>Should be overridden by all subclasses.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Although the recipe for forward pass needs to be defined within
+this function, one should call the <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code> instance afterwards
+instead of this since the former takes care of running the
+registered hooks while the latter silently ignores them.</p>
+</div>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="stable_worldmodel.wm.old_dinowm.Quantize">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">stable_worldmodel.wm.old_dinowm.</span></span><span class="sig-name descname"><span class="pre">Quantize</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dim</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_embed</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">decay</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.99</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">eps</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1e-05</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/stable_worldmodel/wm/old_dinowm.html#Quantize"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.wm.old_dinowm.Quantize" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="stable_worldmodel.wm.old_dinowm.Quantize.embed_code">
+<span class="sig-name descname"><span class="pre">embed_code</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">embed_id</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/stable_worldmodel/wm/old_dinowm.html#Quantize.embed_code"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.wm.old_dinowm.Quantize.embed_code" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="stable_worldmodel.wm.old_dinowm.Quantize.forward">
+<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/stable_worldmodel/wm/old_dinowm.html#Quantize.forward"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.wm.old_dinowm.Quantize.forward" title="Link to this definition">¶</a></dt>
+<dd><p>Define the computation performed at every call.</p>
+<p>Should be overridden by all subclasses.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Although the recipe for forward pass needs to be defined within
+this function, one should call the <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code> instance afterwards
+instead of this since the former takes care of running the
+registered hooks while the latter silently ignores them.</p>
+</div>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="stable_worldmodel.wm.old_dinowm.ResBlock">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">stable_worldmodel.wm.old_dinowm.</span></span><span class="sig-name descname"><span class="pre">ResBlock</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">in_channel</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">channel</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/stable_worldmodel/wm/old_dinowm.html#ResBlock"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.wm.old_dinowm.ResBlock" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="stable_worldmodel.wm.old_dinowm.ResBlock.forward">
+<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/stable_worldmodel/wm/old_dinowm.html#ResBlock.forward"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.wm.old_dinowm.ResBlock.forward" title="Link to this definition">¶</a></dt>
+<dd><p>Define the computation performed at every call.</p>
+<p>Should be overridden by all subclasses.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Although the recipe for forward pass needs to be defined within
+this function, one should call the <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code> instance afterwards
+instead of this since the former takes care of running the
+registered hooks while the latter silently ignores them.</p>
+</div>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="stable_worldmodel.wm.old_dinowm.Transformer">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">stable_worldmodel.wm.old_dinowm.</span></span><span class="sig-name descname"><span class="pre">Transformer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dim</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">depth</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">heads</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dim_head</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mlp_dim</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dropout</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_patches</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_frames</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/stable_worldmodel/wm/old_dinowm.html#Transformer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.wm.old_dinowm.Transformer" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="stable_worldmodel.wm.old_dinowm.Transformer.forward">
+<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/stable_worldmodel/wm/old_dinowm.html#Transformer.forward"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.wm.old_dinowm.Transformer.forward" title="Link to this definition">¶</a></dt>
+<dd><p>Define the computation performed at every call.</p>
+<p>Should be overridden by all subclasses.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Although the recipe for forward pass needs to be defined within
+this function, one should call the <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code> instance afterwards
+instead of this since the former takes care of running the
+registered hooks while the latter silently ignores them.</p>
+</div>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="stable_worldmodel.wm.old_dinowm.VQVAE">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">stable_worldmodel.wm.old_dinowm.</span></span><span class="sig-name descname"><span class="pre">VQVAE</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">in_channel</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">3</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">channel</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">128</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_res_block</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_res_channel</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">32</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">emb_dim</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">64</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_embed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">512</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">decay</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.99</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">quantize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/stable_worldmodel/wm/old_dinowm.html#VQVAE"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.wm.old_dinowm.VQVAE" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="stable_worldmodel.wm.old_dinowm.VQVAE.decode">
+<span class="sig-name descname"><span class="pre">decode</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">quant_b</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/stable_worldmodel/wm/old_dinowm.html#VQVAE.decode"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.wm.old_dinowm.VQVAE.decode" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="stable_worldmodel.wm.old_dinowm.VQVAE.decode_code">
+<span class="sig-name descname"><span class="pre">decode_code</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">code_b</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/stable_worldmodel/wm/old_dinowm.html#VQVAE.decode_code"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.wm.old_dinowm.VQVAE.decode_code" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="stable_worldmodel.wm.old_dinowm.VQVAE.forward">
+<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/stable_worldmodel/wm/old_dinowm.html#VQVAE.forward"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.wm.old_dinowm.VQVAE.forward" title="Link to this definition">¶</a></dt>
+<dd><p>input: (b, t, num_patches, emb_dim)</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="stable_worldmodel.wm.old_dinowm.all_reduce">
+<span class="sig-prename descclassname"><span class="pre">stable_worldmodel.wm.old_dinowm.</span></span><span class="sig-name descname"><span class="pre">all_reduce</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tensor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">op=&lt;RedOpType.SUM:</span> <span class="pre">0&gt;</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/stable_worldmodel/wm/old_dinowm.html#all_reduce"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.wm.old_dinowm.all_reduce" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="stable_worldmodel.wm.old_dinowm.get_world_size">
+<span class="sig-prename descclassname"><span class="pre">stable_worldmodel.wm.old_dinowm.</span></span><span class="sig-name descname"><span class="pre">get_world_size</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/stable_worldmodel/wm/old_dinowm.html#get_world_size"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.wm.old_dinowm.get_world_size" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</section>
+<section id="module-stable_worldmodel.wm.tdmpc">
+<span id="stable-worldmodel-wm-tdmpc-module"></span><h2>stable_worldmodel.wm.tdmpc module<a class="headerlink" href="#module-stable_worldmodel.wm.tdmpc" title="Link to this heading">¶</a></h2>
+</section>
+<section id="module-stable_worldmodel.wm">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-stable_worldmodel.wm" title="Link to this heading">¶</a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="stable_worldmodel.wm.DINOWM">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">stable_worldmodel.wm.</span></span><span class="sig-name descname"><span class="pre">DINOWM</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">encoder</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">predictor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">action_encoder</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">proprio_encoder</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">decoder</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">history_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">3</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_pred</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">device</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'cpu'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/stable_worldmodel/wm/dinowm.html#DINOWM"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.wm.DINOWM" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="stable_worldmodel.wm.DINOWM.decode">
+<span class="sig-name descname"><span class="pre">decode</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">info</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/stable_worldmodel/wm/dinowm.html#DINOWM.decode"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.wm.DINOWM.decode" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="stable_worldmodel.wm.DINOWM.encode">
+<span class="sig-name descname"><span class="pre">encode</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">info</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pixels_key</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'pixels'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'embed'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">proprio_key</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">action_key</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/stable_worldmodel/wm/dinowm.html#DINOWM.encode"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.wm.DINOWM.encode" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="stable_worldmodel.wm.DINOWM.get_cost">
+<span class="sig-name descname"><span class="pre">get_cost</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">info_dict</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">action_candidates</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/stable_worldmodel/wm/dinowm.html#DINOWM.get_cost"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.wm.DINOWM.get_cost" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="stable_worldmodel.wm.DINOWM.predict">
+<span class="sig-name descname"><span class="pre">predict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">embedding</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/stable_worldmodel/wm/dinowm.html#DINOWM.predict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.wm.DINOWM.predict" title="Link to this definition">¶</a></dt>
+<dd><p>predict next latent state
+:param embedding: (B, T, P, d)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>(B, T, P, d)</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>preds</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="stable_worldmodel.wm.DINOWM.replace_action_in_embedding">
+<span class="sig-name descname"><span class="pre">replace_action_in_embedding</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">embedding</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">act</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/stable_worldmodel/wm/dinowm.html#DINOWM.replace_action_in_embedding"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.wm.DINOWM.replace_action_in_embedding" title="Link to this definition">¶</a></dt>
+<dd><p>Replace the action embeddings in the latent state z with the provided actions.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="stable_worldmodel.wm.DINOWM.rollout">
+<span class="sig-name descname"><span class="pre">rollout</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">info</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">action_sequence</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/stable_worldmodel/wm/dinowm.html#DINOWM.rollout"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.wm.DINOWM.rollout" title="Link to this definition">¶</a></dt>
+<dd><p>Rollout the world model given an initial observation and a sequence of actions.</p>
+<p>Params:
+obs_start: n current observations (B, n, C, H, W)
+actions: current and predicted actions (B, n+t, action_dim)</p>
+<p>Returns:
+z_obs: dict with latent observations (B, n+t+1, n_patches, D)
+z: predicted latent states (B, n+t+1, n_patches, D)</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="stable_worldmodel.wm.DINOWM.split_embedding">
+<span class="sig-name descname"><span class="pre">split_embedding</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">embedding</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">action_dim</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">proprio_dim</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/stable_worldmodel/wm/dinowm.html#DINOWM.split_embedding"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.wm.DINOWM.split_embedding" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="stable_worldmodel.wm.DummyWorldModel">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">stable_worldmodel.wm.</span></span><span class="sig-name descname"><span class="pre">DummyWorldModel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">image_shape</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">action_dim</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/stable_worldmodel/wm/dummy.html#DummyWorldModel"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.wm.DummyWorldModel" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="stable_worldmodel.wm.DummyWorldModel.encode">
+<span class="sig-name descname"><span class="pre">encode</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">obs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/stable_worldmodel/wm/dummy.html#DummyWorldModel.encode"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.wm.DummyWorldModel.encode" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="stable_worldmodel.wm.DummyWorldModel.get_cost">
+<span class="sig-name descname"><span class="pre">get_cost</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">info_dict</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">action_candidates</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/stable_worldmodel/wm/dummy.html#DummyWorldModel.get_cost"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.wm.DummyWorldModel.get_cost" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="stable_worldmodel.wm.DummyWorldModel.predict">
+<span class="sig-name descname"><span class="pre">predict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">obs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">actions</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timestep</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/stable_worldmodel/wm/dummy.html#DummyWorldModel.predict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.wm.DummyWorldModel.predict" title="Link to this definition">¶</a></dt>
+<dd><p>Predict next s_t+H embedding given s_t + action sequence i.e rollout the dynamics model for H steps.</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+</section>
+
+        </article>
+      </div>
+      <footer>
+        
+        <div class="related-pages">
+          
+          
+        </div>
+        <div class="bottom-of-page">
+          <div class="left-details">
+            <div class="copyright">
+                Copyright &#169; 2025
+            </div>
+            Made with <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
+            
+            <a href="https://github.com/pradyunsg/furo">Furo</a>
+            
+          </div>
+          <div class="right-details">
+            <div class="icons">
+              <a class="muted-link fa-brands fa-solid fa-discord" href="https://discord.gg/8M6hT39X" aria-label="Discord"></a>
+              <a class="muted-link fa-brands fa-solid fa-github" href="https://github.com/randall-lab/stable-worldmodel" aria-label="GitHub"></a>
+              
+            </div>
+          </div>
+        </div>
+        
+      </footer>
+    </div>
+    <aside class="toc-drawer">
+      
+      
+      <div class="toc-sticky toc-scroll">
+        <div class="toc-title-container">
+          <span class="toc-title">
+            On this page
+          </span>
+        </div>
+        <div class="toc-tree-container">
+          <div class="toc-tree">
+            <ul>
+<li><a class="reference internal" href="#">stable_worldmodel.wm package</a><ul>
+<li><a class="reference internal" href="#submodules">Submodules</a></li>
+<li><a class="reference internal" href="#module-stable_worldmodel.wm.dinowm">stable_worldmodel.wm.dinowm module</a><ul>
+<li><a class="reference internal" href="#stable_worldmodel.wm.dinowm.Attention"><code class="docutils literal notranslate"><span class="pre">Attention</span></code></a><ul>
+<li><a class="reference internal" href="#stable_worldmodel.wm.dinowm.Attention.forward"><code class="docutils literal notranslate"><span class="pre">Attention.forward()</span></code></a></li>
+<li><a class="reference internal" href="#stable_worldmodel.wm.dinowm.Attention.generate_mask_matrix"><code class="docutils literal notranslate"><span class="pre">Attention.generate_mask_matrix()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#stable_worldmodel.wm.dinowm.CausalPredictor"><code class="docutils literal notranslate"><span class="pre">CausalPredictor</span></code></a><ul>
+<li><a class="reference internal" href="#stable_worldmodel.wm.dinowm.CausalPredictor.forward"><code class="docutils literal notranslate"><span class="pre">CausalPredictor.forward()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#stable_worldmodel.wm.dinowm.DINOWM"><code class="docutils literal notranslate"><span class="pre">DINOWM</span></code></a><ul>
+<li><a class="reference internal" href="#stable_worldmodel.wm.dinowm.DINOWM.decode"><code class="docutils literal notranslate"><span class="pre">DINOWM.decode()</span></code></a></li>
+<li><a class="reference internal" href="#stable_worldmodel.wm.dinowm.DINOWM.encode"><code class="docutils literal notranslate"><span class="pre">DINOWM.encode()</span></code></a></li>
+<li><a class="reference internal" href="#stable_worldmodel.wm.dinowm.DINOWM.get_cost"><code class="docutils literal notranslate"><span class="pre">DINOWM.get_cost()</span></code></a></li>
+<li><a class="reference internal" href="#stable_worldmodel.wm.dinowm.DINOWM.predict"><code class="docutils literal notranslate"><span class="pre">DINOWM.predict()</span></code></a></li>
+<li><a class="reference internal" href="#stable_worldmodel.wm.dinowm.DINOWM.replace_action_in_embedding"><code class="docutils literal notranslate"><span class="pre">DINOWM.replace_action_in_embedding()</span></code></a></li>
+<li><a class="reference internal" href="#stable_worldmodel.wm.dinowm.DINOWM.rollout"><code class="docutils literal notranslate"><span class="pre">DINOWM.rollout()</span></code></a></li>
+<li><a class="reference internal" href="#stable_worldmodel.wm.dinowm.DINOWM.split_embedding"><code class="docutils literal notranslate"><span class="pre">DINOWM.split_embedding()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#stable_worldmodel.wm.dinowm.Decoder"><code class="docutils literal notranslate"><span class="pre">Decoder</span></code></a><ul>
+<li><a class="reference internal" href="#stable_worldmodel.wm.dinowm.Decoder.forward"><code class="docutils literal notranslate"><span class="pre">Decoder.forward()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#stable_worldmodel.wm.dinowm.Embedder"><code class="docutils literal notranslate"><span class="pre">Embedder</span></code></a><ul>
+<li><a class="reference internal" href="#stable_worldmodel.wm.dinowm.Embedder.forward"><code class="docutils literal notranslate"><span class="pre">Embedder.forward()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#stable_worldmodel.wm.dinowm.Encoder"><code class="docutils literal notranslate"><span class="pre">Encoder</span></code></a><ul>
+<li><a class="reference internal" href="#stable_worldmodel.wm.dinowm.Encoder.forward"><code class="docutils literal notranslate"><span class="pre">Encoder.forward()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#stable_worldmodel.wm.dinowm.FeedForward"><code class="docutils literal notranslate"><span class="pre">FeedForward</span></code></a><ul>
+<li><a class="reference internal" href="#stable_worldmodel.wm.dinowm.FeedForward.forward"><code class="docutils literal notranslate"><span class="pre">FeedForward.forward()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#stable_worldmodel.wm.dinowm.Quantize"><code class="docutils literal notranslate"><span class="pre">Quantize</span></code></a><ul>
+<li><a class="reference internal" href="#stable_worldmodel.wm.dinowm.Quantize.embed_code"><code class="docutils literal notranslate"><span class="pre">Quantize.embed_code()</span></code></a></li>
+<li><a class="reference internal" href="#stable_worldmodel.wm.dinowm.Quantize.forward"><code class="docutils literal notranslate"><span class="pre">Quantize.forward()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#stable_worldmodel.wm.dinowm.ResBlock"><code class="docutils literal notranslate"><span class="pre">ResBlock</span></code></a><ul>
+<li><a class="reference internal" href="#stable_worldmodel.wm.dinowm.ResBlock.forward"><code class="docutils literal notranslate"><span class="pre">ResBlock.forward()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#stable_worldmodel.wm.dinowm.Transformer"><code class="docutils literal notranslate"><span class="pre">Transformer</span></code></a><ul>
+<li><a class="reference internal" href="#stable_worldmodel.wm.dinowm.Transformer.forward"><code class="docutils literal notranslate"><span class="pre">Transformer.forward()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#stable_worldmodel.wm.dinowm.VQVAE"><code class="docutils literal notranslate"><span class="pre">VQVAE</span></code></a><ul>
+<li><a class="reference internal" href="#stable_worldmodel.wm.dinowm.VQVAE.decode"><code class="docutils literal notranslate"><span class="pre">VQVAE.decode()</span></code></a></li>
+<li><a class="reference internal" href="#stable_worldmodel.wm.dinowm.VQVAE.decode_code"><code class="docutils literal notranslate"><span class="pre">VQVAE.decode_code()</span></code></a></li>
+<li><a class="reference internal" href="#stable_worldmodel.wm.dinowm.VQVAE.forward"><code class="docutils literal notranslate"><span class="pre">VQVAE.forward()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#stable_worldmodel.wm.dinowm.all_reduce"><code class="docutils literal notranslate"><span class="pre">all_reduce()</span></code></a></li>
+<li><a class="reference internal" href="#stable_worldmodel.wm.dinowm.get_world_size"><code class="docutils literal notranslate"><span class="pre">get_world_size()</span></code></a></li>
+<li><a class="reference internal" href="#stable_worldmodel.wm.dinowm.transform"><code class="docutils literal notranslate"><span class="pre">transform()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#module-stable_worldmodel.wm.dreamer">stable_worldmodel.wm.dreamer module</a></li>
+<li><a class="reference internal" href="#module-stable_worldmodel.wm.dummy">stable_worldmodel.wm.dummy module</a><ul>
+<li><a class="reference internal" href="#stable_worldmodel.wm.dummy.DummyWorldModel"><code class="docutils literal notranslate"><span class="pre">DummyWorldModel</span></code></a><ul>
+<li><a class="reference internal" href="#stable_worldmodel.wm.dummy.DummyWorldModel.encode"><code class="docutils literal notranslate"><span class="pre">DummyWorldModel.encode()</span></code></a></li>
+<li><a class="reference internal" href="#stable_worldmodel.wm.dummy.DummyWorldModel.get_cost"><code class="docutils literal notranslate"><span class="pre">DummyWorldModel.get_cost()</span></code></a></li>
+<li><a class="reference internal" href="#stable_worldmodel.wm.dummy.DummyWorldModel.predict"><code class="docutils literal notranslate"><span class="pre">DummyWorldModel.predict()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#stable_worldmodel.wm.dummy.transform"><code class="docutils literal notranslate"><span class="pre">transform()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#module-stable_worldmodel.wm.frame">stable_worldmodel.wm.frame module</a></li>
+<li><a class="reference internal" href="#module-stable_worldmodel.wm.old_dinowm">stable_worldmodel.wm.old_dinowm module</a><ul>
+<li><a class="reference internal" href="#stable_worldmodel.wm.old_dinowm.Attention"><code class="docutils literal notranslate"><span class="pre">Attention</span></code></a><ul>
+<li><a class="reference internal" href="#stable_worldmodel.wm.old_dinowm.Attention.forward"><code class="docutils literal notranslate"><span class="pre">Attention.forward()</span></code></a></li>
+<li><a class="reference internal" href="#stable_worldmodel.wm.old_dinowm.Attention.generate_mask_matrix"><code class="docutils literal notranslate"><span class="pre">Attention.generate_mask_matrix()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#stable_worldmodel.wm.old_dinowm.CausalPredictor"><code class="docutils literal notranslate"><span class="pre">CausalPredictor</span></code></a><ul>
+<li><a class="reference internal" href="#stable_worldmodel.wm.old_dinowm.CausalPredictor.forward"><code class="docutils literal notranslate"><span class="pre">CausalPredictor.forward()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#stable_worldmodel.wm.old_dinowm.DINOWM"><code class="docutils literal notranslate"><span class="pre">DINOWM</span></code></a><ul>
+<li><a class="reference internal" href="#stable_worldmodel.wm.old_dinowm.DINOWM.decode_obs"><code class="docutils literal notranslate"><span class="pre">DINOWM.decode_obs()</span></code></a></li>
+<li><a class="reference internal" href="#stable_worldmodel.wm.old_dinowm.DINOWM.denormalize_actions"><code class="docutils literal notranslate"><span class="pre">DINOWM.denormalize_actions()</span></code></a></li>
+<li><a class="reference internal" href="#stable_worldmodel.wm.old_dinowm.DINOWM.denormalize_proprio"><code class="docutils literal notranslate"><span class="pre">DINOWM.denormalize_proprio()</span></code></a></li>
+<li><a class="reference internal" href="#stable_worldmodel.wm.old_dinowm.DINOWM.encode"><code class="docutils literal notranslate"><span class="pre">DINOWM.encode()</span></code></a></li>
+<li><a class="reference internal" href="#stable_worldmodel.wm.old_dinowm.DINOWM.encode_action"><code class="docutils literal notranslate"><span class="pre">DINOWM.encode_action()</span></code></a></li>
+<li><a class="reference internal" href="#stable_worldmodel.wm.old_dinowm.DINOWM.encode_obs"><code class="docutils literal notranslate"><span class="pre">DINOWM.encode_obs()</span></code></a></li>
+<li><a class="reference internal" href="#stable_worldmodel.wm.old_dinowm.DINOWM.encode_proprio"><code class="docutils literal notranslate"><span class="pre">DINOWM.encode_proprio()</span></code></a></li>
+<li><a class="reference internal" href="#stable_worldmodel.wm.old_dinowm.DINOWM.forward"><code class="docutils literal notranslate"><span class="pre">DINOWM.forward()</span></code></a></li>
+<li><a class="reference internal" href="#stable_worldmodel.wm.old_dinowm.DINOWM.normalize_actions"><code class="docutils literal notranslate"><span class="pre">DINOWM.normalize_actions()</span></code></a></li>
+<li><a class="reference internal" href="#stable_worldmodel.wm.old_dinowm.DINOWM.normalize_proprio"><code class="docutils literal notranslate"><span class="pre">DINOWM.normalize_proprio()</span></code></a></li>
+<li><a class="reference internal" href="#stable_worldmodel.wm.old_dinowm.DINOWM.predict"><code class="docutils literal notranslate"><span class="pre">DINOWM.predict()</span></code></a></li>
+<li><a class="reference internal" href="#stable_worldmodel.wm.old_dinowm.DINOWM.replace_actions_from_z"><code class="docutils literal notranslate"><span class="pre">DINOWM.replace_actions_from_z()</span></code></a></li>
+<li><a class="reference internal" href="#stable_worldmodel.wm.old_dinowm.DINOWM.rollout"><code class="docutils literal notranslate"><span class="pre">DINOWM.rollout()</span></code></a></li>
+<li><a class="reference internal" href="#stable_worldmodel.wm.old_dinowm.DINOWM.split_embeddings"><code class="docutils literal notranslate"><span class="pre">DINOWM.split_embeddings()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#stable_worldmodel.wm.old_dinowm.Decoder"><code class="docutils literal notranslate"><span class="pre">Decoder</span></code></a><ul>
+<li><a class="reference internal" href="#stable_worldmodel.wm.old_dinowm.Decoder.forward"><code class="docutils literal notranslate"><span class="pre">Decoder.forward()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#stable_worldmodel.wm.old_dinowm.DinoV2Encoder"><code class="docutils literal notranslate"><span class="pre">DinoV2Encoder</span></code></a><ul>
+<li><a class="reference internal" href="#stable_worldmodel.wm.old_dinowm.DinoV2Encoder.forward"><code class="docutils literal notranslate"><span class="pre">DinoV2Encoder.forward()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#stable_worldmodel.wm.old_dinowm.Embedder"><code class="docutils literal notranslate"><span class="pre">Embedder</span></code></a><ul>
+<li><a class="reference internal" href="#stable_worldmodel.wm.old_dinowm.Embedder.forward"><code class="docutils literal notranslate"><span class="pre">Embedder.forward()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#stable_worldmodel.wm.old_dinowm.Encoder"><code class="docutils literal notranslate"><span class="pre">Encoder</span></code></a><ul>
+<li><a class="reference internal" href="#stable_worldmodel.wm.old_dinowm.Encoder.forward"><code class="docutils literal notranslate"><span class="pre">Encoder.forward()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#stable_worldmodel.wm.old_dinowm.FeedForward"><code class="docutils literal notranslate"><span class="pre">FeedForward</span></code></a><ul>
+<li><a class="reference internal" href="#stable_worldmodel.wm.old_dinowm.FeedForward.forward"><code class="docutils literal notranslate"><span class="pre">FeedForward.forward()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#stable_worldmodel.wm.old_dinowm.Quantize"><code class="docutils literal notranslate"><span class="pre">Quantize</span></code></a><ul>
+<li><a class="reference internal" href="#stable_worldmodel.wm.old_dinowm.Quantize.embed_code"><code class="docutils literal notranslate"><span class="pre">Quantize.embed_code()</span></code></a></li>
+<li><a class="reference internal" href="#stable_worldmodel.wm.old_dinowm.Quantize.forward"><code class="docutils literal notranslate"><span class="pre">Quantize.forward()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#stable_worldmodel.wm.old_dinowm.ResBlock"><code class="docutils literal notranslate"><span class="pre">ResBlock</span></code></a><ul>
+<li><a class="reference internal" href="#stable_worldmodel.wm.old_dinowm.ResBlock.forward"><code class="docutils literal notranslate"><span class="pre">ResBlock.forward()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#stable_worldmodel.wm.old_dinowm.Transformer"><code class="docutils literal notranslate"><span class="pre">Transformer</span></code></a><ul>
+<li><a class="reference internal" href="#stable_worldmodel.wm.old_dinowm.Transformer.forward"><code class="docutils literal notranslate"><span class="pre">Transformer.forward()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#stable_worldmodel.wm.old_dinowm.VQVAE"><code class="docutils literal notranslate"><span class="pre">VQVAE</span></code></a><ul>
+<li><a class="reference internal" href="#stable_worldmodel.wm.old_dinowm.VQVAE.decode"><code class="docutils literal notranslate"><span class="pre">VQVAE.decode()</span></code></a></li>
+<li><a class="reference internal" href="#stable_worldmodel.wm.old_dinowm.VQVAE.decode_code"><code class="docutils literal notranslate"><span class="pre">VQVAE.decode_code()</span></code></a></li>
+<li><a class="reference internal" href="#stable_worldmodel.wm.old_dinowm.VQVAE.forward"><code class="docutils literal notranslate"><span class="pre">VQVAE.forward()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#stable_worldmodel.wm.old_dinowm.all_reduce"><code class="docutils literal notranslate"><span class="pre">all_reduce()</span></code></a></li>
+<li><a class="reference internal" href="#stable_worldmodel.wm.old_dinowm.get_world_size"><code class="docutils literal notranslate"><span class="pre">get_world_size()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#module-stable_worldmodel.wm.tdmpc">stable_worldmodel.wm.tdmpc module</a></li>
+<li><a class="reference internal" href="#module-stable_worldmodel.wm">Module contents</a><ul>
+<li><a class="reference internal" href="#stable_worldmodel.wm.DINOWM"><code class="docutils literal notranslate"><span class="pre">DINOWM</span></code></a><ul>
+<li><a class="reference internal" href="#stable_worldmodel.wm.DINOWM.decode"><code class="docutils literal notranslate"><span class="pre">DINOWM.decode()</span></code></a></li>
+<li><a class="reference internal" href="#stable_worldmodel.wm.DINOWM.encode"><code class="docutils literal notranslate"><span class="pre">DINOWM.encode()</span></code></a></li>
+<li><a class="reference internal" href="#stable_worldmodel.wm.DINOWM.get_cost"><code class="docutils literal notranslate"><span class="pre">DINOWM.get_cost()</span></code></a></li>
+<li><a class="reference internal" href="#stable_worldmodel.wm.DINOWM.predict"><code class="docutils literal notranslate"><span class="pre">DINOWM.predict()</span></code></a></li>
+<li><a class="reference internal" href="#stable_worldmodel.wm.DINOWM.replace_action_in_embedding"><code class="docutils literal notranslate"><span class="pre">DINOWM.replace_action_in_embedding()</span></code></a></li>
+<li><a class="reference internal" href="#stable_worldmodel.wm.DINOWM.rollout"><code class="docutils literal notranslate"><span class="pre">DINOWM.rollout()</span></code></a></li>
+<li><a class="reference internal" href="#stable_worldmodel.wm.DINOWM.split_embedding"><code class="docutils literal notranslate"><span class="pre">DINOWM.split_embedding()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#stable_worldmodel.wm.DummyWorldModel"><code class="docutils literal notranslate"><span class="pre">DummyWorldModel</span></code></a><ul>
+<li><a class="reference internal" href="#stable_worldmodel.wm.DummyWorldModel.encode"><code class="docutils literal notranslate"><span class="pre">DummyWorldModel.encode()</span></code></a></li>
+<li><a class="reference internal" href="#stable_worldmodel.wm.DummyWorldModel.get_cost"><code class="docutils literal notranslate"><span class="pre">DummyWorldModel.get_cost()</span></code></a></li>
+<li><a class="reference internal" href="#stable_worldmodel.wm.DummyWorldModel.predict"><code class="docutils literal notranslate"><span class="pre">DummyWorldModel.predict()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+          </div>
+        </div>
+      </div>
+      
+      
+    </aside>
+  </div>
+</div><script src="_static/documentation_options.js?v=c2d0de4b"></script>
+    <script src="_static/doctools.js?v=9bcbadda"></script>
+    <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/scripts/furo.js?v=46bd48cc"></script>
+    </body>
+</html>

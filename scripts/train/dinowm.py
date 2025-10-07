@@ -6,7 +6,9 @@ import lightning as pl
 import stable_pretraining as spt
 import torch
 from lightning.pytorch.callbacks import ModelCheckpoint
+from lightning.pytorch.loggers import WandbLogger
 from loguru import logger as logging
+from omegaconf import OmegaConf
 from torch.nn import functional as F
 from torch.utils.data import DataLoader
 from transformers import AutoModel
@@ -29,7 +31,7 @@ def get_data(dataset_name):
     def get_img_pipeling(key, target, img_size=224):
         return spt.data.transforms.Compose(
             spt.data.transforms.ToImage(
-                **spt.data.dataset_stat.ImageNet,
+                **spt.data.dataset_stats.ImageNet,
                 source=key,
                 target=target,
             ),
@@ -44,6 +46,7 @@ def get_data(dataset_name):
     )
 
     # == action transformations
+    # TODO
 
     # == load dataset
     data_dir = swm.data.get_cache_dir()
@@ -74,6 +77,16 @@ def forward(self, batch, stage):
     """Forward pass for predictor training"""
 
     proprio_key = "proprio" if "proprio" in batch else None
+
+    # make action and proprio NaN (last action) at 0
+    if proprio_key is not None:
+        nan_mask = torch.isnan(batch[proprio_key])
+        batch[proprio_key][nan_mask] = 0.0
+
+    if "action" in batch:
+        nan_mask = torch.isnan(batch["action"])
+        batch["action"][nan_mask] = 0.0
+
     batch = self.model.encode(
         batch,
         target="embed",
@@ -83,11 +96,11 @@ def forward(self, batch, stage):
     )
 
     # predictions
-    embedding = batch["embed"][:, : self.model.history_size, :, :]  # (B, history_size, P, d)
+    embedding = batch["embed"][:, :-1, :, :]  # (B, history_size, P, d)
     pred_embedding = self.model.predict(embedding)
 
     # targets values
-    target_embedding = batch["embed"][:, self.model.num_pred :, :, :]  # (B, T-history_size, P, d)
+    target_embedding = batch["embed"][:, 1:, :, :]  # (B, T-history_size, P, d)
 
     # == pixels loss
     pixels_dim = batch["pixels_embed"].shape[-1]
@@ -182,9 +195,29 @@ def get_world_model(action_dim):
     return world_model
 
 
+def setup_pl_logger(cfg):
+    if not cfg.wandb.enable:
+        return None
+
+    wandb_run_id = cfg.wandb.get("run_id", None)
+    wandb_logger = WandbLogger(
+        name="dino_wm",
+        project=cfg.wandb.project,
+        entity=cfg.wandb.entity,
+        resume="allow" if wandb_run_id else None,
+        id=wandb_run_id,
+    )
+
+    wandb_logger.log_hyperparams(OmegaConf.to_container(cfg))
+    return wandb_logger
+
+
 @hydra.main(version_base=None, config_path="./", config_name="config")
 def run(cfg):
     """Run training of predictor"""
+
+    wandb_logger = setup_pl_logger(cfg)
+
     data, action_dim = get_data(cfg.dataset_name)
     world_model = get_world_model(action_dim)
 
@@ -194,11 +227,11 @@ def run(cfg):
     )  # , save_last=True)
 
     trainer = pl.Trainer(
-        max_epochs=1,
+        max_epochs=10,
         callbacks=[checkpoint_callback],
         num_sanity_val_steps=1,
-        precision="16-mixed",
-        logger=False,
+        logger=wandb_logger,
+        # precision="16-mixed",
         enable_checkpointing=True,
     )
 

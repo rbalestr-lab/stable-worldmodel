@@ -10,6 +10,64 @@ from ogbench.manipspace.envs.manipspace_env import ManipSpaceEnv
 import stable_worldmodel as swm
 
 
+def perturb_camera_angle(xyaxis, deg_dif=[3, 3]):
+    xaxis = np.array(xyaxis[:3])
+    yaxis = np.array(xyaxis[3:])
+
+    # Compute z-axis
+    zaxis = np.cross(xaxis, yaxis)
+    zaxis /= np.linalg.norm(zaxis)
+
+    # Small random rotation (e.g. ±3 degrees)
+    yaw = np.deg2rad(deg_dif[0])
+    pitch = np.deg2rad(deg_dif[1])
+
+    # Build rotation matrices
+    R_yaw = np.array([
+        [np.cos(yaw), -np.sin(yaw), 0],
+        [np.sin(yaw),  np.cos(yaw), 0],
+        [0, 0, 1]
+    ])
+
+    R_pitch = np.array([
+        [1, 0, 0],
+        [0, np.cos(pitch), -np.sin(pitch)],
+        [0, np.sin(pitch),  np.cos(pitch)]
+    ])
+
+    # Combine and rotate the basis
+    R = R_pitch @ R_yaw
+    xaxis_new = R @ xaxis
+    yaxis_new = R @ yaxis
+
+    # Flatten back to tuple for MuJoCo
+    xyaxes_new = tuple(np.concatenate([xaxis_new, yaxis_new]))
+    
+    return xyaxes_new
+
+
+def perturb_light_direction(direction, angle_deg=5):
+    """Perturb a direction vector by a small random rotation (in degrees)."""
+    direction = np.array(direction, dtype=float)
+    direction /= np.linalg.norm(direction)
+
+    # Generate a small random rotation axis
+    axis = np.random.normal(size=3)
+    axis /= np.linalg.norm(axis)
+
+    # Random rotation angle
+    theta = np.deg2rad(np.random.uniform(-angle_deg, angle_deg))
+
+    # Rodrigues’ rotation formula
+    direction_rot = (
+        direction * np.cos(theta)
+        + np.cross(axis, direction) * np.sin(theta)
+        + axis * np.dot(axis, direction) * (1 - np.cos(theta))
+    )
+
+    return tuple(direction_rot / np.linalg.norm(direction_rot))
+
+
 class CubeEnv(ManipSpaceEnv):
     """Cube environment.
 
@@ -18,7 +76,7 @@ class CubeEnv(ManipSpaceEnv):
     - `env_type`: 'single', 'double', 'triple', 'quadruple'.
     """
 
-    def __init__(self, env_type, permute_blocks=True, *args, **kwargs):
+    def __init__(self, env_type, permute_blocks=True, multiview=False, *args, **kwargs):
         """Initialize the Cube environment.
 
         Args:
@@ -29,6 +87,7 @@ class CubeEnv(ManipSpaceEnv):
         """
         self._env_type = env_type
         self._permute_blocks = permute_blocks
+        self._multiview = multiview
 
         if self._env_type == 'single':
             self._num_cubes = 1
@@ -106,6 +165,39 @@ class CubeEnv(ManipSpaceEnv):
                             shape=(3,),
                             dtype=np.float64,
                             init_value=self._colors['purple'][:3],
+                        ),
+                    }
+                ),
+                "floor": swm.spaces.Dict(
+                    {
+                        "color": swm.spaces.Box(
+                            low=0.0,
+                            high=1.0,
+                            shape=(2, 3),
+                            dtype=np.float64,
+                            init_value=np.array([[0.08, 0.11, 0.16], [0.15, 0.18, 0.25]]),
+                        ),
+                    }
+                ),
+                "camera": swm.spaces.Dict(
+                    {
+                        "angle_delta": swm.spaces.Box(
+                            low=-10.0,
+                            high=10.0,
+                            shape=(2, 2) if self._multiview else (1, 2),
+                            dtype=np.float64,
+                            init_value=np.zeros([2, 2]) if self._multiview else np.zeros([1, 2]),
+                        ),
+                    }
+                ),
+                "light": swm.spaces.Dict(
+                    {
+                        "intensity": swm.spaces.Box(
+                            low=0.0,
+                            high=1.0,
+                            shape=(1,),
+                            dtype=np.float64,
+                            init_value=[0.6],
                         ),
                     }
                 ),
@@ -548,10 +640,6 @@ class CubeEnv(ManipSpaceEnv):
             self._reward_task_id = 2  # Default task.
 
     def reset(self, options=None, *args, **kwargs):
-        # TODO: implement color changes to table continuous
-        # TODO: implement camera angle changes
-        # TODO: implement multiview camera angles
-        # TODO: implement number of cubes changes
         options = options or {}
 
         self.variation_options = options["variation"] if "variation" in options else {}
@@ -602,7 +690,7 @@ class CubeEnv(ManipSpaceEnv):
             self._cube_target_geoms_list.append(arena_mjcf.find('body', f'object_target_{i}').find_all('geom'))
 
         # Add cameras.
-        cameras = {
+        self.cameras = {
             'front': {
                 'pos': (1.287, 0.000, 0.509),
                 'xyaxes': (0.000, 1.000, 0.000, -0.342, 0.000, 0.940),
@@ -611,8 +699,13 @@ class CubeEnv(ManipSpaceEnv):
                 'pos': (1.053, -0.014, 0.639),
                 'xyaxes': (0.000, 1.000, 0.000, -0.628, 0.001, 0.778),
             },
+            'side_pixels': {
+                'pos': (0.414, -0.753, 0.639),
+                'xyaxes': (1.000, 0.000, 0.000, -0.001, 0.628, 0.778),
+            },
         }
-        for camera_name, camera_kwargs in cameras.items():
+        
+        for camera_name, camera_kwargs in self.cameras.items():
             arena_mjcf.worldbody.add('camera', name=camera_name, **camera_kwargs)
 
     def post_compilation_objects(self):
@@ -629,10 +722,15 @@ class CubeEnv(ManipSpaceEnv):
         ]
 
     def modify_mjcf_model(self, mjcf_model):
-        # mjcf_model = mjcf_model.copy()
 
+        if "all" in self.variation_options or "floor.color" in self.variation_options:
+            # Modify floor color
+            grid_texture = mjcf_model.find('texture', 'grid')
+            grid_texture.rgb1 = self.variation_space["floor"]["color"].value[0]
+            grid_texture.rgb2 = self.variation_space["floor"]["color"].value[1]
+        
         if "all" in self.variation_options or "agent.color" in self.variation_options:
-            # Adjust arm color
+            # Modify arm color
             mjcf_model.find('material', 'ur5e/robotiq/black').rgba[:3] = self.variation_space["agent"]["color"].value
             mjcf_model.find('material', 'ur5e/robotiq/pad_gray').rgba[:3] = self.variation_space["agent"]["color"].value
         
@@ -651,6 +749,19 @@ class CubeEnv(ManipSpaceEnv):
                     for geom in target_body.find_all('geom'):
                         geom.size = self.variation_space["cube"]["size"].value[i] * np.ones((3), dtype=np.float32)
             
+            self.mark_dirty()
+        
+        if "all" in self.variation_options or "camera.angle_delta" in self.variation_options:
+            # Perturb camera angle
+            cameras_to_vary = ['front_pixels', 'side_pixels'] if self._multiview else ['front_pixels']
+            for i, cam_name in enumerate(cameras_to_vary):
+                cam = mjcf_model.find('camera', cam_name)
+                cam.xyaxes = perturb_camera_angle(self.cameras[cam_name]["xyaxes"], self.variation_space["camera"]["angle_delta"].value[i])
+        
+        if "all" in self.variation_options or "light.intensity" in self.variation_options:
+            # Modify light intensity
+            light = mjcf_model.find('light', 'global')
+            light.diffuse = self.variation_space["light"]["intensity"].value[0] * np.ones((3), dtype=np.float32)
             self.mark_dirty()
         
         return mjcf_model
@@ -924,3 +1035,20 @@ class CubeEnv(ManipSpaceEnv):
         successes = self._compute_successes()
         reward = float(sum(successes) - len(successes))
         return reward
+    
+    def render(
+        self,
+        camera='front_pixels',
+        *args,
+        **kwargs,
+    ):
+        camera = 'front_pixels' if not self._multiview else ['front_pixels', 'side_pixels']
+        if isinstance(camera, (list, tuple)):
+            imgs = []
+            for cam in camera:
+                img = super().render(camera=cam, *args, **kwargs)
+                imgs.append(img)
+            stacked_views = np.stack(imgs, axis=0)
+            return stacked_views
+        else:
+            return super().render(camera=camera, *args, **kwargs)

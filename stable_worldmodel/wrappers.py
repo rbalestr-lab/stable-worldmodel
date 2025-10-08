@@ -114,6 +114,7 @@ class EverythingToInfoWrapper(gym.Wrapper):
         options = kwargs.get("options")
         if options is not None and "variation" in options:
             var_opt = options["variation"]
+            assert isinstance(var_opt, Iterable), "options['variation'] must be an iterable of variation names or 'all'"
             if len(var_opt) == 1 and var_opt[0] == "all":
                 self._variations_watch = self.env.unwrapped.variation_space.names()
             else:

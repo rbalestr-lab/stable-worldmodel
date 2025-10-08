@@ -12,13 +12,14 @@ if __name__ == "__main__":
     world = swm.World(
         "swm/OGBCube-v0",
         num_envs=1,
-        image_shape=(64, 64),
+        image_shape=(224, 224),
         max_episode_steps=200,
         
         env_type='single',
+        multiview=False,
         ob_type='pixels',
-        width=64,
-        height=64,
+        width=224,
+        height=224,
         visualize_info=False,
     )
 
@@ -29,16 +30,17 @@ if __name__ == "__main__":
     #######################
 
     world.set_policy(swm.policy.RandomPolicy())
-    world.record_dataset(
-        "ogbench-cube-single",
-        episodes=10,
-        seed=2347,
-        options=dict(variation=("cube.color", "cube.size", "agent.color")),
-    )
+    # world.record_dataset(
+    #     "ogbench-cube-single",
+    #     episodes=10,
+    #     seed=2347,
+    #     options=dict(variation=("cube.color", "cube.size", "agent.color", "floor.color")),
+    # )
     world.record_video(
         "./",
         seed=2347,
-        options=dict(variation=("cube.color", "cube.size", "agent.color")),
+        # options=dict(variation=("cube.color", "cube.size", "agent.color", "floor.color", "camera.angle_delta", "light.angle_delta")),
+        options=dict(variation=("light.intensity",)),
     )
     exit()
 

@@ -13,7 +13,6 @@ if __name__ == "__main__":
         "swm/OGBCube-v0",
         num_envs=1,
         image_shape=(64, 64),
-        # render_mode="rgb_array",
         max_episode_steps=200,
         
         env_type='single',
@@ -41,26 +40,31 @@ if __name__ == "__main__":
         seed=2347,
         options=dict(variation=("cube.color", "cube.size", "agent.color")),
     )
+    exit()
 
     ################
     ##  Pretrain  ##
     ################
 
-    # pre-train world model
     swm.pretraining(
-        "scripts/train/dummy.py",
-        "++dump_object=True dataset_name=ogbench-cube-single output_model_name=dummy_test",
+        "scripts/train/dinowm.py",
+        dataset_name="ogbench-cube-single",
+        output_model_name="dummy_ogcube",
+        dump_object=True,
     )
 
     ################
     ##  Evaluate  ##
     ################
 
-    model = swm.policy.AutoCost("dummy_test")  # auto-cost is confusing
-    config = swm.PlanConfig(horizon=10, receding_horizon=5, action_block=5)
-    solver = swm.solver.GDSolver(model, n_steps=10)
+    # NOTE for user: make sure to match action_block with the one used during training!
+
+    model = swm.policy.AutoCostModel("dummy_ogcube").to("cuda")
+    config = swm.PlanConfig(horizon=5, receding_horizon=5, action_block=5)
+    solver = swm.solver.CEMSolver(model, num_samples=300, var_scale=1.0, n_steps=30, topk=30, device="cuda")
     policy = swm.policy.WorldModelPolicy(solver=solver, config=config)
+
     world.set_policy(policy)
-    results = world.evaluate(episodes=2, seed=2347)  # , options={...})
+    results = world.evaluate(episodes=5, seed=2347)
 
     print(results)

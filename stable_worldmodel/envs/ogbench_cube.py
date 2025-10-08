@@ -550,6 +550,7 @@ class CubeEnv(ManipSpaceEnv):
     def reset(self, options=None, *args, **kwargs):
         # TODO: implement color changes to table continuous
         # TODO: implement camera angle changes
+        # TODO: implement multiview camera angles
         # TODO: implement number of cubes changes
         options = options or {}
 

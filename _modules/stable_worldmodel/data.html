@@ -251,11 +251,11 @@ Documentation</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">gymnasium</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">gym</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">PIL</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">stable_pretraining</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">spt</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">datasets</span><span class="w"> </span><span class="kn">import</span> <span class="n">load_dataset</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">datasets</span><span class="w"> </span><span class="kn">import</span> <span class="n">load_from_disk</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">rich</span><span class="w"> </span><span class="kn">import</span> <span class="nb">print</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">torch.utils.data</span><span class="w"> </span><span class="kn">import</span> <span class="n">default_collate</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">stable_worldmodel</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">swm</span>
 
@@ -265,16 +265,16 @@ Documentation</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">StepsDataset</span><span class="p">(</span><span class="n">spt</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">HFDataset</span><span class="p">):</span>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
+        <span class="n">path</span><span class="p">,</span>
         <span class="o">*</span><span class="n">args</span><span class="p">,</span>
         <span class="n">num_steps</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
         <span class="n">frameskip</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
-        <span class="n">torch_exclude_column</span><span class="o">=</span><span class="p">{</span>
-            <span class="s2">&quot;pixels&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;goal&quot;</span><span class="p">,</span>
-        <span class="p">},</span>
         <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
     <span class="p">):</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="n">data_dir</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;cache_dir&quot;</span><span class="p">,</span> <span class="n">swm</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">get_cache_dir</span><span class="p">()),</span> <span class="n">path</span><span class="p">)</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">data_dir</span><span class="p">,</span> <span class="s2">&quot;records&quot;</span><span class="p">),</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">data_dir</span> <span class="o">=</span> <span class="n">data_dir</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">num_steps</span> <span class="o">=</span> <span class="n">num_steps</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">frameskip</span> <span class="o">=</span> <span class="n">frameskip</span>
 
@@ -282,18 +282,8 @@ Documentation</span>
         <span class="k">assert</span> <span class="s2">&quot;step_idx&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">column_names</span><span class="p">,</span> <span class="s2">&quot;Dataset must have &#39;step_idx&#39; column&quot;</span>
         <span class="k">assert</span> <span class="s2">&quot;action&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">column_names</span><span class="p">,</span> <span class="s2">&quot;Dataset must have &#39;action&#39; column&quot;</span>
 
-        <span class="c1"># Setup HF dataset</span>
-
-        <span class="bp">self</span><span class="o">.</span><span class="n">torch_exclude_column</span> <span class="o">=</span> <span class="n">torch_exclude_column</span>
-
-        <span class="c1"># TODO: add assert for basic column name</span>
-
-        <span class="c1"># load the dataset with pytorch format</span>
-        <span class="n">cols</span> <span class="o">=</span> <span class="p">[</span><span class="n">c</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">column_names</span> <span class="k">if</span> <span class="n">c</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">torch_exclude_column</span><span class="p">]</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">with_format</span><span class="p">(</span><span class="s2">&quot;torch&quot;</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="n">cols</span><span class="p">,</span> <span class="n">output_all_columns</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-
         <span class="c1"># get number of episodes</span>
-        <span class="n">ep_indices</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="p">[</span><span class="s2">&quot;episode_idx&quot;</span><span class="p">]</span>
+        <span class="n">ep_indices</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="p">[</span><span class="s2">&quot;episode_idx&quot;</span><span class="p">])</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">episodes</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">ep_indices</span><span class="p">)</span>
 
         <span class="c1"># get dataset indices of each episode</span>
@@ -308,33 +298,19 @@ Documentation</span>
         <span class="c1"># map from sample to their episode</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">idx_to_ep</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">searchsorted</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cum_slices</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="p">)),</span> <span class="n">side</span><span class="o">=</span><span class="s2">&quot;right&quot;</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span>
 
+        <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">set_format</span><span class="p">(</span><span class="s2">&quot;torch&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">img_cols</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">infer_img_path_columns</span><span class="p">()</span>
+
 <div class="viewcode-block" id="StepsDataset.get_episode_slice">
 <a class="viewcode-back" href="../../stable_worldmodel.html#stable_worldmodel.data.StepsDataset.get_episode_slice">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">get_episode_slice</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">episode_idx</span><span class="p">,</span> <span class="n">episode_indices</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Return number of possible slices for a given episode index&quot;&quot;&quot;</span>
         <span class="n">indices</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">flatnonzero</span><span class="p">(</span><span class="n">episode_indices</span> <span class="o">==</span> <span class="n">episode_idx</span><span class="p">)</span>
-
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">indices</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">num_steps</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">frameskip</span><span class="p">):</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
                 <span class="sa">f</span><span class="s2">&quot;Episode </span><span class="si">{</span><span class="n">episode_idx</span><span class="si">}</span><span class="s2"> is too short (</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">indices</span><span class="p">)</span><span class="si">}</span><span class="s2"> steps) for </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">num_steps</span><span class="si">}</span><span class="s2"> steps with </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">frameskip</span><span class="si">}</span><span class="s2"> frameskip&quot;</span>
             <span class="p">)</span>
-
         <span class="k">return</span> <span class="n">indices</span></div>
-
-
-<div class="viewcode-block" id="StepsDataset.process_sample">
-<a class="viewcode-back" href="../../stable_worldmodel.html#stable_worldmodel.data.StepsDataset.process_sample">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">process_sample</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sample</span><span class="p">):</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_trainer</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="k">if</span> <span class="s2">&quot;global_step&quot;</span> <span class="ow">in</span> <span class="n">sample</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Can&#39;t use that keywords&quot;</span><span class="p">)</span>
-            <span class="k">if</span> <span class="s2">&quot;current_epoch&quot;</span> <span class="ow">in</span> <span class="n">sample</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Can&#39;t use that keywords&quot;</span><span class="p">)</span>
-            <span class="n">sample</span><span class="p">[</span><span class="s2">&quot;global_step&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_trainer</span><span class="o">.</span><span class="n">global_step</span>
-            <span class="n">sample</span><span class="p">[</span><span class="s2">&quot;current_epoch&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_trainer</span><span class="o">.</span><span class="n">current_epoch</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">transform</span><span class="p">:</span>
-            <span class="n">sample</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">sample</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">sample</span></div>
 
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__len__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -342,30 +318,61 @@ Documentation</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">idx</span><span class="p">):</span>
         <span class="n">ep</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">idx_to_ep</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span>
-        <span class="n">episode_indices</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">episode_slices</span><span class="p">[</span><span class="n">ep</span><span class="p">]</span>  <span class="c1"># indices for this episode</span>
-
-        <span class="n">offset</span> <span class="o">=</span> <span class="n">idx</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">cum_slices</span><span class="p">[</span><span class="n">ep</span><span class="p">]</span>  <span class="c1"># position within the episode</span>
+        <span class="n">episode_indices</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">episode_slices</span><span class="p">[</span><span class="n">ep</span><span class="p">]</span>
+        <span class="n">offset</span> <span class="o">=</span> <span class="n">idx</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">cum_slices</span><span class="p">[</span><span class="n">ep</span><span class="p">]</span>
         <span class="n">start</span> <span class="o">=</span> <span class="n">offset</span>
         <span class="n">stop</span> <span class="o">=</span> <span class="n">start</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_steps</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">frameskip</span>
-
-        <span class="c1"># actions indices, covering the whole window (every frame in between)</span>
         <span class="n">idx_slice</span> <span class="o">=</span> <span class="n">episode_indices</span><span class="p">[</span><span class="n">start</span><span class="p">:</span><span class="n">stop</span><span class="p">]</span>
+        <span class="n">steps</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="p">[</span><span class="n">idx_slice</span><span class="p">]</span>
 
-        <span class="c1"># pre select and transform data</span>
-        <span class="n">raw_info</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">idx_slice</span><span class="p">]</span>
-        <span class="n">raw_steps</span> <span class="o">=</span> <span class="n">default_collate</span><span class="p">(</span><span class="n">raw_info</span><span class="p">)</span>
-
-        <span class="n">steps</span> <span class="o">=</span> <span class="p">{}</span>
-        <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">raw_steps</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">steps</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
             <span class="k">if</span> <span class="n">k</span> <span class="o">==</span> <span class="s2">&quot;action&quot;</span><span class="p">:</span>
-                <span class="n">steps</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">v</span>
                 <span class="k">continue</span>
-            <span class="n">steps</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">v</span><span class="p">[::</span> <span class="bp">self</span><span class="o">.</span><span class="n">frameskip</span><span class="p">]</span>
 
-        <span class="c1"># reshape actions after transform!</span>
+            <span class="n">v</span> <span class="o">=</span> <span class="n">v</span><span class="p">[::</span> <span class="bp">self</span><span class="o">.</span><span class="n">frameskip</span><span class="p">]</span>
+            <span class="n">steps</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">v</span>
+
+            <span class="k">if</span> <span class="n">k</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">img_cols</span><span class="p">:</span>
+                <span class="n">steps</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">PIL</span><span class="o">.</span><span class="n">Image</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data_dir</span> <span class="o">/</span> <span class="n">img_path</span><span class="p">)</span> <span class="k">for</span> <span class="n">img_path</span> <span class="ow">in</span> <span class="n">v</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">transform</span><span class="p">:</span>
+            <span class="n">steps</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">steps</span><span class="p">)</span>
+
+        <span class="c1"># stack images into a single tensor</span>
+        <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">img_cols</span><span class="p">:</span>
+            <span class="n">steps</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">stack</span><span class="p">(</span><span class="n">steps</span><span class="p">[</span><span class="n">k</span><span class="p">])</span>
+
+        <span class="c1"># reshape action</span>
         <span class="n">steps</span><span class="p">[</span><span class="s2">&quot;action&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">steps</span><span class="p">[</span><span class="s2">&quot;action&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">num_steps</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
 
-        <span class="k">return</span> <span class="n">steps</span></div>
+        <span class="k">return</span> <span class="n">steps</span>
+
+<div class="viewcode-block" id="StepsDataset.infer_img_path_columns">
+<a class="viewcode-back" href="../../stable_worldmodel.html#stable_worldmodel.data.StepsDataset.infer_img_path_columns">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">infer_img_path_columns</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return list of columns that contain image file paths.&quot;&quot;&quot;</span>
+
+        <span class="n">IMG_EXTENSIONS</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;.jpeg&quot;</span><span class="p">,</span> <span class="s2">&quot;.png&quot;</span><span class="p">,</span> <span class="s2">&quot;.jpg&quot;</span><span class="p">)</span>
+
+        <span class="n">img_cols</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+        <span class="n">first_elem</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">column_names</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">first_elem</span><span class="p">[</span><span class="n">col</span><span class="p">],</span> <span class="nb">str</span><span class="p">)</span> <span class="ow">and</span> <span class="n">first_elem</span><span class="p">[</span><span class="n">col</span><span class="p">]</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="n">IMG_EXTENSIONS</span><span class="p">):</span>
+                <span class="n">img_cols</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">col</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">img_cols</span></div>
+</div>
+
+
+
+<span class="c1">#####################</span>
+<span class="c1">###     utils     ###</span>
+<span class="c1">#####################</span>
+
+
+<div class="viewcode-block" id="is_image">
+<a class="viewcode-back" href="../../stable_worldmodel.html#stable_worldmodel.data.is_image">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">is_image</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+    <span class="k">return</span> <span class="nb">type</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="ow">is</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="ow">and</span> <span class="n">x</span><span class="o">.</span><span class="n">ndim</span> <span class="o">==</span> <span class="mi">3</span> <span class="ow">and</span> <span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">]</span> <span class="ow">and</span> <span class="n">x</span><span class="o">.</span><span class="n">dtype</span> <span class="o">==</span> <span class="n">np</span><span class="o">.</span><span class="n">uint8</span></div>
 
 
 
@@ -448,11 +455,7 @@ Documentation</span>
     <span class="k">if</span> <span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">list_datasets</span><span class="p">():</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Dataset &#39;</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">&#39; not found. Available: </span><span class="si">{</span><span class="n">list_datasets</span><span class="p">()</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 
-    <span class="n">dataset</span> <span class="o">=</span> <span class="n">load_dataset</span><span class="p">(</span>
-        <span class="s2">&quot;parquet&quot;</span><span class="p">,</span>
-        <span class="n">data_files</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">Path</span><span class="p">(</span><span class="n">get_cache_dir</span><span class="p">(),</span> <span class="n">name</span><span class="p">,</span> <span class="s2">&quot;*.parquet&quot;</span><span class="p">)),</span>
-        <span class="n">split</span><span class="o">=</span><span class="s2">&quot;train&quot;</span><span class="p">,</span>
-    <span class="p">)</span>
+    <span class="n">dataset</span> <span class="o">=</span> <span class="n">load_from_disk</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">Path</span><span class="p">(</span><span class="n">get_cache_dir</span><span class="p">(),</span> <span class="n">name</span><span class="p">,</span> <span class="s2">&quot;records&quot;</span><span class="p">)))</span>
 
     <span class="n">dataset</span><span class="o">.</span><span class="n">set_format</span><span class="p">(</span><span class="s2">&quot;numpy&quot;</span><span class="p">)</span>
 
@@ -575,8 +578,9 @@ Documentation</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">dataset_path</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Dataset </span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2"> does not exist at </span><span class="si">{</span><span class="n">dataset_path</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 
+        <span class="n">dataset</span> <span class="o">=</span> <span class="n">load_from_disk</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">Path</span><span class="p">(</span><span class="n">dataset_path</span><span class="p">,</span> <span class="s2">&quot;records&quot;</span><span class="p">)))</span>
+
         <span class="c1"># remove cache files</span>
-        <span class="n">dataset</span> <span class="o">=</span> <span class="n">load_dataset</span><span class="p">(</span><span class="s2">&quot;parquet&quot;</span><span class="p">,</span> <span class="n">data_files</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">Path</span><span class="p">(</span><span class="n">dataset_path</span><span class="p">,</span> <span class="s2">&quot;*.parquet&quot;</span><span class="p">)))</span>
         <span class="n">dataset</span><span class="o">.</span><span class="n">cleanup_cache_files</span><span class="p">()</span>
 
         <span class="c1"># delete dataset directory</span>

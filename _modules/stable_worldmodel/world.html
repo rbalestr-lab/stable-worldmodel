@@ -247,12 +247,14 @@ Documentation</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">datasets</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">gymnasium</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">gym</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">imageio.v3</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">iio</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">datasets</span><span class="w"> </span><span class="kn">import</span> <span class="n">Dataset</span><span class="p">,</span> <span class="n">Features</span><span class="p">,</span> <span class="n">Image</span><span class="p">,</span> <span class="n">Value</span><span class="p">,</span> <span class="n">load_dataset</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">datasets</span><span class="w"> </span><span class="kn">import</span> <span class="n">Dataset</span><span class="p">,</span> <span class="n">Features</span><span class="p">,</span> <span class="n">Value</span><span class="p">,</span> <span class="n">load_dataset</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">loguru</span><span class="w"> </span><span class="kn">import</span> <span class="n">logger</span> <span class="k">as</span> <span class="n">logging</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">rich</span><span class="w"> </span><span class="kn">import</span> <span class="nb">print</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">stable_worldmodel</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">swm</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">stable_worldmodel.data</span><span class="w"> </span><span class="kn">import</span> <span class="n">is_image</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">.wrappers</span><span class="w"> </span><span class="kn">import</span> <span class="n">MegaWrapper</span><span class="p">,</span> <span class="n">VariationWrapper</span>
 
@@ -553,10 +555,7 @@ Documentation</span>
         <span class="n">dataset_path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">cache_dir</span><span class="p">,</span> <span class="n">dataset_name</span><span class="p">)</span>
         <span class="n">dataset_path</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
-        <span class="n">hf_dataset</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="n">recorded_episodes</span> <span class="o">=</span> <span class="mi">0</span>
-        <span class="n">dataset_path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">dataset_path</span><span class="p">)</span>
-        <span class="n">dataset_path</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">terminateds</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">num_envs</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">truncateds</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">num_envs</span><span class="p">)</span>
@@ -629,79 +628,97 @@ Documentation</span>
         <span class="n">counts</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">bincount</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">records</span><span class="p">[</span><span class="s2">&quot;episode_idx&quot;</span><span class="p">]),</span> <span class="n">minlength</span><span class="o">=</span><span class="nb">max</span><span class="p">(</span><span class="n">records</span><span class="p">[</span><span class="s2">&quot;episode_idx&quot;</span><span class="p">])</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
         <span class="n">records</span><span class="p">[</span><span class="s2">&quot;episode_len&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">counts</span><span class="p">[</span><span class="n">ep</span><span class="p">])</span> <span class="k">for</span> <span class="n">ep</span> <span class="ow">in</span> <span class="n">records</span><span class="p">[</span><span class="s2">&quot;episode_idx&quot;</span><span class="p">]]</span>
 
-        <span class="c1"># determine feature</span>
-        <span class="n">features</span> <span class="o">=</span> <span class="p">{</span>
-            <span class="s2">&quot;pixels&quot;</span><span class="p">:</span> <span class="n">Image</span><span class="p">(),</span>
-            <span class="s2">&quot;episode_idx&quot;</span><span class="p">:</span> <span class="n">Value</span><span class="p">(</span><span class="s2">&quot;int32&quot;</span><span class="p">),</span>
-            <span class="s2">&quot;step_idx&quot;</span><span class="p">:</span> <span class="n">Value</span><span class="p">(</span><span class="s2">&quot;int32&quot;</span><span class="p">),</span>
-            <span class="s2">&quot;episode_len&quot;</span><span class="p">:</span> <span class="n">Value</span><span class="p">(</span><span class="s2">&quot;int32&quot;</span><span class="p">),</span>
-        <span class="p">}</span>
+        <span class="c1">########################</span>
+        <span class="c1"># Save dataset to disk #</span>
+        <span class="c1">########################</span>
 
-        <span class="k">if</span> <span class="s2">&quot;goal&quot;</span> <span class="ow">in</span> <span class="n">records</span><span class="p">:</span>
-            <span class="n">features</span><span class="p">[</span><span class="s2">&quot;goal&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">Image</span><span class="p">()</span>
-        <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">records</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">features</span><span class="p">:</span>
-                <span class="k">continue</span>
-            <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">records</span><span class="p">[</span><span class="n">k</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span> <span class="ow">is</span> <span class="nb">str</span><span class="p">:</span>
-                <span class="n">state_feature</span> <span class="o">=</span> <span class="n">Value</span><span class="p">(</span><span class="s2">&quot;string&quot;</span><span class="p">)</span>
-            <span class="k">elif</span> <span class="n">records</span><span class="p">[</span><span class="n">k</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">ndim</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
-                <span class="n">state_feature</span> <span class="o">=</span> <span class="n">datasets</span><span class="o">.</span><span class="n">Sequence</span><span class="p">(</span>
-                    <span class="n">feature</span><span class="o">=</span><span class="n">Value</span><span class="p">(</span><span class="n">dtype</span><span class="o">=</span><span class="n">records</span><span class="p">[</span><span class="n">k</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">dtype</span><span class="o">.</span><span class="n">name</span><span class="p">),</span>
-                    <span class="n">length</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">records</span><span class="p">[</span><span class="n">k</span><span class="p">][</span><span class="mi">0</span><span class="p">]),</span>
-                <span class="p">)</span>
-            <span class="k">elif</span> <span class="mi">2</span> <span class="o">&lt;=</span> <span class="n">records</span><span class="p">[</span><span class="n">k</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">ndim</span> <span class="o">&lt;=</span> <span class="mi">6</span><span class="p">:</span>
-                <span class="n">feature_cls</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">datasets</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;Array</span><span class="si">{</span><span class="n">records</span><span class="p">[</span><span class="n">k</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">ndim</span><span class="si">}</span><span class="s2">D&quot;</span><span class="p">)</span>
-                <span class="n">state_feature</span> <span class="o">=</span> <span class="n">feature_cls</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="n">records</span><span class="p">[</span><span class="n">k</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">records</span><span class="p">[</span><span class="n">k</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">dtype</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="n">state_feature</span> <span class="o">=</span> <span class="n">Value</span><span class="p">(</span><span class="n">records</span><span class="p">[</span><span class="n">k</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">dtype</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
-            <span class="n">features</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">state_feature</span>
+        <span class="k">assert</span> <span class="s2">&quot;pixels&quot;</span> <span class="ow">in</span> <span class="n">records</span><span class="p">,</span> <span class="s2">&quot;pixels key is required in records&quot;</span>
+        <span class="k">assert</span> <span class="s2">&quot;episode_idx&quot;</span> <span class="ow">in</span> <span class="n">records</span><span class="p">,</span> <span class="s2">&quot;episode_idx key is required in records&quot;</span>
+        <span class="k">assert</span> <span class="s2">&quot;step_idx&quot;</span> <span class="ow">in</span> <span class="n">records</span><span class="p">,</span> <span class="s2">&quot;step_idx key is required in records&quot;</span>
+        <span class="k">assert</span> <span class="s2">&quot;episode_len&quot;</span> <span class="ow">in</span> <span class="n">records</span><span class="p">,</span> <span class="s2">&quot;episode_len key is required in records&quot;</span>
 
-        <span class="n">features</span> <span class="o">=</span> <span class="n">Features</span><span class="p">(</span><span class="n">features</span><span class="p">)</span>
+        <span class="c1"># Create the dataset directory structure</span>
+        <span class="n">dataset_path</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
-        <span class="c1"># make dataset</span>
-        <span class="n">hf_dataset</span> <span class="o">=</span> <span class="n">Dataset</span><span class="o">.</span><span class="n">from_dict</span><span class="p">(</span><span class="n">records</span><span class="p">,</span> <span class="n">features</span><span class="o">=</span><span class="n">features</span><span class="p">)</span>
+        <span class="c1"># save all jpeg images</span>
+        <span class="n">image_cols</span> <span class="o">=</span> <span class="p">{</span><span class="n">col</span> <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">records</span> <span class="k">if</span> <span class="n">is_image</span><span class="p">(</span><span class="n">records</span><span class="p">[</span><span class="n">col</span><span class="p">][</span><span class="mi">0</span><span class="p">])}</span>
 
-        <span class="c1"># determine shard index and num episode recorded so far</span>
-        <span class="n">shard_idx</span> <span class="o">=</span> <span class="mi">0</span>
-        <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
-            <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="n">dataset_path</span> <span class="o">/</span> <span class="sa">f</span><span class="s2">&quot;data_shard_</span><span class="si">{</span><span class="n">shard_idx</span><span class="si">:</span><span class="s2">05d</span><span class="si">}</span><span class="s2">.parquet&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">is_file</span><span class="p">():</span>
-                <span class="k">break</span>
-            <span class="n">shard_idx</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="c1"># pre-create all directories</span>
+        <span class="k">for</span> <span class="n">ep_idx</span> <span class="ow">in</span> <span class="nb">set</span><span class="p">(</span><span class="n">records</span><span class="p">[</span><span class="s2">&quot;episode_idx&quot;</span><span class="p">]):</span>
+            <span class="n">img_folder</span> <span class="o">=</span> <span class="n">dataset_path</span> <span class="o">/</span> <span class="s2">&quot;img&quot;</span> <span class="o">/</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">ep_idx</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="n">img_folder</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
-        <span class="n">episode_counter</span> <span class="o">=</span> <span class="mi">0</span>
-        <span class="k">if</span> <span class="n">shard_idx</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="n">shard_dataset</span> <span class="o">=</span> <span class="n">load_dataset</span><span class="p">(</span>
-                <span class="s2">&quot;parquet&quot;</span><span class="p">,</span>
-                <span class="n">split</span><span class="o">=</span><span class="s2">&quot;train&quot;</span><span class="p">,</span>
-                <span class="n">data_files</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">dataset_path</span> <span class="o">/</span> <span class="sa">f</span><span class="s2">&quot;data_shard_</span><span class="si">{</span><span class="n">shard_idx</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mi">1</span><span class="si">:</span><span class="s2">05d</span><span class="si">}</span><span class="s2">.parquet&quot;</span><span class="p">),</span>
-            <span class="p">)</span>
-            <span class="n">episode_counter</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">shard_dataset</span><span class="p">[</span><span class="s2">&quot;episode_idx&quot;</span><span class="p">])</span> <span class="o">+</span> <span class="mi">1</span>
+        <span class="c1"># dump all data</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">records</span><span class="p">[</span><span class="s2">&quot;episode_idx&quot;</span><span class="p">])):</span>
+            <span class="n">ep_idx</span> <span class="o">=</span> <span class="n">records</span><span class="p">[</span><span class="s2">&quot;episode_idx&quot;</span><span class="p">][</span><span class="n">i</span><span class="p">]</span>
+            <span class="n">step_idx</span> <span class="o">=</span> <span class="n">records</span><span class="p">[</span><span class="s2">&quot;step_idx&quot;</span><span class="p">][</span><span class="n">i</span><span class="p">]</span>
+            <span class="k">for</span> <span class="n">img_col</span> <span class="ow">in</span> <span class="n">image_cols</span><span class="p">:</span>
+                <span class="n">img</span> <span class="o">=</span> <span class="n">records</span><span class="p">[</span><span class="n">img_col</span><span class="p">][</span><span class="n">i</span><span class="p">]</span>
+                <span class="n">img_folder</span> <span class="o">=</span> <span class="n">dataset_path</span> <span class="o">/</span> <span class="s2">&quot;img&quot;</span> <span class="o">/</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">ep_idx</span><span class="si">}</span><span class="s2">&quot;</span>
+                <span class="n">img_path</span> <span class="o">=</span> <span class="n">img_folder</span> <span class="o">/</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">step_idx</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">img_col</span><span class="si">}</span><span class="s2">.jpeg&quot;</span>
+                <span class="n">iio</span><span class="o">.</span><span class="n">imwrite</span><span class="p">(</span><span class="n">img_path</span><span class="p">,</span> <span class="n">img</span><span class="p">)</span>
 
-        <span class="c1"># flush incomplete episode</span>
-        <span class="n">ep_col</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">hf_dataset</span><span class="p">[</span><span class="s2">&quot;episode_idx&quot;</span><span class="p">])</span>
-        <span class="n">non_complete_episodes</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">episode_idx</span><span class="p">[</span><span class="o">~</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">terminateds</span> <span class="o">|</span> <span class="bp">self</span><span class="o">.</span><span class="n">truncateds</span><span class="p">)])</span>
-        <span class="n">keep_episode</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nonzero</span><span class="p">(</span><span class="o">~</span><span class="n">np</span><span class="o">.</span><span class="n">isin</span><span class="p">(</span><span class="n">ep_col</span><span class="p">,</span> <span class="n">non_complete_episodes</span><span class="p">))[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
-        <span class="n">hf_dataset</span> <span class="o">=</span> <span class="n">hf_dataset</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="n">keep_episode</span><span class="p">)</span>
+                <span class="c1"># replace image in records with relative path</span>
+                <span class="n">records</span><span class="p">[</span><span class="n">img_col</span><span class="p">][</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">img_path</span><span class="o">.</span><span class="n">relative_to</span><span class="p">(</span><span class="n">dataset_path</span><span class="p">))</span>
 
-        <span class="c1"># re-index remaining episode starting from the last shard episode number</span>
-        <span class="n">unique_eps</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">hf_dataset</span><span class="p">[</span><span class="s2">&quot;episode_idx&quot;</span><span class="p">])</span>
-        <span class="n">id_map</span> <span class="o">=</span> <span class="p">{</span><span class="n">old</span><span class="p">:</span> <span class="n">new</span> <span class="k">for</span> <span class="n">new</span><span class="p">,</span> <span class="n">old</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">unique_eps</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="n">episode_counter</span><span class="p">)}</span>
-        <span class="n">hf_dataset</span> <span class="o">=</span> <span class="n">hf_dataset</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">row</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;episode_idx&quot;</span><span class="p">:</span> <span class="n">id_map</span><span class="p">[</span><span class="n">row</span><span class="p">[</span><span class="s2">&quot;episode_idx&quot;</span><span class="p">]]})</span>
+        <span class="k">def</span><span class="w"> </span><span class="nf">determine_features</span><span class="p">(</span><span class="n">records</span><span class="p">):</span>
+            <span class="n">features</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="s2">&quot;episode_idx&quot;</span><span class="p">:</span> <span class="n">Value</span><span class="p">(</span><span class="s2">&quot;int32&quot;</span><span class="p">),</span>
+                <span class="s2">&quot;step_idx&quot;</span><span class="p">:</span> <span class="n">Value</span><span class="p">(</span><span class="s2">&quot;int32&quot;</span><span class="p">),</span>
+                <span class="s2">&quot;episode_len&quot;</span><span class="p">:</span> <span class="n">Value</span><span class="p">(</span><span class="s2">&quot;int32&quot;</span><span class="p">),</span>
+            <span class="p">}</span>
 
-        <span class="c1"># flush all extra episode saved for the current shard</span>
-        <span class="n">hf_dataset</span> <span class="o">=</span> <span class="n">hf_dataset</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="k">lambda</span> <span class="n">row</span><span class="p">:</span> <span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="s2">&quot;episode_idx&quot;</span><span class="p">]</span> <span class="o">-</span> <span class="n">episode_counter</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">episodes</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">col_name</span> <span class="ow">in</span> <span class="n">records</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">col_name</span> <span class="ow">in</span> <span class="n">features</span><span class="p">:</span>
+                    <span class="k">continue</span>
 
-        <span class="n">hf_dataset</span><span class="o">.</span><span class="n">to_parquet</span><span class="p">(</span><span class="n">dataset_path</span> <span class="o">/</span> <span class="sa">f</span><span class="s2">&quot;data_shard_</span><span class="si">{</span><span class="n">shard_idx</span><span class="si">:</span><span class="s2">05d</span><span class="si">}</span><span class="s2">.parquet&quot;</span><span class="p">)</span>
+                <span class="n">first_elem</span> <span class="o">=</span> <span class="n">records</span><span class="p">[</span><span class="n">col_name</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
 
-        <span class="c1"># display info</span>
-        <span class="n">final_num_episodes</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">hf_dataset</span><span class="p">[</span><span class="s2">&quot;episode_idx&quot;</span><span class="p">])</span>
-        <span class="n">episode_range</span> <span class="o">=</span> <span class="p">(</span>
-            <span class="n">final_num_episodes</span><span class="o">.</span><span class="n">min</span><span class="p">()</span><span class="o">.</span><span class="n">item</span><span class="p">(),</span>
-            <span class="n">final_num_episodes</span><span class="o">.</span><span class="n">max</span><span class="p">()</span><span class="o">.</span><span class="n">item</span><span class="p">(),</span>
-        <span class="p">)</span>
-        <span class="nb">print</span><span class="p">(</span>
-            <span class="sa">f</span><span class="s2">&quot;Dataset saved to </span><span class="si">{</span><span class="n">shard_idx</span><span class="si">}</span><span class="s2">th shard file (</span><span class="si">{</span><span class="n">dataset_path</span><span class="si">}</span><span class="s2">) with </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">final_num_episodes</span><span class="p">)</span><span class="si">}</span><span class="s2"> episodes, range: </span><span class="si">{</span><span class="n">episode_range</span><span class="si">}</span><span class="s2">&quot;</span>
-        <span class="p">)</span></div>
+                <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">first_elem</span><span class="p">)</span> <span class="ow">is</span> <span class="nb">str</span><span class="p">:</span>
+                    <span class="n">features</span><span class="p">[</span><span class="n">col_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">Value</span><span class="p">(</span><span class="s2">&quot;string&quot;</span><span class="p">)</span>
+
+                <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">first_elem</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
+                    <span class="k">if</span> <span class="n">first_elem</span><span class="o">.</span><span class="n">ndim</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                        <span class="n">state_feature</span> <span class="o">=</span> <span class="n">datasets</span><span class="o">.</span><span class="n">Sequence</span><span class="p">(</span>
+                            <span class="n">feature</span><span class="o">=</span><span class="n">Value</span><span class="p">(</span><span class="n">dtype</span><span class="o">=</span><span class="n">first_elem</span><span class="o">.</span><span class="n">dtype</span><span class="o">.</span><span class="n">name</span><span class="p">),</span>
+                            <span class="n">length</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">first_elem</span><span class="p">),</span>
+                        <span class="p">)</span>
+                    <span class="k">elif</span> <span class="mi">2</span> <span class="o">&lt;=</span> <span class="n">first_elem</span><span class="o">.</span><span class="n">ndim</span> <span class="o">&lt;=</span> <span class="mi">6</span><span class="p">:</span>
+                        <span class="n">feature_cls</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">datasets</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;Array</span><span class="si">{</span><span class="n">first_elem</span><span class="o">.</span><span class="n">ndim</span><span class="si">}</span><span class="s2">D&quot;</span><span class="p">)</span>
+                        <span class="n">state_feature</span> <span class="o">=</span> <span class="n">feature_cls</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="n">first_elem</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">first_elem</span><span class="o">.</span><span class="n">dtype</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">state_feature</span> <span class="o">=</span> <span class="n">Value</span><span class="p">(</span><span class="n">first_elem</span><span class="o">.</span><span class="n">dtype</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+                    <span class="n">features</span><span class="p">[</span><span class="n">col_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">state_feature</span>
+
+                <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">first_elem</span><span class="p">,</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">generic</span><span class="p">)):</span>
+                    <span class="n">features</span><span class="p">[</span><span class="n">col_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">Value</span><span class="p">(</span><span class="n">first_elem</span><span class="o">.</span><span class="n">dtype</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">features</span><span class="p">[</span><span class="n">col_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">Value</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">first_elem</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="p">)</span>
+
+            <span class="k">return</span> <span class="n">Features</span><span class="p">(</span><span class="n">features</span><span class="p">)</span>
+
+        <span class="n">records_feat</span> <span class="o">=</span> <span class="n">determine_features</span><span class="p">(</span><span class="n">records</span><span class="p">)</span>
+        <span class="n">records_ds</span> <span class="o">=</span> <span class="n">Dataset</span><span class="o">.</span><span class="n">from_dict</span><span class="p">(</span><span class="n">records</span><span class="p">,</span> <span class="n">features</span><span class="o">=</span><span class="n">records_feat</span><span class="p">)</span>
+
+        <span class="c1"># flush incomplete episodes</span>
+        <span class="c1"># get episodes that are currently running (not done)</span>
+        <span class="n">incomplete_episodes</span> <span class="o">=</span> <span class="n">episode_idx</span><span class="p">[</span><span class="o">~</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">terminateds</span> <span class="o">|</span> <span class="bp">self</span><span class="o">.</span><span class="n">truncateds</span><span class="p">)]</span>
+        <span class="c1"># keep only episodes that are NOT in the incomplete list</span>
+        <span class="n">keep_mask</span> <span class="o">=</span> <span class="o">~</span><span class="n">np</span><span class="o">.</span><span class="n">isin</span><span class="p">(</span><span class="n">records_ds</span><span class="p">[</span><span class="s2">&quot;episode_idx&quot;</span><span class="p">],</span> <span class="n">incomplete_episodes</span><span class="p">)</span>
+        <span class="n">records_ds</span> <span class="o">=</span> <span class="n">records_ds</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">nonzero</span><span class="p">(</span><span class="n">keep_mask</span><span class="p">)[</span><span class="mi">0</span><span class="p">])</span>
+
+        <span class="c1"># flush all extra episodes saved (keep only first N episodes)</span>
+        <span class="n">episodes_to_keep</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">records_ds</span><span class="p">[</span><span class="s2">&quot;episode_idx&quot;</span><span class="p">])[:</span><span class="n">episodes</span><span class="p">]</span>
+        <span class="n">keep_mask</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">isin</span><span class="p">(</span><span class="n">records_ds</span><span class="p">[</span><span class="s2">&quot;episode_idx&quot;</span><span class="p">],</span> <span class="n">episodes_to_keep</span><span class="p">)</span>
+        <span class="n">records_ds</span> <span class="o">=</span> <span class="n">records_ds</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">nonzero</span><span class="p">(</span><span class="n">keep_mask</span><span class="p">)[</span><span class="mi">0</span><span class="p">])</span>
+
+        <span class="c1"># save dataset</span>
+        <span class="n">records_path</span> <span class="o">=</span> <span class="n">dataset_path</span> <span class="o">/</span> <span class="s2">&quot;records&quot;</span>
+        <span class="n">num_chunks</span> <span class="o">=</span> <span class="n">episodes</span> <span class="o">//</span> <span class="mi">50</span>
+        <span class="n">records_path</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">records_ds</span><span class="o">.</span><span class="n">save_to_disk</span><span class="p">(</span><span class="n">records_path</span><span class="p">,</span> <span class="n">num_shards</span><span class="o">=</span><span class="n">num_chunks</span> <span class="ow">or</span> <span class="mi">1</span><span class="p">)</span>
+
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Dataset saved to </span><span class="si">{</span><span class="n">dataset_path</span><span class="si">}</span><span class="s2"> with </span><span class="si">{</span><span class="n">episodes</span><span class="si">}</span><span class="s2"> episodes!&quot;</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="World.record_video_from_dataset">
@@ -753,6 +770,7 @@ Documentation</span>
             <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">episode_idx</span>
         <span class="p">]</span>
 
+        <span class="c1"># TODO: should load from disk directly</span>
         <span class="n">dataset</span> <span class="o">=</span> <span class="n">load_dataset</span><span class="p">(</span><span class="s2">&quot;parquet&quot;</span><span class="p">,</span> <span class="n">data_files</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">Path</span><span class="p">(</span><span class="n">dataset_path</span><span class="p">,</span> <span class="s2">&quot;*.parquet&quot;</span><span class="p">)),</span> <span class="n">split</span><span class="o">=</span><span class="s2">&quot;train&quot;</span><span class="p">)</span>
 
         <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">o</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">episode_idx</span><span class="p">,</span> <span class="n">out</span><span class="p">):</span>

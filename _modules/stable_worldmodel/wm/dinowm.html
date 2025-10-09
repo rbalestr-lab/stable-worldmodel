@@ -419,10 +419,12 @@ Documentation</span>
 
         <span class="c1"># == proprio embedding</span>
         <span class="k">if</span> <span class="n">proprio_dim</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="n">split_embed</span><span class="p">[</span><span class="s2">&quot;proprio_embed&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">embedding</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">pixel_dim</span> <span class="p">:</span> <span class="n">pixel_dim</span> <span class="o">+</span> <span class="n">proprio_dim</span><span class="p">]</span>
+            <span class="n">proprio_emb</span> <span class="o">=</span> <span class="n">embedding</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">pixel_dim</span> <span class="p">:</span> <span class="n">pixel_dim</span> <span class="o">+</span> <span class="n">proprio_dim</span><span class="p">]</span>
+            <span class="n">split_embed</span><span class="p">[</span><span class="s2">&quot;proprio_embed&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">proprio_emb</span><span class="p">[:,</span> <span class="p">:,</span> <span class="mi">0</span><span class="p">]</span>  <span class="c1"># all patches are the same</span>
 
         <span class="k">if</span> <span class="n">action_dim</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="n">split_embed</span><span class="p">[</span><span class="s2">&quot;action_embed&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">embedding</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="o">-</span><span class="n">action_dim</span><span class="p">:]</span>
+            <span class="n">action_emb</span> <span class="o">=</span> <span class="n">embedding</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="o">-</span><span class="n">action_dim</span><span class="p">:]</span>
+            <span class="n">split_embed</span><span class="p">[</span><span class="s2">&quot;action_embed&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">action_emb</span><span class="p">[:,</span> <span class="p">:,</span> <span class="mi">0</span><span class="p">]</span>  <span class="c1"># all patches are the same</span>
 
         <span class="k">return</span> <span class="n">split_embed</span></div>
 
@@ -540,6 +542,7 @@ Documentation</span>
             <span class="c1"># == get the proprio cost</span>
             <span class="n">proprio_preds</span> <span class="o">=</span> <span class="n">info_dict</span><span class="p">[</span><span class="s2">&quot;predicted_proprio_embed&quot;</span><span class="p">]</span>
             <span class="n">proprio_goal</span> <span class="o">=</span> <span class="n">info_dict</span><span class="p">[</span><span class="s2">&quot;proprio_goal_embed&quot;</span><span class="p">]</span>
+
             <span class="n">proprio_cost</span> <span class="o">=</span> <span class="n">F</span><span class="o">.</span><span class="n">mse_loss</span><span class="p">(</span><span class="n">proprio_preds</span><span class="p">[:,</span> <span class="o">-</span><span class="mi">1</span><span class="p">:],</span> <span class="n">proprio_goal</span><span class="p">,</span> <span class="n">reduction</span><span class="o">=</span><span class="s2">&quot;none&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span>
                 <span class="n">dim</span><span class="o">=</span><span class="nb">tuple</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">proprio_preds</span><span class="o">.</span><span class="n">ndim</span><span class="p">))</span>
             <span class="p">)</span>
@@ -658,11 +661,7 @@ Documentation</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">to_qkv</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="n">dim</span><span class="p">,</span> <span class="n">inner_dim</span> <span class="o">*</span> <span class="mi">3</span><span class="p">,</span> <span class="n">bias</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">to_out</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Sequential</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="n">inner_dim</span><span class="p">,</span> <span class="n">dim</span><span class="p">),</span> <span class="n">nn</span><span class="o">.</span><span class="n">Dropout</span><span class="p">(</span><span class="n">dropout</span><span class="p">))</span> <span class="k">if</span> <span class="n">project_out</span> <span class="k">else</span> <span class="n">nn</span><span class="o">.</span><span class="n">Identity</span><span class="p">()</span>
 
-        <span class="c1"># self.register_buffer(</span>
-        <span class="c1">#     &quot;temp_mask&quot;, self.generate_mask_matrix(num_patches, num_frames)</span>
-        <span class="c1"># )</span>
-
-        <span class="bp">self</span><span class="o">.</span><span class="n">bias</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">generate_mask_matrix</span><span class="p">(</span><span class="n">num_patches</span><span class="p">,</span> <span class="n">num_frames</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="s2">&quot;cuda&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">register_buffer</span><span class="p">(</span><span class="s2">&quot;bias&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">generate_mask_matrix</span><span class="p">(</span><span class="n">num_patches</span><span class="p">,</span> <span class="n">num_frames</span><span class="p">))</span>
 
 <div class="viewcode-block" id="Attention.forward">
 <a class="viewcode-back" href="../../../stable_worldmodel.wm.html#stable_worldmodel.wm.dinowm.Attention.forward">[docs]</a>

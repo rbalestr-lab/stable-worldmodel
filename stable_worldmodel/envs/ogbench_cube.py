@@ -1,9 +1,8 @@
-from typing import Sequence
+from collections.abc import Iterable, Sequence
 
 import mujoco
 import numpy as np
 from dm_control import mjcf
-
 from ogbench.manipspace import lie
 from ogbench.manipspace.envs.manipspace_env import ManipSpaceEnv
 
@@ -23,17 +22,9 @@ def perturb_camera_angle(xyaxis, deg_dif=[3, 3]):
     pitch = np.deg2rad(deg_dif[1])
 
     # Build rotation matrices
-    R_yaw = np.array([
-        [np.cos(yaw), -np.sin(yaw), 0],
-        [np.sin(yaw),  np.cos(yaw), 0],
-        [0, 0, 1]
-    ])
+    R_yaw = np.array([[np.cos(yaw), -np.sin(yaw), 0], [np.sin(yaw), np.cos(yaw), 0], [0, 0, 1]])
 
-    R_pitch = np.array([
-        [1, 0, 0],
-        [0, np.cos(pitch), -np.sin(pitch)],
-        [0, np.sin(pitch),  np.cos(pitch)]
-    ])
+    R_pitch = np.array([[1, 0, 0], [0, np.cos(pitch), -np.sin(pitch)], [0, np.sin(pitch), np.cos(pitch)]])
 
     # Combine and rotate the basis
     R = R_pitch @ R_yaw
@@ -42,30 +33,8 @@ def perturb_camera_angle(xyaxis, deg_dif=[3, 3]):
 
     # Flatten back to tuple for MuJoCo
     xyaxes_new = tuple(np.concatenate([xaxis_new, yaxis_new]))
-    
+
     return xyaxes_new
-
-
-def perturb_light_direction(direction, angle_deg=5):
-    """Perturb a direction vector by a small random rotation (in degrees)."""
-    direction = np.array(direction, dtype=float)
-    direction /= np.linalg.norm(direction)
-
-    # Generate a small random rotation axis
-    axis = np.random.normal(size=3)
-    axis /= np.linalg.norm(axis)
-
-    # Random rotation angle
-    theta = np.deg2rad(np.random.uniform(-angle_deg, angle_deg))
-
-    # Rodrigues’ rotation formula
-    direction_rot = (
-        direction * np.cos(theta)
-        + np.cross(axis, direction) * np.sin(theta)
-        + axis * np.dot(axis, direction) * (1 - np.cos(theta))
-    )
-
-    return tuple(direction_rot / np.linalg.norm(direction_rot))
 
 
 class CubeEnv(ManipSpaceEnv):
@@ -80,8 +49,9 @@ class CubeEnv(ManipSpaceEnv):
         """Initialize the Cube environment.
 
         Args:
-            env_type: Environment type. One of 'single', 'double', 'triple', or 'quadruple'.
+            env_type: Environment type. One of 'single', 'double', 'triple', 'quadruple' or 'octuple'.
             permute_blocks: Whether to randomly permute the order of the blocks at task initialization.
+            multiview: Whether to render the scene from both a front and side view.
             *args: Additional arguments to pass to the parent class.
             **kwargs: Additional keyword arguments to pass to the parent class.
         """
@@ -89,49 +59,49 @@ class CubeEnv(ManipSpaceEnv):
         self._permute_blocks = permute_blocks
         self._multiview = multiview
 
-        if self._env_type == 'single':
+        if self._env_type == "single":
             self._num_cubes = 1
-        elif self._env_type == 'double':
+        elif self._env_type == "double":
             self._num_cubes = 2
-        elif self._env_type == 'triple':
+        elif self._env_type == "triple":
             self._num_cubes = 3
-        elif self._env_type == 'quadruple':
+        elif self._env_type == "quadruple":
             self._num_cubes = 4
-        elif self._env_type == 'octuple':
+        elif self._env_type == "octuple":
             self._num_cubes = 8
         else:
-            raise ValueError(f'Invalid env_type: {env_type}')
+            raise ValueError(f"Invalid env_type: {env_type}")
 
         super().__init__(*args, **kwargs)
 
         # Define constants.
         self._cube_colors = np.array(
             [
-                self._colors['red'],
-                self._colors['blue'],
-                self._colors['orange'],
-                self._colors['green'],
-                self._colors['purple'],
-                self._colors['yellow'],
-                self._colors['magenta'],
-                self._colors['gray'],
+                self._colors["red"],
+                self._colors["blue"],
+                self._colors["orange"],
+                self._colors["green"],
+                self._colors["purple"],
+                self._colors["yellow"],
+                self._colors["magenta"],
+                self._colors["gray"],
             ]
         )
         self._cube_success_colors = np.array(
             [
-                self._colors['lightred'],
-                self._colors['lightblue'],
-                self._colors['lightorange'],
-                self._colors['lightgreen'],
-                self._colors['lightpurple'],
-                self._colors['lightyellow'],
-                self._colors['lightmagenta'],
-                self._colors['white'],
+                self._colors["lightred"],
+                self._colors["lightblue"],
+                self._colors["lightorange"],
+                self._colors["lightgreen"],
+                self._colors["lightpurple"],
+                self._colors["lightyellow"],
+                self._colors["lightmagenta"],
+                self._colors["white"],
             ]
         )
 
         # Target info.
-        self._target_task = 'cube'
+        self._target_task = "cube"
         # The target cube position is stored in the mocap object.
         self._target_block = 0
 
@@ -145,7 +115,7 @@ class CubeEnv(ManipSpaceEnv):
                             high=1.0,
                             shape=(self._num_cubes, 3),
                             dtype=np.float64,
-                            init_value=self._cube_colors[:self._num_cubes, :3].copy(),
+                            init_value=self._cube_colors[: self._num_cubes, :3].copy(),
                         ),
                         "size": swm.spaces.Box(
                             low=0.01,
@@ -164,7 +134,7 @@ class CubeEnv(ManipSpaceEnv):
                             high=1.0,
                             shape=(3,),
                             dtype=np.float64,
-                            init_value=self._colors['purple'][:3],
+                            init_value=self._colors["purple"][:3],
                         ),
                     }
                 ),
@@ -203,207 +173,207 @@ class CubeEnv(ManipSpaceEnv):
                 ),
             }
         )
-    
+
     def set_tasks(self):
-        if self._env_type == 'single':
+        if self._env_type == "single":
             self.task_infos = [
-                dict(
-                    task_name='task1_horizontal',
-                    init_xyzs=np.array([[0.425, 0.1, 0.02]]),
-                    goal_xyzs=np.array([[0.425, -0.1, 0.02]]),
-                ),
-                dict(
-                    task_name='task2_vertical1',
-                    init_xyzs=np.array([[0.35, 0.0, 0.02]]),
-                    goal_xyzs=np.array([[0.50, 0.0, 0.02]]),
-                ),
-                dict(
-                    task_name='task3_vertical2',
-                    init_xyzs=np.array([[0.50, 0.0, 0.02]]),
-                    goal_xyzs=np.array([[0.35, 0.0, 0.02]]),
-                ),
-                dict(
-                    task_name='task4_diagonal1',
-                    init_xyzs=np.array([[0.35, -0.2, 0.02]]),
-                    goal_xyzs=np.array([[0.50, 0.2, 0.02]]),
-                ),
-                dict(
-                    task_name='task5_diagonal2',
-                    init_xyzs=np.array([[0.35, 0.2, 0.02]]),
-                    goal_xyzs=np.array([[0.50, -0.2, 0.02]]),
-                ),
+                {
+                    "task_name": "task1_horizontal",
+                    "init_xyzs": np.array([[0.425, 0.1, 0.02]]),
+                    "goal_xyzs": np.array([[0.425, -0.1, 0.02]]),
+                },
+                {
+                    "task_name": "task2_vertical1",
+                    "init_xyzs": np.array([[0.35, 0.0, 0.02]]),
+                    "goal_xyzs": np.array([[0.50, 0.0, 0.02]]),
+                },
+                {
+                    "task_name": "task3_vertical2",
+                    "init_xyzs": np.array([[0.50, 0.0, 0.02]]),
+                    "goal_xyzs": np.array([[0.35, 0.0, 0.02]]),
+                },
+                {
+                    "task_name": "task4_diagonal1",
+                    "init_xyzs": np.array([[0.35, -0.2, 0.02]]),
+                    "goal_xyzs": np.array([[0.50, 0.2, 0.02]]),
+                },
+                {
+                    "task_name": "task5_diagonal2",
+                    "init_xyzs": np.array([[0.35, 0.2, 0.02]]),
+                    "goal_xyzs": np.array([[0.50, -0.2, 0.02]]),
+                },
             ]
-        elif self._env_type == 'double':
+        elif self._env_type == "double":
             self.task_infos = [
-                dict(
-                    task_name='task1_single_pnp',
-                    init_xyzs=np.array(
+                {
+                    "task_name": "task1_single_pnp",
+                    "init_xyzs": np.array(
                         [
                             [0.425, 0.0, 0.02],
                             [0.425, -0.1, 0.02],
                         ]
                     ),
-                    goal_xyzs=np.array(
+                    "goal_xyzs": np.array(
                         [
                             [0.425, 0.0, 0.02],
                             [0.425, 0.1, 0.02],
                         ]
                     ),
-                ),
-                dict(
-                    task_name='task2_double_pnp1',
-                    init_xyzs=np.array(
+                },
+                {
+                    "task_name": "task2_double_pnp1",
+                    "init_xyzs": np.array(
                         [
                             [0.35, -0.1, 0.02],
                             [0.50, -0.1, 0.02],
                         ]
                     ),
-                    goal_xyzs=np.array(
+                    "goal_xyzs": np.array(
                         [
                             [0.35, 0.1, 0.02],
                             [0.50, 0.1, 0.02],
                         ]
                     ),
-                ),
-                dict(
-                    task_name='task3_double_pnp2',
-                    init_xyzs=np.array(
+                },
+                {
+                    "task_name": "task3_double_pnp2",
+                    "init_xyzs": np.array(
                         [
                             [0.35, 0.0, 0.02],
                             [0.50, 0.0, 0.02],
                         ]
                     ),
-                    goal_xyzs=np.array(
+                    "goal_xyzs": np.array(
                         [
                             [0.425, -0.2, 0.02],
                             [0.425, 0.2, 0.02],
                         ]
                     ),
-                ),
-                dict(
-                    task_name='task4_swap',
-                    init_xyzs=np.array(
+                },
+                {
+                    "task_name": "task4_swap",
+                    "init_xyzs": np.array(
                         [
                             [0.425, -0.1, 0.02],
                             [0.425, 0.1, 0.02],
                         ]
                     ),
-                    goal_xyzs=np.array(
+                    "goal_xyzs": np.array(
                         [
                             [0.425, 0.1, 0.02],
                             [0.425, -0.1, 0.02],
                         ]
                     ),
-                ),
-                dict(
-                    task_name='task5_stack',
-                    init_xyzs=np.array(
+                },
+                {
+                    "task_name": "task5_stack",
+                    "init_xyzs": np.array(
                         [
                             [0.425, -0.2, 0.02],
                             [0.425, 0.2, 0.02],
                         ]
                     ),
-                    goal_xyzs=np.array(
+                    "goal_xyzs": np.array(
                         [
                             [0.425, 0.0, 0.02],
                             [0.425, 0.0, 0.06],
                         ]
                     ),
-                ),
+                },
             ]
-        elif self._env_type == 'triple':
+        elif self._env_type == "triple":
             self.task_infos = [
-                dict(
-                    task_name='task1_single_pnp',
-                    init_xyzs=np.array(
+                {
+                    "task_name": "task1_single_pnp",
+                    "init_xyzs": np.array(
                         [
                             [0.35, -0.1, 0.02],
                             [0.35, 0.1, 0.02],
                             [0.50, -0.1, 0.02],
                         ]
                     ),
-                    goal_xyzs=np.array(
+                    "goal_xyzs": np.array(
                         [
                             [0.35, -0.1, 0.02],
                             [0.35, 0.1, 0.02],
                             [0.50, 0.1, 0.02],
                         ]
                     ),
-                ),
-                dict(
-                    task_name='task2_triple_pnp',
-                    init_xyzs=np.array(
+                },
+                {
+                    "task_name": "task2_triple_pnp",
+                    "init_xyzs": np.array(
                         [
                             [0.35, -0.2, 0.02],
                             [0.35, 0.0, 0.02],
                             [0.35, 0.2, 0.02],
                         ]
                     ),
-                    goal_xyzs=np.array(
+                    "goal_xyzs": np.array(
                         [
                             [0.50, 0.0, 0.02],
                             [0.50, 0.2, 0.02],
                             [0.50, -0.2, 0.02],
                         ]
                     ),
-                ),
-                dict(
-                    task_name='task3_pnp_from_stack',
-                    init_xyzs=np.array(
+                },
+                {
+                    "task_name": "task3_pnp_from_stack",
+                    "init_xyzs": np.array(
                         [
                             [0.425, 0.2, 0.02],
                             [0.425, 0.2, 0.06],
                             [0.425, 0.2, 0.10],
                         ]
                     ),
-                    goal_xyzs=np.array(
+                    "goal_xyzs": np.array(
                         [
                             [0.35, -0.1, 0.02],
                             [0.50, -0.2, 0.02],
                             [0.50, 0.0, 0.02],
                         ]
                     ),
-                ),
-                dict(
-                    task_name='task4_cycle',
-                    init_xyzs=np.array(
+                },
+                {
+                    "task_name": "task4_cycle",
+                    "init_xyzs": np.array(
                         [
                             [0.35, 0.0, 0.02],
                             [0.50, -0.1, 0.02],
                             [0.50, 0.1, 0.02],
                         ]
                     ),
-                    goal_xyzs=np.array(
+                    "goal_xyzs": np.array(
                         [
                             [0.50, -0.1, 0.02],
                             [0.50, 0.1, 0.02],
                             [0.35, 0.0, 0.02],
                         ]
                     ),
-                ),
-                dict(
-                    task_name='task5_stack',
-                    init_xyzs=np.array(
+                },
+                {
+                    "task_name": "task5_stack",
+                    "init_xyzs": np.array(
                         [
                             [0.35, -0.1, 0.02],
                             [0.50, -0.2, 0.02],
                             [0.50, 0.0, 0.02],
                         ]
                     ),
-                    goal_xyzs=np.array(
+                    "goal_xyzs": np.array(
                         [
                             [0.425, 0.2, 0.02],
                             [0.425, 0.2, 0.06],
                             [0.425, 0.2, 0.10],
                         ]
                     ),
-                ),
+                },
             ]
-        elif self._env_type == 'quadruple':
+        elif self._env_type == "quadruple":
             self.task_infos = [
-                dict(
-                    task_name='task1_double_pnp',
-                    init_xyzs=np.array(
+                {
+                    "task_name": "task1_double_pnp",
+                    "init_xyzs": np.array(
                         [
                             [0.35, -0.1, 0.02],
                             [0.35, 0.1, 0.02],
@@ -411,7 +381,7 @@ class CubeEnv(ManipSpaceEnv):
                             [0.50, 0.1, 0.02],
                         ]
                     ),
-                    goal_xyzs=np.array(
+                    "goal_xyzs": np.array(
                         [
                             [0.35, -0.25, 0.02],
                             [0.35, 0.1, 0.02],
@@ -419,10 +389,10 @@ class CubeEnv(ManipSpaceEnv):
                             [0.50, 0.25, 0.02],
                         ]
                     ),
-                ),
-                dict(
-                    task_name='task2_quadruple_pnp',
-                    init_xyzs=np.array(
+                },
+                {
+                    "task_name": "task2_quadruple_pnp",
+                    "init_xyzs": np.array(
                         [
                             [0.325, -0.2, 0.02],
                             [0.325, 0.2, 0.02],
@@ -430,7 +400,7 @@ class CubeEnv(ManipSpaceEnv):
                             [0.525, 0.2, 0.02],
                         ]
                     ),
-                    goal_xyzs=np.array(
+                    "goal_xyzs": np.array(
                         [
                             [0.375, 0.1, 0.02],
                             [0.475, 0.1, 0.02],
@@ -438,10 +408,10 @@ class CubeEnv(ManipSpaceEnv):
                             [0.475, -0.1, 0.02],
                         ]
                     ),
-                ),
-                dict(
-                    task_name='task3_pnp_from_square',
-                    init_xyzs=np.array(
+                },
+                {
+                    "task_name": "task3_pnp_from_square",
+                    "init_xyzs": np.array(
                         [
                             [0.425, -0.02, 0.02],
                             [0.425, 0.02, 0.02],
@@ -449,7 +419,7 @@ class CubeEnv(ManipSpaceEnv):
                             [0.425, 0.02, 0.06],
                         ]
                     ),
-                    goal_xyzs=np.array(
+                    "goal_xyzs": np.array(
                         [
                             [0.525, -0.2, 0.02],
                             [0.325, 0.2, 0.02],
@@ -457,10 +427,10 @@ class CubeEnv(ManipSpaceEnv):
                             [0.525, 0.2, 0.02],
                         ]
                     ),
-                ),
-                dict(
-                    task_name='task4_cycle',
-                    init_xyzs=np.array(
+                },
+                {
+                    "task_name": "task4_cycle",
+                    "init_xyzs": np.array(
                         [
                             [0.525, -0.1, 0.02],
                             [0.525, 0.1, 0.02],
@@ -468,7 +438,7 @@ class CubeEnv(ManipSpaceEnv):
                             [0.325, -0.1, 0.02],
                         ]
                     ),
-                    goal_xyzs=np.array(
+                    "goal_xyzs": np.array(
                         [
                             [0.525, 0.1, 0.02],
                             [0.325, 0.1, 0.02],
@@ -476,10 +446,10 @@ class CubeEnv(ManipSpaceEnv):
                             [0.525, -0.1, 0.02],
                         ]
                     ),
-                ),
-                dict(
-                    task_name='task5_stack',
-                    init_xyzs=np.array(
+                },
+                {
+                    "task_name": "task5_stack",
+                    "init_xyzs": np.array(
                         [
                             [0.50, -0.05, 0.02],
                             [0.50, -0.2, 0.02],
@@ -487,7 +457,7 @@ class CubeEnv(ManipSpaceEnv):
                             [0.35, -0.05, 0.02],
                         ]
                     ),
-                    goal_xyzs=np.array(
+                    "goal_xyzs": np.array(
                         [
                             [0.425, 0.2, 0.02],
                             [0.425, 0.2, 0.06],
@@ -495,13 +465,13 @@ class CubeEnv(ManipSpaceEnv):
                             [0.425, 0.2, 0.14],
                         ]
                     ),
-                ),
+                },
             ]
-        elif self._env_type == 'octuple':
+        elif self._env_type == "octuple":
             self.task_infos = [
-                dict(
-                    task_name='task1_quadruple_pnp',
-                    init_xyzs=np.array(
+                {
+                    "task_name": "task1_quadruple_pnp",
+                    "init_xyzs": np.array(
                         [
                             [0.325, -0.15, 0.02],
                             [0.425, -0.15, 0.02],
@@ -513,7 +483,7 @@ class CubeEnv(ManipSpaceEnv):
                             [0.525, 0.15, 0.02],
                         ]
                     ),
-                    goal_xyzs=np.array(
+                    "goal_xyzs": np.array(
                         [
                             [0.525, 0.05, 0.02],
                             [0.425, -0.15, 0.02],
@@ -525,10 +495,10 @@ class CubeEnv(ManipSpaceEnv):
                             [0.325, -0.05, 0.02],
                         ]
                     ),
-                ),
-                dict(
-                    task_name='task2_octuple_pnp1',
-                    init_xyzs=np.array(
+                },
+                {
+                    "task_name": "task2_octuple_pnp1",
+                    "init_xyzs": np.array(
                         [
                             [0.40, -0.15, 0.02],
                             [0.40, -0.05, 0.02],
@@ -540,7 +510,7 @@ class CubeEnv(ManipSpaceEnv):
                             [0.45, 0.15, 0.02],
                         ]
                     ),
-                    goal_xyzs=np.array(
+                    "goal_xyzs": np.array(
                         [
                             [0.525, 0.2, 0.02],
                             [0.525, 0.0, 0.02],
@@ -552,10 +522,10 @@ class CubeEnv(ManipSpaceEnv):
                             [0.425, 0.2, 0.02],
                         ]
                     ),
-                ),
-                dict(
-                    task_name='task3_octuple_pnp2',
-                    init_xyzs=np.array(
+                },
+                {
+                    "task_name": "task3_octuple_pnp2",
+                    "init_xyzs": np.array(
                         [
                             [0.32, -0.15, 0.02],
                             [0.32, 0.05, 0.02],
@@ -567,7 +537,7 @@ class CubeEnv(ManipSpaceEnv):
                             [0.53, 0.15, 0.02],
                         ]
                     ),
-                    goal_xyzs=np.array(
+                    "goal_xyzs": np.array(
                         [
                             [0.32, 0.15, 0.02],
                             [0.46, 0.15, 0.02],
@@ -579,10 +549,10 @@ class CubeEnv(ManipSpaceEnv):
                             [0.53, -0.15, 0.02],
                         ]
                     ),
-                ),
-                dict(
-                    task_name='task4_stack1',
-                    init_xyzs=np.array(
+                },
+                {
+                    "task_name": "task4_stack1",
+                    "init_xyzs": np.array(
                         [
                             [0.40, -0.025, 0.02],
                             [0.40, -0.025, 0.06],
@@ -594,7 +564,7 @@ class CubeEnv(ManipSpaceEnv):
                             [0.45, 0.025, 0.06],
                         ]
                     ),
-                    goal_xyzs=np.array(
+                    "goal_xyzs": np.array(
                         [
                             [0.525, 0.05, 0.02],
                             [0.525, -0.05, 0.02],
@@ -606,10 +576,10 @@ class CubeEnv(ManipSpaceEnv):
                             [0.325, 0.05, 0.02],
                         ]
                     ),
-                ),
-                dict(
-                    task_name='task5_stack2',
-                    init_xyzs=np.array(
+                },
+                {
+                    "task_name": "task5_stack2",
+                    "init_xyzs": np.array(
                         [
                             [0.50, 0.2, 0.06],
                             [0.50, 0.2, 0.02],
@@ -621,7 +591,7 @@ class CubeEnv(ManipSpaceEnv):
                             [0.35, 0.2, 0.02],
                         ]
                     ),
-                    goal_xyzs=np.array(
+                    "goal_xyzs": np.array(
                         [
                             [0.325, 0.0, 0.02],
                             [0.325, 0.0, 0.06],
@@ -633,7 +603,7 @@ class CubeEnv(ManipSpaceEnv):
                             [0.425, -0.2, 0.06],
                         ]
                     ),
-                ),
+                },
             ]
 
         if self._reward_task_id == 0:
@@ -642,7 +612,7 @@ class CubeEnv(ManipSpaceEnv):
     def reset(self, options=None, *args, **kwargs):
         options = options or {}
 
-        self.variation_options = options["variation"] if "variation" in options else {}
+        self.variation_options = options.get("variation", {})
 
         self.variation_space.reset()
 
@@ -657,56 +627,54 @@ class CubeEnv(ManipSpaceEnv):
             else:
                 self.variation_space.update(set(options["variation"]))
 
-        assert self.variation_space.check(debug=True), (
-            "Variation values must be within variation space!"
-        )
+        assert self.variation_space.check(debug=True), "Variation values must be within variation space!"
 
         return super().reset(options, *args, **kwargs)
 
     def add_objects(self, arena_mjcf):
         # Add cube scene.
-        cube_outer_mjcf = mjcf.from_path((self._desc_dir / 'cube_outer.xml').as_posix())
+        cube_outer_mjcf = mjcf.from_path((self._desc_dir / "cube_outer.xml").as_posix())
         arena_mjcf.include_copy(cube_outer_mjcf)
 
         # Add `num_cubes` cubes to the scene.
         distance = 0.05
         for i in range(self._num_cubes):
-            cube_mjcf = mjcf.from_path((self._desc_dir / 'cube_inner.xml').as_posix())
+            cube_mjcf = mjcf.from_path((self._desc_dir / "cube_inner.xml").as_posix())
             pos = -distance * (self._num_cubes - 1) + 2 * distance * i
-            cube_mjcf.find('body', 'object_0').pos[1] = pos
-            cube_mjcf.find('body', 'object_target_0').pos[1] = pos
-            for tag in ['body', 'joint', 'geom', 'site']:
+            cube_mjcf.find("body", "object_0").pos[1] = pos
+            cube_mjcf.find("body", "object_target_0").pos[1] = pos
+            for tag in ["body", "joint", "geom", "site"]:
                 for item in cube_mjcf.find_all(tag):
-                    if hasattr(item, 'name') and item.name is not None and item.name.endswith('_0'):
-                        item.name = item.name[:-2] + f'_{i}'
+                    if hasattr(item, "name") and item.name is not None and item.name.endswith("_0"):
+                        item.name = item.name[:-2] + f"_{i}"
             arena_mjcf.include_copy(cube_mjcf)
 
         # Save cube geoms.
         self._cube_geoms_list = []
         for i in range(self._num_cubes):
-            self._cube_geoms_list.append(arena_mjcf.find('body', f'object_{i}').find_all('geom'))
+            self._cube_geoms_list.append(arena_mjcf.find("body", f"object_{i}").find_all("geom"))
         self._cube_target_geoms_list = []
         for i in range(self._num_cubes):
-            self._cube_target_geoms_list.append(arena_mjcf.find('body', f'object_target_{i}').find_all('geom'))
+            self._cube_target_geoms_list.append(arena_mjcf.find("body", f"object_target_{i}").find_all("geom"))
 
         # Add cameras.
         self.cameras = {
-            'front': {
-                'pos': (1.287, 0.000, 0.509),
-                'xyaxes': (0.000, 1.000, 0.000, -0.342, 0.000, 0.940),
+            "front": {
+                "pos": (1.287, 0.000, 0.509),
+                "xyaxes": (0.000, 1.000, 0.000, -0.342, 0.000, 0.940),
             },
-            'front_pixels': {
-                'pos': (1.053, -0.014, 0.639),
-                'xyaxes': (0.000, 1.000, 0.000, -0.628, 0.001, 0.778),
+            "front_pixels": {
+                "pos": (1.053, -0.014, 0.639),
+                "xyaxes": (0.000, 1.000, 0.000, -0.628, 0.001, 0.778),
             },
-            'side_pixels': {
-                'pos': (0.414, -0.753, 0.639),
-                'xyaxes': (1.000, 0.000, 0.000, -0.001, 0.628, 0.778),
+            "side_pixels": {
+                "pos": (0.414, -0.753, 0.639),
+                "xyaxes": (1.000, 0.000, 0.000, -0.001, 0.628, 0.778),
             },
         }
-        
+
         for camera_name, camera_kwargs in self.cameras.items():
-            arena_mjcf.worldbody.add('camera', name=camera_name, **camera_kwargs)
+            arena_mjcf.worldbody.add("camera", name=camera_name, **camera_kwargs)
 
     def post_compilation_objects(self):
         # Cube geom IDs.
@@ -714,7 +682,7 @@ class CubeEnv(ManipSpaceEnv):
             [self._model.geom(geom.full_identifier).id for geom in cube_geoms] for cube_geoms in self._cube_geoms_list
         ]
         self._cube_target_mocap_ids = [
-            self._model.body(f'object_target_{i}').mocapid[0] for i in range(self._num_cubes)
+            self._model.body(f"object_target_{i}").mocapid[0] for i in range(self._num_cubes)
         ]
         self._cube_target_geom_ids_list = [
             [self._model.geom(geom.full_identifier).id for geom in cube_target_geoms]
@@ -722,50 +690,54 @@ class CubeEnv(ManipSpaceEnv):
         ]
 
     def modify_mjcf_model(self, mjcf_model):
-
         if "all" in self.variation_options or "floor.color" in self.variation_options:
             # Modify floor color
-            grid_texture = mjcf_model.find('texture', 'grid')
+            grid_texture = mjcf_model.find("texture", "grid")
             grid_texture.rgb1 = self.variation_space["floor"]["color"].value[0]
             grid_texture.rgb2 = self.variation_space["floor"]["color"].value[1]
-        
+
         if "all" in self.variation_options or "agent.color" in self.variation_options:
             # Modify arm color
-            mjcf_model.find('material', 'ur5e/robotiq/black').rgba[:3] = self.variation_space["agent"]["color"].value
-            mjcf_model.find('material', 'ur5e/robotiq/pad_gray').rgba[:3] = self.variation_space["agent"]["color"].value
-        
+            mjcf_model.find("material", "ur5e/robotiq/black").rgba[:3] = self.variation_space["agent"]["color"].value
+            mjcf_model.find("material", "ur5e/robotiq/pad_gray").rgba[:3] = self.variation_space["agent"][
+                "color"
+            ].value
+
         if "all" in self.variation_options or "cube.size" in self.variation_options:
             # Modify cube size based on variation space
             for i in range(self._num_cubes):
                 # Regular cubes
-                body = mjcf_model.find('body', f'object_{i}')
+                body = mjcf_model.find("body", f"object_{i}")
                 if body:
-                    for geom in body.find_all('geom'):
-                        geom.size = self.variation_space["cube"]["size"].value[i] * np.ones((3), dtype=np.float32)  # half-extents (x, y, z)
+                    for geom in body.find_all("geom"):
+                        geom.size = self.variation_space["cube"]["size"].value[i] * np.ones(
+                            (3), dtype=np.float32
+                        )  # half-extents (x, y, z)
 
                 # Target cubes (if any)
-                target_body = mjcf_model.find('body', f'object_target_{i}')
+                target_body = mjcf_model.find("body", f"object_target_{i}")
                 if target_body:
-                    for geom in target_body.find_all('geom'):
+                    for geom in target_body.find_all("geom"):
                         geom.size = self.variation_space["cube"]["size"].value[i] * np.ones((3), dtype=np.float32)
-            
+
             self.mark_dirty()
-        
+
         if "all" in self.variation_options or "camera.angle_delta" in self.variation_options:
             # Perturb camera angle
-            cameras_to_vary = ['front_pixels', 'side_pixels'] if self._multiview else ['front_pixels']
+            cameras_to_vary = ["front_pixels", "side_pixels"] if self._multiview else ["front_pixels"]
             for i, cam_name in enumerate(cameras_to_vary):
-                cam = mjcf_model.find('camera', cam_name)
-                cam.xyaxes = perturb_camera_angle(self.cameras[cam_name]["xyaxes"], self.variation_space["camera"]["angle_delta"].value[i])
-        
+                cam = mjcf_model.find("camera", cam_name)
+                cam.xyaxes = perturb_camera_angle(
+                    self.cameras[cam_name]["xyaxes"], self.variation_space["camera"]["angle_delta"].value[i]
+                )
+
         if "all" in self.variation_options or "light.intensity" in self.variation_options:
             # Modify light intensity
-            light = mjcf_model.find('light', 'global')
+            light = mjcf_model.find("light", "global")
             light.diffuse = self.variation_space["light"]["intensity"].value[0] * np.ones((3), dtype=np.float32)
             self.mark_dirty()
-        
+
         return mjcf_model
-        
 
     def initialize_episode(self):
         # Set cube colors.
@@ -779,7 +751,7 @@ class CubeEnv(ManipSpaceEnv):
         self._data.qpos[self._arm_joint_ids] = self._home_qpos
         mujoco.mj_kinematics(self._model, self._data)
 
-        if self._mode == 'data_collection':
+        if self._mode == "data_collection":
             # Randomize the scene.
 
             self.initialize_arm()
@@ -790,8 +762,8 @@ class CubeEnv(ManipSpaceEnv):
                 obj_pos = (*xy, 0.02)
                 yaw = self.np_random.uniform(0, 2 * np.pi)
                 obj_ori = lie.SO3.from_z_radians(yaw).wxyz.tolist()
-                self._data.joint(f'object_joint_{i}').qpos[:3] = obj_pos
-                self._data.joint(f'object_joint_{i}').qpos[3:] = obj_ori
+                self._data.joint(f"object_joint_{i}").qpos[:3] = obj_pos
+                self._data.joint(f"object_joint_{i}").qpos[3:] = obj_ori
 
             # Set a new target.
             self.set_new_target(return_info=False)
@@ -803,16 +775,16 @@ class CubeEnv(ManipSpaceEnv):
                 permutation = self.np_random.permutation(self._num_cubes)
             else:
                 permutation = np.arange(self._num_cubes)
-            init_xyzs = self.cur_task_info['init_xyzs'].copy()[permutation]
-            goal_xyzs = self.cur_task_info['goal_xyzs'].copy()[permutation]
+            init_xyzs = self.cur_task_info["init_xyzs"].copy()[permutation]
+            goal_xyzs = self.cur_task_info["goal_xyzs"].copy()[permutation]
 
             # First, force set the current scene to the goal state to obtain the goal observation.
             saved_qpos = self._data.qpos.copy()
             saved_qvel = self._data.qvel.copy()
             self.initialize_arm()
             for i in range(self._num_cubes):
-                self._data.joint(f'object_joint_{i}').qpos[:3] = goal_xyzs[i]
-                self._data.joint(f'object_joint_{i}').qpos[3:] = lie.SO3.identity().wxyz.tolist()
+                self._data.joint(f"object_joint_{i}").qpos[:3] = goal_xyzs[i]
+                self._data.joint(f"object_joint_{i}").qpos[3:] = lie.SO3.identity().wxyz.tolist()
                 self._data.mocap_pos[self._cube_target_mocap_ids[i]] = goal_xyzs[i]
                 self._data.mocap_quat[self._cube_target_mocap_ids[i]] = lie.SO3.identity().wxyz.tolist()
             mujoco.mj_forward(self._model, self._data)
@@ -838,10 +810,10 @@ class CubeEnv(ManipSpaceEnv):
                 # Randomize the position and orientation of the cube slightly.
                 obj_pos = init_xyzs[i].copy()
                 obj_pos[:2] += self.np_random.uniform(-0.01, 0.01, size=2)
-                self._data.joint(f'object_joint_{i}').qpos[:3] = obj_pos
+                self._data.joint(f"object_joint_{i}").qpos[:3] = obj_pos
                 yaw = self.np_random.uniform(0, 2 * np.pi)
                 obj_ori = lie.SO3.from_z_radians(yaw).wxyz.tolist()
-                self._data.joint(f'object_joint_{i}').qpos[3:] = obj_ori
+                self._data.joint(f"object_joint_{i}").qpos[3:] = obj_ori
                 self._data.mocap_pos[self._cube_target_mocap_ids[i]] = goal_xyzs[i]
                 self._data.mocap_quat[self._cube_target_mocap_ids[i]] = lie.SO3.identity().wxyz.tolist()
 
@@ -859,9 +831,9 @@ class CubeEnv(ManipSpaceEnv):
             return_info: Whether to return the observation and reset info.
             p_stack: Probability of stacking the target block on top of another block when there are multiple blocks.
         """
-        assert self._mode == 'data_collection'
+        assert self._mode == "data_collection"
 
-        block_xyzs = np.array([self._data.joint(f'object_joint_{i}').qpos[:3] for i in range(self._num_cubes)])
+        block_xyzs = np.array([self._data.joint(f"object_joint_{i}").qpos[:3] for i in range(self._num_cubes)])
 
         # Compute the top blocks.
         top_blocks = []
@@ -869,7 +841,10 @@ class CubeEnv(ManipSpaceEnv):
             for j in range(self._num_cubes):
                 if i == j:
                     continue
-                if block_xyzs[j][2] > block_xyzs[i][2] and np.linalg.norm(block_xyzs[i][:2] - block_xyzs[j][:2]) < 0.02:
+                if (
+                    block_xyzs[j][2] > block_xyzs[i][2]
+                    and np.linalg.norm(block_xyzs[i][:2] - block_xyzs[j][:2]) < 0.02
+                ):
                     break
             else:
                 top_blocks.append(i)
@@ -881,7 +856,7 @@ class CubeEnv(ManipSpaceEnv):
         if stack:
             # Stack the target block on top of another block.
             block_idx = self.np_random.choice(list(set(top_blocks) - {self._target_block}))
-            block_pos = self._data.joint(f'object_joint_{block_idx}').qpos[:3]
+            block_pos = self._data.joint(f"object_joint_{block_idx}").qpos[:3]
             tar_pos = np.array([block_pos[0], block_pos[1], block_pos[2] + 0.04])
         else:
             # Randomize target position.
@@ -918,7 +893,7 @@ class CubeEnv(ManipSpaceEnv):
         """Compute object successes."""
         cube_successes = []
         for i in range(self._num_cubes):
-            obj_pos = self._data.joint(f'object_joint_{i}').qpos[:3]
+            obj_pos = self._data.joint(f"object_joint_{i}").qpos[:3]
             tar_pos = self._data.mocap_pos[self._cube_target_mocap_ids[i]]
             if np.linalg.norm(obj_pos - tar_pos) <= 0.04:
                 cube_successes.append(True)
@@ -926,18 +901,18 @@ class CubeEnv(ManipSpaceEnv):
                 cube_successes.append(False)
 
         return cube_successes
-    
+
     def post_step(self):
         # Check if the cubes are in the target positions.
         cube_successes = self._compute_successes()
-        if self._mode == 'data_collection':
+        if self._mode == "data_collection":
             self._success = cube_successes[self._target_block]
         else:
             self._success = all(cube_successes)
 
         # Adjust the colors of the cubes based on success.
         for i in range(self._num_cubes):
-            if self._visualize_info and (self._mode == 'task' or i == self._target_block):
+            if self._visualize_info and (self._mode == "task" or i == self._target_block):
                 for gid in self._cube_target_geom_ids_list[i]:
                     self._model.geom(gid).rgba[3] = 0.2
             else:
@@ -953,40 +928,40 @@ class CubeEnv(ManipSpaceEnv):
 
     def get_reset_info(self):
         reset_info = self.compute_ob_info()
-        if self._mode == 'task':
-            reset_info['goal'] = self._cur_goal_ob
-        reset_info['success'] = self._success
+        if self._mode == "task":
+            reset_info["goal"] = self._cur_goal_ob
+        reset_info["success"] = self._success
         return reset_info
-    
+
     def get_step_info(self):
         ob_info = self.compute_ob_info()
-        if self._mode == 'task':
-            ob_info['goal'] = self._cur_goal_ob
-        ob_info['success'] = self._success
+        if self._mode == "task":
+            ob_info["goal"] = self._cur_goal_ob
+        ob_info["success"] = self._success
         return ob_info
-    
+
     def add_object_info(self, ob_info):
         # Cube positions and orientations.
         for i in range(self._num_cubes):
-            ob_info[f'privileged/block_{i}_pos'] = self._data.joint(f'object_joint_{i}').qpos[:3].copy()
-            ob_info[f'privileged/block_{i}_quat'] = self._data.joint(f'object_joint_{i}').qpos[3:].copy()
-            ob_info[f'privileged/block_{i}_yaw'] = np.array(
-                [lie.SO3(wxyz=self._data.joint(f'object_joint_{i}').qpos[3:]).compute_yaw_radians()]
+            ob_info[f"privileged/block_{i}_pos"] = self._data.joint(f"object_joint_{i}").qpos[:3].copy()
+            ob_info[f"privileged/block_{i}_quat"] = self._data.joint(f"object_joint_{i}").qpos[3:].copy()
+            ob_info[f"privileged/block_{i}_yaw"] = np.array(
+                [lie.SO3(wxyz=self._data.joint(f"object_joint_{i}").qpos[3:]).compute_yaw_radians()]
             )
 
-        if self._mode == 'data_collection':
+        if self._mode == "data_collection":
             # Target cube info.
-            ob_info['privileged/target_task'] = self._target_task
+            ob_info["privileged/target_task"] = self._target_task
 
             target_mocap_id = self._cube_target_mocap_ids[self._target_block]
-            ob_info['privileged/target_block'] = self._target_block
-            ob_info['privileged/target_block_pos'] = self._data.mocap_pos[target_mocap_id].copy()
-            ob_info['privileged/target_block_yaw'] = np.array(
+            ob_info["privileged/target_block"] = self._target_block
+            ob_info["privileged/target_block_pos"] = self._data.mocap_pos[target_mocap_id].copy()
+            ob_info["privileged/target_block_yaw"] = np.array(
                 [lie.SO3(wxyz=self._data.mocap_quat[target_mocap_id]).compute_yaw_radians()]
             )
 
     def compute_observation(self):
-        if self._ob_type == 'pixels':
+        if self._ob_type == "pixels":
             return self.get_pixel_observation()
         else:
             xyz_center = np.array([0.425, 0.0, 0.0])
@@ -995,21 +970,21 @@ class CubeEnv(ManipSpaceEnv):
 
             ob_info = self.compute_ob_info()
             ob = [
-                ob_info['proprio/joint_pos'],
-                ob_info['proprio/joint_vel'],
-                (ob_info['proprio/effector_pos'] - xyz_center) * xyz_scaler,
-                np.cos(ob_info['proprio/effector_yaw']),
-                np.sin(ob_info['proprio/effector_yaw']),
-                ob_info['proprio/gripper_opening'] * gripper_scaler,
-                ob_info['proprio/gripper_contact'],
+                ob_info["proprio/joint_pos"],
+                ob_info["proprio/joint_vel"],
+                (ob_info["proprio/effector_pos"] - xyz_center) * xyz_scaler,
+                np.cos(ob_info["proprio/effector_yaw"]),
+                np.sin(ob_info["proprio/effector_yaw"]),
+                ob_info["proprio/gripper_opening"] * gripper_scaler,
+                ob_info["proprio/gripper_contact"],
             ]
             for i in range(self._num_cubes):
                 ob.extend(
                     [
-                        (ob_info[f'privileged/block_{i}_pos'] - xyz_center) * xyz_scaler,
-                        ob_info[f'privileged/block_{i}_quat'],
-                        np.cos(ob_info[f'privileged/block_{i}_yaw']),
-                        np.sin(ob_info[f'privileged/block_{i}_yaw']),
+                        (ob_info[f"privileged/block_{i}_pos"] - xyz_center) * xyz_scaler,
+                        ob_info[f"privileged/block_{i}_quat"],
+                        np.cos(ob_info[f"privileged/block_{i}_yaw"]),
+                        np.sin(ob_info[f"privileged/block_{i}_yaw"]),
                     ]
                 )
 
@@ -1023,7 +998,7 @@ class CubeEnv(ManipSpaceEnv):
         ob_info = self.compute_ob_info()
         ob = []
         for i in range(self._num_cubes):
-            ob.append((ob_info[f'privileged/block_{i}_pos'] - xyz_center) * xyz_scaler)
+            ob.append((ob_info[f"privileged/block_{i}_pos"] - xyz_center) * xyz_scaler)
 
         return np.concatenate(ob)
 
@@ -1035,15 +1010,15 @@ class CubeEnv(ManipSpaceEnv):
         successes = self._compute_successes()
         reward = float(sum(successes) - len(successes))
         return reward
-    
+
     def render(
         self,
-        camera='front_pixels',
+        camera="front_pixels",
         *args,
         **kwargs,
     ):
-        camera = 'front_pixels' if not self._multiview else ['front_pixels', 'side_pixels']
-        if isinstance(camera, (list, tuple)):
+        camera = "front_pixels" if not self._multiview else ["front_pixels", "side_pixels"]
+        if isinstance(camera, Iterable):
             imgs = []
             for cam in camera:
                 img = super().render(camera=cam, *args, **kwargs)

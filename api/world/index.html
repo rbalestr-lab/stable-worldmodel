@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+
+<html :class="{'dark': darkMode === 'dark' || (darkMode === 'system' &amp;&amp; window.matchMedia('(prefers-color-scheme: dark)').matches)}" class="scroll-smooth" data-content_root="../../" lang="en" x-data="{ darkMode: localStorage.getItem('darkMode') || localStorage.setItem('darkMode', 'system'), activeSection: '' }" x-init="$watch('darkMode', val =&gt; localStorage.setItem('darkMode', val))">
+<head>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<meta charset="utf-8"/>
+<meta content="white" media="(prefers-color-scheme: light)" name="theme-color"/>
+<meta content="black" media="(prefers-color-scheme: dark)" name="theme-color"/>
+<meta content="width=device-width, initial-scale=1" name="viewport"/>
+<title>World | stable-worldmodel</title>
+<meta content="World | stable-worldmodel" property="og:title"/>
+<meta content="World | stable-worldmodel" name="twitter:title"/>
+<link href="../../_static/pygments.css?v=91c1d931" rel="stylesheet" type="text/css"/>
+<link href="../../_static/theme.css?v=42baaae4" rel="stylesheet" type="text/css"/>
+<link href="../../_static/sphinx-design.min.css?v=95c83b7e" rel="stylesheet" type="text/css"/>
+<link href="../../_static/css/custom.css?v=b1ec85b4" rel="stylesheet" type="text/css"/>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/fontawesome.min.css" rel="stylesheet" type="text/css"/>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/solid.min.css" rel="stylesheet" type="text/css"/>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/brands.min.css" rel="stylesheet" type="text/css"/>
+<link href="../../_static/awesome-sphinx-design.css?v=15e0fffa" rel="stylesheet" type="text/css"/>
+<link href="../../_static/favicon.ico" rel="icon"/>
+<link href="../../search/" rel="search" title="Search"/>
+<link href="../../genindex/" rel="index" title="Index"/>
+<link href="../policy/" rel="next" title="Policy"/>
+<link href="../data/" rel="prev" title="StepsDataset"/>
+<script>
+    <!-- Prevent Flash of wrong theme -->
+      const userPreference = localStorage.getItem('darkMode');
+      let mode;
+      if (userPreference === 'dark' || window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        mode = 'dark';
+        document.documentElement.classList.add('dark');
+      } else {
+        mode = 'light';
+      }
+      if (!userPreference) {localStorage.setItem('darkMode', mode)}
+    </script>
+</head>
+<body :class="{ 'overflow-hidden': showSidebar }" class="min-h-screen font-sans antialiased bg-background text-foreground" x-data="{ showSidebar: false, showScrollTop: false }">
+<div @click.self="showSidebar = false" class="fixed inset-0 z-50 overflow-hidden bg-background/80 backdrop-blur-sm md:hidden" x-cloak="" x-show="showSidebar"></div><div class="relative flex flex-col min-h-screen" id="page"><a class="absolute top-0 left-0 z-[100] block bg-background p-4 text-xl transition -translate-x-full opacity-0 focus:translate-x-0 focus:opacity-100" href="#content">
+      Skip to content
+    </a><header class="sticky top-0 z-40 w-full border-b shadow-sm border-border supports-backdrop-blur:bg-background/60 bg-background/95 backdrop-blur"><div class="container flex items-center h-14">
+<div class="hidden mr-4 md:flex">
+<a class="flex items-center mr-6" href="../../">
+<img alt="Logo" class="mr-2 hidden dark:block" height="24" src="../../_static/logo-dark.svg" width="24"/>
+<img alt="Logo" class="mr-2 dark:hidden" height="24" src="../../_static/logo-light.svg" width="24"/><span class="hidden font-bold sm:inline-block text-clip whitespace-nowrap">stable-worldmodel</span>
+</a></div><button @click="showSidebar = true" class="inline-flex items-center justify-center h-10 px-0 py-2 mr-2 text-base font-medium transition-colors rounded-md hover:text-accent-foreground hover:bg-transparent md:hidden" type="button">
+<svg aria-hidden="true" fill="currentColor" height="24" viewbox="0 96 960 960" width="24" xmlns="http://www.w3.org/2000/svg">
+<path d="M152.587 825.087q-19.152 0-32.326-13.174t-13.174-32.326q0-19.152 13.174-32.326t32.326-13.174h440q19.152 0 32.326 13.174t13.174 32.326q0 19.152-13.174 32.326t-32.326 13.174h-440Zm0-203.587q-19.152 0-32.326-13.174T107.087 576q0-19.152 13.174-32.326t32.326-13.174h320q19.152 0 32.326 13.174T518.087 576q0 19.152-13.174 32.326T472.587 621.5h-320Zm0-203.587q-19.152 0-32.326-13.174t-13.174-32.326q0-19.152 13.174-32.326t32.326-13.174h440q19.152 0 32.326 13.174t13.174 32.326q0 19.152-13.174 32.326t-32.326 13.174h-440ZM708.913 576l112.174 112.174q12.674 12.674 12.674 31.826t-12.674 31.826Q808.413 764.5 789.261 764.5t-31.826-12.674l-144-144Q600 594.391 600 576t13.435-31.826l144-144q12.674-12.674 31.826-12.674t31.826 12.674q12.674 12.674 12.674 31.826t-12.674 31.826L708.913 576Z"></path>
+</svg>
+<span class="sr-only">Toggle navigation menu</span>
+</button>
+<div class="flex items-center justify-between flex-1 space-x-2 sm:space-x-4 md:justify-end">
+<div class="flex-1 w-full md:w-auto md:flex-none"><form @keydown.k.window.meta="$refs.search.focus()" action="../../search/" class="relative flex items-center group" id="searchbox" method="get">
+<input aria-label="Search the docs" class="inline-flex items-center font-medium transition-colors bg-transparent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ring-offset-background border border-input hover:bg-accent focus:bg-accent hover:text-accent-foreground focus:text-accent-foreground hover:placeholder-accent-foreground py-2 px-4 relative h-9 w-full justify-start rounded-[0.5rem] text-sm text-muted-foreground sm:pr-12 md:w-40 lg:w-64" id="search-input" name="q" placeholder="Search ..." type="search" x-ref="search"/>
+<kbd class="pointer-events-none absolute right-1.5 top-2 hidden h-5 select-none text-muted-foreground items-center gap-1 rounded border border-border bg-muted px-1.5 font-mono text-[10px] font-medium opacity-100 sm:flex group-hover:bg-accent group-hover:text-accent-foreground">
+<span class="text-xs">⌘</span>
+    K
+  </kbd>
+</form>
+</div>
+<nav class="flex items-center space-x-1">
+<button @click="darkMode = darkMode === 'light' ? 'dark' : 'light'" aria-label="Color theme switcher" class="relative inline-flex items-center justify-center px-0 text-sm font-medium transition-colors rounded-md hover:bg-accent hover:text-accent-foreground h-9 w-9" type="button">
+<svg class="absolute transition-all scale-100 rotate-0 dark:-rotate-90 dark:scale-0" fill="currentColor" height="24" viewbox="0 96 960 960" width="24" xmlns="http://www.w3.org/2000/svg">
+<path d="M480 685q45.456 0 77.228-31.772Q589 621.456 589 576q0-45.456-31.772-77.228Q525.456 467 480 467q-45.456 0-77.228 31.772Q371 530.544 371 576q0 45.456 31.772 77.228Q434.544 685 480 685Zm0 91q-83 0-141.5-58.5T280 576q0-83 58.5-141.5T480 376q83 0 141.5 58.5T680 576q0 83-58.5 141.5T480 776ZM80 621.5q-19.152 0-32.326-13.174T34.5 576q0-19.152 13.174-32.326T80 530.5h80q19.152 0 32.326 13.174T205.5 576q0 19.152-13.174 32.326T160 621.5H80Zm720 0q-19.152 0-32.326-13.174T754.5 576q0-19.152 13.174-32.326T800 530.5h80q19.152 0 32.326 13.174T925.5 576q0 19.152-13.174 32.326T880 621.5h-80Zm-320-320q-19.152 0-32.326-13.174T434.5 256v-80q0-19.152 13.174-32.326T480 130.5q19.152 0 32.326 13.174T525.5 176v80q0 19.152-13.174 32.326T480 301.5Zm0 720q-19.152 0-32.326-13.17Q434.5 995.152 434.5 976v-80q0-19.152 13.174-32.326T480 850.5q19.152 0 32.326 13.174T525.5 896v80q0 19.152-13.174 32.33-13.174 13.17-32.326 13.17ZM222.174 382.065l-43-42Q165.5 327.391 166 308.239t13.174-33.065q13.435-13.674 32.587-13.674t32.065 13.674l42.239 43q12.674 13.435 12.555 31.706-.12 18.272-12.555 31.946-12.674 13.674-31.445 13.413-18.772-.261-32.446-13.174Zm494 494.761-42.239-43q-12.674-13.435-12.674-32.087t12.674-31.565Q686.609 756.5 705.38 757q18.772.5 32.446 13.174l43 41.761Q794.5 824.609 794 843.761t-13.174 33.065Q767.391 890.5 748.239 890.5t-32.065-13.674Zm-42-494.761Q660.5 369.391 661 350.62q.5-18.772 13.174-32.446l41.761-43Q728.609 261.5 747.761 262t33.065 13.174q13.674 13.435 13.674 32.587t-13.674 32.065l-43 42.239q-13.435 12.674-31.706 12.555-18.272-.12-31.946-12.555Zm-495 494.761Q165.5 863.391 165.5 844.239t13.674-32.065l43-42.239q13.435-12.674 32.087-12.674t31.565 12.674Q299.5 782.609 299 801.38q-.5 18.772-13.174 32.446l-41.761 43Q231.391 890.5 212.239 890t-33.065-13.174ZM480 576Z"></path>
+</svg>
+<svg class="absolute transition-all scale-0 rotate-90 dark:rotate-0 dark:scale-100" fill="currentColor" height="24" viewbox="0 96 960 960" width="24" xmlns="http://www.w3.org/2000/svg">
+<path d="M480 936q-151 0-255.5-104.5T120 576q0-138 90-239.5T440 218q25-3 39 18t-1 44q-17 26-25.5 55t-8.5 61q0 90 63 153t153 63q31 0 61.5-9t54.5-25q21-14 43-1.5t19 39.5q-14 138-117.5 229T480 936Zm0-80q88 0 158-48.5T740 681q-20 5-40 8t-40 3q-123 0-209.5-86.5T364 396q0-20 3-40t8-40q-78 32-126.5 102T200 576q0 116 82 198t198 82Zm-10-270Z"></path>
+</svg>
+</button>
+</nav>
+</div>
+</div>
+</header>
+<div class="flex-1"><div class="container flex-1 items-start md:grid md:grid-cols-[220px_minmax(0,1fr)] md:gap-6 lg:grid-cols-[240px_minmax(0,1fr)] lg:gap-10"><aside :aria-hidden="!showSidebar" :class="{ 'translate-x-0': showSidebar }" class="fixed inset-y-0 left-0 md:top-14 z-50 md:z-30 bg-background md:bg-transparent transition-all duration-100 -translate-x-full md:translate-x-0 ml-0 p-6 md:p-0 md:-ml-2 md:h-[calc(100vh-3.5rem)] w-5/6 md:w-full shrink-0 overflow-y-auto border-r border-border md:sticky" id="left-sidebar">
+<a class="!justify-start text-sm md:!hidden bg-background" href="../../">
+<img alt="Logo" class="mr-2 hidden dark:block" height="16" src="../../_static/logo-dark.svg" width="16"/>
+<img alt="Logo" class="mr-2 dark:hidden" height="16" src="../../_static/logo-light.svg" width="16"/><span class="font-bold text-clip whitespace-nowrap">stable-worldmodel</span>
+</a>
+<div class="relative overflow-hidden md:overflow-auto my-4 md:my-0 h-[calc(100vh-8rem)] md:h-auto">
+<div class="overflow-y-auto h-full w-full relative pr-6"><nav class="table w-full min-w-full my-6 lg:my-8">
+<p class="caption" role="heading"><span class="caption-text">Introduction</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../introduction/quickstart/">Quick Start</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../introduction/dinowm/">DINO-WM Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../introduction/showcase/">Showcase</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../data/">StepsDataset</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">World</a></li>
+<li class="toctree-l1" x-data="{ expanded: $el.classList.contains('current') ? true : false }"><a :class="{ 'expanded' : expanded }" @click="expanded = !expanded" class="reference internal expandable" href="../policy/">Policy<button @click.prevent.stop="expanded = !expanded" type="button"><span class="sr-only"></span><svg fill="currentColor" height="18px" stroke="none" viewbox="0 0 24 24" width="18px" xmlns="http://www.w3.org/2000/svg"><path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"></path></svg></button></a><ul x-show="expanded">
+<li class="toctree-l2"><a class="reference internal" href="../generated/stable_worldmodel.policy.PlanConfig/">PlanConfig</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../generated/stable_worldmodel.policy.BasePolicy/">BasePolicy</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../generated/stable_worldmodel.policy.RandomPolicy/">RandomPolicy</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../generated/stable_worldmodel.policy.ExpertPolicy/">ExpertPolicy</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../generated/stable_worldmodel.policy.WorldModelPolicy/">WorldModelPolicy</a></li>
+</ul>
+</li>
+<li class="toctree-l1" x-data="{ expanded: $el.classList.contains('current') ? true : false }"><a :class="{ 'expanded' : expanded }" @click="expanded = !expanded" class="reference internal expandable" href="../spaces/">Space<button @click.prevent.stop="expanded = !expanded" type="button"><span class="sr-only"></span><svg fill="currentColor" height="18px" stroke="none" viewbox="0 0 24 24" width="18px" xmlns="http://www.w3.org/2000/svg"><path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"></path></svg></button></a><ul x-show="expanded">
+<li class="toctree-l2"><a class="reference internal" href="../generated/stable_worldmodel.spaces.Discrete/">Discrete</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../generated/stable_worldmodel.spaces.MultiDiscrete/">MultiDiscrete</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../generated/stable_worldmodel.spaces.Box/">Box</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../generated/stable_worldmodel.spaces.RGBBox/">RGBBox</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../generated/stable_worldmodel.spaces.Dict/">Dict</a></li>
+</ul>
+</li>
+<li class="toctree-l1" x-data="{ expanded: $el.classList.contains('current') ? true : false }"><a :class="{ 'expanded' : expanded }" @click="expanded = !expanded" class="reference internal expandable" href="../wrappers/">Wrappers<button @click.prevent.stop="expanded = !expanded" type="button"><span class="sr-only"></span><svg fill="currentColor" height="18px" stroke="none" viewbox="0 0 24 24" width="18px" xmlns="http://www.w3.org/2000/svg"><path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"></path></svg></button></a><ul x-show="expanded">
+<li class="toctree-l2"><a class="reference internal" href="../generated/stable_worldmodel.wrappers.EnsureInfoKeysWrapper/">EnsureInfoKeysWrapper</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../generated/stable_worldmodel.wrappers.EnsureImageShape/">EnsureImageShape</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../generated/stable_worldmodel.wrappers.EnsureGoalInfoWrapper/">EnsureGoalInfoWrapper</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../generated/stable_worldmodel.wrappers.EverythingToInfoWrapper/">EverythingToInfoWrapper</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../generated/stable_worldmodel.wrappers.AddPixelsWrapper/">AddPixelsWrapper</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../generated/stable_worldmodel.wrappers.ResizeGoalWrapper/">ResizeGoalWrapper</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../generated/stable_worldmodel.wrappers.MegaWrapper/">MegaWrapper</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../generated/stable_worldmodel.wrappers.VariationWrapper/">VariationWrapper</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Worlds</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../world/simple-pointmaze/">Simple Point-Maze</a></li>
+<li class="toctree-l1" x-data="{ expanded: $el.classList.contains('current') ? true : false }"><a :class="{ 'expanded' : expanded }" @click="expanded = !expanded" class="reference internal expandable" href="../../world/OGBench/">OGBench<button @click.prevent.stop="expanded = !expanded" type="button"><span class="sr-only"></span><svg fill="currentColor" height="18px" stroke="none" viewbox="0 0 24 24" width="18px" xmlns="http://www.w3.org/2000/svg"><path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"></path></svg></button></a><ul x-show="expanded">
+<li class="toctree-l2"><a class="reference internal" href="../../world/OGBench/cube/">Cube</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Development</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/rbalestr-lab/stable-worldmodel">Github</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/rbalestr-lab/stable-worldmodel/tree/main/docs">Contribute to the Docs</a></li>
+</ul>
+</nav>
+</div>
+</div>
+<button @click="showSidebar = false" class="absolute md:hidden right-4 top-4 rounded-sm opacity-70 transition-opacity hover:opacity-100" type="button">
+<svg class="h-4 w-4" fill="currentColor" height="24" stroke="none" viewbox="0 96 960 960" width="24" xmlns="http://www.w3.org/2000/svg">
+<path d="M480 632 284 828q-11 11-28 11t-28-11q-11-11-11-28t11-28l196-196-196-196q-11-11-11-28t11-28q11-11 28-11t28 11l196 196 196-196q11-11 28-11t28 11q11 11 11 28t-11 28L536 576l196 196q11 11 11 28t-11 28q-11 11-28 11t-28-11L480 632Z"></path>
+</svg>
+</button>
+</aside>
+<main class="relative py-6 lg:gap-10 lg:py-8 xl:grid xl:grid-cols-[1fr_300px]">
+<div class="w-full min-w-0 mx-auto">
+<nav aria-label="breadcrumbs" class="flex items-center mb-4 space-x-1 text-sm text-muted-foreground">
+<a class="overflow-hidden text-ellipsis whitespace-nowrap hover:text-foreground" href="../../">
+<span class="hidden md:inline">stable-worldmodel</span>
+<svg aria-label="Home" class="md:hidden" fill="currentColor" height="18" stroke="none" viewbox="0 96 960 960" width="18" xmlns="http://www.w3.org/2000/svg">
+<path d="M240 856h120V616h240v240h120V496L480 316 240 496v360Zm-80 80V456l320-240 320 240v480H520V696h-80v240H160Zm320-350Z"></path>
+</svg>
+</a>
+<div class="mr-1">/</div><span aria-current="page" class="font-medium text-foreground overflow-hidden text-ellipsis whitespace-nowrap">World</span>
+</nav>
+<div id="content" role="main">
+<section id="world">
+<h1>World<a class="headerlink" href="#world" title="Link to this heading"><svg height="1em" viewbox="0 0 24 24" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"></path></svg></a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="stable_worldmodel.world.World">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">World</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">env_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_envs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">image_shape</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">tuple</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">goal_shape</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">tuple</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">goal_transform</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Callable</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">image_transform</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Callable</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seed</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">2349867</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_episode_steps</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">100</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/stable_worldmodel/world/#World"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.world.World" title="Link to this definition" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#stable_worldmodel.world.World'"><svg height="1em" viewbox="0 0 24 24" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"></path></svg></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>A high-level environment manager for vectorized gym environments with support for
+goal-conditioned tasks, video recording, dataset generation, and evaluation.</p>
+<p>The <cite>World</cite> class wraps multiple parallel environments using Gymnasium’s vectorized API and
+integrates with custom wrappers (e.g., <cite>MegaWrapper</cite>) to handle image-based observations and goals.
+It provides utility methods for recording trajectories, saving datasets in HuggingFace Datasets .parquet format,
+evaluating policies, and exporting video rollouts.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>env_name</strong> (<em>str</em>) – The name of the Gymnasium environment to instantiate.</p></li>
+<li><p><strong>num_envs</strong> (<em>int</em>) – Number of parallel environments to run.</p></li>
+<li><p><strong>image_shape</strong> (<em>tuple</em><em>[</em><em>int</em><em>]</em>) – Shape of image observations (C, H, W).</p></li>
+<li><p><strong>image_transform</strong> (<em>callable</em><em>, </em><em>optional</em>) – Transformation function applied to image observations.</p></li>
+<li><p><strong>goal_shape</strong> (<em>tuple</em><em>[</em><em>int</em><em>]</em><em>, </em><em>optional</em>) – Shape of goal image observations.</p></li>
+<li><p><strong>goal_transform</strong> (<em>callable</em><em>, </em><em>optional</em>) – Transformation function applied to goal observations.</p></li>
+<li><p><strong>seed</strong> (<em>int</em>) – Random seed for environment initialization and goal sampling.</p></li>
+<li><p><strong>max_episode_steps</strong> (<em>int</em><em>, </em><em>default=100</em>) – Maximum number of steps per episode.</p></li>
+<li><p><strong>**kwargs</strong> (<em>dict</em>) – Additional keyword arguments passed to <cite>gym.make_vec</cite>.</p></li>
+<li><p><strong>Attributes</strong></p></li>
+<li><p><strong>----------</strong></p></li>
+<li><p><strong>envs</strong> (<em>gym.vector.VectorEnv</em>) – Vectorized environments wrapped with <cite>MegaWrapper</cite>.</p></li>
+<li><p><strong>goal_envs</strong> (<em>gym.vector.VectorEnv</em>) – Separate vectorized environments for goal sampling.</p></li>
+<li><p><strong>seed</strong> – Random seed for reproducibility.</p></li>
+<li><p><strong>goal_seed</strong> (<em>int</em>) – Secondary random seed for sampling goals.</p></li>
+<li><p><strong>policy</strong> (<em>object</em>) – Policy instance with <cite>get_action</cite> and <cite>set_env</cite> methods.</p></li>
+<li><p><strong>Properties</strong></p></li>
+<li><p><strong>----------</strong></p></li>
+<li><p><strong>num_envs</strong> – Number of environments in the vectorized setup.</p></li>
+<li><p><strong>observation_space</strong> (<em>gym.Space</em>) – Observation space of the environments.</p></li>
+<li><p><strong>action_space</strong> (<em>gym.Space</em>) – Action space of the environments.</p></li>
+<li><p><strong>single_action_space</strong> (<em>gym.Space</em>) – Action space for a single environment.</p></li>
+<li><p><strong>single_observation_space</strong> (<em>gym.Space</em>) – Observation space for a single environment.</p></li>
+<li><p><strong>Methods</strong></p></li>
+<li><p><strong>-------</strong></p></li>
+<li><p><strong>close</strong><strong>(</strong><strong>**kwargs</strong><strong>)</strong> – <p>Closes all managed environments.</p>
+</p></li>
+<li><p><strong>denormalize</strong><strong>(</strong><strong>x</strong><strong>)</strong> – Converts normalized images in [-1, 1] back to [0, 1].</p></li>
+<li><p><strong>set_policy</strong><strong>(</strong><strong>policy</strong><strong>)</strong> – Assigns a policy object for interaction.</p></li>
+<li><p><strong>reset</strong><strong>(</strong><strong>seed=None</strong> – Resets the environments and returns initial states and infos.</p></li>
+<li><p><strong>options=None</strong><strong>)</strong> – Resets the environments and returns initial states and infos.</p></li>
+<li><p><strong>step</strong><strong>(</strong><strong>)</strong> – Steps all environments using the current policy’s actions.</p></li>
+<li><p><strong>__iter__</strong><strong>(</strong><strong>)</strong> – Prepares the iterator by resetting environments.</p></li>
+<li><p><strong>__next__</strong><strong>(</strong><strong>)</strong> – Iterates over environment states until all episodes are done.</p></li>
+<li><p><strong>record_video</strong><strong>(</strong><strong>video_path</strong> – Records a rollout video for each environment.</p></li>
+<li><p><strong>max_steps=500</strong> – Records a rollout video for each environment.</p></li>
+<li><p><strong>fps=30</strong> – Records a rollout video for each environment.</p></li>
+<li><p><strong>seed=None</strong> – Records a rollout video for each environment.</p></li>
+<li><p><strong>options=None</strong><strong>)</strong> – Records a rollout video for each environment.</p></li>
+<li><p><strong>record_dataset</strong><strong>(</strong><strong>dataset_name</strong> – Collects episodes into a HuggingFace Dataset and saves as Parquet shards.</p></li>
+<li><p><strong>episodes=10</strong> – Collects episodes into a HuggingFace Dataset and saves as Parquet shards.</p></li>
+<li><p><strong>seed=None</strong> – Collects episodes into a HuggingFace Dataset and saves as Parquet shards.</p></li>
+<li><p><strong>options=None</strong><strong>)</strong> – Collects episodes into a HuggingFace Dataset and saves as Parquet shards.</p></li>
+<li><p><strong>record_video_from_dataset</strong><strong>(</strong><strong>video_path</strong> – Replays stored dataset episodes and exports them as videos.</p></li>
+<li><p><strong>dataset_name</strong> – Replays stored dataset episodes and exports them as videos.</p></li>
+<li><p><strong>episode_idx</strong> – Replays stored dataset episodes and exports them as videos.</p></li>
+<li><p><strong>max_steps=500</strong> – Replays stored dataset episodes and exports them as videos.</p></li>
+<li><p><strong>fps=30</strong> – Replays stored dataset episodes and exports them as videos.</p></li>
+<li><p><strong>num_proc=4</strong><strong>)</strong> – Replays stored dataset episodes and exports them as videos.</p></li>
+<li><p><strong>evaluate</strong><strong>(</strong><strong>episodes=10</strong> – Evaluates the policy across multiple episodes and computes metrics.</p></li>
+<li><p><strong>eval_keys=None</strong> – Evaluates the policy across multiple episodes and computes metrics.</p></li>
+<li><p><strong>seed=None</strong> – Evaluates the policy across multiple episodes and computes metrics.</p></li>
+<li><p><strong>options=None</strong><strong>)</strong> – Evaluates the policy across multiple episodes and computes metrics.</p></li>
+<li><p><strong>Notes</strong></p></li>
+<li><p><strong>-----</strong></p></li>
+<li><p><strong>tracking.</strong> (<em>- Supports parallelized rollout collection with episode</em>)</p></li>
+<li><p><strong>replay.</strong> (<em>- Integrates tightly with HuggingFace Datasets for storage and</em>)</p></li>
+<li><p><strong>metrics.</strong> (<em>- Provides success-rate evaluation with optional custom</em>)</p></li>
+<li><p><strong>encoding.</strong> (<em>- Video export uses imageio with libx264</em>)</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py property">
+<dt class="sig sig-object py" id="stable_worldmodel.world.World.action_space">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">action_space</span></span><a class="headerlink" href="#stable_worldmodel.world.World.action_space" title="Link to this definition" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#stable_worldmodel.world.World.action_space'"><svg height="1em" viewbox="0 0 24 24" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"></path></svg></a></dt>
+<dd></dd></dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="stable_worldmodel.world.World.close">
+<span class="sig-name descname"><span class="pre">close</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/stable_worldmodel/world/#World.close"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.world.World.close" title="Link to this definition" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#stable_worldmodel.world.World.close'"><svg height="1em" viewbox="0 0 24 24" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"></path></svg></a></dt>
+<dd></dd></dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="stable_worldmodel.world.World.evaluate">
+<span class="sig-name descname"><span class="pre">evaluate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">episodes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">eval_keys</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">options</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/stable_worldmodel/world/#World.evaluate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.world.World.evaluate" title="Link to this definition" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#stable_worldmodel.world.World.evaluate'"><svg height="1em" viewbox="0 0 24 24" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"></path></svg></a></dt>
+<dd><p>Evaluate the current policy across multiple episodes and compute metrics.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>episodes</strong> (<em>int</em><em>, </em><em>default=10</em>) – Number of complete episodes to evaluate.</p></li>
+<li><p><strong>eval_keys</strong> (<em>list</em><em>[</em><em>str</em><em>]</em><em>, </em><em>optional</em>) – Additional keys in <code class="docutils literal notranslate"><span class="pre">infos</span></code> to log as episode-wise metrics. Each key will
+produce a vector of length <code class="docutils literal notranslate"><span class="pre">episodes</span></code> in the returned metrics dict.</p></li>
+<li><p><strong>seed</strong> (<em>int</em><em>, </em><em>optional</em>) – Base seed for the initial reset; per-env continuation seeds derive from this value.</p></li>
+<li><p><strong>options</strong> (<em>dict</em><em>, </em><em>optional</em>) – Env reset options.</p></li>
+<li><p><strong>Returns</strong></p></li>
+<li><p><strong>-------</strong></p></li>
+<li><p><strong>dict</strong> – <p>Metrics dictionary with the following entries:
+- <code class="docutils literal notranslate"><span class="pre">"success_rate"</span></code> : float</p>
+<blockquote>
+<div><p>Percentage of successful episodes (terminations) in [0, 100].</p>
+</div></blockquote>
+<ul>
+<li><dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">"episode_successes"</span></code><span class="classifier">np.ndarray, shape (episodes,)</span></dt><dd><p>Boolean array indicating success (True) or failure (False) per episode.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">"seeds"</span></code><span class="classifier">np.ndarray, shape (episodes,)</span></dt><dd><p>The per-episode seeds used for evaluation.</p>
+</dd>
+</dl>
+</li>
+<li><p>Additional arrays for each key in <code class="docutils literal notranslate"><span class="pre">eval_keys</span></code>, each of shape (episodes,).</p></li>
+</ul>
+</p></li>
+<li><p><strong>Notes</strong></p></li>
+<li><p><strong>-----</strong></p></li>
+<li><p><strong>auto-reset.</strong> (<em>Success is counted using the terminated signal observed prior to an env's</em>)</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+<dl class="py property">
+<dt class="sig sig-object py" id="stable_worldmodel.world.World.num_envs">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">num_envs</span></span><a class="headerlink" href="#stable_worldmodel.world.World.num_envs" title="Link to this definition" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#stable_worldmodel.world.World.num_envs'"><svg height="1em" viewbox="0 0 24 24" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"></path></svg></a></dt>
+<dd></dd></dl>
+<dl class="py property">
+<dt class="sig sig-object py" id="stable_worldmodel.world.World.observation_space">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">observation_space</span></span><a class="headerlink" href="#stable_worldmodel.world.World.observation_space" title="Link to this definition" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#stable_worldmodel.world.World.observation_space'"><svg height="1em" viewbox="0 0 24 24" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"></path></svg></a></dt>
+<dd></dd></dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="stable_worldmodel.world.World.record_dataset">
+<span class="sig-name descname"><span class="pre">record_dataset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dataset_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">episodes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cache_dir</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">options</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/stable_worldmodel/world/#World.record_dataset"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.world.World.record_dataset" title="Link to this definition" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#stable_worldmodel.world.World.record_dataset'"><svg height="1em" viewbox="0 0 24 24" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"></path></svg></a></dt>
+<dd><p>Collect episodes with the current policy and save them as a HuggingFace Dataset (Parquet shards).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>dataset_name</strong> (<em>str</em>) – Name of the dataset directory under the stable_worldmodel cache dir.</p></li>
+<li><p><strong>episodes</strong> (<em>int</em><em>, </em><em>default=10</em>) – Number of <em>complete</em> episodes to record (across all envs, total).</p></li>
+<li><p><strong>seed</strong> (<em>int</em><em>, </em><em>optional</em>) – Base seed used for the initial reset; subsequent resets for per-env continuation
+derive unique seeds from this value.</p></li>
+<li><p><strong>options</strong> (<em>dict</em><em>, </em><em>optional</em>) – Env reset options.</p></li>
+<li><p><strong>Effects</strong> (<em>Side</em>)</p></li>
+<li><p><strong>------------</strong></p></li>
+<li><p><strong>files.</strong> (<em>- Creates {cache_dir}/{dataset_name}/data_shard_{NNNNN}.parquet</em>)</p></li>
+<li><p><strong>dropped</strong><strong>)</strong><strong>.</strong> (<em>- Appends only complete episodes to the shard</em><em> (</em><em>partial episodes are</em>)</p></li>
+<li><p><strong>shards.</strong> (<em>- Re-indexes episode_idx to be contiguous across</em>)</p></li>
+<li><p><strong>Schema</strong> (<em>Dataset</em>)</p></li>
+<li><p><strong>--------------</strong></p></li>
+<li><p><strong>minimum</strong><strong>)</strong> (<em>The resulting dataset includes</em><em> (</em><em>at</em>) – <ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">pixels</span></code> : <code class="xref py py-class docutils literal notranslate"><span class="pre">datasets.Image</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">episode_idx</span></code> : <code class="xref py py-class docutils literal notranslate"><span class="pre">datasets.Value("int32")</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">step_idx</span></code> : <code class="xref py py-class docutils literal notranslate"><span class="pre">datasets.Value("int32")</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">episode_len</span></code> : <code class="xref py py-class docutils literal notranslate"><span class="pre">datasets.Value("int32")</span></code></p></li>
+</ul>
+</p></li>
+<li><p><strong>available</strong> (<em>If</em>) – <ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">goal</span></code> : <code class="xref py py-class docutils literal notranslate"><span class="pre">datasets.Image</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">action</span></code> : array-like feature shaped like the env action space</p></li>
+<li><p>Per-step scalar/vector fields exposed by the wrapper in <code class="docutils literal notranslate"><span class="pre">infos</span></code></p></li>
+</ul>
+</p></li>
+<li><p><strong>include</strong> (<em>it may also</em>) – <ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">goal</span></code> : <code class="xref py py-class docutils literal notranslate"><span class="pre">datasets.Image</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">action</span></code> : array-like feature shaped like the env action space</p></li>
+<li><p>Per-step scalar/vector fields exposed by the wrapper in <code class="docutils literal notranslate"><span class="pre">infos</span></code></p></li>
+</ul>
+</p></li>
+<li><p><strong>Notes</strong></p></li>
+<li><p><strong>-----</strong></p></li>
+<li><p><strong>episodes.</strong> (<em>- The function handles action shifting to ensure alignment with continuing</em>)</p></li>
+<li><p><strong>exist.</strong> (<em>- Sharding logic ensures a new shard index is chosen if prior shards</em>)</p></li>
+<li><p><strong>shard.</strong> (<em>- Only the first episodes fully completed episodes are persisted for the new</em>)</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="stable_worldmodel.world.World.record_video">
+<span class="sig-name descname"><span class="pre">record_video</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">video_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_steps</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">500</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fps</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">30</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">options</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/stable_worldmodel/world/#World.record_video"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.world.World.record_video" title="Link to this definition" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#stable_worldmodel.world.World.record_video'"><svg height="1em" viewbox="0 0 24 24" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"></path></svg></a></dt>
+<dd><p>Record rollout videos for each environment under the current policy.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>video_path</strong> (<em>str</em><em> or </em><em>Path</em>) – Directory to which MP4 files will be written; one file per env named <code class="docutils literal notranslate"><span class="pre">env_{i}.mp4</span></code>.</p></li>
+<li><p><strong>max_steps</strong> (<em>int</em><em>, </em><em>default=500</em>) – Maximum number of steps to record per environment.</p></li>
+<li><p><strong>fps</strong> (<em>int</em><em>, </em><em>default=30</em>) – Frames per second for the output video.</p></li>
+<li><p><strong>seed</strong> (<em>int</em><em>, </em><em>optional</em>) – Seed to use for the initial reset prior to recording.</p></li>
+<li><p><strong>options</strong> (<em>dict</em><em>, </em><em>optional</em>) – Env reset options.</p></li>
+<li><p><strong>Notes</strong></p></li>
+<li><p><strong>-----</strong></p></li>
+<li><p><strong>"goal"</strong> (<em>- If infos contains</em>) – beneath the observation pixels in the output frames.</p></li>
+<li><p><strong>stacked</strong> (<em>the goal image is vertically</em>) – beneath the observation pixels in the output frames.</p></li>
+<li><p><strong>``imageio.get_writer</strong><strong>(</strong><strong>...</strong> (<em>- Uses</em>) – </p></li>
+<li><p><strong>encoding.</strong> (<em>codec="libx264"</em><em>)</em><em>`` for MP4</em>)</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="stable_worldmodel.world.World.record_video_from_dataset">
+<span class="sig-name descname"><span class="pre">record_video_from_dataset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">video_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dataset_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">episode_idx</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_steps</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">500</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fps</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">30</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_proc</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">4</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cache_dir</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/stable_worldmodel/world/#World.record_video_from_dataset"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.world.World.record_video_from_dataset" title="Link to this definition" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#stable_worldmodel.world.World.record_video_from_dataset'"><svg height="1em" viewbox="0 0 24 24" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"></path></svg></a></dt>
+<dd><p>Replay stored dataset episodes and export them as MP4 videos.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>video_path</strong> (<em>str</em><em> or </em><em>Path</em>) – Directory to which MP4 files will be written; one file per requested episode
+named <code class="docutils literal notranslate"><span class="pre">episode_{idx}.mp4</span></code>.</p></li>
+<li><p><strong>dataset_name</strong> (<em>str</em>) – Name of the dataset directory under the stable_worldmodel cache dir.</p></li>
+<li><p><strong>episode_idx</strong> (<em>int</em><em> or </em><em>list</em><em>[</em><em>int</em><em>]</em>) – Episode index or indices to render from the dataset.</p></li>
+<li><p><strong>max_steps</strong> (<em>int</em><em>, </em><em>default=500</em>) – Maximum number of steps to render per episode (truncates longer episodes).</p></li>
+<li><p><strong>fps</strong> (<em>int</em><em>, </em><em>default=30</em>) – Frames per second for the output video(s).</p></li>
+<li><p><strong>num_proc</strong> (<em>int</em><em>, </em><em>default=4</em>) – Degree of parallelism for dataset filtering.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="stable_worldmodel.world.World.reset">
+<span class="sig-name descname"><span class="pre">reset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">seed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">options</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/stable_worldmodel/world/#World.reset"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.world.World.reset" title="Link to this definition" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#stable_worldmodel.world.World.reset'"><svg height="1em" viewbox="0 0 24 24" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"></path></svg></a></dt>
+<dd><p>Reset all environments.</p>
+</dd></dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="stable_worldmodel.world.World.set_policy">
+<span class="sig-name descname"><span class="pre">set_policy</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">policy</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/stable_worldmodel/world/#World.set_policy"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.world.World.set_policy" title="Link to this definition" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#stable_worldmodel.world.World.set_policy'"><svg height="1em" viewbox="0 0 24 24" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"></path></svg></a></dt>
+<dd><p>Attach a policy to the world and provide it the env context.</p>
+</dd></dl>
+<dl class="py property">
+<dt class="sig sig-object py" id="stable_worldmodel.world.World.single_action_space">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">single_action_space</span></span><a class="headerlink" href="#stable_worldmodel.world.World.single_action_space" title="Link to this definition" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#stable_worldmodel.world.World.single_action_space'"><svg height="1em" viewbox="0 0 24 24" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"></path></svg></a></dt>
+<dd></dd></dl>
+<dl class="py property">
+<dt class="sig sig-object py" id="stable_worldmodel.world.World.single_observation_space">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">single_observation_space</span></span><a class="headerlink" href="#stable_worldmodel.world.World.single_observation_space" title="Link to this definition" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#stable_worldmodel.world.World.single_observation_space'"><svg height="1em" viewbox="0 0 24 24" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"></path></svg></a></dt>
+<dd></dd></dl>
+<dl class="py property">
+<dt class="sig sig-object py" id="stable_worldmodel.world.World.single_variation_space">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">single_variation_space</span></span><a class="headerlink" href="#stable_worldmodel.world.World.single_variation_space" title="Link to this definition" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#stable_worldmodel.world.World.single_variation_space'"><svg height="1em" viewbox="0 0 24 24" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"></path></svg></a></dt>
+<dd></dd></dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="stable_worldmodel.world.World.step">
+<span class="sig-name descname"><span class="pre">step</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/stable_worldmodel/world/#World.step"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.world.World.step" title="Link to this definition" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#stable_worldmodel.world.World.step'"><svg height="1em" viewbox="0 0 24 24" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"></path></svg></a></dt>
+<dd><p>Advance all environments by one step using the current policy.</p>
+</dd></dl>
+<dl class="py property">
+<dt class="sig sig-object py" id="stable_worldmodel.world.World.variation_space">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">variation_space</span></span><a class="headerlink" href="#stable_worldmodel.world.World.variation_space" title="Link to this definition" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#stable_worldmodel.world.World.variation_space'"><svg height="1em" viewbox="0 0 24 24" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"></path></svg></a></dt>
+<dd></dd></dl>
+</dd></dl>
+</section>
+</div></div><aside class="hidden text-sm xl:block" id="right-sidebar">
+<div class="sticky top-16 -mt-10 max-h-[calc(100vh-5rem)] overflow-y-auto pt-6 space-y-2"><p class="font-medium">On this page</p>
+<ul>
+<li><a :data-current="activeSection === '#stable_worldmodel.world.World'" class="reference internal" href="#stable_worldmodel.world.World"><code class="docutils literal notranslate"><span class="pre">World</span></code></a><ul>
+<li><a :data-current="activeSection === '#stable_worldmodel.world.World.action_space'" class="reference internal" href="#stable_worldmodel.world.World.action_space"><code class="docutils literal notranslate"><span class="pre">World.action_space</span></code></a></li>
+<li><a :data-current="activeSection === '#stable_worldmodel.world.World.close'" class="reference internal" href="#stable_worldmodel.world.World.close"><code class="docutils literal notranslate"><span class="pre">World.close()</span></code></a></li>
+<li><a :data-current="activeSection === '#stable_worldmodel.world.World.evaluate'" class="reference internal" href="#stable_worldmodel.world.World.evaluate"><code class="docutils literal notranslate"><span class="pre">World.evaluate()</span></code></a></li>
+<li><a :data-current="activeSection === '#stable_worldmodel.world.World.num_envs'" class="reference internal" href="#stable_worldmodel.world.World.num_envs"><code class="docutils literal notranslate"><span class="pre">World.num_envs</span></code></a></li>
+<li><a :data-current="activeSection === '#stable_worldmodel.world.World.observation_space'" class="reference internal" href="#stable_worldmodel.world.World.observation_space"><code class="docutils literal notranslate"><span class="pre">World.observation_space</span></code></a></li>
+<li><a :data-current="activeSection === '#stable_worldmodel.world.World.record_dataset'" class="reference internal" href="#stable_worldmodel.world.World.record_dataset"><code class="docutils literal notranslate"><span class="pre">World.record_dataset()</span></code></a></li>
+<li><a :data-current="activeSection === '#stable_worldmodel.world.World.record_video'" class="reference internal" href="#stable_worldmodel.world.World.record_video"><code class="docutils literal notranslate"><span class="pre">World.record_video()</span></code></a></li>
+<li><a :data-current="activeSection === '#stable_worldmodel.world.World.record_video_from_dataset'" class="reference internal" href="#stable_worldmodel.world.World.record_video_from_dataset"><code class="docutils literal notranslate"><span class="pre">World.record_video_from_dataset()</span></code></a></li>
+<li><a :data-current="activeSection === '#stable_worldmodel.world.World.reset'" class="reference internal" href="#stable_worldmodel.world.World.reset"><code class="docutils literal notranslate"><span class="pre">World.reset()</span></code></a></li>
+<li><a :data-current="activeSection === '#stable_worldmodel.world.World.set_policy'" class="reference internal" href="#stable_worldmodel.world.World.set_policy"><code class="docutils literal notranslate"><span class="pre">World.set_policy()</span></code></a></li>
+<li><a :data-current="activeSection === '#stable_worldmodel.world.World.single_action_space'" class="reference internal" href="#stable_worldmodel.world.World.single_action_space"><code class="docutils literal notranslate"><span class="pre">World.single_action_space</span></code></a></li>
+<li><a :data-current="activeSection === '#stable_worldmodel.world.World.single_observation_space'" class="reference internal" href="#stable_worldmodel.world.World.single_observation_space"><code class="docutils literal notranslate"><span class="pre">World.single_observation_space</span></code></a></li>
+<li><a :data-current="activeSection === '#stable_worldmodel.world.World.single_variation_space'" class="reference internal" href="#stable_worldmodel.world.World.single_variation_space"><code class="docutils literal notranslate"><span class="pre">World.single_variation_space</span></code></a></li>
+<li><a :data-current="activeSection === '#stable_worldmodel.world.World.step'" class="reference internal" href="#stable_worldmodel.world.World.step"><code class="docutils literal notranslate"><span class="pre">World.step()</span></code></a></li>
+<li><a :data-current="activeSection === '#stable_worldmodel.world.World.variation_space'" class="reference internal" href="#stable_worldmodel.world.World.variation_space"><code class="docutils literal notranslate"><span class="pre">World.variation_space</span></code></a></li>
+</ul>
+</li>
+</ul>
+</div>
+</aside>
+</main>
+</div>
+</div><footer class="py-6 border-t border-border md:py-0">
+<div class="container flex flex-col items-center justify-between gap-4 md:h-24 md:flex-row">
+<div class="flex flex-col items-center gap-4 px-8 md:flex-row md:gap-2 md:px-0">
+<p class="text-sm leading-loose text-center text-muted-foreground md:text-left">© 2025 Built with <a class="font-medium underline underline-offset-4" href="https://www.sphinx-doc.org" rel="noreferrer">Sphinx 8.2.3</a></p>
+</div>
+</div>
+</footer>
+</div>
+<script src="../../_static/documentation_options.js?v=2c52d5bf"></script>
+<script src="../../_static/doctools.js?v=9bcbadda"></script>
+<script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+<script defer="defer" src="../../_static/theme.js?v=073f68d9"></script>
+<script src="../../_static/design-tabs.js?v=f930bc37"></script>
+</body>
+</html>

@@ -21,7 +21,7 @@
 <link href="../../_static/favicon.ico" rel="icon"/>
 <link href="../../search/" rel="search" title="Search"/>
 <link href="../../genindex/" rel="index" title="Index"/>
-<link href="../../world/simple-pointmaze/" rel="next" title="Simple Point-Maze"/>
+<link href="../../api/data/" rel="next" title="StepsDataset"/>
 <link href="../dinowm/" rel="prev" title="DINO-WM Tutorial"/>
 <script>
     <!-- Prevent Flash of wrong theme -->
@@ -84,6 +84,38 @@
 <li class="toctree-l1"><a class="reference internal" href="../quickstart/">Quick Start</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../dinowm/">DINO-WM Tutorial</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Showcase</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../api/data/">StepsDataset</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api/world/">World</a></li>
+<li class="toctree-l1" x-data="{ expanded: $el.classList.contains('current') ? true : false }"><a :class="{ 'expanded' : expanded }" @click="expanded = !expanded" class="reference internal expandable" href="../../api/policy/">Policy<button @click.prevent.stop="expanded = !expanded" type="button"><span class="sr-only"></span><svg fill="currentColor" height="18px" stroke="none" viewbox="0 0 24 24" width="18px" xmlns="http://www.w3.org/2000/svg"><path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"></path></svg></button></a><ul x-show="expanded">
+<li class="toctree-l2"><a class="reference internal" href="../../api/generated/stable_worldmodel.policy.PlanConfig/">PlanConfig</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../api/generated/stable_worldmodel.policy.BasePolicy/">BasePolicy</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../api/generated/stable_worldmodel.policy.RandomPolicy/">RandomPolicy</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../api/generated/stable_worldmodel.policy.ExpertPolicy/">ExpertPolicy</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../api/generated/stable_worldmodel.policy.WorldModelPolicy/">WorldModelPolicy</a></li>
+</ul>
+</li>
+<li class="toctree-l1" x-data="{ expanded: $el.classList.contains('current') ? true : false }"><a :class="{ 'expanded' : expanded }" @click="expanded = !expanded" class="reference internal expandable" href="../../api/spaces/">Space<button @click.prevent.stop="expanded = !expanded" type="button"><span class="sr-only"></span><svg fill="currentColor" height="18px" stroke="none" viewbox="0 0 24 24" width="18px" xmlns="http://www.w3.org/2000/svg"><path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"></path></svg></button></a><ul x-show="expanded">
+<li class="toctree-l2"><a class="reference internal" href="../../api/generated/stable_worldmodel.spaces.Discrete/">Discrete</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../api/generated/stable_worldmodel.spaces.MultiDiscrete/">MultiDiscrete</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../api/generated/stable_worldmodel.spaces.Box/">Box</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../api/generated/stable_worldmodel.spaces.RGBBox/">RGBBox</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../api/generated/stable_worldmodel.spaces.Dict/">Dict</a></li>
+</ul>
+</li>
+<li class="toctree-l1" x-data="{ expanded: $el.classList.contains('current') ? true : false }"><a :class="{ 'expanded' : expanded }" @click="expanded = !expanded" class="reference internal expandable" href="../../api/wrappers/">Wrappers<button @click.prevent.stop="expanded = !expanded" type="button"><span class="sr-only"></span><svg fill="currentColor" height="18px" stroke="none" viewbox="0 0 24 24" width="18px" xmlns="http://www.w3.org/2000/svg"><path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"></path></svg></button></a><ul x-show="expanded">
+<li class="toctree-l2"><a class="reference internal" href="../../api/generated/stable_worldmodel.wrappers.EnsureInfoKeysWrapper/">EnsureInfoKeysWrapper</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../api/generated/stable_worldmodel.wrappers.EnsureImageShape/">EnsureImageShape</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../api/generated/stable_worldmodel.wrappers.EnsureGoalInfoWrapper/">EnsureGoalInfoWrapper</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../api/generated/stable_worldmodel.wrappers.EverythingToInfoWrapper/">EverythingToInfoWrapper</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../api/generated/stable_worldmodel.wrappers.AddPixelsWrapper/">AddPixelsWrapper</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../api/generated/stable_worldmodel.wrappers.ResizeGoalWrapper/">ResizeGoalWrapper</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../api/generated/stable_worldmodel.wrappers.MegaWrapper/">MegaWrapper</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../api/generated/stable_worldmodel.wrappers.VariationWrapper/">VariationWrapper</a></li>
+</ul>
+</li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Worlds</span></p>
 <ul>

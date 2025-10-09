@@ -1,0 +1,996 @@
+<!DOCTYPE html>
+
+<html :class="{'dark': darkMode === 'dark' || (darkMode === 'system' &amp;&amp; window.matchMedia('(prefers-color-scheme: dark)').matches)}" class="scroll-smooth" data-content_root="../" lang="en" x-data="{ darkMode: localStorage.getItem('darkMode') || localStorage.setItem('darkMode', 'system'), activeSection: '' }" x-init="$watch('darkMode', val =&gt; localStorage.setItem('darkMode', val))">
+<head>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<meta charset="utf-8"/>
+<meta content="white" media="(prefers-color-scheme: light)" name="theme-color"/>
+<meta content="black" media="(prefers-color-scheme: dark)" name="theme-color"/>
+<meta content="width=device-width, initial-scale=1" name="viewport"/>
+<title>stable_worldmodel.wm package | stable-worldmodel</title>
+<meta content="stable_worldmodel.wm package | stable-worldmodel" property="og:title"/>
+<meta content="stable_worldmodel.wm package | stable-worldmodel" name="twitter:title"/>
+<link href="../_static/pygments.css?v=91c1d931" rel="stylesheet" type="text/css"/>
+<link href="../_static/theme.css?v=42baaae4" rel="stylesheet" type="text/css"/>
+<link href="../_static/sphinx-design.min.css?v=95c83b7e" rel="stylesheet" type="text/css"/>
+<link href="../_static/css/custom.css?v=b1ec85b4" rel="stylesheet" type="text/css"/>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/fontawesome.min.css" rel="stylesheet" type="text/css"/>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/solid.min.css" rel="stylesheet" type="text/css"/>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/brands.min.css" rel="stylesheet" type="text/css"/>
+<link href="../_static/awesome-sphinx-design.css?v=15e0fffa" rel="stylesheet" type="text/css"/>
+<link href="../_static/favicon.ico" rel="icon"/>
+<link href="../search/" rel="search" title="Search"/>
+<link href="../genindex/" rel="index" title="Index"/>
+<script>
+    <!-- Prevent Flash of wrong theme -->
+      const userPreference = localStorage.getItem('darkMode');
+      let mode;
+      if (userPreference === 'dark' || window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        mode = 'dark';
+        document.documentElement.classList.add('dark');
+      } else {
+        mode = 'light';
+      }
+      if (!userPreference) {localStorage.setItem('darkMode', mode)}
+    </script>
+</head>
+<body :class="{ 'overflow-hidden': showSidebar }" class="min-h-screen font-sans antialiased bg-background text-foreground" x-data="{ showSidebar: false, showScrollTop: false }">
+<div @click.self="showSidebar = false" class="fixed inset-0 z-50 overflow-hidden bg-background/80 backdrop-blur-sm md:hidden" x-cloak="" x-show="showSidebar"></div><div class="relative flex flex-col min-h-screen" id="page"><a class="absolute top-0 left-0 z-[100] block bg-background p-4 text-xl transition -translate-x-full opacity-0 focus:translate-x-0 focus:opacity-100" href="#content">
+      Skip to content
+    </a><header class="sticky top-0 z-40 w-full border-b shadow-sm border-border supports-backdrop-blur:bg-background/60 bg-background/95 backdrop-blur"><div class="container flex items-center h-14">
+<div class="hidden mr-4 md:flex">
+<a class="flex items-center mr-6" href="../">
+<img alt="Logo" class="mr-2 hidden dark:block" height="24" src="../_static/logo-dark.svg" width="24"/>
+<img alt="Logo" class="mr-2 dark:hidden" height="24" src="../_static/logo-light.svg" width="24"/><span class="hidden font-bold sm:inline-block text-clip whitespace-nowrap">stable-worldmodel</span>
+</a></div><button @click="showSidebar = true" class="inline-flex items-center justify-center h-10 px-0 py-2 mr-2 text-base font-medium transition-colors rounded-md hover:text-accent-foreground hover:bg-transparent md:hidden" type="button">
+<svg aria-hidden="true" fill="currentColor" height="24" viewbox="0 96 960 960" width="24" xmlns="http://www.w3.org/2000/svg">
+<path d="M152.587 825.087q-19.152 0-32.326-13.174t-13.174-32.326q0-19.152 13.174-32.326t32.326-13.174h440q19.152 0 32.326 13.174t13.174 32.326q0 19.152-13.174 32.326t-32.326 13.174h-440Zm0-203.587q-19.152 0-32.326-13.174T107.087 576q0-19.152 13.174-32.326t32.326-13.174h320q19.152 0 32.326 13.174T518.087 576q0 19.152-13.174 32.326T472.587 621.5h-320Zm0-203.587q-19.152 0-32.326-13.174t-13.174-32.326q0-19.152 13.174-32.326t32.326-13.174h440q19.152 0 32.326 13.174t13.174 32.326q0 19.152-13.174 32.326t-32.326 13.174h-440ZM708.913 576l112.174 112.174q12.674 12.674 12.674 31.826t-12.674 31.826Q808.413 764.5 789.261 764.5t-31.826-12.674l-144-144Q600 594.391 600 576t13.435-31.826l144-144q12.674-12.674 31.826-12.674t31.826 12.674q12.674 12.674 12.674 31.826t-12.674 31.826L708.913 576Z"></path>
+</svg>
+<span class="sr-only">Toggle navigation menu</span>
+</button>
+<div class="flex items-center justify-between flex-1 space-x-2 sm:space-x-4 md:justify-end">
+<div class="flex-1 w-full md:w-auto md:flex-none"><form @keydown.k.window.meta="$refs.search.focus()" action="../search/" class="relative flex items-center group" id="searchbox" method="get">
+<input aria-label="Search the docs" class="inline-flex items-center font-medium transition-colors bg-transparent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ring-offset-background border border-input hover:bg-accent focus:bg-accent hover:text-accent-foreground focus:text-accent-foreground hover:placeholder-accent-foreground py-2 px-4 relative h-9 w-full justify-start rounded-[0.5rem] text-sm text-muted-foreground sm:pr-12 md:w-40 lg:w-64" id="search-input" name="q" placeholder="Search ..." type="search" x-ref="search"/>
+<kbd class="pointer-events-none absolute right-1.5 top-2 hidden h-5 select-none text-muted-foreground items-center gap-1 rounded border border-border bg-muted px-1.5 font-mono text-[10px] font-medium opacity-100 sm:flex group-hover:bg-accent group-hover:text-accent-foreground">
+<span class="text-xs">⌘</span>
+    K
+  </kbd>
+</form>
+</div>
+<nav class="flex items-center space-x-1">
+<button @click="darkMode = darkMode === 'light' ? 'dark' : 'light'" aria-label="Color theme switcher" class="relative inline-flex items-center justify-center px-0 text-sm font-medium transition-colors rounded-md hover:bg-accent hover:text-accent-foreground h-9 w-9" type="button">
+<svg class="absolute transition-all scale-100 rotate-0 dark:-rotate-90 dark:scale-0" fill="currentColor" height="24" viewbox="0 96 960 960" width="24" xmlns="http://www.w3.org/2000/svg">
+<path d="M480 685q45.456 0 77.228-31.772Q589 621.456 589 576q0-45.456-31.772-77.228Q525.456 467 480 467q-45.456 0-77.228 31.772Q371 530.544 371 576q0 45.456 31.772 77.228Q434.544 685 480 685Zm0 91q-83 0-141.5-58.5T280 576q0-83 58.5-141.5T480 376q83 0 141.5 58.5T680 576q0 83-58.5 141.5T480 776ZM80 621.5q-19.152 0-32.326-13.174T34.5 576q0-19.152 13.174-32.326T80 530.5h80q19.152 0 32.326 13.174T205.5 576q0 19.152-13.174 32.326T160 621.5H80Zm720 0q-19.152 0-32.326-13.174T754.5 576q0-19.152 13.174-32.326T800 530.5h80q19.152 0 32.326 13.174T925.5 576q0 19.152-13.174 32.326T880 621.5h-80Zm-320-320q-19.152 0-32.326-13.174T434.5 256v-80q0-19.152 13.174-32.326T480 130.5q19.152 0 32.326 13.174T525.5 176v80q0 19.152-13.174 32.326T480 301.5Zm0 720q-19.152 0-32.326-13.17Q434.5 995.152 434.5 976v-80q0-19.152 13.174-32.326T480 850.5q19.152 0 32.326 13.174T525.5 896v80q0 19.152-13.174 32.33-13.174 13.17-32.326 13.17ZM222.174 382.065l-43-42Q165.5 327.391 166 308.239t13.174-33.065q13.435-13.674 32.587-13.674t32.065 13.674l42.239 43q12.674 13.435 12.555 31.706-.12 18.272-12.555 31.946-12.674 13.674-31.445 13.413-18.772-.261-32.446-13.174Zm494 494.761-42.239-43q-12.674-13.435-12.674-32.087t12.674-31.565Q686.609 756.5 705.38 757q18.772.5 32.446 13.174l43 41.761Q794.5 824.609 794 843.761t-13.174 33.065Q767.391 890.5 748.239 890.5t-32.065-13.674Zm-42-494.761Q660.5 369.391 661 350.62q.5-18.772 13.174-32.446l41.761-43Q728.609 261.5 747.761 262t33.065 13.174q13.674 13.435 13.674 32.587t-13.674 32.065l-43 42.239q-13.435 12.674-31.706 12.555-18.272-.12-31.946-12.555Zm-495 494.761Q165.5 863.391 165.5 844.239t13.674-32.065l43-42.239q13.435-12.674 32.087-12.674t31.565 12.674Q299.5 782.609 299 801.38q-.5 18.772-13.174 32.446l-41.761 43Q231.391 890.5 212.239 890t-33.065-13.174ZM480 576Z"></path>
+</svg>
+<svg class="absolute transition-all scale-0 rotate-90 dark:rotate-0 dark:scale-100" fill="currentColor" height="24" viewbox="0 96 960 960" width="24" xmlns="http://www.w3.org/2000/svg">
+<path d="M480 936q-151 0-255.5-104.5T120 576q0-138 90-239.5T440 218q25-3 39 18t-1 44q-17 26-25.5 55t-8.5 61q0 90 63 153t153 63q31 0 61.5-9t54.5-25q21-14 43-1.5t19 39.5q-14 138-117.5 229T480 936Zm0-80q88 0 158-48.5T740 681q-20 5-40 8t-40 3q-123 0-209.5-86.5T364 396q0-20 3-40t8-40q-78 32-126.5 102T200 576q0 116 82 198t198 82Zm-10-270Z"></path>
+</svg>
+</button>
+</nav>
+</div>
+</div>
+</header>
+<div class="flex-1"><div class="container flex-1 items-start md:grid md:grid-cols-[220px_minmax(0,1fr)] md:gap-6 lg:grid-cols-[240px_minmax(0,1fr)] lg:gap-10"><aside :aria-hidden="!showSidebar" :class="{ 'translate-x-0': showSidebar }" class="fixed inset-y-0 left-0 md:top-14 z-50 md:z-30 bg-background md:bg-transparent transition-all duration-100 -translate-x-full md:translate-x-0 ml-0 p-6 md:p-0 md:-ml-2 md:h-[calc(100vh-3.5rem)] w-5/6 md:w-full shrink-0 overflow-y-auto border-r border-border md:sticky" id="left-sidebar">
+<a class="!justify-start text-sm md:!hidden bg-background" href="../">
+<img alt="Logo" class="mr-2 hidden dark:block" height="16" src="../_static/logo-dark.svg" width="16"/>
+<img alt="Logo" class="mr-2 dark:hidden" height="16" src="../_static/logo-light.svg" width="16"/><span class="font-bold text-clip whitespace-nowrap">stable-worldmodel</span>
+</a>
+<div class="relative overflow-hidden md:overflow-auto my-4 md:my-0 h-[calc(100vh-8rem)] md:h-auto">
+<div class="overflow-y-auto h-full w-full relative pr-6"><nav class="table w-full min-w-full my-6 lg:my-8">
+<p class="caption" role="heading"><span class="caption-text">Worlds</span></p>
+<ul>
+<li class="toctree-l1" x-data="{ expanded: $el.classList.contains('current') ? true : false }"><a :class="{ 'expanded' : expanded }" @click="expanded = !expanded" class="reference internal expandable" href="../world/OGBench/">OGBench<button @click.prevent.stop="expanded = !expanded" type="button"><span class="sr-only"></span><svg fill="currentColor" height="18px" stroke="none" viewbox="0 0 24 24" width="18px" xmlns="http://www.w3.org/2000/svg"><path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"></path></svg></button></a><ul class="simple" x-show="expanded">
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Development</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/rbalestr-lab/stable-worldmodel">Github</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/rbalestr-lab/stable-worldmodel/tree/main/docs">Contribute to the Docs</a></li>
+</ul>
+</nav>
+</div>
+</div>
+<button @click="showSidebar = false" class="absolute md:hidden right-4 top-4 rounded-sm opacity-70 transition-opacity hover:opacity-100" type="button">
+<svg class="h-4 w-4" fill="currentColor" height="24" stroke="none" viewbox="0 96 960 960" width="24" xmlns="http://www.w3.org/2000/svg">
+<path d="M480 632 284 828q-11 11-28 11t-28-11q-11-11-11-28t11-28l196-196-196-196q-11-11-11-28t11-28q11-11 28-11t28 11l196 196 196-196q11-11 28-11t28 11q11 11 11 28t-11 28L536 576l196 196q11 11 11 28t-11 28q-11 11-28 11t-28-11L480 632Z"></path>
+</svg>
+</button>
+</aside>
+<main class="relative py-6 lg:gap-10 lg:py-8 xl:grid xl:grid-cols-[1fr_300px]">
+<div class="w-full min-w-0 mx-auto">
+<nav aria-label="breadcrumbs" class="flex items-center mb-4 space-x-1 text-sm text-muted-foreground">
+<a class="overflow-hidden text-ellipsis whitespace-nowrap hover:text-foreground" href="../">
+<span class="hidden md:inline">stable-worldmodel</span>
+<svg aria-label="Home" class="md:hidden" fill="currentColor" height="18" stroke="none" viewbox="0 96 960 960" width="18" xmlns="http://www.w3.org/2000/svg">
+<path d="M240 856h120V616h240v240h120V496L480 316 240 496v360Zm-80 80V456l320-240 320 240v480H520V696h-80v240H160Zm320-350Z"></path>
+</svg>
+</a>
+<div class="mr-1">/</div><span aria-current="page" class="font-medium text-foreground overflow-hidden text-ellipsis whitespace-nowrap">stable_worldmodel.wm package</span>
+</nav>
+<div id="content" role="main">
+<section id="stable-worldmodel-wm-package">
+<h1>stable_worldmodel.wm package<a class="headerlink" href="#stable-worldmodel-wm-package" title="Link to this heading"><svg height="1em" viewbox="0 0 24 24" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"></path></svg></a></h1>
+<section id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Link to this heading" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#submodules'"><svg height="1em" viewbox="0 0 24 24" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"></path></svg></a></h2>
+</section>
+<section id="module-stable_worldmodel.wm.dinowm">
+<span id="stable-worldmodel-wm-dinowm-module"></span><h2>stable_worldmodel.wm.dinowm module<a class="headerlink" href="#module-stable_worldmodel.wm.dinowm" title="Link to this heading" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#module-stable_worldmodel.wm.dinowm'"><svg height="1em" viewbox="0 0 24 24" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"></path></svg></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="stable_worldmodel.wm.dinowm.Attention">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">stable_worldmodel.wm.dinowm.</span></span><span class="sig-name descname"><span class="pre">Attention</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dim</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">heads</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">8</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dim_head</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">64</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dropout</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_patches</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_frames</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/stable_worldmodel/wm/dinowm/#Attention"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.wm.dinowm.Attention" title="Link to this definition" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#stable_worldmodel.wm.dinowm.Attention'"><svg height="1em" viewbox="0 0 24 24" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"></path></svg></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="stable_worldmodel.wm.dinowm.Attention.forward">
+<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/stable_worldmodel/wm/dinowm/#Attention.forward"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.wm.dinowm.Attention.forward" title="Link to this definition" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#stable_worldmodel.wm.dinowm.Attention.forward'"><svg height="1em" viewbox="0 0 24 24" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"></path></svg></a></dt>
+<dd><p>Define the computation performed at every call.</p>
+<p>Should be overridden by all subclasses.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Although the recipe for forward pass needs to be defined within
+this function, one should call the <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code> instance afterwards
+instead of this since the former takes care of running the
+registered hooks while the latter silently ignores them.</p>
+</div>
+</dd></dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="stable_worldmodel.wm.dinowm.Attention.generate_mask_matrix">
+<span class="sig-name descname"><span class="pre">generate_mask_matrix</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">npatch</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nwindow</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/stable_worldmodel/wm/dinowm/#Attention.generate_mask_matrix"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.wm.dinowm.Attention.generate_mask_matrix" title="Link to this definition" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#stable_worldmodel.wm.dinowm.Attention.generate_mask_matrix'"><svg height="1em" viewbox="0 0 24 24" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"></path></svg></a></dt>
+<dd></dd></dl>
+</dd></dl>
+<dl class="py class">
+<dt class="sig sig-object py" id="stable_worldmodel.wm.dinowm.CausalPredictor">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">stable_worldmodel.wm.dinowm.</span></span><span class="sig-name descname"><span class="pre">CausalPredictor</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_patches</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_frames</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dim</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">depth</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">heads</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mlp_dim</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pool</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'cls'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dim_head</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">64</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dropout</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">emb_dropout</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/stable_worldmodel/wm/dinowm/#CausalPredictor"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.wm.dinowm.CausalPredictor" title="Link to this definition" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#stable_worldmodel.wm.dinowm.CausalPredictor'"><svg height="1em" viewbox="0 0 24 24" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"></path></svg></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="stable_worldmodel.wm.dinowm.CausalPredictor.forward">
+<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/stable_worldmodel/wm/dinowm/#CausalPredictor.forward"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.wm.dinowm.CausalPredictor.forward" title="Link to this definition" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#stable_worldmodel.wm.dinowm.CausalPredictor.forward'"><svg height="1em" viewbox="0 0 24 24" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"></path></svg></a></dt>
+<dd><p>Define the computation performed at every call.</p>
+<p>Should be overridden by all subclasses.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Although the recipe for forward pass needs to be defined within
+this function, one should call the <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code> instance afterwards
+instead of this since the former takes care of running the
+registered hooks while the latter silently ignores them.</p>
+</div>
+</dd></dl>
+</dd></dl>
+<dl class="py class">
+<dt class="sig sig-object py" id="stable_worldmodel.wm.dinowm.DINOWM">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">stable_worldmodel.wm.dinowm.</span></span><span class="sig-name descname"><span class="pre">DINOWM</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">encoder</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">predictor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">action_encoder</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">proprio_encoder</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">decoder</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">history_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">3</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_pred</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">device</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'cpu'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/stable_worldmodel/wm/dinowm/#DINOWM"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.wm.dinowm.DINOWM" title="Link to this definition" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#stable_worldmodel.wm.dinowm.DINOWM'"><svg height="1em" viewbox="0 0 24 24" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"></path></svg></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="stable_worldmodel.wm.dinowm.DINOWM.decode">
+<span class="sig-name descname"><span class="pre">decode</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">info</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/stable_worldmodel/wm/dinowm/#DINOWM.decode"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.wm.dinowm.DINOWM.decode" title="Link to this definition" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#stable_worldmodel.wm.dinowm.DINOWM.decode'"><svg height="1em" viewbox="0 0 24 24" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"></path></svg></a></dt>
+<dd></dd></dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="stable_worldmodel.wm.dinowm.DINOWM.encode">
+<span class="sig-name descname"><span class="pre">encode</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">info</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pixels_key</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'pixels'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'embed'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">proprio_key</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">action_key</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/stable_worldmodel/wm/dinowm/#DINOWM.encode"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.wm.dinowm.DINOWM.encode" title="Link to this definition" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#stable_worldmodel.wm.dinowm.DINOWM.encode'"><svg height="1em" viewbox="0 0 24 24" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"></path></svg></a></dt>
+<dd></dd></dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="stable_worldmodel.wm.dinowm.DINOWM.get_cost">
+<span class="sig-name descname"><span class="pre">get_cost</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">info_dict</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">action_candidates</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/stable_worldmodel/wm/dinowm/#DINOWM.get_cost"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.wm.dinowm.DINOWM.get_cost" title="Link to this definition" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#stable_worldmodel.wm.dinowm.DINOWM.get_cost'"><svg height="1em" viewbox="0 0 24 24" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"></path></svg></a></dt>
+<dd></dd></dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="stable_worldmodel.wm.dinowm.DINOWM.predict">
+<span class="sig-name descname"><span class="pre">predict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">embedding</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/stable_worldmodel/wm/dinowm/#DINOWM.predict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.wm.dinowm.DINOWM.predict" title="Link to this definition" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#stable_worldmodel.wm.dinowm.DINOWM.predict'"><svg height="1em" viewbox="0 0 24 24" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"></path></svg></a></dt>
+<dd><p>predict next latent state
+:param embedding: (B, T, P, d)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>(B, T, P, d)</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>preds</p>
+</dd>
+</dl>
+</dd></dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="stable_worldmodel.wm.dinowm.DINOWM.replace_action_in_embedding">
+<span class="sig-name descname"><span class="pre">replace_action_in_embedding</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">embedding</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">act</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/stable_worldmodel/wm/dinowm/#DINOWM.replace_action_in_embedding"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.wm.dinowm.DINOWM.replace_action_in_embedding" title="Link to this definition" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#stable_worldmodel.wm.dinowm.DINOWM.replace_action_in_embedding'"><svg height="1em" viewbox="0 0 24 24" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"></path></svg></a></dt>
+<dd><p>Replace the action embeddings in the latent state z with the provided actions.</p>
+</dd></dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="stable_worldmodel.wm.dinowm.DINOWM.rollout">
+<span class="sig-name descname"><span class="pre">rollout</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">info</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">action_sequence</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/stable_worldmodel/wm/dinowm/#DINOWM.rollout"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.wm.dinowm.DINOWM.rollout" title="Link to this definition" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#stable_worldmodel.wm.dinowm.DINOWM.rollout'"><svg height="1em" viewbox="0 0 24 24" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"></path></svg></a></dt>
+<dd><p>Rollout the world model given an initial observation and a sequence of actions.</p>
+<p>Params:
+obs_start: n current observations (B, n, C, H, W)
+actions: current and predicted actions (B, n+t, action_dim)</p>
+<p>Returns:
+z_obs: dict with latent observations (B, n+t+1, n_patches, D)
+z: predicted latent states (B, n+t+1, n_patches, D)</p>
+</dd></dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="stable_worldmodel.wm.dinowm.DINOWM.split_embedding">
+<span class="sig-name descname"><span class="pre">split_embedding</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">embedding</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">action_dim</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">proprio_dim</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/stable_worldmodel/wm/dinowm/#DINOWM.split_embedding"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.wm.dinowm.DINOWM.split_embedding" title="Link to this definition" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#stable_worldmodel.wm.dinowm.DINOWM.split_embedding'"><svg height="1em" viewbox="0 0 24 24" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"></path></svg></a></dt>
+<dd></dd></dl>
+</dd></dl>
+<dl class="py class">
+<dt class="sig sig-object py" id="stable_worldmodel.wm.dinowm.Decoder">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">stable_worldmodel.wm.dinowm.</span></span><span class="sig-name descname"><span class="pre">Decoder</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">in_channel</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">out_channel</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">channel</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_res_block</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_res_channel</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stride</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/stable_worldmodel/wm/dinowm/#Decoder"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.wm.dinowm.Decoder" title="Link to this definition" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#stable_worldmodel.wm.dinowm.Decoder'"><svg height="1em" viewbox="0 0 24 24" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"></path></svg></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="stable_worldmodel.wm.dinowm.Decoder.forward">
+<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/stable_worldmodel/wm/dinowm/#Decoder.forward"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.wm.dinowm.Decoder.forward" title="Link to this definition" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#stable_worldmodel.wm.dinowm.Decoder.forward'"><svg height="1em" viewbox="0 0 24 24" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"></path></svg></a></dt>
+<dd><p>Define the computation performed at every call.</p>
+<p>Should be overridden by all subclasses.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Although the recipe for forward pass needs to be defined within
+this function, one should call the <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code> instance afterwards
+instead of this since the former takes care of running the
+registered hooks while the latter silently ignores them.</p>
+</div>
+</dd></dl>
+</dd></dl>
+<dl class="py class">
+<dt class="sig sig-object py" id="stable_worldmodel.wm.dinowm.Embedder">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">stable_worldmodel.wm.dinowm.</span></span><span class="sig-name descname"><span class="pre">Embedder</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">num_frames</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tubelet_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">in_chans</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">8</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">emb_dim</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/stable_worldmodel/wm/dinowm/#Embedder"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.wm.dinowm.Embedder" title="Link to this definition" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#stable_worldmodel.wm.dinowm.Embedder'"><svg height="1em" viewbox="0 0 24 24" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"></path></svg></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="stable_worldmodel.wm.dinowm.Embedder.forward">
+<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/stable_worldmodel/wm/dinowm/#Embedder.forward"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.wm.dinowm.Embedder.forward" title="Link to this definition" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#stable_worldmodel.wm.dinowm.Embedder.forward'"><svg height="1em" viewbox="0 0 24 24" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"></path></svg></a></dt>
+<dd><p>Define the computation performed at every call.</p>
+<p>Should be overridden by all subclasses.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Although the recipe for forward pass needs to be defined within
+this function, one should call the <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code> instance afterwards
+instead of this since the former takes care of running the
+registered hooks while the latter silently ignores them.</p>
+</div>
+</dd></dl>
+</dd></dl>
+<dl class="py class">
+<dt class="sig sig-object py" id="stable_worldmodel.wm.dinowm.Encoder">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">stable_worldmodel.wm.dinowm.</span></span><span class="sig-name descname"><span class="pre">Encoder</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">in_channel</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">channel</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_res_block</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_res_channel</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stride</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/stable_worldmodel/wm/dinowm/#Encoder"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.wm.dinowm.Encoder" title="Link to this definition" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#stable_worldmodel.wm.dinowm.Encoder'"><svg height="1em" viewbox="0 0 24 24" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"></path></svg></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="stable_worldmodel.wm.dinowm.Encoder.forward">
+<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/stable_worldmodel/wm/dinowm/#Encoder.forward"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.wm.dinowm.Encoder.forward" title="Link to this definition" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#stable_worldmodel.wm.dinowm.Encoder.forward'"><svg height="1em" viewbox="0 0 24 24" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"></path></svg></a></dt>
+<dd><p>Define the computation performed at every call.</p>
+<p>Should be overridden by all subclasses.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Although the recipe for forward pass needs to be defined within
+this function, one should call the <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code> instance afterwards
+instead of this since the former takes care of running the
+registered hooks while the latter silently ignores them.</p>
+</div>
+</dd></dl>
+</dd></dl>
+<dl class="py class">
+<dt class="sig sig-object py" id="stable_worldmodel.wm.dinowm.FeedForward">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">stable_worldmodel.wm.dinowm.</span></span><span class="sig-name descname"><span class="pre">FeedForward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dim</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hidden_dim</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dropout</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/stable_worldmodel/wm/dinowm/#FeedForward"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.wm.dinowm.FeedForward" title="Link to this definition" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#stable_worldmodel.wm.dinowm.FeedForward'"><svg height="1em" viewbox="0 0 24 24" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"></path></svg></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="stable_worldmodel.wm.dinowm.FeedForward.forward">
+<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/stable_worldmodel/wm/dinowm/#FeedForward.forward"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.wm.dinowm.FeedForward.forward" title="Link to this definition" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#stable_worldmodel.wm.dinowm.FeedForward.forward'"><svg height="1em" viewbox="0 0 24 24" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"></path></svg></a></dt>
+<dd><p>Define the computation performed at every call.</p>
+<p>Should be overridden by all subclasses.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Although the recipe for forward pass needs to be defined within
+this function, one should call the <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code> instance afterwards
+instead of this since the former takes care of running the
+registered hooks while the latter silently ignores them.</p>
+</div>
+</dd></dl>
+</dd></dl>
+<dl class="py class">
+<dt class="sig sig-object py" id="stable_worldmodel.wm.dinowm.Quantize">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">stable_worldmodel.wm.dinowm.</span></span><span class="sig-name descname"><span class="pre">Quantize</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dim</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_embed</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">decay</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.99</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">eps</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1e-05</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/stable_worldmodel/wm/dinowm/#Quantize"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.wm.dinowm.Quantize" title="Link to this definition" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#stable_worldmodel.wm.dinowm.Quantize'"><svg height="1em" viewbox="0 0 24 24" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"></path></svg></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="stable_worldmodel.wm.dinowm.Quantize.embed_code">
+<span class="sig-name descname"><span class="pre">embed_code</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">embed_id</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/stable_worldmodel/wm/dinowm/#Quantize.embed_code"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.wm.dinowm.Quantize.embed_code" title="Link to this definition" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#stable_worldmodel.wm.dinowm.Quantize.embed_code'"><svg height="1em" viewbox="0 0 24 24" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"></path></svg></a></dt>
+<dd></dd></dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="stable_worldmodel.wm.dinowm.Quantize.forward">
+<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/stable_worldmodel/wm/dinowm/#Quantize.forward"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.wm.dinowm.Quantize.forward" title="Link to this definition" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#stable_worldmodel.wm.dinowm.Quantize.forward'"><svg height="1em" viewbox="0 0 24 24" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"></path></svg></a></dt>
+<dd><p>Define the computation performed at every call.</p>
+<p>Should be overridden by all subclasses.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Although the recipe for forward pass needs to be defined within
+this function, one should call the <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code> instance afterwards
+instead of this since the former takes care of running the
+registered hooks while the latter silently ignores them.</p>
+</div>
+</dd></dl>
+</dd></dl>
+<dl class="py class">
+<dt class="sig sig-object py" id="stable_worldmodel.wm.dinowm.ResBlock">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">stable_worldmodel.wm.dinowm.</span></span><span class="sig-name descname"><span class="pre">ResBlock</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">in_channel</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">channel</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/stable_worldmodel/wm/dinowm/#ResBlock"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.wm.dinowm.ResBlock" title="Link to this definition" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#stable_worldmodel.wm.dinowm.ResBlock'"><svg height="1em" viewbox="0 0 24 24" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"></path></svg></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="stable_worldmodel.wm.dinowm.ResBlock.forward">
+<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/stable_worldmodel/wm/dinowm/#ResBlock.forward"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.wm.dinowm.ResBlock.forward" title="Link to this definition" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#stable_worldmodel.wm.dinowm.ResBlock.forward'"><svg height="1em" viewbox="0 0 24 24" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"></path></svg></a></dt>
+<dd><p>Define the computation performed at every call.</p>
+<p>Should be overridden by all subclasses.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Although the recipe for forward pass needs to be defined within
+this function, one should call the <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code> instance afterwards
+instead of this since the former takes care of running the
+registered hooks while the latter silently ignores them.</p>
+</div>
+</dd></dl>
+</dd></dl>
+<dl class="py class">
+<dt class="sig sig-object py" id="stable_worldmodel.wm.dinowm.Transformer">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">stable_worldmodel.wm.dinowm.</span></span><span class="sig-name descname"><span class="pre">Transformer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dim</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">depth</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">heads</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dim_head</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mlp_dim</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dropout</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_patches</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_frames</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/stable_worldmodel/wm/dinowm/#Transformer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.wm.dinowm.Transformer" title="Link to this definition" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#stable_worldmodel.wm.dinowm.Transformer'"><svg height="1em" viewbox="0 0 24 24" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"></path></svg></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="stable_worldmodel.wm.dinowm.Transformer.forward">
+<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/stable_worldmodel/wm/dinowm/#Transformer.forward"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.wm.dinowm.Transformer.forward" title="Link to this definition" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#stable_worldmodel.wm.dinowm.Transformer.forward'"><svg height="1em" viewbox="0 0 24 24" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"></path></svg></a></dt>
+<dd><p>Define the computation performed at every call.</p>
+<p>Should be overridden by all subclasses.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Although the recipe for forward pass needs to be defined within
+this function, one should call the <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code> instance afterwards
+instead of this since the former takes care of running the
+registered hooks while the latter silently ignores them.</p>
+</div>
+</dd></dl>
+</dd></dl>
+<dl class="py class">
+<dt class="sig sig-object py" id="stable_worldmodel.wm.dinowm.VQVAE">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">stable_worldmodel.wm.dinowm.</span></span><span class="sig-name descname"><span class="pre">VQVAE</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">in_channel</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">3</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">channel</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">128</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_res_block</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_res_channel</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">32</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">emb_dim</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">64</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_embed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">512</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">decay</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.99</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">quantize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/stable_worldmodel/wm/dinowm/#VQVAE"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.wm.dinowm.VQVAE" title="Link to this definition" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#stable_worldmodel.wm.dinowm.VQVAE'"><svg height="1em" viewbox="0 0 24 24" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"></path></svg></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="stable_worldmodel.wm.dinowm.VQVAE.decode">
+<span class="sig-name descname"><span class="pre">decode</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">quant_b</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/stable_worldmodel/wm/dinowm/#VQVAE.decode"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.wm.dinowm.VQVAE.decode" title="Link to this definition" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#stable_worldmodel.wm.dinowm.VQVAE.decode'"><svg height="1em" viewbox="0 0 24 24" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"></path></svg></a></dt>
+<dd></dd></dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="stable_worldmodel.wm.dinowm.VQVAE.decode_code">
+<span class="sig-name descname"><span class="pre">decode_code</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">code_b</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/stable_worldmodel/wm/dinowm/#VQVAE.decode_code"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.wm.dinowm.VQVAE.decode_code" title="Link to this definition" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#stable_worldmodel.wm.dinowm.VQVAE.decode_code'"><svg height="1em" viewbox="0 0 24 24" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"></path></svg></a></dt>
+<dd></dd></dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="stable_worldmodel.wm.dinowm.VQVAE.forward">
+<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/stable_worldmodel/wm/dinowm/#VQVAE.forward"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.wm.dinowm.VQVAE.forward" title="Link to this definition" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#stable_worldmodel.wm.dinowm.VQVAE.forward'"><svg height="1em" viewbox="0 0 24 24" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"></path></svg></a></dt>
+<dd><p>input: (b, t, num_patches, emb_dim)</p>
+</dd></dl>
+</dd></dl>
+<dl class="py function">
+<dt class="sig sig-object py" id="stable_worldmodel.wm.dinowm.all_reduce">
+<span class="sig-prename descclassname"><span class="pre">stable_worldmodel.wm.dinowm.</span></span><span class="sig-name descname"><span class="pre">all_reduce</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tensor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">op=&lt;RedOpType.SUM:</span> <span class="pre">0&gt;</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/stable_worldmodel/wm/dinowm/#all_reduce"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.wm.dinowm.all_reduce" title="Link to this definition" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#stable_worldmodel.wm.dinowm.all_reduce'"><svg height="1em" viewbox="0 0 24 24" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"></path></svg></a></dt>
+<dd></dd></dl>
+<dl class="py function">
+<dt class="sig sig-object py" id="stable_worldmodel.wm.dinowm.get_world_size">
+<span class="sig-prename descclassname"><span class="pre">stable_worldmodel.wm.dinowm.</span></span><span class="sig-name descname"><span class="pre">get_world_size</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/stable_worldmodel/wm/dinowm/#get_world_size"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.wm.dinowm.get_world_size" title="Link to this definition" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#stable_worldmodel.wm.dinowm.get_world_size'"><svg height="1em" viewbox="0 0 24 24" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"></path></svg></a></dt>
+<dd></dd></dl>
+<dl class="py function">
+<dt class="sig sig-object py" id="stable_worldmodel.wm.dinowm.transform">
+<span class="sig-prename descclassname"><span class="pre">stable_worldmodel.wm.dinowm.</span></span><span class="sig-name descname"><span class="pre">transform</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">info_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">device</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'cpu'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/stable_worldmodel/wm/dinowm/#transform"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.wm.dinowm.transform" title="Link to this definition" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#stable_worldmodel.wm.dinowm.transform'"><svg height="1em" viewbox="0 0 24 24" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"></path></svg></a></dt>
+<dd></dd></dl>
+</section>
+<section id="module-stable_worldmodel.wm.dreamer">
+<span id="stable-worldmodel-wm-dreamer-module"></span><h2>stable_worldmodel.wm.dreamer module<a class="headerlink" href="#module-stable_worldmodel.wm.dreamer" title="Link to this heading" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#module-stable_worldmodel.wm.dreamer'"><svg height="1em" viewbox="0 0 24 24" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"></path></svg></a></h2>
+</section>
+<section id="module-stable_worldmodel.wm.dummy">
+<span id="stable-worldmodel-wm-dummy-module"></span><h2>stable_worldmodel.wm.dummy module<a class="headerlink" href="#module-stable_worldmodel.wm.dummy" title="Link to this heading" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#module-stable_worldmodel.wm.dummy'"><svg height="1em" viewbox="0 0 24 24" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"></path></svg></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="stable_worldmodel.wm.dummy.DummyWorldModel">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">stable_worldmodel.wm.dummy.</span></span><span class="sig-name descname"><span class="pre">DummyWorldModel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">image_shape</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">action_dim</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/stable_worldmodel/wm/dummy/#DummyWorldModel"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.wm.dummy.DummyWorldModel" title="Link to this definition" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#stable_worldmodel.wm.dummy.DummyWorldModel'"><svg height="1em" viewbox="0 0 24 24" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"></path></svg></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="stable_worldmodel.wm.dummy.DummyWorldModel.encode">
+<span class="sig-name descname"><span class="pre">encode</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">obs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/stable_worldmodel/wm/dummy/#DummyWorldModel.encode"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.wm.dummy.DummyWorldModel.encode" title="Link to this definition" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#stable_worldmodel.wm.dummy.DummyWorldModel.encode'"><svg height="1em" viewbox="0 0 24 24" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"></path></svg></a></dt>
+<dd></dd></dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="stable_worldmodel.wm.dummy.DummyWorldModel.get_cost">
+<span class="sig-name descname"><span class="pre">get_cost</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">info_dict</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">action_candidates</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/stable_worldmodel/wm/dummy/#DummyWorldModel.get_cost"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.wm.dummy.DummyWorldModel.get_cost" title="Link to this definition" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#stable_worldmodel.wm.dummy.DummyWorldModel.get_cost'"><svg height="1em" viewbox="0 0 24 24" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"></path></svg></a></dt>
+<dd></dd></dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="stable_worldmodel.wm.dummy.DummyWorldModel.predict">
+<span class="sig-name descname"><span class="pre">predict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">obs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">actions</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timestep</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/stable_worldmodel/wm/dummy/#DummyWorldModel.predict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.wm.dummy.DummyWorldModel.predict" title="Link to this definition" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#stable_worldmodel.wm.dummy.DummyWorldModel.predict'"><svg height="1em" viewbox="0 0 24 24" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"></path></svg></a></dt>
+<dd><p>Predict next s_t+H embedding given s_t + action sequence i.e rollout the dynamics model for H steps.</p>
+</dd></dl>
+</dd></dl>
+<dl class="py function">
+<dt class="sig sig-object py" id="stable_worldmodel.wm.dummy.transform">
+<span class="sig-prename descclassname"><span class="pre">stable_worldmodel.wm.dummy.</span></span><span class="sig-name descname"><span class="pre">transform</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">info_dict</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/stable_worldmodel/wm/dummy/#transform"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.wm.dummy.transform" title="Link to this definition" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#stable_worldmodel.wm.dummy.transform'"><svg height="1em" viewbox="0 0 24 24" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"></path></svg></a></dt>
+<dd></dd></dl>
+</section>
+<section id="module-stable_worldmodel.wm.frame">
+<span id="stable-worldmodel-wm-frame-module"></span><h2>stable_worldmodel.wm.frame module<a class="headerlink" href="#module-stable_worldmodel.wm.frame" title="Link to this heading" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#module-stable_worldmodel.wm.frame'"><svg height="1em" viewbox="0 0 24 24" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"></path></svg></a></h2>
+</section>
+<section id="module-stable_worldmodel.wm.old_dinowm">
+<span id="stable-worldmodel-wm-old-dinowm-module"></span><h2>stable_worldmodel.wm.old_dinowm module<a class="headerlink" href="#module-stable_worldmodel.wm.old_dinowm" title="Link to this heading" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#module-stable_worldmodel.wm.old_dinowm'"><svg height="1em" viewbox="0 0 24 24" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"></path></svg></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="stable_worldmodel.wm.old_dinowm.Attention">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">stable_worldmodel.wm.old_dinowm.</span></span><span class="sig-name descname"><span class="pre">Attention</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dim</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">heads</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">8</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dim_head</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">64</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dropout</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_patches</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_frames</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/stable_worldmodel/wm/old_dinowm/#Attention"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.wm.old_dinowm.Attention" title="Link to this definition" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#stable_worldmodel.wm.old_dinowm.Attention'"><svg height="1em" viewbox="0 0 24 24" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"></path></svg></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="stable_worldmodel.wm.old_dinowm.Attention.forward">
+<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/stable_worldmodel/wm/old_dinowm/#Attention.forward"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.wm.old_dinowm.Attention.forward" title="Link to this definition" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#stable_worldmodel.wm.old_dinowm.Attention.forward'"><svg height="1em" viewbox="0 0 24 24" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"></path></svg></a></dt>
+<dd><p>Define the computation performed at every call.</p>
+<p>Should be overridden by all subclasses.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Although the recipe for forward pass needs to be defined within
+this function, one should call the <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code> instance afterwards
+instead of this since the former takes care of running the
+registered hooks while the latter silently ignores them.</p>
+</div>
+</dd></dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="stable_worldmodel.wm.old_dinowm.Attention.generate_mask_matrix">
+<span class="sig-name descname"><span class="pre">generate_mask_matrix</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">npatch</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nwindow</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/stable_worldmodel/wm/old_dinowm/#Attention.generate_mask_matrix"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.wm.old_dinowm.Attention.generate_mask_matrix" title="Link to this definition" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#stable_worldmodel.wm.old_dinowm.Attention.generate_mask_matrix'"><svg height="1em" viewbox="0 0 24 24" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"></path></svg></a></dt>
+<dd></dd></dl>
+</dd></dl>
+<dl class="py class">
+<dt class="sig sig-object py" id="stable_worldmodel.wm.old_dinowm.CausalPredictor">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">stable_worldmodel.wm.old_dinowm.</span></span><span class="sig-name descname"><span class="pre">CausalPredictor</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_patches</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_frames</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dim</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">depth</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">heads</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mlp_dim</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pool</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'cls'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dim_head</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">64</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dropout</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">emb_dropout</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/stable_worldmodel/wm/old_dinowm/#CausalPredictor"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.wm.old_dinowm.CausalPredictor" title="Link to this definition" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#stable_worldmodel.wm.old_dinowm.CausalPredictor'"><svg height="1em" viewbox="0 0 24 24" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"></path></svg></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="stable_worldmodel.wm.old_dinowm.CausalPredictor.forward">
+<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/stable_worldmodel/wm/old_dinowm/#CausalPredictor.forward"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.wm.old_dinowm.CausalPredictor.forward" title="Link to this definition" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#stable_worldmodel.wm.old_dinowm.CausalPredictor.forward'"><svg height="1em" viewbox="0 0 24 24" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"></path></svg></a></dt>
+<dd><p>Define the computation performed at every call.</p>
+<p>Should be overridden by all subclasses.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Although the recipe for forward pass needs to be defined within
+this function, one should call the <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code> instance afterwards
+instead of this since the former takes care of running the
+registered hooks while the latter silently ignores them.</p>
+</div>
+</dd></dl>
+</dd></dl>
+<dl class="py class">
+<dt class="sig sig-object py" id="stable_worldmodel.wm.old_dinowm.DINOWM">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">stable_worldmodel.wm.old_dinowm.</span></span><span class="sig-name descname"><span class="pre">DINOWM</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">encoder</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">predictor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">action_encoder</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">proprio_encoder</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">image_size</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">frameskip</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">history_size</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">action_dim</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">action_emb_dim</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">proprio_dim</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">proprio_emb_dim</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">device</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'cpu'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">decoder</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">action_mean</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">action_std</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">proprio_mean</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">proprio_std</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/stable_worldmodel/wm/old_dinowm/#DINOWM"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.wm.old_dinowm.DINOWM" title="Link to this definition" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#stable_worldmodel.wm.old_dinowm.DINOWM'"><svg height="1em" viewbox="0 0 24 24" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"></path></svg></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="stable_worldmodel.wm.old_dinowm.DINOWM.decode_obs">
+<span class="sig-name descname"><span class="pre">decode_obs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">z_obs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/stable_worldmodel/wm/old_dinowm/#DINOWM.decode_obs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.wm.old_dinowm.DINOWM.decode_obs" title="Link to this definition" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#stable_worldmodel.wm.old_dinowm.DINOWM.decode_obs'"><svg height="1em" viewbox="0 0 24 24" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"></path></svg></a></dt>
+<dd><p>input :   z: (b, num_frames, num_patches, emb_dim)
+output: obs: (b, num_frames, 3, img_size, img_size)</p>
+</dd></dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="stable_worldmodel.wm.old_dinowm.DINOWM.denormalize_actions">
+<span class="sig-name descname"><span class="pre">denormalize_actions</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">actions</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/stable_worldmodel/wm/old_dinowm/#DINOWM.denormalize_actions"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.wm.old_dinowm.DINOWM.denormalize_actions" title="Link to this definition" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#stable_worldmodel.wm.old_dinowm.DINOWM.denormalize_actions'"><svg height="1em" viewbox="0 0 24 24" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"></path></svg></a></dt>
+<dd><p>Denormalize actions using the defined normalization parameters.</p>
+</dd></dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="stable_worldmodel.wm.old_dinowm.DINOWM.denormalize_proprio">
+<span class="sig-name descname"><span class="pre">denormalize_proprio</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">proprio</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/stable_worldmodel/wm/old_dinowm/#DINOWM.denormalize_proprio"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.wm.old_dinowm.DINOWM.denormalize_proprio" title="Link to this definition" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#stable_worldmodel.wm.old_dinowm.DINOWM.denormalize_proprio'"><svg height="1em" viewbox="0 0 24 24" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"></path></svg></a></dt>
+<dd><p>Denormalize proprioceptive data using the defined normalization parameters.</p>
+</dd></dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="stable_worldmodel.wm.old_dinowm.DINOWM.encode">
+<span class="sig-name descname"><span class="pre">encode</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">obs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">actions</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/stable_worldmodel/wm/old_dinowm/#DINOWM.encode"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.wm.old_dinowm.DINOWM.encode" title="Link to this definition" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#stable_worldmodel.wm.old_dinowm.DINOWM.encode'"><svg height="1em" viewbox="0 0 24 24" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"></path></svg></a></dt>
+<dd></dd></dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="stable_worldmodel.wm.old_dinowm.DINOWM.encode_action">
+<span class="sig-name descname"><span class="pre">encode_action</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">actions</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/stable_worldmodel/wm/old_dinowm/#DINOWM.encode_action"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.wm.old_dinowm.DINOWM.encode_action" title="Link to this definition" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#stable_worldmodel.wm.old_dinowm.DINOWM.encode_action'"><svg height="1em" viewbox="0 0 24 24" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"></path></svg></a></dt>
+<dd></dd></dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="stable_worldmodel.wm.old_dinowm.DINOWM.encode_obs">
+<span class="sig-name descname"><span class="pre">encode_obs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">obs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/stable_worldmodel/wm/old_dinowm/#DINOWM.encode_obs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.wm.old_dinowm.DINOWM.encode_obs" title="Link to this definition" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#stable_worldmodel.wm.old_dinowm.DINOWM.encode_obs'"><svg height="1em" viewbox="0 0 24 24" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"></path></svg></a></dt>
+<dd><p>Preprocess observation from the environment obs dict
+:param states: dict with all the observation modalities (img, proprio, etc)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>encoded latent states for observations</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>z</p>
+</dd>
+</dl>
+</dd></dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="stable_worldmodel.wm.old_dinowm.DINOWM.encode_proprio">
+<span class="sig-name descname"><span class="pre">encode_proprio</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">proprio</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/stable_worldmodel/wm/old_dinowm/#DINOWM.encode_proprio"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.wm.old_dinowm.DINOWM.encode_proprio" title="Link to this definition" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#stable_worldmodel.wm.old_dinowm.DINOWM.encode_proprio'"><svg height="1em" viewbox="0 0 24 24" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"></path></svg></a></dt>
+<dd></dd></dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="stable_worldmodel.wm.old_dinowm.DINOWM.forward">
+<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">obs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">actions</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/stable_worldmodel/wm/old_dinowm/#DINOWM.forward"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.wm.old_dinowm.DINOWM.forward" title="Link to this definition" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#stable_worldmodel.wm.old_dinowm.DINOWM.forward'"><svg height="1em" viewbox="0 0 24 24" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"></path></svg></a></dt>
+<dd><p>Define the computation performed at every call.</p>
+<p>Should be overridden by all subclasses.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Although the recipe for forward pass needs to be defined within
+this function, one should call the <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code> instance afterwards
+instead of this since the former takes care of running the
+registered hooks while the latter silently ignores them.</p>
+</div>
+</dd></dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="stable_worldmodel.wm.old_dinowm.DINOWM.normalize_actions">
+<span class="sig-name descname"><span class="pre">normalize_actions</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">actions</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/stable_worldmodel/wm/old_dinowm/#DINOWM.normalize_actions"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.wm.old_dinowm.DINOWM.normalize_actions" title="Link to this definition" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#stable_worldmodel.wm.old_dinowm.DINOWM.normalize_actions'"><svg height="1em" viewbox="0 0 24 24" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"></path></svg></a></dt>
+<dd><p>Normalize actions using the defined normalization parameters.</p>
+</dd></dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="stable_worldmodel.wm.old_dinowm.DINOWM.normalize_proprio">
+<span class="sig-name descname"><span class="pre">normalize_proprio</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">proprio</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/stable_worldmodel/wm/old_dinowm/#DINOWM.normalize_proprio"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.wm.old_dinowm.DINOWM.normalize_proprio" title="Link to this definition" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#stable_worldmodel.wm.old_dinowm.DINOWM.normalize_proprio'"><svg height="1em" viewbox="0 0 24 24" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"></path></svg></a></dt>
+<dd><p>Normalize proprioceptive data using the defined normalization parameters.</p>
+</dd></dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="stable_worldmodel.wm.old_dinowm.DINOWM.predict">
+<span class="sig-name descname"><span class="pre">predict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">z</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/stable_worldmodel/wm/old_dinowm/#DINOWM.predict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.wm.old_dinowm.DINOWM.predict" title="Link to this definition" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#stable_worldmodel.wm.old_dinowm.DINOWM.predict'"><svg height="1em" viewbox="0 0 24 24" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"></path></svg></a></dt>
+<dd><p>predict next latent state
+:param z: (B, T, P, d)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>(B, T, P, d)</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>preds</p>
+</dd>
+</dl>
+</dd></dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="stable_worldmodel.wm.old_dinowm.DINOWM.replace_actions_from_z">
+<span class="sig-name descname"><span class="pre">replace_actions_from_z</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">z</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">act</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/stable_worldmodel/wm/old_dinowm/#DINOWM.replace_actions_from_z"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.wm.old_dinowm.DINOWM.replace_actions_from_z" title="Link to this definition" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#stable_worldmodel.wm.old_dinowm.DINOWM.replace_actions_from_z'"><svg height="1em" viewbox="0 0 24 24" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"></path></svg></a></dt>
+<dd><p>Replace the action embeddings in the latent state z with the provided actions.</p>
+</dd></dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="stable_worldmodel.wm.old_dinowm.DINOWM.rollout">
+<span class="sig-name descname"><span class="pre">rollout</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">obs_0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">actions</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/stable_worldmodel/wm/old_dinowm/#DINOWM.rollout"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.wm.old_dinowm.DINOWM.rollout" title="Link to this definition" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#stable_worldmodel.wm.old_dinowm.DINOWM.rollout'"><svg height="1em" viewbox="0 0 24 24" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"></path></svg></a></dt>
+<dd><p>Rollout the world model given an initial observation and a sequence of actions.</p>
+<p>Params:
+obs_start: n current observations (B, n, C, H, W)
+actions: current and predicted actions (B, n+t, action_dim)</p>
+<p>Returns:
+z_obs: dict with latent observations (B, n+t+1, n_patches, D)
+z: predicted latent states (B, n+t+1, n_patches, D)</p>
+</dd></dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="stable_worldmodel.wm.old_dinowm.DINOWM.split_embeddings">
+<span class="sig-name descname"><span class="pre">split_embeddings</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">z</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/stable_worldmodel/wm/old_dinowm/#DINOWM.split_embeddings"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.wm.old_dinowm.DINOWM.split_embeddings" title="Link to this definition" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#stable_worldmodel.wm.old_dinowm.DINOWM.split_embeddings'"><svg height="1em" viewbox="0 0 24 24" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"></path></svg></a></dt>
+<dd><p>Unmerge embedding z into separate modalities.
+:param z:
+:type z: B, T, P, d</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict with separate modalities
+z_act: (B, T, P, action_emb_dim)</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>z_obs</p>
+</dd>
+</dl>
+</dd></dl>
+</dd></dl>
+<dl class="py class">
+<dt class="sig sig-object py" id="stable_worldmodel.wm.old_dinowm.Decoder">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">stable_worldmodel.wm.old_dinowm.</span></span><span class="sig-name descname"><span class="pre">Decoder</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">in_channel</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">out_channel</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">channel</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_res_block</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_res_channel</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stride</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/stable_worldmodel/wm/old_dinowm/#Decoder"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.wm.old_dinowm.Decoder" title="Link to this definition" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#stable_worldmodel.wm.old_dinowm.Decoder'"><svg height="1em" viewbox="0 0 24 24" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"></path></svg></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="stable_worldmodel.wm.old_dinowm.Decoder.forward">
+<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/stable_worldmodel/wm/old_dinowm/#Decoder.forward"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.wm.old_dinowm.Decoder.forward" title="Link to this definition" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#stable_worldmodel.wm.old_dinowm.Decoder.forward'"><svg height="1em" viewbox="0 0 24 24" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"></path></svg></a></dt>
+<dd><p>Define the computation performed at every call.</p>
+<p>Should be overridden by all subclasses.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Although the recipe for forward pass needs to be defined within
+this function, one should call the <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code> instance afterwards
+instead of this since the former takes care of running the
+registered hooks while the latter silently ignores them.</p>
+</div>
+</dd></dl>
+</dd></dl>
+<dl class="py class">
+<dt class="sig sig-object py" id="stable_worldmodel.wm.old_dinowm.DinoV2Encoder">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">stable_worldmodel.wm.old_dinowm.</span></span><span class="sig-name descname"><span class="pre">DinoV2Encoder</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">feature_key</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/stable_worldmodel/wm/old_dinowm/#DinoV2Encoder"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.wm.old_dinowm.DinoV2Encoder" title="Link to this definition" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#stable_worldmodel.wm.old_dinowm.DinoV2Encoder'"><svg height="1em" viewbox="0 0 24 24" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"></path></svg></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="stable_worldmodel.wm.old_dinowm.DinoV2Encoder.forward">
+<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/stable_worldmodel/wm/old_dinowm/#DinoV2Encoder.forward"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.wm.old_dinowm.DinoV2Encoder.forward" title="Link to this definition" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#stable_worldmodel.wm.old_dinowm.DinoV2Encoder.forward'"><svg height="1em" viewbox="0 0 24 24" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"></path></svg></a></dt>
+<dd><p>Define the computation performed at every call.</p>
+<p>Should be overridden by all subclasses.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Although the recipe for forward pass needs to be defined within
+this function, one should call the <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code> instance afterwards
+instead of this since the former takes care of running the
+registered hooks while the latter silently ignores them.</p>
+</div>
+</dd></dl>
+</dd></dl>
+<dl class="py class">
+<dt class="sig sig-object py" id="stable_worldmodel.wm.old_dinowm.Embedder">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">stable_worldmodel.wm.old_dinowm.</span></span><span class="sig-name descname"><span class="pre">Embedder</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">num_frames</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tubelet_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">in_chans</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">8</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">emb_dim</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/stable_worldmodel/wm/old_dinowm/#Embedder"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.wm.old_dinowm.Embedder" title="Link to this definition" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#stable_worldmodel.wm.old_dinowm.Embedder'"><svg height="1em" viewbox="0 0 24 24" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"></path></svg></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="stable_worldmodel.wm.old_dinowm.Embedder.forward">
+<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/stable_worldmodel/wm/old_dinowm/#Embedder.forward"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.wm.old_dinowm.Embedder.forward" title="Link to this definition" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#stable_worldmodel.wm.old_dinowm.Embedder.forward'"><svg height="1em" viewbox="0 0 24 24" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"></path></svg></a></dt>
+<dd><p>Define the computation performed at every call.</p>
+<p>Should be overridden by all subclasses.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Although the recipe for forward pass needs to be defined within
+this function, one should call the <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code> instance afterwards
+instead of this since the former takes care of running the
+registered hooks while the latter silently ignores them.</p>
+</div>
+</dd></dl>
+</dd></dl>
+<dl class="py class">
+<dt class="sig sig-object py" id="stable_worldmodel.wm.old_dinowm.Encoder">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">stable_worldmodel.wm.old_dinowm.</span></span><span class="sig-name descname"><span class="pre">Encoder</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">in_channel</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">channel</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_res_block</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_res_channel</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stride</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/stable_worldmodel/wm/old_dinowm/#Encoder"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.wm.old_dinowm.Encoder" title="Link to this definition" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#stable_worldmodel.wm.old_dinowm.Encoder'"><svg height="1em" viewbox="0 0 24 24" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"></path></svg></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="stable_worldmodel.wm.old_dinowm.Encoder.forward">
+<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/stable_worldmodel/wm/old_dinowm/#Encoder.forward"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.wm.old_dinowm.Encoder.forward" title="Link to this definition" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#stable_worldmodel.wm.old_dinowm.Encoder.forward'"><svg height="1em" viewbox="0 0 24 24" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"></path></svg></a></dt>
+<dd><p>Define the computation performed at every call.</p>
+<p>Should be overridden by all subclasses.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Although the recipe for forward pass needs to be defined within
+this function, one should call the <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code> instance afterwards
+instead of this since the former takes care of running the
+registered hooks while the latter silently ignores them.</p>
+</div>
+</dd></dl>
+</dd></dl>
+<dl class="py class">
+<dt class="sig sig-object py" id="stable_worldmodel.wm.old_dinowm.FeedForward">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">stable_worldmodel.wm.old_dinowm.</span></span><span class="sig-name descname"><span class="pre">FeedForward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dim</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hidden_dim</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dropout</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/stable_worldmodel/wm/old_dinowm/#FeedForward"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.wm.old_dinowm.FeedForward" title="Link to this definition" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#stable_worldmodel.wm.old_dinowm.FeedForward'"><svg height="1em" viewbox="0 0 24 24" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"></path></svg></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="stable_worldmodel.wm.old_dinowm.FeedForward.forward">
+<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/stable_worldmodel/wm/old_dinowm/#FeedForward.forward"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.wm.old_dinowm.FeedForward.forward" title="Link to this definition" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#stable_worldmodel.wm.old_dinowm.FeedForward.forward'"><svg height="1em" viewbox="0 0 24 24" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"></path></svg></a></dt>
+<dd><p>Define the computation performed at every call.</p>
+<p>Should be overridden by all subclasses.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Although the recipe for forward pass needs to be defined within
+this function, one should call the <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code> instance afterwards
+instead of this since the former takes care of running the
+registered hooks while the latter silently ignores them.</p>
+</div>
+</dd></dl>
+</dd></dl>
+<dl class="py class">
+<dt class="sig sig-object py" id="stable_worldmodel.wm.old_dinowm.Quantize">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">stable_worldmodel.wm.old_dinowm.</span></span><span class="sig-name descname"><span class="pre">Quantize</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dim</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_embed</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">decay</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.99</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">eps</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1e-05</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/stable_worldmodel/wm/old_dinowm/#Quantize"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.wm.old_dinowm.Quantize" title="Link to this definition" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#stable_worldmodel.wm.old_dinowm.Quantize'"><svg height="1em" viewbox="0 0 24 24" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"></path></svg></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="stable_worldmodel.wm.old_dinowm.Quantize.embed_code">
+<span class="sig-name descname"><span class="pre">embed_code</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">embed_id</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/stable_worldmodel/wm/old_dinowm/#Quantize.embed_code"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.wm.old_dinowm.Quantize.embed_code" title="Link to this definition" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#stable_worldmodel.wm.old_dinowm.Quantize.embed_code'"><svg height="1em" viewbox="0 0 24 24" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"></path></svg></a></dt>
+<dd></dd></dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="stable_worldmodel.wm.old_dinowm.Quantize.forward">
+<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/stable_worldmodel/wm/old_dinowm/#Quantize.forward"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.wm.old_dinowm.Quantize.forward" title="Link to this definition" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#stable_worldmodel.wm.old_dinowm.Quantize.forward'"><svg height="1em" viewbox="0 0 24 24" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"></path></svg></a></dt>
+<dd><p>Define the computation performed at every call.</p>
+<p>Should be overridden by all subclasses.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Although the recipe for forward pass needs to be defined within
+this function, one should call the <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code> instance afterwards
+instead of this since the former takes care of running the
+registered hooks while the latter silently ignores them.</p>
+</div>
+</dd></dl>
+</dd></dl>
+<dl class="py class">
+<dt class="sig sig-object py" id="stable_worldmodel.wm.old_dinowm.ResBlock">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">stable_worldmodel.wm.old_dinowm.</span></span><span class="sig-name descname"><span class="pre">ResBlock</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">in_channel</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">channel</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/stable_worldmodel/wm/old_dinowm/#ResBlock"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.wm.old_dinowm.ResBlock" title="Link to this definition" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#stable_worldmodel.wm.old_dinowm.ResBlock'"><svg height="1em" viewbox="0 0 24 24" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"></path></svg></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="stable_worldmodel.wm.old_dinowm.ResBlock.forward">
+<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/stable_worldmodel/wm/old_dinowm/#ResBlock.forward"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.wm.old_dinowm.ResBlock.forward" title="Link to this definition" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#stable_worldmodel.wm.old_dinowm.ResBlock.forward'"><svg height="1em" viewbox="0 0 24 24" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"></path></svg></a></dt>
+<dd><p>Define the computation performed at every call.</p>
+<p>Should be overridden by all subclasses.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Although the recipe for forward pass needs to be defined within
+this function, one should call the <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code> instance afterwards
+instead of this since the former takes care of running the
+registered hooks while the latter silently ignores them.</p>
+</div>
+</dd></dl>
+</dd></dl>
+<dl class="py class">
+<dt class="sig sig-object py" id="stable_worldmodel.wm.old_dinowm.Transformer">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">stable_worldmodel.wm.old_dinowm.</span></span><span class="sig-name descname"><span class="pre">Transformer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dim</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">depth</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">heads</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dim_head</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mlp_dim</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dropout</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_patches</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_frames</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/stable_worldmodel/wm/old_dinowm/#Transformer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.wm.old_dinowm.Transformer" title="Link to this definition" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#stable_worldmodel.wm.old_dinowm.Transformer'"><svg height="1em" viewbox="0 0 24 24" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"></path></svg></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="stable_worldmodel.wm.old_dinowm.Transformer.forward">
+<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/stable_worldmodel/wm/old_dinowm/#Transformer.forward"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.wm.old_dinowm.Transformer.forward" title="Link to this definition" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#stable_worldmodel.wm.old_dinowm.Transformer.forward'"><svg height="1em" viewbox="0 0 24 24" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"></path></svg></a></dt>
+<dd><p>Define the computation performed at every call.</p>
+<p>Should be overridden by all subclasses.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Although the recipe for forward pass needs to be defined within
+this function, one should call the <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code> instance afterwards
+instead of this since the former takes care of running the
+registered hooks while the latter silently ignores them.</p>
+</div>
+</dd></dl>
+</dd></dl>
+<dl class="py class">
+<dt class="sig sig-object py" id="stable_worldmodel.wm.old_dinowm.VQVAE">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">stable_worldmodel.wm.old_dinowm.</span></span><span class="sig-name descname"><span class="pre">VQVAE</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">in_channel</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">3</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">channel</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">128</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_res_block</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_res_channel</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">32</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">emb_dim</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">64</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_embed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">512</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">decay</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.99</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">quantize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/stable_worldmodel/wm/old_dinowm/#VQVAE"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.wm.old_dinowm.VQVAE" title="Link to this definition" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#stable_worldmodel.wm.old_dinowm.VQVAE'"><svg height="1em" viewbox="0 0 24 24" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"></path></svg></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="stable_worldmodel.wm.old_dinowm.VQVAE.decode">
+<span class="sig-name descname"><span class="pre">decode</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">quant_b</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/stable_worldmodel/wm/old_dinowm/#VQVAE.decode"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.wm.old_dinowm.VQVAE.decode" title="Link to this definition" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#stable_worldmodel.wm.old_dinowm.VQVAE.decode'"><svg height="1em" viewbox="0 0 24 24" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"></path></svg></a></dt>
+<dd></dd></dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="stable_worldmodel.wm.old_dinowm.VQVAE.decode_code">
+<span class="sig-name descname"><span class="pre">decode_code</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">code_b</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/stable_worldmodel/wm/old_dinowm/#VQVAE.decode_code"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.wm.old_dinowm.VQVAE.decode_code" title="Link to this definition" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#stable_worldmodel.wm.old_dinowm.VQVAE.decode_code'"><svg height="1em" viewbox="0 0 24 24" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"></path></svg></a></dt>
+<dd></dd></dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="stable_worldmodel.wm.old_dinowm.VQVAE.forward">
+<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/stable_worldmodel/wm/old_dinowm/#VQVAE.forward"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.wm.old_dinowm.VQVAE.forward" title="Link to this definition" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#stable_worldmodel.wm.old_dinowm.VQVAE.forward'"><svg height="1em" viewbox="0 0 24 24" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"></path></svg></a></dt>
+<dd><p>input: (b, t, num_patches, emb_dim)</p>
+</dd></dl>
+</dd></dl>
+<dl class="py function">
+<dt class="sig sig-object py" id="stable_worldmodel.wm.old_dinowm.all_reduce">
+<span class="sig-prename descclassname"><span class="pre">stable_worldmodel.wm.old_dinowm.</span></span><span class="sig-name descname"><span class="pre">all_reduce</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tensor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">op=&lt;RedOpType.SUM:</span> <span class="pre">0&gt;</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/stable_worldmodel/wm/old_dinowm/#all_reduce"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.wm.old_dinowm.all_reduce" title="Link to this definition" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#stable_worldmodel.wm.old_dinowm.all_reduce'"><svg height="1em" viewbox="0 0 24 24" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"></path></svg></a></dt>
+<dd></dd></dl>
+<dl class="py function">
+<dt class="sig sig-object py" id="stable_worldmodel.wm.old_dinowm.get_world_size">
+<span class="sig-prename descclassname"><span class="pre">stable_worldmodel.wm.old_dinowm.</span></span><span class="sig-name descname"><span class="pre">get_world_size</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/stable_worldmodel/wm/old_dinowm/#get_world_size"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.wm.old_dinowm.get_world_size" title="Link to this definition" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#stable_worldmodel.wm.old_dinowm.get_world_size'"><svg height="1em" viewbox="0 0 24 24" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"></path></svg></a></dt>
+<dd></dd></dl>
+</section>
+<section id="module-stable_worldmodel.wm.tdmpc">
+<span id="stable-worldmodel-wm-tdmpc-module"></span><h2>stable_worldmodel.wm.tdmpc module<a class="headerlink" href="#module-stable_worldmodel.wm.tdmpc" title="Link to this heading" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#module-stable_worldmodel.wm.tdmpc'"><svg height="1em" viewbox="0 0 24 24" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"></path></svg></a></h2>
+</section>
+<section id="module-stable_worldmodel.wm">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-stable_worldmodel.wm" title="Link to this heading" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#module-stable_worldmodel.wm'"><svg height="1em" viewbox="0 0 24 24" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"></path></svg></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="stable_worldmodel.wm.DINOWM">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">stable_worldmodel.wm.</span></span><span class="sig-name descname"><span class="pre">DINOWM</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">encoder</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">predictor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">action_encoder</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">proprio_encoder</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">decoder</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">history_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">3</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_pred</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">device</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'cpu'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/stable_worldmodel/wm/dinowm/#DINOWM"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.wm.DINOWM" title="Link to this definition" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#stable_worldmodel.wm.DINOWM'"><svg height="1em" viewbox="0 0 24 24" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"></path></svg></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="stable_worldmodel.wm.DINOWM.decode">
+<span class="sig-name descname"><span class="pre">decode</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">info</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/stable_worldmodel/wm/dinowm/#DINOWM.decode"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.wm.DINOWM.decode" title="Link to this definition" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#stable_worldmodel.wm.DINOWM.decode'"><svg height="1em" viewbox="0 0 24 24" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"></path></svg></a></dt>
+<dd></dd></dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="stable_worldmodel.wm.DINOWM.encode">
+<span class="sig-name descname"><span class="pre">encode</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">info</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pixels_key</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'pixels'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'embed'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">proprio_key</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">action_key</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/stable_worldmodel/wm/dinowm/#DINOWM.encode"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.wm.DINOWM.encode" title="Link to this definition" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#stable_worldmodel.wm.DINOWM.encode'"><svg height="1em" viewbox="0 0 24 24" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"></path></svg></a></dt>
+<dd></dd></dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="stable_worldmodel.wm.DINOWM.get_cost">
+<span class="sig-name descname"><span class="pre">get_cost</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">info_dict</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">action_candidates</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/stable_worldmodel/wm/dinowm/#DINOWM.get_cost"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.wm.DINOWM.get_cost" title="Link to this definition" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#stable_worldmodel.wm.DINOWM.get_cost'"><svg height="1em" viewbox="0 0 24 24" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"></path></svg></a></dt>
+<dd></dd></dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="stable_worldmodel.wm.DINOWM.predict">
+<span class="sig-name descname"><span class="pre">predict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">embedding</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/stable_worldmodel/wm/dinowm/#DINOWM.predict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.wm.DINOWM.predict" title="Link to this definition" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#stable_worldmodel.wm.DINOWM.predict'"><svg height="1em" viewbox="0 0 24 24" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"></path></svg></a></dt>
+<dd><p>predict next latent state
+:param embedding: (B, T, P, d)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>(B, T, P, d)</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>preds</p>
+</dd>
+</dl>
+</dd></dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="stable_worldmodel.wm.DINOWM.replace_action_in_embedding">
+<span class="sig-name descname"><span class="pre">replace_action_in_embedding</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">embedding</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">act</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/stable_worldmodel/wm/dinowm/#DINOWM.replace_action_in_embedding"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.wm.DINOWM.replace_action_in_embedding" title="Link to this definition" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#stable_worldmodel.wm.DINOWM.replace_action_in_embedding'"><svg height="1em" viewbox="0 0 24 24" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"></path></svg></a></dt>
+<dd><p>Replace the action embeddings in the latent state z with the provided actions.</p>
+</dd></dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="stable_worldmodel.wm.DINOWM.rollout">
+<span class="sig-name descname"><span class="pre">rollout</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">info</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">action_sequence</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/stable_worldmodel/wm/dinowm/#DINOWM.rollout"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.wm.DINOWM.rollout" title="Link to this definition" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#stable_worldmodel.wm.DINOWM.rollout'"><svg height="1em" viewbox="0 0 24 24" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"></path></svg></a></dt>
+<dd><p>Rollout the world model given an initial observation and a sequence of actions.</p>
+<p>Params:
+obs_start: n current observations (B, n, C, H, W)
+actions: current and predicted actions (B, n+t, action_dim)</p>
+<p>Returns:
+z_obs: dict with latent observations (B, n+t+1, n_patches, D)
+z: predicted latent states (B, n+t+1, n_patches, D)</p>
+</dd></dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="stable_worldmodel.wm.DINOWM.split_embedding">
+<span class="sig-name descname"><span class="pre">split_embedding</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">embedding</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">action_dim</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">proprio_dim</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/stable_worldmodel/wm/dinowm/#DINOWM.split_embedding"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.wm.DINOWM.split_embedding" title="Link to this definition" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#stable_worldmodel.wm.DINOWM.split_embedding'"><svg height="1em" viewbox="0 0 24 24" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"></path></svg></a></dt>
+<dd></dd></dl>
+</dd></dl>
+<dl class="py class">
+<dt class="sig sig-object py" id="stable_worldmodel.wm.DummyWorldModel">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">stable_worldmodel.wm.</span></span><span class="sig-name descname"><span class="pre">DummyWorldModel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">image_shape</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">action_dim</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/stable_worldmodel/wm/dummy/#DummyWorldModel"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.wm.DummyWorldModel" title="Link to this definition" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#stable_worldmodel.wm.DummyWorldModel'"><svg height="1em" viewbox="0 0 24 24" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"></path></svg></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="stable_worldmodel.wm.DummyWorldModel.encode">
+<span class="sig-name descname"><span class="pre">encode</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">obs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/stable_worldmodel/wm/dummy/#DummyWorldModel.encode"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.wm.DummyWorldModel.encode" title="Link to this definition" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#stable_worldmodel.wm.DummyWorldModel.encode'"><svg height="1em" viewbox="0 0 24 24" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"></path></svg></a></dt>
+<dd></dd></dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="stable_worldmodel.wm.DummyWorldModel.get_cost">
+<span class="sig-name descname"><span class="pre">get_cost</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">info_dict</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">action_candidates</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/stable_worldmodel/wm/dummy/#DummyWorldModel.get_cost"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.wm.DummyWorldModel.get_cost" title="Link to this definition" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#stable_worldmodel.wm.DummyWorldModel.get_cost'"><svg height="1em" viewbox="0 0 24 24" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"></path></svg></a></dt>
+<dd></dd></dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="stable_worldmodel.wm.DummyWorldModel.predict">
+<span class="sig-name descname"><span class="pre">predict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">obs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">actions</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timestep</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/stable_worldmodel/wm/dummy/#DummyWorldModel.predict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.wm.DummyWorldModel.predict" title="Link to this definition" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#stable_worldmodel.wm.DummyWorldModel.predict'"><svg height="1em" viewbox="0 0 24 24" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"></path></svg></a></dt>
+<dd><p>Predict next s_t+H embedding given s_t + action sequence i.e rollout the dynamics model for H steps.</p>
+</dd></dl>
+</dd></dl>
+</section>
+</section>
+</div></div><aside class="hidden text-sm xl:block" id="right-sidebar">
+<div class="sticky top-16 -mt-10 max-h-[calc(100vh-5rem)] overflow-y-auto pt-6 space-y-2"><p class="font-medium">On this page</p>
+<ul>
+<li><a :data-current="activeSection === '#submodules'" class="reference internal" href="#submodules">Submodules</a></li>
+<li><a :data-current="activeSection === '#module-stable_worldmodel.wm.dinowm'" class="reference internal" href="#module-stable_worldmodel.wm.dinowm">stable_worldmodel.wm.dinowm module</a><ul>
+<li><a :data-current="activeSection === '#stable_worldmodel.wm.dinowm.Attention'" class="reference internal" href="#stable_worldmodel.wm.dinowm.Attention"><code class="docutils literal notranslate"><span class="pre">Attention</span></code></a><ul>
+<li><a :data-current="activeSection === '#stable_worldmodel.wm.dinowm.Attention.forward'" class="reference internal" href="#stable_worldmodel.wm.dinowm.Attention.forward"><code class="docutils literal notranslate"><span class="pre">Attention.forward()</span></code></a></li>
+<li><a :data-current="activeSection === '#stable_worldmodel.wm.dinowm.Attention.generate_mask_matrix'" class="reference internal" href="#stable_worldmodel.wm.dinowm.Attention.generate_mask_matrix"><code class="docutils literal notranslate"><span class="pre">Attention.generate_mask_matrix()</span></code></a></li>
+</ul>
+</li>
+<li><a :data-current="activeSection === '#stable_worldmodel.wm.dinowm.CausalPredictor'" class="reference internal" href="#stable_worldmodel.wm.dinowm.CausalPredictor"><code class="docutils literal notranslate"><span class="pre">CausalPredictor</span></code></a><ul>
+<li><a :data-current="activeSection === '#stable_worldmodel.wm.dinowm.CausalPredictor.forward'" class="reference internal" href="#stable_worldmodel.wm.dinowm.CausalPredictor.forward"><code class="docutils literal notranslate"><span class="pre">CausalPredictor.forward()</span></code></a></li>
+</ul>
+</li>
+<li><a :data-current="activeSection === '#stable_worldmodel.wm.dinowm.DINOWM'" class="reference internal" href="#stable_worldmodel.wm.dinowm.DINOWM"><code class="docutils literal notranslate"><span class="pre">DINOWM</span></code></a><ul>
+<li><a :data-current="activeSection === '#stable_worldmodel.wm.dinowm.DINOWM.decode'" class="reference internal" href="#stable_worldmodel.wm.dinowm.DINOWM.decode"><code class="docutils literal notranslate"><span class="pre">DINOWM.decode()</span></code></a></li>
+<li><a :data-current="activeSection === '#stable_worldmodel.wm.dinowm.DINOWM.encode'" class="reference internal" href="#stable_worldmodel.wm.dinowm.DINOWM.encode"><code class="docutils literal notranslate"><span class="pre">DINOWM.encode()</span></code></a></li>
+<li><a :data-current="activeSection === '#stable_worldmodel.wm.dinowm.DINOWM.get_cost'" class="reference internal" href="#stable_worldmodel.wm.dinowm.DINOWM.get_cost"><code class="docutils literal notranslate"><span class="pre">DINOWM.get_cost()</span></code></a></li>
+<li><a :data-current="activeSection === '#stable_worldmodel.wm.dinowm.DINOWM.predict'" class="reference internal" href="#stable_worldmodel.wm.dinowm.DINOWM.predict"><code class="docutils literal notranslate"><span class="pre">DINOWM.predict()</span></code></a></li>
+<li><a :data-current="activeSection === '#stable_worldmodel.wm.dinowm.DINOWM.replace_action_in_embedding'" class="reference internal" href="#stable_worldmodel.wm.dinowm.DINOWM.replace_action_in_embedding"><code class="docutils literal notranslate"><span class="pre">DINOWM.replace_action_in_embedding()</span></code></a></li>
+<li><a :data-current="activeSection === '#stable_worldmodel.wm.dinowm.DINOWM.rollout'" class="reference internal" href="#stable_worldmodel.wm.dinowm.DINOWM.rollout"><code class="docutils literal notranslate"><span class="pre">DINOWM.rollout()</span></code></a></li>
+<li><a :data-current="activeSection === '#stable_worldmodel.wm.dinowm.DINOWM.split_embedding'" class="reference internal" href="#stable_worldmodel.wm.dinowm.DINOWM.split_embedding"><code class="docutils literal notranslate"><span class="pre">DINOWM.split_embedding()</span></code></a></li>
+</ul>
+</li>
+<li><a :data-current="activeSection === '#stable_worldmodel.wm.dinowm.Decoder'" class="reference internal" href="#stable_worldmodel.wm.dinowm.Decoder"><code class="docutils literal notranslate"><span class="pre">Decoder</span></code></a><ul>
+<li><a :data-current="activeSection === '#stable_worldmodel.wm.dinowm.Decoder.forward'" class="reference internal" href="#stable_worldmodel.wm.dinowm.Decoder.forward"><code class="docutils literal notranslate"><span class="pre">Decoder.forward()</span></code></a></li>
+</ul>
+</li>
+<li><a :data-current="activeSection === '#stable_worldmodel.wm.dinowm.Embedder'" class="reference internal" href="#stable_worldmodel.wm.dinowm.Embedder"><code class="docutils literal notranslate"><span class="pre">Embedder</span></code></a><ul>
+<li><a :data-current="activeSection === '#stable_worldmodel.wm.dinowm.Embedder.forward'" class="reference internal" href="#stable_worldmodel.wm.dinowm.Embedder.forward"><code class="docutils literal notranslate"><span class="pre">Embedder.forward()</span></code></a></li>
+</ul>
+</li>
+<li><a :data-current="activeSection === '#stable_worldmodel.wm.dinowm.Encoder'" class="reference internal" href="#stable_worldmodel.wm.dinowm.Encoder"><code class="docutils literal notranslate"><span class="pre">Encoder</span></code></a><ul>
+<li><a :data-current="activeSection === '#stable_worldmodel.wm.dinowm.Encoder.forward'" class="reference internal" href="#stable_worldmodel.wm.dinowm.Encoder.forward"><code class="docutils literal notranslate"><span class="pre">Encoder.forward()</span></code></a></li>
+</ul>
+</li>
+<li><a :data-current="activeSection === '#stable_worldmodel.wm.dinowm.FeedForward'" class="reference internal" href="#stable_worldmodel.wm.dinowm.FeedForward"><code class="docutils literal notranslate"><span class="pre">FeedForward</span></code></a><ul>
+<li><a :data-current="activeSection === '#stable_worldmodel.wm.dinowm.FeedForward.forward'" class="reference internal" href="#stable_worldmodel.wm.dinowm.FeedForward.forward"><code class="docutils literal notranslate"><span class="pre">FeedForward.forward()</span></code></a></li>
+</ul>
+</li>
+<li><a :data-current="activeSection === '#stable_worldmodel.wm.dinowm.Quantize'" class="reference internal" href="#stable_worldmodel.wm.dinowm.Quantize"><code class="docutils literal notranslate"><span class="pre">Quantize</span></code></a><ul>
+<li><a :data-current="activeSection === '#stable_worldmodel.wm.dinowm.Quantize.embed_code'" class="reference internal" href="#stable_worldmodel.wm.dinowm.Quantize.embed_code"><code class="docutils literal notranslate"><span class="pre">Quantize.embed_code()</span></code></a></li>
+<li><a :data-current="activeSection === '#stable_worldmodel.wm.dinowm.Quantize.forward'" class="reference internal" href="#stable_worldmodel.wm.dinowm.Quantize.forward"><code class="docutils literal notranslate"><span class="pre">Quantize.forward()</span></code></a></li>
+</ul>
+</li>
+<li><a :data-current="activeSection === '#stable_worldmodel.wm.dinowm.ResBlock'" class="reference internal" href="#stable_worldmodel.wm.dinowm.ResBlock"><code class="docutils literal notranslate"><span class="pre">ResBlock</span></code></a><ul>
+<li><a :data-current="activeSection === '#stable_worldmodel.wm.dinowm.ResBlock.forward'" class="reference internal" href="#stable_worldmodel.wm.dinowm.ResBlock.forward"><code class="docutils literal notranslate"><span class="pre">ResBlock.forward()</span></code></a></li>
+</ul>
+</li>
+<li><a :data-current="activeSection === '#stable_worldmodel.wm.dinowm.Transformer'" class="reference internal" href="#stable_worldmodel.wm.dinowm.Transformer"><code class="docutils literal notranslate"><span class="pre">Transformer</span></code></a><ul>
+<li><a :data-current="activeSection === '#stable_worldmodel.wm.dinowm.Transformer.forward'" class="reference internal" href="#stable_worldmodel.wm.dinowm.Transformer.forward"><code class="docutils literal notranslate"><span class="pre">Transformer.forward()</span></code></a></li>
+</ul>
+</li>
+<li><a :data-current="activeSection === '#stable_worldmodel.wm.dinowm.VQVAE'" class="reference internal" href="#stable_worldmodel.wm.dinowm.VQVAE"><code class="docutils literal notranslate"><span class="pre">VQVAE</span></code></a><ul>
+<li><a :data-current="activeSection === '#stable_worldmodel.wm.dinowm.VQVAE.decode'" class="reference internal" href="#stable_worldmodel.wm.dinowm.VQVAE.decode"><code class="docutils literal notranslate"><span class="pre">VQVAE.decode()</span></code></a></li>
+<li><a :data-current="activeSection === '#stable_worldmodel.wm.dinowm.VQVAE.decode_code'" class="reference internal" href="#stable_worldmodel.wm.dinowm.VQVAE.decode_code"><code class="docutils literal notranslate"><span class="pre">VQVAE.decode_code()</span></code></a></li>
+<li><a :data-current="activeSection === '#stable_worldmodel.wm.dinowm.VQVAE.forward'" class="reference internal" href="#stable_worldmodel.wm.dinowm.VQVAE.forward"><code class="docutils literal notranslate"><span class="pre">VQVAE.forward()</span></code></a></li>
+</ul>
+</li>
+<li><a :data-current="activeSection === '#stable_worldmodel.wm.dinowm.all_reduce'" class="reference internal" href="#stable_worldmodel.wm.dinowm.all_reduce"><code class="docutils literal notranslate"><span class="pre">all_reduce()</span></code></a></li>
+<li><a :data-current="activeSection === '#stable_worldmodel.wm.dinowm.get_world_size'" class="reference internal" href="#stable_worldmodel.wm.dinowm.get_world_size"><code class="docutils literal notranslate"><span class="pre">get_world_size()</span></code></a></li>
+<li><a :data-current="activeSection === '#stable_worldmodel.wm.dinowm.transform'" class="reference internal" href="#stable_worldmodel.wm.dinowm.transform"><code class="docutils literal notranslate"><span class="pre">transform()</span></code></a></li>
+</ul>
+</li>
+<li><a :data-current="activeSection === '#module-stable_worldmodel.wm.dreamer'" class="reference internal" href="#module-stable_worldmodel.wm.dreamer">stable_worldmodel.wm.dreamer module</a></li>
+<li><a :data-current="activeSection === '#module-stable_worldmodel.wm.dummy'" class="reference internal" href="#module-stable_worldmodel.wm.dummy">stable_worldmodel.wm.dummy module</a><ul>
+<li><a :data-current="activeSection === '#stable_worldmodel.wm.dummy.DummyWorldModel'" class="reference internal" href="#stable_worldmodel.wm.dummy.DummyWorldModel"><code class="docutils literal notranslate"><span class="pre">DummyWorldModel</span></code></a><ul>
+<li><a :data-current="activeSection === '#stable_worldmodel.wm.dummy.DummyWorldModel.encode'" class="reference internal" href="#stable_worldmodel.wm.dummy.DummyWorldModel.encode"><code class="docutils literal notranslate"><span class="pre">DummyWorldModel.encode()</span></code></a></li>
+<li><a :data-current="activeSection === '#stable_worldmodel.wm.dummy.DummyWorldModel.get_cost'" class="reference internal" href="#stable_worldmodel.wm.dummy.DummyWorldModel.get_cost"><code class="docutils literal notranslate"><span class="pre">DummyWorldModel.get_cost()</span></code></a></li>
+<li><a :data-current="activeSection === '#stable_worldmodel.wm.dummy.DummyWorldModel.predict'" class="reference internal" href="#stable_worldmodel.wm.dummy.DummyWorldModel.predict"><code class="docutils literal notranslate"><span class="pre">DummyWorldModel.predict()</span></code></a></li>
+</ul>
+</li>
+<li><a :data-current="activeSection === '#stable_worldmodel.wm.dummy.transform'" class="reference internal" href="#stable_worldmodel.wm.dummy.transform"><code class="docutils literal notranslate"><span class="pre">transform()</span></code></a></li>
+</ul>
+</li>
+<li><a :data-current="activeSection === '#module-stable_worldmodel.wm.frame'" class="reference internal" href="#module-stable_worldmodel.wm.frame">stable_worldmodel.wm.frame module</a></li>
+<li><a :data-current="activeSection === '#module-stable_worldmodel.wm.old_dinowm'" class="reference internal" href="#module-stable_worldmodel.wm.old_dinowm">stable_worldmodel.wm.old_dinowm module</a><ul>
+<li><a :data-current="activeSection === '#stable_worldmodel.wm.old_dinowm.Attention'" class="reference internal" href="#stable_worldmodel.wm.old_dinowm.Attention"><code class="docutils literal notranslate"><span class="pre">Attention</span></code></a><ul>
+<li><a :data-current="activeSection === '#stable_worldmodel.wm.old_dinowm.Attention.forward'" class="reference internal" href="#stable_worldmodel.wm.old_dinowm.Attention.forward"><code class="docutils literal notranslate"><span class="pre">Attention.forward()</span></code></a></li>
+<li><a :data-current="activeSection === '#stable_worldmodel.wm.old_dinowm.Attention.generate_mask_matrix'" class="reference internal" href="#stable_worldmodel.wm.old_dinowm.Attention.generate_mask_matrix"><code class="docutils literal notranslate"><span class="pre">Attention.generate_mask_matrix()</span></code></a></li>
+</ul>
+</li>
+<li><a :data-current="activeSection === '#stable_worldmodel.wm.old_dinowm.CausalPredictor'" class="reference internal" href="#stable_worldmodel.wm.old_dinowm.CausalPredictor"><code class="docutils literal notranslate"><span class="pre">CausalPredictor</span></code></a><ul>
+<li><a :data-current="activeSection === '#stable_worldmodel.wm.old_dinowm.CausalPredictor.forward'" class="reference internal" href="#stable_worldmodel.wm.old_dinowm.CausalPredictor.forward"><code class="docutils literal notranslate"><span class="pre">CausalPredictor.forward()</span></code></a></li>
+</ul>
+</li>
+<li><a :data-current="activeSection === '#stable_worldmodel.wm.old_dinowm.DINOWM'" class="reference internal" href="#stable_worldmodel.wm.old_dinowm.DINOWM"><code class="docutils literal notranslate"><span class="pre">DINOWM</span></code></a><ul>
+<li><a :data-current="activeSection === '#stable_worldmodel.wm.old_dinowm.DINOWM.decode_obs'" class="reference internal" href="#stable_worldmodel.wm.old_dinowm.DINOWM.decode_obs"><code class="docutils literal notranslate"><span class="pre">DINOWM.decode_obs()</span></code></a></li>
+<li><a :data-current="activeSection === '#stable_worldmodel.wm.old_dinowm.DINOWM.denormalize_actions'" class="reference internal" href="#stable_worldmodel.wm.old_dinowm.DINOWM.denormalize_actions"><code class="docutils literal notranslate"><span class="pre">DINOWM.denormalize_actions()</span></code></a></li>
+<li><a :data-current="activeSection === '#stable_worldmodel.wm.old_dinowm.DINOWM.denormalize_proprio'" class="reference internal" href="#stable_worldmodel.wm.old_dinowm.DINOWM.denormalize_proprio"><code class="docutils literal notranslate"><span class="pre">DINOWM.denormalize_proprio()</span></code></a></li>
+<li><a :data-current="activeSection === '#stable_worldmodel.wm.old_dinowm.DINOWM.encode'" class="reference internal" href="#stable_worldmodel.wm.old_dinowm.DINOWM.encode"><code class="docutils literal notranslate"><span class="pre">DINOWM.encode()</span></code></a></li>
+<li><a :data-current="activeSection === '#stable_worldmodel.wm.old_dinowm.DINOWM.encode_action'" class="reference internal" href="#stable_worldmodel.wm.old_dinowm.DINOWM.encode_action"><code class="docutils literal notranslate"><span class="pre">DINOWM.encode_action()</span></code></a></li>
+<li><a :data-current="activeSection === '#stable_worldmodel.wm.old_dinowm.DINOWM.encode_obs'" class="reference internal" href="#stable_worldmodel.wm.old_dinowm.DINOWM.encode_obs"><code class="docutils literal notranslate"><span class="pre">DINOWM.encode_obs()</span></code></a></li>
+<li><a :data-current="activeSection === '#stable_worldmodel.wm.old_dinowm.DINOWM.encode_proprio'" class="reference internal" href="#stable_worldmodel.wm.old_dinowm.DINOWM.encode_proprio"><code class="docutils literal notranslate"><span class="pre">DINOWM.encode_proprio()</span></code></a></li>
+<li><a :data-current="activeSection === '#stable_worldmodel.wm.old_dinowm.DINOWM.forward'" class="reference internal" href="#stable_worldmodel.wm.old_dinowm.DINOWM.forward"><code class="docutils literal notranslate"><span class="pre">DINOWM.forward()</span></code></a></li>
+<li><a :data-current="activeSection === '#stable_worldmodel.wm.old_dinowm.DINOWM.normalize_actions'" class="reference internal" href="#stable_worldmodel.wm.old_dinowm.DINOWM.normalize_actions"><code class="docutils literal notranslate"><span class="pre">DINOWM.normalize_actions()</span></code></a></li>
+<li><a :data-current="activeSection === '#stable_worldmodel.wm.old_dinowm.DINOWM.normalize_proprio'" class="reference internal" href="#stable_worldmodel.wm.old_dinowm.DINOWM.normalize_proprio"><code class="docutils literal notranslate"><span class="pre">DINOWM.normalize_proprio()</span></code></a></li>
+<li><a :data-current="activeSection === '#stable_worldmodel.wm.old_dinowm.DINOWM.predict'" class="reference internal" href="#stable_worldmodel.wm.old_dinowm.DINOWM.predict"><code class="docutils literal notranslate"><span class="pre">DINOWM.predict()</span></code></a></li>
+<li><a :data-current="activeSection === '#stable_worldmodel.wm.old_dinowm.DINOWM.replace_actions_from_z'" class="reference internal" href="#stable_worldmodel.wm.old_dinowm.DINOWM.replace_actions_from_z"><code class="docutils literal notranslate"><span class="pre">DINOWM.replace_actions_from_z()</span></code></a></li>
+<li><a :data-current="activeSection === '#stable_worldmodel.wm.old_dinowm.DINOWM.rollout'" class="reference internal" href="#stable_worldmodel.wm.old_dinowm.DINOWM.rollout"><code class="docutils literal notranslate"><span class="pre">DINOWM.rollout()</span></code></a></li>
+<li><a :data-current="activeSection === '#stable_worldmodel.wm.old_dinowm.DINOWM.split_embeddings'" class="reference internal" href="#stable_worldmodel.wm.old_dinowm.DINOWM.split_embeddings"><code class="docutils literal notranslate"><span class="pre">DINOWM.split_embeddings()</span></code></a></li>
+</ul>
+</li>
+<li><a :data-current="activeSection === '#stable_worldmodel.wm.old_dinowm.Decoder'" class="reference internal" href="#stable_worldmodel.wm.old_dinowm.Decoder"><code class="docutils literal notranslate"><span class="pre">Decoder</span></code></a><ul>
+<li><a :data-current="activeSection === '#stable_worldmodel.wm.old_dinowm.Decoder.forward'" class="reference internal" href="#stable_worldmodel.wm.old_dinowm.Decoder.forward"><code class="docutils literal notranslate"><span class="pre">Decoder.forward()</span></code></a></li>
+</ul>
+</li>
+<li><a :data-current="activeSection === '#stable_worldmodel.wm.old_dinowm.DinoV2Encoder'" class="reference internal" href="#stable_worldmodel.wm.old_dinowm.DinoV2Encoder"><code class="docutils literal notranslate"><span class="pre">DinoV2Encoder</span></code></a><ul>
+<li><a :data-current="activeSection === '#stable_worldmodel.wm.old_dinowm.DinoV2Encoder.forward'" class="reference internal" href="#stable_worldmodel.wm.old_dinowm.DinoV2Encoder.forward"><code class="docutils literal notranslate"><span class="pre">DinoV2Encoder.forward()</span></code></a></li>
+</ul>
+</li>
+<li><a :data-current="activeSection === '#stable_worldmodel.wm.old_dinowm.Embedder'" class="reference internal" href="#stable_worldmodel.wm.old_dinowm.Embedder"><code class="docutils literal notranslate"><span class="pre">Embedder</span></code></a><ul>
+<li><a :data-current="activeSection === '#stable_worldmodel.wm.old_dinowm.Embedder.forward'" class="reference internal" href="#stable_worldmodel.wm.old_dinowm.Embedder.forward"><code class="docutils literal notranslate"><span class="pre">Embedder.forward()</span></code></a></li>
+</ul>
+</li>
+<li><a :data-current="activeSection === '#stable_worldmodel.wm.old_dinowm.Encoder'" class="reference internal" href="#stable_worldmodel.wm.old_dinowm.Encoder"><code class="docutils literal notranslate"><span class="pre">Encoder</span></code></a><ul>
+<li><a :data-current="activeSection === '#stable_worldmodel.wm.old_dinowm.Encoder.forward'" class="reference internal" href="#stable_worldmodel.wm.old_dinowm.Encoder.forward"><code class="docutils literal notranslate"><span class="pre">Encoder.forward()</span></code></a></li>
+</ul>
+</li>
+<li><a :data-current="activeSection === '#stable_worldmodel.wm.old_dinowm.FeedForward'" class="reference internal" href="#stable_worldmodel.wm.old_dinowm.FeedForward"><code class="docutils literal notranslate"><span class="pre">FeedForward</span></code></a><ul>
+<li><a :data-current="activeSection === '#stable_worldmodel.wm.old_dinowm.FeedForward.forward'" class="reference internal" href="#stable_worldmodel.wm.old_dinowm.FeedForward.forward"><code class="docutils literal notranslate"><span class="pre">FeedForward.forward()</span></code></a></li>
+</ul>
+</li>
+<li><a :data-current="activeSection === '#stable_worldmodel.wm.old_dinowm.Quantize'" class="reference internal" href="#stable_worldmodel.wm.old_dinowm.Quantize"><code class="docutils literal notranslate"><span class="pre">Quantize</span></code></a><ul>
+<li><a :data-current="activeSection === '#stable_worldmodel.wm.old_dinowm.Quantize.embed_code'" class="reference internal" href="#stable_worldmodel.wm.old_dinowm.Quantize.embed_code"><code class="docutils literal notranslate"><span class="pre">Quantize.embed_code()</span></code></a></li>
+<li><a :data-current="activeSection === '#stable_worldmodel.wm.old_dinowm.Quantize.forward'" class="reference internal" href="#stable_worldmodel.wm.old_dinowm.Quantize.forward"><code class="docutils literal notranslate"><span class="pre">Quantize.forward()</span></code></a></li>
+</ul>
+</li>
+<li><a :data-current="activeSection === '#stable_worldmodel.wm.old_dinowm.ResBlock'" class="reference internal" href="#stable_worldmodel.wm.old_dinowm.ResBlock"><code class="docutils literal notranslate"><span class="pre">ResBlock</span></code></a><ul>
+<li><a :data-current="activeSection === '#stable_worldmodel.wm.old_dinowm.ResBlock.forward'" class="reference internal" href="#stable_worldmodel.wm.old_dinowm.ResBlock.forward"><code class="docutils literal notranslate"><span class="pre">ResBlock.forward()</span></code></a></li>
+</ul>
+</li>
+<li><a :data-current="activeSection === '#stable_worldmodel.wm.old_dinowm.Transformer'" class="reference internal" href="#stable_worldmodel.wm.old_dinowm.Transformer"><code class="docutils literal notranslate"><span class="pre">Transformer</span></code></a><ul>
+<li><a :data-current="activeSection === '#stable_worldmodel.wm.old_dinowm.Transformer.forward'" class="reference internal" href="#stable_worldmodel.wm.old_dinowm.Transformer.forward"><code class="docutils literal notranslate"><span class="pre">Transformer.forward()</span></code></a></li>
+</ul>
+</li>
+<li><a :data-current="activeSection === '#stable_worldmodel.wm.old_dinowm.VQVAE'" class="reference internal" href="#stable_worldmodel.wm.old_dinowm.VQVAE"><code class="docutils literal notranslate"><span class="pre">VQVAE</span></code></a><ul>
+<li><a :data-current="activeSection === '#stable_worldmodel.wm.old_dinowm.VQVAE.decode'" class="reference internal" href="#stable_worldmodel.wm.old_dinowm.VQVAE.decode"><code class="docutils literal notranslate"><span class="pre">VQVAE.decode()</span></code></a></li>
+<li><a :data-current="activeSection === '#stable_worldmodel.wm.old_dinowm.VQVAE.decode_code'" class="reference internal" href="#stable_worldmodel.wm.old_dinowm.VQVAE.decode_code"><code class="docutils literal notranslate"><span class="pre">VQVAE.decode_code()</span></code></a></li>
+<li><a :data-current="activeSection === '#stable_worldmodel.wm.old_dinowm.VQVAE.forward'" class="reference internal" href="#stable_worldmodel.wm.old_dinowm.VQVAE.forward"><code class="docutils literal notranslate"><span class="pre">VQVAE.forward()</span></code></a></li>
+</ul>
+</li>
+<li><a :data-current="activeSection === '#stable_worldmodel.wm.old_dinowm.all_reduce'" class="reference internal" href="#stable_worldmodel.wm.old_dinowm.all_reduce"><code class="docutils literal notranslate"><span class="pre">all_reduce()</span></code></a></li>
+<li><a :data-current="activeSection === '#stable_worldmodel.wm.old_dinowm.get_world_size'" class="reference internal" href="#stable_worldmodel.wm.old_dinowm.get_world_size"><code class="docutils literal notranslate"><span class="pre">get_world_size()</span></code></a></li>
+</ul>
+</li>
+<li><a :data-current="activeSection === '#module-stable_worldmodel.wm.tdmpc'" class="reference internal" href="#module-stable_worldmodel.wm.tdmpc">stable_worldmodel.wm.tdmpc module</a></li>
+<li><a :data-current="activeSection === '#module-stable_worldmodel.wm'" class="reference internal" href="#module-stable_worldmodel.wm">Module contents</a><ul>
+<li><a :data-current="activeSection === '#stable_worldmodel.wm.DINOWM'" class="reference internal" href="#stable_worldmodel.wm.DINOWM"><code class="docutils literal notranslate"><span class="pre">DINOWM</span></code></a><ul>
+<li><a :data-current="activeSection === '#stable_worldmodel.wm.DINOWM.decode'" class="reference internal" href="#stable_worldmodel.wm.DINOWM.decode"><code class="docutils literal notranslate"><span class="pre">DINOWM.decode()</span></code></a></li>
+<li><a :data-current="activeSection === '#stable_worldmodel.wm.DINOWM.encode'" class="reference internal" href="#stable_worldmodel.wm.DINOWM.encode"><code class="docutils literal notranslate"><span class="pre">DINOWM.encode()</span></code></a></li>
+<li><a :data-current="activeSection === '#stable_worldmodel.wm.DINOWM.get_cost'" class="reference internal" href="#stable_worldmodel.wm.DINOWM.get_cost"><code class="docutils literal notranslate"><span class="pre">DINOWM.get_cost()</span></code></a></li>
+<li><a :data-current="activeSection === '#stable_worldmodel.wm.DINOWM.predict'" class="reference internal" href="#stable_worldmodel.wm.DINOWM.predict"><code class="docutils literal notranslate"><span class="pre">DINOWM.predict()</span></code></a></li>
+<li><a :data-current="activeSection === '#stable_worldmodel.wm.DINOWM.replace_action_in_embedding'" class="reference internal" href="#stable_worldmodel.wm.DINOWM.replace_action_in_embedding"><code class="docutils literal notranslate"><span class="pre">DINOWM.replace_action_in_embedding()</span></code></a></li>
+<li><a :data-current="activeSection === '#stable_worldmodel.wm.DINOWM.rollout'" class="reference internal" href="#stable_worldmodel.wm.DINOWM.rollout"><code class="docutils literal notranslate"><span class="pre">DINOWM.rollout()</span></code></a></li>
+<li><a :data-current="activeSection === '#stable_worldmodel.wm.DINOWM.split_embedding'" class="reference internal" href="#stable_worldmodel.wm.DINOWM.split_embedding"><code class="docutils literal notranslate"><span class="pre">DINOWM.split_embedding()</span></code></a></li>
+</ul>
+</li>
+<li><a :data-current="activeSection === '#stable_worldmodel.wm.DummyWorldModel'" class="reference internal" href="#stable_worldmodel.wm.DummyWorldModel"><code class="docutils literal notranslate"><span class="pre">DummyWorldModel</span></code></a><ul>
+<li><a :data-current="activeSection === '#stable_worldmodel.wm.DummyWorldModel.encode'" class="reference internal" href="#stable_worldmodel.wm.DummyWorldModel.encode"><code class="docutils literal notranslate"><span class="pre">DummyWorldModel.encode()</span></code></a></li>
+<li><a :data-current="activeSection === '#stable_worldmodel.wm.DummyWorldModel.get_cost'" class="reference internal" href="#stable_worldmodel.wm.DummyWorldModel.get_cost"><code class="docutils literal notranslate"><span class="pre">DummyWorldModel.get_cost()</span></code></a></li>
+<li><a :data-current="activeSection === '#stable_worldmodel.wm.DummyWorldModel.predict'" class="reference internal" href="#stable_worldmodel.wm.DummyWorldModel.predict"><code class="docutils literal notranslate"><span class="pre">DummyWorldModel.predict()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</div>
+</aside>
+</main>
+</div>
+</div><footer class="py-6 border-t border-border md:py-0">
+<div class="container flex flex-col items-center justify-between gap-4 md:h-24 md:flex-row">
+<div class="flex flex-col items-center gap-4 px-8 md:flex-row md:gap-2 md:px-0">
+<p class="text-sm leading-loose text-center text-muted-foreground md:text-left">© 2025 Built with <a class="font-medium underline underline-offset-4" href="https://www.sphinx-doc.org" rel="noreferrer">Sphinx 8.2.3</a></p>
+</div>
+</div>
+</footer>
+</div>
+<script src="../_static/documentation_options.js?v=2c52d5bf"></script>
+<script src="../_static/doctools.js?v=9bcbadda"></script>
+<script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+<script defer="defer" src="../_static/theme.js?v=073f68d9"></script>
+<script src="../_static/design-tabs.js?v=f930bc37"></script>
+</body>
+</html>

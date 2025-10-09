@@ -7,9 +7,9 @@
 <meta content="white" media="(prefers-color-scheme: light)" name="theme-color"/>
 <meta content="black" media="(prefers-color-scheme: dark)" name="theme-color"/>
 <meta content="width=device-width, initial-scale=1" name="viewport"/>
-<title>OGBench | stable-worldmodel</title>
-<meta content="OGBench | stable-worldmodel" property="og:title"/>
-<meta content="OGBench | stable-worldmodel" name="twitter:title"/>
+<title>DINO-WM Tutorial | stable-worldmodel</title>
+<meta content="DINO-WM Tutorial | stable-worldmodel" property="og:title"/>
+<meta content="DINO-WM Tutorial | stable-worldmodel" name="twitter:title"/>
 <link href="../../_static/pygments.css?v=91c1d931" rel="stylesheet" type="text/css"/>
 <link href="../../_static/theme.css?v=42baaae4" rel="stylesheet" type="text/css"/>
 <link href="../../_static/sphinx-design.min.css?v=95c83b7e" rel="stylesheet" type="text/css"/>
@@ -21,8 +21,8 @@
 <link href="../../_static/favicon.ico" rel="icon"/>
 <link href="../../search/" rel="search" title="Search"/>
 <link href="../../genindex/" rel="index" title="Index"/>
-<link href="cube/" rel="next" title="Cube"/>
-<link href="../simple-pointmaze/" rel="prev" title="Simple Point-Maze"/>
+<link href="../showcase/" rel="next" title="Showcase"/>
+<link href="../quickstart/" rel="prev" title="Quick Start"/>
 <script>
     <!-- Prevent Flash of wrong theme -->
       const userPreference = localStorage.getItem('darkMode');
@@ -80,16 +80,16 @@
 <div class="relative overflow-hidden md:overflow-auto my-4 md:my-0 h-[calc(100vh-8rem)] md:h-auto">
 <div class="overflow-y-auto h-full w-full relative pr-6"><nav class="table w-full min-w-full my-6 lg:my-8">
 <p class="caption" role="heading"><span class="caption-text">Introduction</span></p>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="../../introduction/quickstart/">Quick Start</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../introduction/dinowm/">DINO-WM Tutorial</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../introduction/showcase/">Showcase</a></li>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/">Quick Start</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">DINO-WM Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../showcase/">Showcase</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Worlds</span></p>
-<ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="../simple-pointmaze/">Simple Point-Maze</a></li>
-<li class="toctree-l1 current" x-data="{ expanded: $el.classList.contains('current') ? true : false }"><a :class="{ 'expanded' : expanded }" @click="expanded = !expanded" class="current reference internal expandable" href="#">OGBench<button @click.prevent.stop="expanded = !expanded" type="button"><span class="sr-only"></span><svg fill="currentColor" height="18px" stroke="none" viewbox="0 0 24 24" width="18px" xmlns="http://www.w3.org/2000/svg"><path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"></path></svg></button></a><ul x-show="expanded">
-<li class="toctree-l2"><a class="reference internal" href="cube/">Cube</a></li>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../world/simple-pointmaze/">Simple Point-Maze</a></li>
+<li class="toctree-l1" x-data="{ expanded: $el.classList.contains('current') ? true : false }"><a :class="{ 'expanded' : expanded }" @click="expanded = !expanded" class="reference internal expandable" href="../../world/OGBench/">OGBench<button @click.prevent.stop="expanded = !expanded" type="button"><span class="sr-only"></span><svg fill="currentColor" height="18px" stroke="none" viewbox="0 0 24 24" width="18px" xmlns="http://www.w3.org/2000/svg"><path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"></path></svg></button></a><ul x-show="expanded">
+<li class="toctree-l2"><a class="reference internal" href="../../world/OGBench/cube/">Cube</a></li>
 </ul>
 </li>
 </ul>
@@ -116,16 +116,12 @@
 <path d="M240 856h120V616h240v240h120V496L480 316 240 496v360Zm-80 80V456l320-240 320 240v480H520V696h-80v240H160Zm320-350Z"></path>
 </svg>
 </a>
-<div class="mr-1">/</div><span aria-current="page" class="font-medium text-foreground overflow-hidden text-ellipsis whitespace-nowrap">OGBench</span>
+<div class="mr-1">/</div><span aria-current="page" class="font-medium text-foreground overflow-hidden text-ellipsis whitespace-nowrap">DINO-WM Tutorial</span>
 </nav>
 <div id="content" role="main">
-<section id="ogbench">
-<h1>OGBench<a class="headerlink" href="#ogbench" title="Link to this heading"><svg height="1em" viewbox="0 0 24 24" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"></path></svg></a></h1>
-<div class="toctree-wrapper compound">
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="cube/">Cube</a></li>
-</ul>
-</div>
+<section id="dino-wm-tutorial">
+<h1>DINO-WM Tutorial<a class="headerlink" href="#dino-wm-tutorial" title="Link to this heading"><svg height="1em" viewbox="0 0 24 24" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"></path></svg></a></h1>
+<p>This tutorial introduces DINO-WM at a high level and shows you how to get set up quickly.</p>
 </section>
 </div></div>
 </main>

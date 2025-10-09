@@ -77,9 +77,17 @@
 </a>
 <div class="relative overflow-hidden md:overflow-auto my-4 md:my-0 h-[calc(100vh-8rem)] md:h-auto">
 <div class="overflow-y-auto h-full w-full relative pr-6"><nav class="table w-full min-w-full my-6 lg:my-8">
+<p class="caption" role="heading"><span class="caption-text">Introduction</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../introduction/quickstart/">Quick Start</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../introduction/dinowm/">DINO-WM Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../introduction/showcase/">Showcase</a></li>
+</ul>
 <p class="caption" role="heading"><span class="caption-text">Worlds</span></p>
 <ul>
-<li class="toctree-l1" x-data="{ expanded: $el.classList.contains('current') ? true : false }"><a :class="{ 'expanded' : expanded }" @click="expanded = !expanded" class="reference internal expandable" href="../world/OGBench/">OGBench<button @click.prevent.stop="expanded = !expanded" type="button"><span class="sr-only"></span><svg fill="currentColor" height="18px" stroke="none" viewbox="0 0 24 24" width="18px" xmlns="http://www.w3.org/2000/svg"><path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"></path></svg></button></a><ul class="simple" x-show="expanded">
+<li class="toctree-l1"><a class="reference internal" href="../world/simple-pointmaze/">Simple Point-Maze</a></li>
+<li class="toctree-l1" x-data="{ expanded: $el.classList.contains('current') ? true : false }"><a :class="{ 'expanded' : expanded }" @click="expanded = !expanded" class="reference internal expandable" href="../world/OGBench/">OGBench<button @click.prevent.stop="expanded = !expanded" type="button"><span class="sr-only"></span><svg fill="currentColor" height="18px" stroke="none" viewbox="0 0 24 24" width="18px" xmlns="http://www.w3.org/2000/svg"><path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"></path></svg></button></a><ul x-show="expanded">
+<li class="toctree-l2"><a class="reference internal" href="../world/OGBench/cube/">Cube</a></li>
 </ul>
 </li>
 </ul>

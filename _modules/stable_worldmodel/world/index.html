@@ -18,7 +18,7 @@
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=91c1d931" />
       <link rel="stylesheet" type="text/css" href="../../../_static/theme.css?v=42baaae4" />
       <link rel="stylesheet" type="text/css" href="../../../_static/sphinx-design.min.css?v=95c83b7e" />
-      <link rel="stylesheet" type="text/css" href="../../../_static/css/custom.css?v=b1ec85b4" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/custom.css?v=879ef6c1" />
       <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/fontawesome.min.css" />
       <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/solid.min.css" />
       <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/brands.min.css" />
@@ -40,15 +40,13 @@
       if (!userPreference) {localStorage.setItem('darkMode', mode)}
     </script>
 </head>
-  <body x-data="{ showSidebar: false, showScrollTop: false }" class="min-h-screen font-sans antialiased bg-background text-foreground" :class="{ 'overflow-hidden': showSidebar }">
+  <body x-data="{ showSidebar: false, showScrollTop: false }" class="min-h-screen font-sans antialiased bg-background text-foreground" :class="{ 'overflow-hidden': showSidebar }"@scroll.window="showScrollTop = pageYOffset > 100">
     <div x-cloak x-show="showSidebar" class="fixed inset-0 z-50 overflow-hidden bg-background/80 backdrop-blur-sm md:hidden" @click.self="showSidebar = false"></div><div id="page" class="relative flex flex-col min-h-screen"><a href="#content" class="absolute top-0 left-0 z-[100] block bg-background p-4 text-xl transition -translate-x-full opacity-0 focus:translate-x-0 focus:opacity-100">
       Skip to content
     </a><header
   class="sticky top-0 z-40 w-full border-b shadow-sm border-border supports-backdrop-blur:bg-background/60 bg-background/95 backdrop-blur"><div class="container flex items-center h-14">
     <div class="hidden mr-4 md:flex">
-      <a href="../../../" class="flex items-center mr-6">
-          <img width="24" height="24" class="mr-2 hidden dark:block" src="../../../_static/logo-dark.svg" alt="Logo" />
-        <img width="24" height="24" class="mr-2 dark:hidden" src="../../../_static/logo-light.svg" alt="Logo" /><span class="hidden font-bold sm:inline-block text-clip whitespace-nowrap">stable-worldmodel</span>
+      <a href="../../../" class="flex items-center mr-6"><span class="hidden font-bold sm:inline-block text-clip whitespace-nowrap">stable-worldmodel</span>
       </a></div><button
       class="inline-flex items-center justify-center h-10 px-0 py-2 mr-2 text-base font-medium transition-colors rounded-md hover:text-accent-foreground hover:bg-transparent md:hidden"
       type="button" @click="showSidebar = true">
@@ -79,6 +77,13 @@
 </form>
       </div>
       <nav class="flex items-center space-x-1">
+        <a href="https://github.com/rbalestr-lab/stable-worldmodel" title="Visit repository on GitHub" rel="noopener nofollow">
+          <div
+            class="inline-flex items-center justify-center px-0 text-sm font-medium transition-colors rounded-md disabled:opacity-50 disabled:pointer-events-none hover:bg-accent hover:text-accent-foreground h-9 w-9">
+            <svg height="26px" style="margin-top:-2px;display:inline" viewBox="0 0 45 44" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" clip-rule="evenodd" d="M22.477.927C10.485.927.76 10.65.76 22.647c0 9.596 6.223 17.736 14.853 20.608 1.087.2 1.483-.47 1.483-1.047 0-.516-.019-1.881-.03-3.693-6.04 1.312-7.315-2.912-7.315-2.912-.988-2.51-2.412-3.178-2.412-3.178-1.972-1.346.149-1.32.149-1.32 2.18.154 3.327 2.24 3.327 2.24 1.937 3.318 5.084 2.36 6.321 1.803.197-1.403.759-2.36 1.379-2.903-4.823-.548-9.894-2.412-9.894-10.734 0-2.37.847-4.31 2.236-5.828-.224-.55-.969-2.759.214-5.748 0 0 1.822-.584 5.972 2.226 1.732-.482 3.59-.722 5.437-.732 1.845.01 3.703.25 5.437.732 4.147-2.81 5.967-2.226 5.967-2.226 1.185 2.99.44 5.198.217 5.748 1.392 1.517 2.232 3.457 2.232 5.828 0 8.344-5.078 10.18-9.916 10.717.779.67 1.474 1.996 1.474 4.021 0 2.904-.027 5.247-.027 5.96 0 .58.392 1.256 1.493 1.044C37.981 40.375 44.2 32.24 44.2 22.647c0-11.996-9.726-21.72-21.722-21.72" fill="currentColor"/></svg>
+          </div>
+        </a>
+        
         <button @click="darkMode = darkMode === 'light' ? 'dark' : 'light'"
           class="relative inline-flex items-center justify-center px-0 text-sm font-medium transition-colors rounded-md hover:bg-accent hover:text-accent-foreground h-9 w-9"
           type="button"
@@ -103,9 +108,7 @@
   class="fixed inset-y-0 left-0 md:top-14 z-50 md:z-30 bg-background md:bg-transparent transition-all duration-100 -translate-x-full md:translate-x-0 ml-0 p-6 md:p-0 md:-ml-2 md:h-[calc(100vh-3.5rem)] w-5/6 md:w-full shrink-0 overflow-y-auto border-r border-border md:sticky"
   :aria-hidden="!showSidebar" :class="{ 'translate-x-0': showSidebar }">
 
-    <a href="../../../" class="!justify-start text-sm md:!hidden bg-background">
-        <img width="16" height="16" class="mr-2 hidden dark:block" src="../../../_static/logo-dark.svg" alt="Logo" />
-        <img width="16" height="16" class="mr-2 dark:hidden" src="../../../_static/logo-light.svg" alt="Logo" /><span class="font-bold text-clip whitespace-nowrap">stable-worldmodel</span>
+    <a href="../../../" class="!justify-start text-sm md:!hidden bg-background"><span class="font-bold text-clip whitespace-nowrap">stable-worldmodel</span>
     </a>
 
     <div class="relative overflow-hidden md:overflow-auto my-4 md:my-0 h-[calc(100vh-8rem)] md:h-auto">
@@ -113,7 +116,6 @@
   <p class="caption" role="heading"><span class="caption-text">Introduction</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../introduction/quickstart/">Quick Start</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../introduction/dinowm/">DINO-WM Tutorial</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../introduction/showcase/">Showcase</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
@@ -148,6 +150,11 @@
 </ul>
 </li>
 </ul>
+<p class="caption" role="heading"><span class="caption-text">Tutorials</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../tutorials/dinowm/">Reproducing DINO-WM</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../tutorials/new-world/">Adding New World</a></li>
+</ul>
 <p class="caption" role="heading"><span class="caption-text">Worlds</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../world/simple-pointmaze/">Simple Point-Maze</a></li>
@@ -155,11 +162,6 @@
 <li class="toctree-l2"><a class="reference internal" href="../../../world/OGBench/cube/">Cube</a></li>
 </ul>
 </li>
-</ul>
-<p class="caption" role="heading"><span class="caption-text">Development</span></p>
-<ul>
-<li class="toctree-l1"><a class="reference external" href="https://github.com/rbalestr-lab/stable-worldmodel">Github</a></li>
-<li class="toctree-l1"><a class="reference external" href="https://github.com/rbalestr-lab/stable-worldmodel/tree/main/docs">Contribute to the Docs</a></li>
 </ul>
 
 </nav>
@@ -880,7 +882,22 @@
 </div>
 </div>
 </footer>
-  </div>
+  </div><button id="scrolltop"
+        x-cloak
+        @click="window.scrollTo({top: 0, behavior: 'smooth'})"
+        class="fixed bottom-8 right-8 p-2 z-10 rounded-sm bg-gray-700 text-xs text-white transition-all duration-1000 hover:bg-gray-950 focus:bg-gray-950"
+        :class="{'opacity-0 invisible' : !showScrollTop}"
+>
+  <svg xmlns="http://www.w3.org/2000/svg"
+       height="14"
+       viewBox="0 96 960 960"
+       width="14"
+       class="inline fill-current mb-[2px]"
+       aria-hidden="true">
+    <path d="M450 896V370L202 618l-42-42 320-320 320 320-42 42-248-248v526h-60Z" />
+  </svg>
+  Back to top
+</button>
   
     <script src="../../../_static/documentation_options.js?v=2c52d5bf"></script>
     <script src="../../../_static/doctools.js?v=9bcbadda"></script>

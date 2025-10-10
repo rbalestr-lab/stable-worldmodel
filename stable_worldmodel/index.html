@@ -82,6 +82,7 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../introduction/quickstart/">Quick Start</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../introduction/showcase/">Showcase</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../introduction/contributing/">Contributing</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
 <ul>
@@ -572,7 +573,7 @@ Typer framework with Rich formatting for an enhanced terminal experience.</p>
 </div></blockquote>
 <dl class="py function">
 <dt class="sig sig-object py" id="stable_worldmodel.cli.common">
-<span class="sig-name descname"><span class="pre">common</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">version:</span> <span class="pre">~types.Annotated[bool</span> <span class="pre">|</span> <span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">&lt;typer.models.OptionInfo</span> <span class="pre">object</span> <span class="pre">at</span> <span class="pre">0x7f3be265ea90&gt;]</span> <span class="pre">=</span> <span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/stable_worldmodel/cli/#common"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.cli.common" title="Link to this definition" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#stable_worldmodel.cli.common'"><svg height="1em" viewbox="0 0 24 24" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"></path></svg></a></dt>
+<span class="sig-name descname"><span class="pre">common</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">version:</span> <span class="pre">~types.Annotated[bool</span> <span class="pre">|</span> <span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">&lt;typer.models.OptionInfo</span> <span class="pre">object</span> <span class="pre">at</span> <span class="pre">0x7f13d3d24490&gt;]</span> <span class="pre">=</span> <span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/stable_worldmodel/cli/#common"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.cli.common" title="Link to this definition" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#stable_worldmodel.cli.common'"><svg height="1em" viewbox="0 0 24 24" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"></path></svg></a></dt>
 <dd><p>Common options for all stable-worldmodel commands.</p>
 <p>This callback provides global options that apply to all CLI commands.
 Currently only supports the –version flag.</p>
@@ -585,7 +586,7 @@ Defaults to None.</p>
 </dd></dl>
 <dl class="py function">
 <dt class="sig sig-object py" id="stable_worldmodel.cli.delete">
-<span class="sig-name descname"><span class="pre">delete</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="pre">kind:</span> <span class="pre">~typing.Annotated[str,</span> <span class="pre">&lt;typer.models.ArgumentInfo</span> <span class="pre">object</span> <span class="pre">at</span> <span class="pre">0x7f3be1070090&gt;],</span> <span class="pre">names:</span> <span class="pre">~typing.Annotated[list[str],</span> <span class="pre">&lt;typer.models.ArgumentInfo</span> <span class="pre">object</span> <span class="pre">at</span> <span class="pre">0x7f3be1070110&gt;]</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/stable_worldmodel/cli/#delete"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.cli.delete" title="Link to this definition" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#stable_worldmodel.cli.delete'"><svg height="1em" viewbox="0 0 24 24" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"></path></svg></a></dt>
+<span class="sig-name descname"><span class="pre">delete</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="pre">kind:</span> <span class="pre">~typing.Annotated[str,</span> <span class="pre">&lt;typer.models.ArgumentInfo</span> <span class="pre">object</span> <span class="pre">at</span> <span class="pre">0x7f13cf56a5d0&gt;],</span> <span class="pre">names:</span> <span class="pre">~typing.Annotated[list[str],</span> <span class="pre">&lt;typer.models.ArgumentInfo</span> <span class="pre">object</span> <span class="pre">at</span> <span class="pre">0x7f13cf56a650&gt;]</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/stable_worldmodel/cli/#delete"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.cli.delete" title="Link to this definition" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#stable_worldmodel.cli.delete'"><svg height="1em" viewbox="0 0 24 24" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"></path></svg></a></dt>
 <dd><p>Delete models or datasets from cache directory.</p>
 <p>Permanently removes specified models or datasets from the local cache directory.
 Requires user confirmation before deletion. This operation cannot be undone.</p>
@@ -669,7 +670,7 @@ and variation space in a hierarchical, color-coded format.</p>
 </dd></dl>
 <dl class="py function">
 <dt class="sig sig-object py" id="stable_worldmodel.cli.list_cmd">
-<span class="sig-name descname"><span class="pre">list_cmd</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="pre">kind:</span> <span class="pre">~typing.Annotated[str,</span> <span class="pre">&lt;typer.models.ArgumentInfo</span> <span class="pre">object</span> <span class="pre">at</span> <span class="pre">0x7f3be11c8210&gt;]</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/stable_worldmodel/cli/#list_cmd"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.cli.list_cmd" title="Link to this definition" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#stable_worldmodel.cli.list_cmd'"><svg height="1em" viewbox="0 0 24 24" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"></path></svg></a></dt>
+<span class="sig-name descname"><span class="pre">list_cmd</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="pre">kind:</span> <span class="pre">~typing.Annotated[str,</span> <span class="pre">&lt;typer.models.ArgumentInfo</span> <span class="pre">object</span> <span class="pre">at</span> <span class="pre">0x7f13d8234090&gt;]</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/stable_worldmodel/cli/#list_cmd"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.cli.list_cmd" title="Link to this definition" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#stable_worldmodel.cli.list_cmd'"><svg height="1em" viewbox="0 0 24 24" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"></path></svg></a></dt>
 <dd><p>List cached stable-worldmodel resources.</p>
 <p>Displays a table of all cached models, datasets, or worlds stored in the
 stable-worldmodel cache directory. Useful for seeing what resources are
@@ -697,7 +698,7 @@ available locally.</p>
 </dd></dl>
 <dl class="py function">
 <dt class="sig sig-object py" id="stable_worldmodel.cli.show">
-<span class="sig-name descname"><span class="pre">show</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="pre">kind:</span> <span class="pre">~typing.Annotated[str,</span> <span class="pre">&lt;typer.models.ArgumentInfo</span> <span class="pre">object</span> <span class="pre">at</span> <span class="pre">0x7f3be11c9410&gt;],</span> <span class="pre">names:</span> <span class="pre">~types.Annotated[list[str]</span> <span class="pre">|</span> <span class="pre">None,</span> <span class="pre">&lt;typer.models.ArgumentInfo</span> <span class="pre">object</span> <span class="pre">at</span> <span class="pre">0x7f3be1067e50&gt;]</span> <span class="pre">=</span> <span class="pre">None,</span> <span class="pre">all:</span> <span class="pre">~typing.Annotated[bool,</span> <span class="pre">&lt;typer.models.OptionInfo</span> <span class="pre">object</span> <span class="pre">at</span> <span class="pre">0x7f3be1067f50&gt;]</span> <span class="pre">=</span> <span class="pre">False</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/stable_worldmodel/cli/#show"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.cli.show" title="Link to this definition" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#stable_worldmodel.cli.show'"><svg height="1em" viewbox="0 0 24 24" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"></path></svg></a></dt>
+<span class="sig-name descname"><span class="pre">show</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="pre">kind:</span> <span class="pre">~typing.Annotated[str,</span> <span class="pre">&lt;typer.models.ArgumentInfo</span> <span class="pre">object</span> <span class="pre">at</span> <span class="pre">0x7f13d0dbfe10&gt;],</span> <span class="pre">names:</span> <span class="pre">~types.Annotated[list[str]</span> <span class="pre">|</span> <span class="pre">None,</span> <span class="pre">&lt;typer.models.ArgumentInfo</span> <span class="pre">object</span> <span class="pre">at</span> <span class="pre">0x7f13d2f4be10&gt;]</span> <span class="pre">=</span> <span class="pre">None,</span> <span class="pre">all:</span> <span class="pre">~typing.Annotated[bool,</span> <span class="pre">&lt;typer.models.OptionInfo</span> <span class="pre">object</span> <span class="pre">at</span> <span class="pre">0x7f13cf514310&gt;]</span> <span class="pre">=</span> <span class="pre">False</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/stable_worldmodel/cli/#show"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.cli.show" title="Link to this definition" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#stable_worldmodel.cli.show'"><svg height="1em" viewbox="0 0 24 24" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"></path></svg></a></dt>
 <dd><p>Show detailed information about datasets or worlds.</p>
 <p>Displays comprehensive information about specified datasets or world environments
 including their structure, spaces, and variations. Information is presented in
@@ -964,128 +965,6 @@ the specified kind. Defaults to False.</p></li>
 <section id="module-stable_worldmodel.spaces">
 <span id="stable-worldmodel-spaces-module"></span><h2>stable_worldmodel.spaces module<a class="headerlink" href="#module-stable_worldmodel.spaces" title="Link to this heading" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#module-stable_worldmodel.spaces'"><svg height="1em" viewbox="0 0 24 24" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"></path></svg></a></h2>
 <p>Extended Gymnasium spaces with state tracking and constraint support.</p>
-<p>This module provides custom Gymnasium space classes that extend the standard
-Gymnasium spaces with additional functionality for managing environment variations
-and initial conditions. Unlike traditional Gymnasium spaces which primarily define
-boundaries for action and observation spaces in RL environments, these extended
-spaces are designed to:</p>
-<ol class="arabic simple">
-<li><p><strong>Track current state</strong>: Each space maintains a current value in addition to
-defining valid boundaries.</p></li>
-<li><p><strong>Support initial values</strong>: Spaces can be initialized with specific values that
-represent the starting state for environment episodes.</p></li>
-<li><p><strong>Enable constraint functions</strong>: Optional user-defined predicates for rejection
-sampling ensure sampled values satisfy custom conditions.</p></li>
-<li><p><strong>Provide ordered sampling</strong>: Dict spaces support explicit sampling order for
-handling dependencies between variables.</p></li>
-</ol>
-<p>These spaces are particularly useful for defining procedurally generated environments
-or environments with configurable parameters, where each space represents a variable
-aspect of the environment that can be sampled, reset, and validated.</p>
-<dl class="simple">
-<dt>Classes:</dt><dd><dl class="simple">
-<dt>Discrete: Extended discrete space with state tracking and constraint support.</dt><dd><p>Supports integer values in range [0, n) with optional constraint function.</p>
-</dd>
-<dt>MultiDiscrete: Extended multi-discrete space with state tracking.</dt><dd><p>Represents multiple discrete values with different ranges (nvec).</p>
-</dd>
-<dt>Box: Extended continuous box space with constraint support.</dt><dd><p>Represents bounded continuous values with configurable shape and dtype.</p>
-</dd>
-<dt>RGBBox: Specialized box space for RGB image data.</dt><dd><p>Automatically constrains to 3-channel uint8 images with values [0, 255].</p>
-</dd>
-<dt>Dict: Extended dictionary space with ordered sampling and nesting support.</dt><dd><p>Composes multiple spaces with dependencies and hierarchical structure.</p>
-</dd>
-</dl>
-</dd>
-</dl>
-<p>Typical usage example:</p>
-<blockquote>
-<div><p>Create a constrained discrete space that only samples even numbers:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><code><span id="line-1"><span class="kn">from</span><span class="w"> </span><span class="nn">stable_worldmodel</span><span class="w"> </span><span class="kn">import</span> <span class="n">spaces</span>
-</span><span id="line-2">
-</span><span id="line-3"><span class="n">even_space</span> <span class="o">=</span> <span class="n">spaces</span><span class="o">.</span><span class="n">Discrete</span><span class="p">(</span>
-</span><span id="line-4">    <span class="n">n</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">init_value</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">constrain_fn</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span> <span class="o">%</span> <span class="mi">2</span> <span class="o">==</span> <span class="mi">0</span>
-</span><span id="line-5"><span class="p">)</span>
-</span><span id="line-6">
-</span><span id="line-7"><span class="c1"># Sample valid even numbers</span>
-</span><span id="line-8"><span class="n">value</span> <span class="o">=</span> <span class="n">even_space</span><span class="o">.</span><span class="n">sample</span><span class="p">()</span>
-</span><span id="line-9"><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Sampled: </span><span class="si">{</span><span class="n">value</span><span class="si">}</span><span class="s2">, Current: </span><span class="si">{</span><span class="n">even_space</span><span class="o">.</span><span class="n">value</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
-</span><span id="line-10">
-</span><span id="line-11"><span class="c1"># Reset to initial value</span>
-</span><span id="line-12"><span class="n">even_space</span><span class="o">.</span><span class="n">reset</span><span class="p">()</span>
-</span></code></pre></div>
-</div>
-<p>Create a nested dictionary space with sampling order:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><code><span id="line-1"><span class="kn">from</span><span class="w"> </span><span class="nn">stable_worldmodel</span><span class="w"> </span><span class="kn">import</span> <span class="n">spaces</span>
-</span><span id="line-2"><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
-</span><span id="line-3">
-</span><span id="line-4"><span class="n">env_config</span> <span class="o">=</span> <span class="n">spaces</span><span class="o">.</span><span class="n">Dict</span><span class="p">(</span>
-</span><span id="line-5">    <span class="p">{</span>
-</span><span id="line-6">        <span class="s2">"difficulty"</span><span class="p">:</span> <span class="n">spaces</span><span class="o">.</span><span class="n">Discrete</span><span class="p">(</span><span class="n">n</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">init_value</span><span class="o">=</span><span class="mi">0</span><span class="p">),</span>
-</span><span id="line-7">        <span class="s2">"agent_pos"</span><span class="p">:</span> <span class="n">spaces</span><span class="o">.</span><span class="n">Box</span><span class="p">(</span>
-</span><span id="line-8">            <span class="n">low</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]),</span>
-</span><span id="line-9">            <span class="n">high</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">10</span><span class="p">,</span> <span class="mi">10</span><span class="p">]),</span>
-</span><span id="line-10">            <span class="n">init_value</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">5</span><span class="p">,</span> <span class="mi">5</span><span class="p">]),</span>
-</span><span id="line-11">        <span class="p">),</span>
-</span><span id="line-12">        <span class="s2">"goal_pos"</span><span class="p">:</span> <span class="n">spaces</span><span class="o">.</span><span class="n">Box</span><span class="p">(</span>
-</span><span id="line-13">            <span class="n">low</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]),</span>
-</span><span id="line-14">            <span class="n">high</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">10</span><span class="p">,</span> <span class="mi">10</span><span class="p">]),</span>
-</span><span id="line-15">            <span class="n">init_value</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">9</span><span class="p">,</span> <span class="mi">9</span><span class="p">]),</span>
-</span><span id="line-16">        <span class="p">),</span>
-</span><span id="line-17">    <span class="p">},</span>
-</span><span id="line-18">    <span class="n">sampling_order</span><span class="o">=</span><span class="p">[</span><span class="s2">"difficulty"</span><span class="p">,</span> <span class="s2">"goal_pos"</span><span class="p">,</span> <span class="s2">"agent_pos"</span><span class="p">],</span>
-</span><span id="line-19"><span class="p">)</span>
-</span><span id="line-20">
-</span><span id="line-21"><span class="c1"># Sample respects the specified order</span>
-</span><span id="line-22"><span class="n">config</span> <span class="o">=</span> <span class="n">env_config</span><span class="o">.</span><span class="n">sample</span><span class="p">()</span>
-</span><span id="line-23">
-</span><span id="line-24"><span class="c1"># Access nested values</span>
-</span><span id="line-25"><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Difficulty: </span><span class="si">{</span><span class="n">config</span><span class="p">[</span><span class="s1">'difficulty'</span><span class="p">]</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
-</span></code></pre></div>
-</div>
-<p>Create an RGB image space:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><code><span id="line-1"><span class="kn">from</span><span class="w"> </span><span class="nn">stable_worldmodel</span><span class="w"> </span><span class="kn">import</span> <span class="n">spaces</span>
-</span><span id="line-2"><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
-</span><span id="line-3">
-</span><span id="line-4"><span class="n">image_space</span> <span class="o">=</span> <span class="n">spaces</span><span class="o">.</span><span class="n">RGBBox</span><span class="p">(</span>
-</span><span id="line-5">    <span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="mi">64</span><span class="p">,</span> <span class="mi">64</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span> <span class="n">init_value</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">64</span><span class="p">,</span> <span class="mi">64</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">uint8</span><span class="p">)</span>
-</span><span id="line-6"><span class="p">)</span>
-</span><span id="line-7">
-</span><span id="line-8"><span class="c1"># Sample random RGB image</span>
-</span><span id="line-9"><span class="n">img</span> <span class="o">=</span> <span class="n">image_space</span><span class="o">.</span><span class="n">sample</span><span class="p">()</span>
-</span></code></pre></div>
-</div>
-</div></blockquote>
-<dl class="field-list simple">
-<dt class="field-odd">ivar This module does not define any module-level variables.<span class="colon">:</span></dt>
-<dd class="field-odd"><p></p></dd>
-</dl>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p>These spaces extend <code class="docutils literal notranslate"><span class="pre">gymnasium.spaces</span></code> classes and maintain API compatibility
-while adding state management features. The <code class="docutils literal notranslate"><span class="pre">sample()</span></code> method performs
-rejection sampling when a <code class="docutils literal notranslate"><span class="pre">constrain_fn</span></code> is provided, which may impact
-performance if constraints are difficult to satisfy.</p>
-<dl class="simple">
-<dt>All spaces support the following additional parameters:</dt><dd><ul class="simple">
-<li><p><code class="docutils literal notranslate"><span class="pre">init_value</span></code>: Initial value for the space (returned by reset)</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">constrain_fn</span></code>: Optional callable returning bool for validation</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">max_tries</span></code>: Maximum rejection sampling attempts (default: 1000)</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">warn_after_s</span></code>: Warning threshold for slow sampling (default: 5.0s)</p></li>
-</ul>
-</dd>
-</dl>
-<p><strong>Important</strong>: When accessing values in constraint functions for nested Dict
-spaces, prefer using <code class="docutils literal notranslate"><span class="pre">space.value['key']['key2']</span></code> over
-<code class="docutils literal notranslate"><span class="pre">space['key']['key2'].value</span></code>. The <code class="docutils literal notranslate"><span class="pre">.value</span></code> property recursively
-constructs the complete value dictionary top-down with all current information,
-while direct space access only retrieves the individual subspace’s value.</p>
-</div>
-<div class="admonition seealso">
-<p class="admonition-title">See also</p>
-<p>stable_worldmodel.world: World class that composes these spaces
-stable_worldmodel.envs: Environment implementations using these spaces
-gymnasium.spaces: Base Gymnasium spaces documentation</p>
-</div>
 <dl class="py class">
 <dt class="sig sig-object py" id="stable_worldmodel.spaces.Box">
 <em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Box</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">init_value</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">constrain_fn</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/stable_worldmodel/spaces/#Box"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.spaces.Box" title="Link to this definition" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#stable_worldmodel.spaces.Box'"><svg height="1em" viewbox="0 0 24 24" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"></path></svg></a></dt>
@@ -1980,77 +1859,7 @@ and executes the command in a subprocess.</p>
 <dt class="sig sig-object py" id="stable_worldmodel.world.World">
 <em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">World</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">env_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_envs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">image_shape</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">tuple</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">goal_shape</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">tuple</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">goal_transform</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Callable</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">image_transform</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Callable</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seed</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">2349867</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_episode_steps</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">100</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/stable_worldmodel/world/#World"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.world.World" title="Link to this definition" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#stable_worldmodel.world.World'"><svg height="1em" viewbox="0 0 24 24" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"></path></svg></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
-<p>A high-level environment manager for vectorized gym environments with support for
-goal-conditioned tasks, video recording, dataset generation, and evaluation.</p>
-<p>The <cite>World</cite> class wraps multiple parallel environments using Gymnasium’s vectorized API and
-integrates with custom wrappers (e.g., <cite>MegaWrapper</cite>) to handle image-based observations and goals.
-It provides utility methods for recording trajectories, saving datasets in HuggingFace Datasets .parquet format,
-evaluating policies, and exporting video rollouts.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>env_name</strong> (<em>str</em>) – The name of the Gymnasium environment to instantiate.</p></li>
-<li><p><strong>num_envs</strong> (<em>int</em>) – Number of parallel environments to run.</p></li>
-<li><p><strong>image_shape</strong> (<em>tuple</em><em>[</em><em>int</em><em>]</em>) – Shape of image observations (C, H, W).</p></li>
-<li><p><strong>image_transform</strong> (<em>callable</em><em>, </em><em>optional</em>) – Transformation function applied to image observations.</p></li>
-<li><p><strong>goal_shape</strong> (<em>tuple</em><em>[</em><em>int</em><em>]</em><em>, </em><em>optional</em>) – Shape of goal image observations.</p></li>
-<li><p><strong>goal_transform</strong> (<em>callable</em><em>, </em><em>optional</em>) – Transformation function applied to goal observations.</p></li>
-<li><p><strong>seed</strong> (<em>int</em>) – Random seed for environment initialization and goal sampling.</p></li>
-<li><p><strong>max_episode_steps</strong> (<em>int</em><em>, </em><em>default=100</em>) – Maximum number of steps per episode.</p></li>
-<li><p><strong>**kwargs</strong> (<em>dict</em>) – Additional keyword arguments passed to <cite>gym.make_vec</cite>.</p></li>
-<li><p><strong>Attributes</strong></p></li>
-<li><p><strong>----------</strong></p></li>
-<li><p><strong>envs</strong> (<em>gym.vector.VectorEnv</em>) – Vectorized environments wrapped with <cite>MegaWrapper</cite>.</p></li>
-<li><p><strong>goal_envs</strong> (<em>gym.vector.VectorEnv</em>) – Separate vectorized environments for goal sampling.</p></li>
-<li><p><strong>seed</strong> – Random seed for reproducibility.</p></li>
-<li><p><strong>goal_seed</strong> (<em>int</em>) – Secondary random seed for sampling goals.</p></li>
-<li><p><strong>policy</strong> (<em>object</em>) – Policy instance with <cite>get_action</cite> and <cite>set_env</cite> methods.</p></li>
-<li><p><strong>Properties</strong></p></li>
-<li><p><strong>----------</strong></p></li>
-<li><p><strong>num_envs</strong> – Number of environments in the vectorized setup.</p></li>
-<li><p><strong>observation_space</strong> (<em>gym.Space</em>) – Observation space of the environments.</p></li>
-<li><p><strong>action_space</strong> (<em>gym.Space</em>) – Action space of the environments.</p></li>
-<li><p><strong>single_action_space</strong> (<em>gym.Space</em>) – Action space for a single environment.</p></li>
-<li><p><strong>single_observation_space</strong> (<em>gym.Space</em>) – Observation space for a single environment.</p></li>
-<li><p><strong>Methods</strong></p></li>
-<li><p><strong>-------</strong></p></li>
-<li><p><strong>close</strong><strong>(</strong><strong>**kwargs</strong><strong>)</strong> – <p>Closes all managed environments.</p>
-</p></li>
-<li><p><strong>denormalize</strong><strong>(</strong><strong>x</strong><strong>)</strong> – Converts normalized images in [-1, 1] back to [0, 1].</p></li>
-<li><p><strong>set_policy</strong><strong>(</strong><strong>policy</strong><strong>)</strong> – Assigns a policy object for interaction.</p></li>
-<li><p><strong>reset</strong><strong>(</strong><strong>seed=None</strong> – Resets the environments and returns initial states and infos.</p></li>
-<li><p><strong>options=None</strong><strong>)</strong> – Resets the environments and returns initial states and infos.</p></li>
-<li><p><strong>step</strong><strong>(</strong><strong>)</strong> – Steps all environments using the current policy’s actions.</p></li>
-<li><p><strong>__iter__</strong><strong>(</strong><strong>)</strong> – Prepares the iterator by resetting environments.</p></li>
-<li><p><strong>__next__</strong><strong>(</strong><strong>)</strong> – Iterates over environment states until all episodes are done.</p></li>
-<li><p><strong>record_video</strong><strong>(</strong><strong>video_path</strong> – Records a rollout video for each environment.</p></li>
-<li><p><strong>max_steps=500</strong> – Records a rollout video for each environment.</p></li>
-<li><p><strong>fps=30</strong> – Records a rollout video for each environment.</p></li>
-<li><p><strong>seed=None</strong> – Records a rollout video for each environment.</p></li>
-<li><p><strong>options=None</strong><strong>)</strong> – Records a rollout video for each environment.</p></li>
-<li><p><strong>record_dataset</strong><strong>(</strong><strong>dataset_name</strong> – Collects episodes into a HuggingFace Dataset and saves as Parquet shards.</p></li>
-<li><p><strong>episodes=10</strong> – Collects episodes into a HuggingFace Dataset and saves as Parquet shards.</p></li>
-<li><p><strong>seed=None</strong> – Collects episodes into a HuggingFace Dataset and saves as Parquet shards.</p></li>
-<li><p><strong>options=None</strong><strong>)</strong> – Collects episodes into a HuggingFace Dataset and saves as Parquet shards.</p></li>
-<li><p><strong>record_video_from_dataset</strong><strong>(</strong><strong>video_path</strong> – Replays stored dataset episodes and exports them as videos.</p></li>
-<li><p><strong>dataset_name</strong> – Replays stored dataset episodes and exports them as videos.</p></li>
-<li><p><strong>episode_idx</strong> – Replays stored dataset episodes and exports them as videos.</p></li>
-<li><p><strong>max_steps=500</strong> – Replays stored dataset episodes and exports them as videos.</p></li>
-<li><p><strong>fps=30</strong> – Replays stored dataset episodes and exports them as videos.</p></li>
-<li><p><strong>num_proc=4</strong><strong>)</strong> – Replays stored dataset episodes and exports them as videos.</p></li>
-<li><p><strong>evaluate</strong><strong>(</strong><strong>episodes=10</strong> – Evaluates the policy across multiple episodes and computes metrics.</p></li>
-<li><p><strong>eval_keys=None</strong> – Evaluates the policy across multiple episodes and computes metrics.</p></li>
-<li><p><strong>seed=None</strong> – Evaluates the policy across multiple episodes and computes metrics.</p></li>
-<li><p><strong>options=None</strong><strong>)</strong> – Evaluates the policy across multiple episodes and computes metrics.</p></li>
-<li><p><strong>Notes</strong></p></li>
-<li><p><strong>-----</strong></p></li>
-<li><p><strong>tracking.</strong> (<em>- Supports parallelized rollout collection with episode</em>)</p></li>
-<li><p><strong>replay.</strong> (<em>- Integrates tightly with HuggingFace Datasets for storage and</em>)</p></li>
-<li><p><strong>metrics.</strong> (<em>- Provides success-rate evaluation with optional custom</em>)</p></li>
-<li><p><strong>encoding.</strong> (<em>- Video export uses imageio with libx264</em>)</p></li>
-</ul>
-</dd>
-</dl>
+<p>A high-level environment manager for vectorized gym environments with support for</p>
 <dl class="py property">
 <dt class="sig sig-object py" id="stable_worldmodel.world.World.action_space">
 <em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">action_space</span></span><a class="headerlink" href="#stable_worldmodel.world.World.action_space" title="Link to this definition" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#stable_worldmodel.world.World.action_space'"><svg height="1em" viewbox="0 0 24 24" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"></path></svg></a></dt>
@@ -2062,42 +1871,7 @@ evaluating policies, and exporting video rollouts.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="stable_worldmodel.world.World.evaluate">
 <span class="sig-name descname"><span class="pre">evaluate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">episodes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">eval_keys</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">options</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/stable_worldmodel/world/#World.evaluate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.world.World.evaluate" title="Link to this definition" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#stable_worldmodel.world.World.evaluate'"><svg height="1em" viewbox="0 0 24 24" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"></path></svg></a></dt>
-<dd><p>Evaluate the current policy across multiple episodes and compute metrics.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>episodes</strong> (<em>int</em><em>, </em><em>default=10</em>) – Number of complete episodes to evaluate.</p></li>
-<li><p><strong>eval_keys</strong> (<em>list</em><em>[</em><em>str</em><em>]</em><em>, </em><em>optional</em>) – Additional keys in <code class="docutils literal notranslate"><span class="pre">infos</span></code> to log as episode-wise metrics. Each key will
-produce a vector of length <code class="docutils literal notranslate"><span class="pre">episodes</span></code> in the returned metrics dict.</p></li>
-<li><p><strong>seed</strong> (<em>int</em><em>, </em><em>optional</em>) – Base seed for the initial reset; per-env continuation seeds derive from this value.</p></li>
-<li><p><strong>options</strong> (<em>dict</em><em>, </em><em>optional</em>) – Env reset options.</p></li>
-<li><p><strong>Returns</strong></p></li>
-<li><p><strong>-------</strong></p></li>
-<li><p><strong>dict</strong> – <p>Metrics dictionary with the following entries:
-- <code class="docutils literal notranslate"><span class="pre">"success_rate"</span></code> : float</p>
-<blockquote>
-<div><p>Percentage of successful episodes (terminations) in [0, 100].</p>
-</div></blockquote>
-<ul>
-<li><dl class="simple">
-<dt><code class="docutils literal notranslate"><span class="pre">"episode_successes"</span></code><span class="classifier">np.ndarray, shape (episodes,)</span></dt><dd><p>Boolean array indicating success (True) or failure (False) per episode.</p>
-</dd>
-</dl>
-</li>
-<li><dl class="simple">
-<dt><code class="docutils literal notranslate"><span class="pre">"seeds"</span></code><span class="classifier">np.ndarray, shape (episodes,)</span></dt><dd><p>The per-episode seeds used for evaluation.</p>
-</dd>
-</dl>
-</li>
-<li><p>Additional arrays for each key in <code class="docutils literal notranslate"><span class="pre">eval_keys</span></code>, each of shape (episodes,).</p></li>
-</ul>
-</p></li>
-<li><p><strong>Notes</strong></p></li>
-<li><p><strong>-----</strong></p></li>
-<li><p><strong>auto-reset.</strong> (<em>Success is counted using the terminated signal observed prior to an env's</em>)</p></li>
-</ul>
-</dd>
-</dl>
+<dd><p>Evaluate the current policy over a number of episodes and return metrics.</p>
 </dd></dl>
 <dl class="py property">
 <dt class="sig sig-object py" id="stable_worldmodel.world.World.num_envs">
@@ -2111,88 +1885,16 @@ produce a vector of length <code class="docutils literal notranslate"><span clas
 <dt class="sig sig-object py" id="stable_worldmodel.world.World.record_dataset">
 <span class="sig-name descname"><span class="pre">record_dataset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dataset_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">episodes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cache_dir</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">options</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/stable_worldmodel/world/#World.record_dataset"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.world.World.record_dataset" title="Link to this definition" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#stable_worldmodel.world.World.record_dataset'"><svg height="1em" viewbox="0 0 24 24" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"></path></svg></a></dt>
 <dd><p>Collect episodes with the current policy and save them as a HuggingFace Dataset (Parquet shards).</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>dataset_name</strong> (<em>str</em>) – Name of the dataset directory under the stable_worldmodel cache dir.</p></li>
-<li><p><strong>episodes</strong> (<em>int</em><em>, </em><em>default=10</em>) – Number of <em>complete</em> episodes to record (across all envs, total).</p></li>
-<li><p><strong>seed</strong> (<em>int</em><em>, </em><em>optional</em>) – Base seed used for the initial reset; subsequent resets for per-env continuation
-derive unique seeds from this value.</p></li>
-<li><p><strong>options</strong> (<em>dict</em><em>, </em><em>optional</em>) – Env reset options.</p></li>
-<li><p><strong>Effects</strong> (<em>Side</em>)</p></li>
-<li><p><strong>------------</strong></p></li>
-<li><p><strong>files.</strong> (<em>- Creates {cache_dir}/{dataset_name}/data_shard_{NNNNN}.parquet</em>)</p></li>
-<li><p><strong>dropped</strong><strong>)</strong><strong>.</strong> (<em>- Appends only complete episodes to the shard</em><em> (</em><em>partial episodes are</em>)</p></li>
-<li><p><strong>shards.</strong> (<em>- Re-indexes episode_idx to be contiguous across</em>)</p></li>
-<li><p><strong>Schema</strong> (<em>Dataset</em>)</p></li>
-<li><p><strong>--------------</strong></p></li>
-<li><p><strong>minimum</strong><strong>)</strong> (<em>The resulting dataset includes</em><em> (</em><em>at</em>) – <ul>
-<li><p><code class="docutils literal notranslate"><span class="pre">pixels</span></code> : <code class="xref py py-class docutils literal notranslate"><span class="pre">datasets.Image</span></code></p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">episode_idx</span></code> : <code class="xref py py-class docutils literal notranslate"><span class="pre">datasets.Value("int32")</span></code></p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">step_idx</span></code> : <code class="xref py py-class docutils literal notranslate"><span class="pre">datasets.Value("int32")</span></code></p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">episode_len</span></code> : <code class="xref py py-class docutils literal notranslate"><span class="pre">datasets.Value("int32")</span></code></p></li>
-</ul>
-</p></li>
-<li><p><strong>available</strong> (<em>If</em>) – <ul>
-<li><p><code class="docutils literal notranslate"><span class="pre">goal</span></code> : <code class="xref py py-class docutils literal notranslate"><span class="pre">datasets.Image</span></code></p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">action</span></code> : array-like feature shaped like the env action space</p></li>
-<li><p>Per-step scalar/vector fields exposed by the wrapper in <code class="docutils literal notranslate"><span class="pre">infos</span></code></p></li>
-</ul>
-</p></li>
-<li><p><strong>include</strong> (<em>it may also</em>) – <ul>
-<li><p><code class="docutils literal notranslate"><span class="pre">goal</span></code> : <code class="xref py py-class docutils literal notranslate"><span class="pre">datasets.Image</span></code></p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">action</span></code> : array-like feature shaped like the env action space</p></li>
-<li><p>Per-step scalar/vector fields exposed by the wrapper in <code class="docutils literal notranslate"><span class="pre">infos</span></code></p></li>
-</ul>
-</p></li>
-<li><p><strong>Notes</strong></p></li>
-<li><p><strong>-----</strong></p></li>
-<li><p><strong>episodes.</strong> (<em>- The function handles action shifting to ensure alignment with continuing</em>)</p></li>
-<li><p><strong>exist.</strong> (<em>- Sharding logic ensures a new shard index is chosen if prior shards</em>)</p></li>
-<li><p><strong>shard.</strong> (<em>- Only the first episodes fully completed episodes are persisted for the new</em>)</p></li>
-</ul>
-</dd>
-</dl>
 </dd></dl>
 <dl class="py method">
 <dt class="sig sig-object py" id="stable_worldmodel.world.World.record_video">
 <span class="sig-name descname"><span class="pre">record_video</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">video_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_steps</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">500</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fps</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">30</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">options</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/stable_worldmodel/world/#World.record_video"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.world.World.record_video" title="Link to this definition" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#stable_worldmodel.world.World.record_video'"><svg height="1em" viewbox="0 0 24 24" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"></path></svg></a></dt>
 <dd><p>Record rollout videos for each environment under the current policy.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>video_path</strong> (<em>str</em><em> or </em><em>Path</em>) – Directory to which MP4 files will be written; one file per env named <code class="docutils literal notranslate"><span class="pre">env_{i}.mp4</span></code>.</p></li>
-<li><p><strong>max_steps</strong> (<em>int</em><em>, </em><em>default=500</em>) – Maximum number of steps to record per environment.</p></li>
-<li><p><strong>fps</strong> (<em>int</em><em>, </em><em>default=30</em>) – Frames per second for the output video.</p></li>
-<li><p><strong>seed</strong> (<em>int</em><em>, </em><em>optional</em>) – Seed to use for the initial reset prior to recording.</p></li>
-<li><p><strong>options</strong> (<em>dict</em><em>, </em><em>optional</em>) – Env reset options.</p></li>
-<li><p><strong>Notes</strong></p></li>
-<li><p><strong>-----</strong></p></li>
-<li><p><strong>"goal"</strong> (<em>- If infos contains</em>) – beneath the observation pixels in the output frames.</p></li>
-<li><p><strong>stacked</strong> (<em>the goal image is vertically</em>) – beneath the observation pixels in the output frames.</p></li>
-<li><p><strong>``imageio.get_writer</strong><strong>(</strong><strong>...</strong> (<em>- Uses</em>) – </p></li>
-<li><p><strong>encoding.</strong> (<em>codec="libx264"</em><em>)</em><em>`` for MP4</em>)</p></li>
-</ul>
-</dd>
-</dl>
 </dd></dl>
 <dl class="py method">
 <dt class="sig sig-object py" id="stable_worldmodel.world.World.record_video_from_dataset">
 <span class="sig-name descname"><span class="pre">record_video_from_dataset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">video_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dataset_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">episode_idx</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_steps</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">500</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fps</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">30</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_proc</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">4</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cache_dir</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/stable_worldmodel/world/#World.record_video_from_dataset"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.world.World.record_video_from_dataset" title="Link to this definition" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#stable_worldmodel.world.World.record_video_from_dataset'"><svg height="1em" viewbox="0 0 24 24" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"></path></svg></a></dt>
 <dd><p>Replay stored dataset episodes and export them as MP4 videos.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>video_path</strong> (<em>str</em><em> or </em><em>Path</em>) – Directory to which MP4 files will be written; one file per requested episode
-named <code class="docutils literal notranslate"><span class="pre">episode_{idx}.mp4</span></code>.</p></li>
-<li><p><strong>dataset_name</strong> (<em>str</em>) – Name of the dataset directory under the stable_worldmodel cache dir.</p></li>
-<li><p><strong>episode_idx</strong> (<em>int</em><em> or </em><em>list</em><em>[</em><em>int</em><em>]</em>) – Episode index or indices to render from the dataset.</p></li>
-<li><p><strong>max_steps</strong> (<em>int</em><em>, </em><em>default=500</em>) – Maximum number of steps to render per episode (truncates longer episodes).</p></li>
-<li><p><strong>fps</strong> (<em>int</em><em>, </em><em>default=30</em>) – Frames per second for the output video(s).</p></li>
-<li><p><strong>num_proc</strong> (<em>int</em><em>, </em><em>default=4</em>) – Degree of parallelism for dataset filtering.</p></li>
-</ul>
-</dd>
-</dl>
 </dd></dl>
 <dl class="py method">
 <dt class="sig sig-object py" id="stable_worldmodel.world.World.reset">
@@ -2390,77 +2092,7 @@ under a specified key after reset and step.</p>
 <dt class="sig sig-object py" id="stable_worldmodel.World">
 <em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">World</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">env_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_envs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">image_shape</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">tuple</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">goal_shape</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">tuple</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">goal_transform</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Callable</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">image_transform</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Callable</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seed</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">2349867</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_episode_steps</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">100</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/stable_worldmodel/world/#World"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.World" title="Link to this definition" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#stable_worldmodel.World'"><svg height="1em" viewbox="0 0 24 24" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"></path></svg></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
-<p>A high-level environment manager for vectorized gym environments with support for
-goal-conditioned tasks, video recording, dataset generation, and evaluation.</p>
-<p>The <cite>World</cite> class wraps multiple parallel environments using Gymnasium’s vectorized API and
-integrates with custom wrappers (e.g., <cite>MegaWrapper</cite>) to handle image-based observations and goals.
-It provides utility methods for recording trajectories, saving datasets in HuggingFace Datasets .parquet format,
-evaluating policies, and exporting video rollouts.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>env_name</strong> (<em>str</em>) – The name of the Gymnasium environment to instantiate.</p></li>
-<li><p><strong>num_envs</strong> (<em>int</em>) – Number of parallel environments to run.</p></li>
-<li><p><strong>image_shape</strong> (<em>tuple</em><em>[</em><em>int</em><em>]</em>) – Shape of image observations (C, H, W).</p></li>
-<li><p><strong>image_transform</strong> (<em>callable</em><em>, </em><em>optional</em>) – Transformation function applied to image observations.</p></li>
-<li><p><strong>goal_shape</strong> (<em>tuple</em><em>[</em><em>int</em><em>]</em><em>, </em><em>optional</em>) – Shape of goal image observations.</p></li>
-<li><p><strong>goal_transform</strong> (<em>callable</em><em>, </em><em>optional</em>) – Transformation function applied to goal observations.</p></li>
-<li><p><strong>seed</strong> (<em>int</em>) – Random seed for environment initialization and goal sampling.</p></li>
-<li><p><strong>max_episode_steps</strong> (<em>int</em><em>, </em><em>default=100</em>) – Maximum number of steps per episode.</p></li>
-<li><p><strong>**kwargs</strong> (<em>dict</em>) – Additional keyword arguments passed to <cite>gym.make_vec</cite>.</p></li>
-<li><p><strong>Attributes</strong></p></li>
-<li><p><strong>----------</strong></p></li>
-<li><p><strong>envs</strong> (<em>gym.vector.VectorEnv</em>) – Vectorized environments wrapped with <cite>MegaWrapper</cite>.</p></li>
-<li><p><strong>goal_envs</strong> (<em>gym.vector.VectorEnv</em>) – Separate vectorized environments for goal sampling.</p></li>
-<li><p><strong>seed</strong> – Random seed for reproducibility.</p></li>
-<li><p><strong>goal_seed</strong> (<em>int</em>) – Secondary random seed for sampling goals.</p></li>
-<li><p><strong>policy</strong> (<em>object</em>) – Policy instance with <cite>get_action</cite> and <cite>set_env</cite> methods.</p></li>
-<li><p><strong>Properties</strong></p></li>
-<li><p><strong>----------</strong></p></li>
-<li><p><strong>num_envs</strong> – Number of environments in the vectorized setup.</p></li>
-<li><p><strong>observation_space</strong> (<em>gym.Space</em>) – Observation space of the environments.</p></li>
-<li><p><strong>action_space</strong> (<em>gym.Space</em>) – Action space of the environments.</p></li>
-<li><p><strong>single_action_space</strong> (<em>gym.Space</em>) – Action space for a single environment.</p></li>
-<li><p><strong>single_observation_space</strong> (<em>gym.Space</em>) – Observation space for a single environment.</p></li>
-<li><p><strong>Methods</strong></p></li>
-<li><p><strong>-------</strong></p></li>
-<li><p><strong>close</strong><strong>(</strong><strong>**kwargs</strong><strong>)</strong> – <p>Closes all managed environments.</p>
-</p></li>
-<li><p><strong>denormalize</strong><strong>(</strong><strong>x</strong><strong>)</strong> – Converts normalized images in [-1, 1] back to [0, 1].</p></li>
-<li><p><strong>set_policy</strong><strong>(</strong><strong>policy</strong><strong>)</strong> – Assigns a policy object for interaction.</p></li>
-<li><p><strong>reset</strong><strong>(</strong><strong>seed=None</strong> – Resets the environments and returns initial states and infos.</p></li>
-<li><p><strong>options=None</strong><strong>)</strong> – Resets the environments and returns initial states and infos.</p></li>
-<li><p><strong>step</strong><strong>(</strong><strong>)</strong> – Steps all environments using the current policy’s actions.</p></li>
-<li><p><strong>__iter__</strong><strong>(</strong><strong>)</strong> – Prepares the iterator by resetting environments.</p></li>
-<li><p><strong>__next__</strong><strong>(</strong><strong>)</strong> – Iterates over environment states until all episodes are done.</p></li>
-<li><p><strong>record_video</strong><strong>(</strong><strong>video_path</strong> – Records a rollout video for each environment.</p></li>
-<li><p><strong>max_steps=500</strong> – Records a rollout video for each environment.</p></li>
-<li><p><strong>fps=30</strong> – Records a rollout video for each environment.</p></li>
-<li><p><strong>seed=None</strong> – Records a rollout video for each environment.</p></li>
-<li><p><strong>options=None</strong><strong>)</strong> – Records a rollout video for each environment.</p></li>
-<li><p><strong>record_dataset</strong><strong>(</strong><strong>dataset_name</strong> – Collects episodes into a HuggingFace Dataset and saves as Parquet shards.</p></li>
-<li><p><strong>episodes=10</strong> – Collects episodes into a HuggingFace Dataset and saves as Parquet shards.</p></li>
-<li><p><strong>seed=None</strong> – Collects episodes into a HuggingFace Dataset and saves as Parquet shards.</p></li>
-<li><p><strong>options=None</strong><strong>)</strong> – Collects episodes into a HuggingFace Dataset and saves as Parquet shards.</p></li>
-<li><p><strong>record_video_from_dataset</strong><strong>(</strong><strong>video_path</strong> – Replays stored dataset episodes and exports them as videos.</p></li>
-<li><p><strong>dataset_name</strong> – Replays stored dataset episodes and exports them as videos.</p></li>
-<li><p><strong>episode_idx</strong> – Replays stored dataset episodes and exports them as videos.</p></li>
-<li><p><strong>max_steps=500</strong> – Replays stored dataset episodes and exports them as videos.</p></li>
-<li><p><strong>fps=30</strong> – Replays stored dataset episodes and exports them as videos.</p></li>
-<li><p><strong>num_proc=4</strong><strong>)</strong> – Replays stored dataset episodes and exports them as videos.</p></li>
-<li><p><strong>evaluate</strong><strong>(</strong><strong>episodes=10</strong> – Evaluates the policy across multiple episodes and computes metrics.</p></li>
-<li><p><strong>eval_keys=None</strong> – Evaluates the policy across multiple episodes and computes metrics.</p></li>
-<li><p><strong>seed=None</strong> – Evaluates the policy across multiple episodes and computes metrics.</p></li>
-<li><p><strong>options=None</strong><strong>)</strong> – Evaluates the policy across multiple episodes and computes metrics.</p></li>
-<li><p><strong>Notes</strong></p></li>
-<li><p><strong>-----</strong></p></li>
-<li><p><strong>tracking.</strong> (<em>- Supports parallelized rollout collection with episode</em>)</p></li>
-<li><p><strong>replay.</strong> (<em>- Integrates tightly with HuggingFace Datasets for storage and</em>)</p></li>
-<li><p><strong>metrics.</strong> (<em>- Provides success-rate evaluation with optional custom</em>)</p></li>
-<li><p><strong>encoding.</strong> (<em>- Video export uses imageio with libx264</em>)</p></li>
-</ul>
-</dd>
-</dl>
+<p>A high-level environment manager for vectorized gym environments with support for</p>
 <dl class="py property">
 <dt class="sig sig-object py" id="stable_worldmodel.World.action_space">
 <em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">action_space</span></span><a class="headerlink" href="#stable_worldmodel.World.action_space" title="Link to this definition" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#stable_worldmodel.World.action_space'"><svg height="1em" viewbox="0 0 24 24" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"></path></svg></a></dt>
@@ -2472,42 +2104,7 @@ evaluating policies, and exporting video rollouts.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="stable_worldmodel.World.evaluate">
 <span class="sig-name descname"><span class="pre">evaluate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">episodes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">eval_keys</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">options</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/stable_worldmodel/world/#World.evaluate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.World.evaluate" title="Link to this definition" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#stable_worldmodel.World.evaluate'"><svg height="1em" viewbox="0 0 24 24" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"></path></svg></a></dt>
-<dd><p>Evaluate the current policy across multiple episodes and compute metrics.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>episodes</strong> (<em>int</em><em>, </em><em>default=10</em>) – Number of complete episodes to evaluate.</p></li>
-<li><p><strong>eval_keys</strong> (<em>list</em><em>[</em><em>str</em><em>]</em><em>, </em><em>optional</em>) – Additional keys in <code class="docutils literal notranslate"><span class="pre">infos</span></code> to log as episode-wise metrics. Each key will
-produce a vector of length <code class="docutils literal notranslate"><span class="pre">episodes</span></code> in the returned metrics dict.</p></li>
-<li><p><strong>seed</strong> (<em>int</em><em>, </em><em>optional</em>) – Base seed for the initial reset; per-env continuation seeds derive from this value.</p></li>
-<li><p><strong>options</strong> (<em>dict</em><em>, </em><em>optional</em>) – Env reset options.</p></li>
-<li><p><strong>Returns</strong></p></li>
-<li><p><strong>-------</strong></p></li>
-<li><p><strong>dict</strong> – <p>Metrics dictionary with the following entries:
-- <code class="docutils literal notranslate"><span class="pre">"success_rate"</span></code> : float</p>
-<blockquote>
-<div><p>Percentage of successful episodes (terminations) in [0, 100].</p>
-</div></blockquote>
-<ul>
-<li><dl class="simple">
-<dt><code class="docutils literal notranslate"><span class="pre">"episode_successes"</span></code><span class="classifier">np.ndarray, shape (episodes,)</span></dt><dd><p>Boolean array indicating success (True) or failure (False) per episode.</p>
-</dd>
-</dl>
-</li>
-<li><dl class="simple">
-<dt><code class="docutils literal notranslate"><span class="pre">"seeds"</span></code><span class="classifier">np.ndarray, shape (episodes,)</span></dt><dd><p>The per-episode seeds used for evaluation.</p>
-</dd>
-</dl>
-</li>
-<li><p>Additional arrays for each key in <code class="docutils literal notranslate"><span class="pre">eval_keys</span></code>, each of shape (episodes,).</p></li>
-</ul>
-</p></li>
-<li><p><strong>Notes</strong></p></li>
-<li><p><strong>-----</strong></p></li>
-<li><p><strong>auto-reset.</strong> (<em>Success is counted using the terminated signal observed prior to an env's</em>)</p></li>
-</ul>
-</dd>
-</dl>
+<dd><p>Evaluate the current policy over a number of episodes and return metrics.</p>
 </dd></dl>
 <dl class="py property">
 <dt class="sig sig-object py" id="stable_worldmodel.World.num_envs">
@@ -2521,88 +2118,16 @@ produce a vector of length <code class="docutils literal notranslate"><span clas
 <dt class="sig sig-object py" id="stable_worldmodel.World.record_dataset">
 <span class="sig-name descname"><span class="pre">record_dataset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dataset_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">episodes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cache_dir</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">options</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/stable_worldmodel/world/#World.record_dataset"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.World.record_dataset" title="Link to this definition" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#stable_worldmodel.World.record_dataset'"><svg height="1em" viewbox="0 0 24 24" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"></path></svg></a></dt>
 <dd><p>Collect episodes with the current policy and save them as a HuggingFace Dataset (Parquet shards).</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>dataset_name</strong> (<em>str</em>) – Name of the dataset directory under the stable_worldmodel cache dir.</p></li>
-<li><p><strong>episodes</strong> (<em>int</em><em>, </em><em>default=10</em>) – Number of <em>complete</em> episodes to record (across all envs, total).</p></li>
-<li><p><strong>seed</strong> (<em>int</em><em>, </em><em>optional</em>) – Base seed used for the initial reset; subsequent resets for per-env continuation
-derive unique seeds from this value.</p></li>
-<li><p><strong>options</strong> (<em>dict</em><em>, </em><em>optional</em>) – Env reset options.</p></li>
-<li><p><strong>Effects</strong> (<em>Side</em>)</p></li>
-<li><p><strong>------------</strong></p></li>
-<li><p><strong>files.</strong> (<em>- Creates {cache_dir}/{dataset_name}/data_shard_{NNNNN}.parquet</em>)</p></li>
-<li><p><strong>dropped</strong><strong>)</strong><strong>.</strong> (<em>- Appends only complete episodes to the shard</em><em> (</em><em>partial episodes are</em>)</p></li>
-<li><p><strong>shards.</strong> (<em>- Re-indexes episode_idx to be contiguous across</em>)</p></li>
-<li><p><strong>Schema</strong> (<em>Dataset</em>)</p></li>
-<li><p><strong>--------------</strong></p></li>
-<li><p><strong>minimum</strong><strong>)</strong> (<em>The resulting dataset includes</em><em> (</em><em>at</em>) – <ul>
-<li><p><code class="docutils literal notranslate"><span class="pre">pixels</span></code> : <code class="xref py py-class docutils literal notranslate"><span class="pre">datasets.Image</span></code></p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">episode_idx</span></code> : <code class="xref py py-class docutils literal notranslate"><span class="pre">datasets.Value("int32")</span></code></p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">step_idx</span></code> : <code class="xref py py-class docutils literal notranslate"><span class="pre">datasets.Value("int32")</span></code></p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">episode_len</span></code> : <code class="xref py py-class docutils literal notranslate"><span class="pre">datasets.Value("int32")</span></code></p></li>
-</ul>
-</p></li>
-<li><p><strong>available</strong> (<em>If</em>) – <ul>
-<li><p><code class="docutils literal notranslate"><span class="pre">goal</span></code> : <code class="xref py py-class docutils literal notranslate"><span class="pre">datasets.Image</span></code></p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">action</span></code> : array-like feature shaped like the env action space</p></li>
-<li><p>Per-step scalar/vector fields exposed by the wrapper in <code class="docutils literal notranslate"><span class="pre">infos</span></code></p></li>
-</ul>
-</p></li>
-<li><p><strong>include</strong> (<em>it may also</em>) – <ul>
-<li><p><code class="docutils literal notranslate"><span class="pre">goal</span></code> : <code class="xref py py-class docutils literal notranslate"><span class="pre">datasets.Image</span></code></p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">action</span></code> : array-like feature shaped like the env action space</p></li>
-<li><p>Per-step scalar/vector fields exposed by the wrapper in <code class="docutils literal notranslate"><span class="pre">infos</span></code></p></li>
-</ul>
-</p></li>
-<li><p><strong>Notes</strong></p></li>
-<li><p><strong>-----</strong></p></li>
-<li><p><strong>episodes.</strong> (<em>- The function handles action shifting to ensure alignment with continuing</em>)</p></li>
-<li><p><strong>exist.</strong> (<em>- Sharding logic ensures a new shard index is chosen if prior shards</em>)</p></li>
-<li><p><strong>shard.</strong> (<em>- Only the first episodes fully completed episodes are persisted for the new</em>)</p></li>
-</ul>
-</dd>
-</dl>
 </dd></dl>
 <dl class="py method">
 <dt class="sig sig-object py" id="stable_worldmodel.World.record_video">
 <span class="sig-name descname"><span class="pre">record_video</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">video_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_steps</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">500</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fps</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">30</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">options</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/stable_worldmodel/world/#World.record_video"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.World.record_video" title="Link to this definition" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#stable_worldmodel.World.record_video'"><svg height="1em" viewbox="0 0 24 24" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"></path></svg></a></dt>
 <dd><p>Record rollout videos for each environment under the current policy.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>video_path</strong> (<em>str</em><em> or </em><em>Path</em>) – Directory to which MP4 files will be written; one file per env named <code class="docutils literal notranslate"><span class="pre">env_{i}.mp4</span></code>.</p></li>
-<li><p><strong>max_steps</strong> (<em>int</em><em>, </em><em>default=500</em>) – Maximum number of steps to record per environment.</p></li>
-<li><p><strong>fps</strong> (<em>int</em><em>, </em><em>default=30</em>) – Frames per second for the output video.</p></li>
-<li><p><strong>seed</strong> (<em>int</em><em>, </em><em>optional</em>) – Seed to use for the initial reset prior to recording.</p></li>
-<li><p><strong>options</strong> (<em>dict</em><em>, </em><em>optional</em>) – Env reset options.</p></li>
-<li><p><strong>Notes</strong></p></li>
-<li><p><strong>-----</strong></p></li>
-<li><p><strong>"goal"</strong> (<em>- If infos contains</em>) – beneath the observation pixels in the output frames.</p></li>
-<li><p><strong>stacked</strong> (<em>the goal image is vertically</em>) – beneath the observation pixels in the output frames.</p></li>
-<li><p><strong>``imageio.get_writer</strong><strong>(</strong><strong>...</strong> (<em>- Uses</em>) – </p></li>
-<li><p><strong>encoding.</strong> (<em>codec="libx264"</em><em>)</em><em>`` for MP4</em>)</p></li>
-</ul>
-</dd>
-</dl>
 </dd></dl>
 <dl class="py method">
 <dt class="sig sig-object py" id="stable_worldmodel.World.record_video_from_dataset">
 <span class="sig-name descname"><span class="pre">record_video_from_dataset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">video_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dataset_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">episode_idx</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_steps</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">500</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fps</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">30</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_proc</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">4</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cache_dir</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/stable_worldmodel/world/#World.record_video_from_dataset"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.World.record_video_from_dataset" title="Link to this definition" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#stable_worldmodel.World.record_video_from_dataset'"><svg height="1em" viewbox="0 0 24 24" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"></path></svg></a></dt>
 <dd><p>Replay stored dataset episodes and export them as MP4 videos.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>video_path</strong> (<em>str</em><em> or </em><em>Path</em>) – Directory to which MP4 files will be written; one file per requested episode
-named <code class="docutils literal notranslate"><span class="pre">episode_{idx}.mp4</span></code>.</p></li>
-<li><p><strong>dataset_name</strong> (<em>str</em>) – Name of the dataset directory under the stable_worldmodel cache dir.</p></li>
-<li><p><strong>episode_idx</strong> (<em>int</em><em> or </em><em>list</em><em>[</em><em>int</em><em>]</em>) – Episode index or indices to render from the dataset.</p></li>
-<li><p><strong>max_steps</strong> (<em>int</em><em>, </em><em>default=500</em>) – Maximum number of steps to render per episode (truncates longer episodes).</p></li>
-<li><p><strong>fps</strong> (<em>int</em><em>, </em><em>default=30</em>) – Frames per second for the output video(s).</p></li>
-<li><p><strong>num_proc</strong> (<em>int</em><em>, </em><em>default=4</em>) – Degree of parallelism for dataset filtering.</p></li>
-</ul>
-</dd>
-</dl>
 </dd></dl>
 <dl class="py method">
 <dt class="sig sig-object py" id="stable_worldmodel.World.reset">

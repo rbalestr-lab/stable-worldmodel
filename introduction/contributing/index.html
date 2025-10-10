@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+
+<html :class="{'dark': darkMode === 'dark' || (darkMode === 'system' &amp;&amp; window.matchMedia('(prefers-color-scheme: dark)').matches)}" class="scroll-smooth" data-content_root="../../" lang="en" x-data="{ darkMode: localStorage.getItem('darkMode') || localStorage.setItem('darkMode', 'system'), activeSection: '' }" x-init="$watch('darkMode', val =&gt; localStorage.setItem('darkMode', val))">
+<head>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<meta charset="utf-8"/>
+<meta content="white" media="(prefers-color-scheme: light)" name="theme-color"/>
+<meta content="black" media="(prefers-color-scheme: dark)" name="theme-color"/>
+<meta content="width=device-width, initial-scale=1" name="viewport"/>
+<title>Contributing | stable-worldmodel</title>
+<meta content="Contributing | stable-worldmodel" property="og:title"/>
+<meta content="Contributing | stable-worldmodel" name="twitter:title"/>
+<link href="../../_static/pygments.css?v=91c1d931" rel="stylesheet" type="text/css"/>
+<link href="../../_static/theme.css?v=42baaae4" rel="stylesheet" type="text/css"/>
+<link href="../../_static/sphinx-design.min.css?v=95c83b7e" rel="stylesheet" type="text/css"/>
+<link href="../../_static/css/custom.css?v=879ef6c1" rel="stylesheet" type="text/css"/>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/fontawesome.min.css" rel="stylesheet" type="text/css"/>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/solid.min.css" rel="stylesheet" type="text/css"/>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/brands.min.css" rel="stylesheet" type="text/css"/>
+<link href="../../_static/awesome-sphinx-design.css?v=15e0fffa" rel="stylesheet" type="text/css"/>
+<link href="../../_static/favicon.ico" rel="icon"/>
+<link href="../../search/" rel="search" title="Search"/>
+<link href="../../genindex/" rel="index" title="Index"/>
+<link href="../../api/data/" rel="next" title="StepsDataset"/>
+<link href="../showcase/" rel="prev" title="Showcase"/>
+<script>
+    <!-- Prevent Flash of wrong theme -->
+      const userPreference = localStorage.getItem('darkMode');
+      let mode;
+      if (userPreference === 'dark' || window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        mode = 'dark';
+        document.documentElement.classList.add('dark');
+      } else {
+        mode = 'light';
+      }
+      if (!userPreference) {localStorage.setItem('darkMode', mode)}
+    </script>
+</head>
+<body :class="{ 'overflow-hidden': showSidebar }" @scroll.window="showScrollTop = pageYOffset &gt; 100" class="min-h-screen font-sans antialiased bg-background text-foreground" x-data="{ showSidebar: false, showScrollTop: false }">
+<div @click.self="showSidebar = false" class="fixed inset-0 z-50 overflow-hidden bg-background/80 backdrop-blur-sm md:hidden" x-cloak="" x-show="showSidebar"></div><div class="relative flex flex-col min-h-screen" id="page"><a class="absolute top-0 left-0 z-[100] block bg-background p-4 text-xl transition -translate-x-full opacity-0 focus:translate-x-0 focus:opacity-100" href="#content">
+      Skip to content
+    </a><header class="sticky top-0 z-40 w-full border-b shadow-sm border-border supports-backdrop-blur:bg-background/60 bg-background/95 backdrop-blur"><div class="container flex items-center h-14">
+<div class="hidden mr-4 md:flex">
+<a class="flex items-center mr-6" href="../../"><span class="hidden font-bold sm:inline-block text-clip whitespace-nowrap">stable-worldmodel</span>
+</a></div><button @click="showSidebar = true" class="inline-flex items-center justify-center h-10 px-0 py-2 mr-2 text-base font-medium transition-colors rounded-md hover:text-accent-foreground hover:bg-transparent md:hidden" type="button">
+<svg aria-hidden="true" fill="currentColor" height="24" viewbox="0 96 960 960" width="24" xmlns="http://www.w3.org/2000/svg">
+<path d="M152.587 825.087q-19.152 0-32.326-13.174t-13.174-32.326q0-19.152 13.174-32.326t32.326-13.174h440q19.152 0 32.326 13.174t13.174 32.326q0 19.152-13.174 32.326t-32.326 13.174h-440Zm0-203.587q-19.152 0-32.326-13.174T107.087 576q0-19.152 13.174-32.326t32.326-13.174h320q19.152 0 32.326 13.174T518.087 576q0 19.152-13.174 32.326T472.587 621.5h-320Zm0-203.587q-19.152 0-32.326-13.174t-13.174-32.326q0-19.152 13.174-32.326t32.326-13.174h440q19.152 0 32.326 13.174t13.174 32.326q0 19.152-13.174 32.326t-32.326 13.174h-440ZM708.913 576l112.174 112.174q12.674 12.674 12.674 31.826t-12.674 31.826Q808.413 764.5 789.261 764.5t-31.826-12.674l-144-144Q600 594.391 600 576t13.435-31.826l144-144q12.674-12.674 31.826-12.674t31.826 12.674q12.674 12.674 12.674 31.826t-12.674 31.826L708.913 576Z"></path>
+</svg>
+<span class="sr-only">Toggle navigation menu</span>
+</button>
+<div class="flex items-center justify-between flex-1 space-x-2 sm:space-x-4 md:justify-end">
+<div class="flex-1 w-full md:w-auto md:flex-none"><form @keydown.k.window.meta="$refs.search.focus()" action="../../search/" class="relative flex items-center group" id="searchbox" method="get">
+<input aria-label="Search the docs" class="inline-flex items-center font-medium transition-colors bg-transparent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ring-offset-background border border-input hover:bg-accent focus:bg-accent hover:text-accent-foreground focus:text-accent-foreground hover:placeholder-accent-foreground py-2 px-4 relative h-9 w-full justify-start rounded-[0.5rem] text-sm text-muted-foreground sm:pr-12 md:w-40 lg:w-64" id="search-input" name="q" placeholder="Search ..." type="search" x-ref="search"/>
+<kbd class="pointer-events-none absolute right-1.5 top-2 hidden h-5 select-none text-muted-foreground items-center gap-1 rounded border border-border bg-muted px-1.5 font-mono text-[10px] font-medium opacity-100 sm:flex group-hover:bg-accent group-hover:text-accent-foreground">
+<span class="text-xs">⌘</span>
+    K
+  </kbd>
+</form>
+</div>
+<nav class="flex items-center space-x-1">
+<a href="https://github.com/rbalestr-lab/stable-worldmodel" rel="noopener nofollow" title="Visit repository on GitHub">
+<div class="inline-flex items-center justify-center px-0 text-sm font-medium transition-colors rounded-md disabled:opacity-50 disabled:pointer-events-none hover:bg-accent hover:text-accent-foreground h-9 w-9">
+<svg fill="currentColor" height="26px" style="margin-top:-2px;display:inline" viewbox="0 0 45 44" xmlns="http://www.w3.org/2000/svg"><path clip-rule="evenodd" d="M22.477.927C10.485.927.76 10.65.76 22.647c0 9.596 6.223 17.736 14.853 20.608 1.087.2 1.483-.47 1.483-1.047 0-.516-.019-1.881-.03-3.693-6.04 1.312-7.315-2.912-7.315-2.912-.988-2.51-2.412-3.178-2.412-3.178-1.972-1.346.149-1.32.149-1.32 2.18.154 3.327 2.24 3.327 2.24 1.937 3.318 5.084 2.36 6.321 1.803.197-1.403.759-2.36 1.379-2.903-4.823-.548-9.894-2.412-9.894-10.734 0-2.37.847-4.31 2.236-5.828-.224-.55-.969-2.759.214-5.748 0 0 1.822-.584 5.972 2.226 1.732-.482 3.59-.722 5.437-.732 1.845.01 3.703.25 5.437.732 4.147-2.81 5.967-2.226 5.967-2.226 1.185 2.99.44 5.198.217 5.748 1.392 1.517 2.232 3.457 2.232 5.828 0 8.344-5.078 10.18-9.916 10.717.779.67 1.474 1.996 1.474 4.021 0 2.904-.027 5.247-.027 5.96 0 .58.392 1.256 1.493 1.044C37.981 40.375 44.2 32.24 44.2 22.647c0-11.996-9.726-21.72-21.722-21.72" fill="currentColor" fill-rule="evenodd"></path></svg>
+</div>
+</a>
+<button @click="darkMode = darkMode === 'light' ? 'dark' : 'light'" aria-label="Color theme switcher" class="relative inline-flex items-center justify-center px-0 text-sm font-medium transition-colors rounded-md hover:bg-accent hover:text-accent-foreground h-9 w-9" type="button">
+<svg class="absolute transition-all scale-100 rotate-0 dark:-rotate-90 dark:scale-0" fill="currentColor" height="24" viewbox="0 96 960 960" width="24" xmlns="http://www.w3.org/2000/svg">
+<path d="M480 685q45.456 0 77.228-31.772Q589 621.456 589 576q0-45.456-31.772-77.228Q525.456 467 480 467q-45.456 0-77.228 31.772Q371 530.544 371 576q0 45.456 31.772 77.228Q434.544 685 480 685Zm0 91q-83 0-141.5-58.5T280 576q0-83 58.5-141.5T480 376q83 0 141.5 58.5T680 576q0 83-58.5 141.5T480 776ZM80 621.5q-19.152 0-32.326-13.174T34.5 576q0-19.152 13.174-32.326T80 530.5h80q19.152 0 32.326 13.174T205.5 576q0 19.152-13.174 32.326T160 621.5H80Zm720 0q-19.152 0-32.326-13.174T754.5 576q0-19.152 13.174-32.326T800 530.5h80q19.152 0 32.326 13.174T925.5 576q0 19.152-13.174 32.326T880 621.5h-80Zm-320-320q-19.152 0-32.326-13.174T434.5 256v-80q0-19.152 13.174-32.326T480 130.5q19.152 0 32.326 13.174T525.5 176v80q0 19.152-13.174 32.326T480 301.5Zm0 720q-19.152 0-32.326-13.17Q434.5 995.152 434.5 976v-80q0-19.152 13.174-32.326T480 850.5q19.152 0 32.326 13.174T525.5 896v80q0 19.152-13.174 32.33-13.174 13.17-32.326 13.17ZM222.174 382.065l-43-42Q165.5 327.391 166 308.239t13.174-33.065q13.435-13.674 32.587-13.674t32.065 13.674l42.239 43q12.674 13.435 12.555 31.706-.12 18.272-12.555 31.946-12.674 13.674-31.445 13.413-18.772-.261-32.446-13.174Zm494 494.761-42.239-43q-12.674-13.435-12.674-32.087t12.674-31.565Q686.609 756.5 705.38 757q18.772.5 32.446 13.174l43 41.761Q794.5 824.609 794 843.761t-13.174 33.065Q767.391 890.5 748.239 890.5t-32.065-13.674Zm-42-494.761Q660.5 369.391 661 350.62q.5-18.772 13.174-32.446l41.761-43Q728.609 261.5 747.761 262t33.065 13.174q13.674 13.435 13.674 32.587t-13.674 32.065l-43 42.239q-13.435 12.674-31.706 12.555-18.272-.12-31.946-12.555Zm-495 494.761Q165.5 863.391 165.5 844.239t13.674-32.065l43-42.239q13.435-12.674 32.087-12.674t31.565 12.674Q299.5 782.609 299 801.38q-.5 18.772-13.174 32.446l-41.761 43Q231.391 890.5 212.239 890t-33.065-13.174ZM480 576Z"></path>
+</svg>
+<svg class="absolute transition-all scale-0 rotate-90 dark:rotate-0 dark:scale-100" fill="currentColor" height="24" viewbox="0 96 960 960" width="24" xmlns="http://www.w3.org/2000/svg">
+<path d="M480 936q-151 0-255.5-104.5T120 576q0-138 90-239.5T440 218q25-3 39 18t-1 44q-17 26-25.5 55t-8.5 61q0 90 63 153t153 63q31 0 61.5-9t54.5-25q21-14 43-1.5t19 39.5q-14 138-117.5 229T480 936Zm0-80q88 0 158-48.5T740 681q-20 5-40 8t-40 3q-123 0-209.5-86.5T364 396q0-20 3-40t8-40q-78 32-126.5 102T200 576q0 116 82 198t198 82Zm-10-270Z"></path>
+</svg>
+</button>
+</nav>
+</div>
+</div>
+</header>
+<div class="flex-1"><div class="container flex-1 items-start md:grid md:grid-cols-[220px_minmax(0,1fr)] md:gap-6 lg:grid-cols-[240px_minmax(0,1fr)] lg:gap-10"><aside :aria-hidden="!showSidebar" :class="{ 'translate-x-0': showSidebar }" class="fixed inset-y-0 left-0 md:top-14 z-50 md:z-30 bg-background md:bg-transparent transition-all duration-100 -translate-x-full md:translate-x-0 ml-0 p-6 md:p-0 md:-ml-2 md:h-[calc(100vh-3.5rem)] w-5/6 md:w-full shrink-0 overflow-y-auto border-r border-border md:sticky" id="left-sidebar">
+<a class="!justify-start text-sm md:!hidden bg-background" href="../../"><span class="font-bold text-clip whitespace-nowrap">stable-worldmodel</span>
+</a>
+<div class="relative overflow-hidden md:overflow-auto my-4 md:my-0 h-[calc(100vh-8rem)] md:h-auto">
+<div class="overflow-y-auto h-full w-full relative pr-6"><nav class="table w-full min-w-full my-6 lg:my-8">
+<p class="caption" role="heading"><span class="caption-text">Introduction</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/">Quick Start</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../showcase/">Showcase</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Contributing</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../api/data/">StepsDataset</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api/world/">World</a></li>
+<li class="toctree-l1" x-data="{ expanded: $el.classList.contains('current') ? true : false }"><a :class="{ 'expanded' : expanded }" @click="expanded = !expanded" class="reference internal expandable" href="../../api/policy/">Policy<button @click.prevent.stop="expanded = !expanded" type="button"><span class="sr-only"></span><svg fill="currentColor" height="18px" stroke="none" viewbox="0 0 24 24" width="18px" xmlns="http://www.w3.org/2000/svg"><path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"></path></svg></button></a><ul x-show="expanded">
+<li class="toctree-l2"><a class="reference internal" href="../../api/generated/stable_worldmodel.policy.PlanConfig/">PlanConfig</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../api/generated/stable_worldmodel.policy.BasePolicy/">BasePolicy</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../api/generated/stable_worldmodel.policy.RandomPolicy/">RandomPolicy</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../api/generated/stable_worldmodel.policy.ExpertPolicy/">ExpertPolicy</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../api/generated/stable_worldmodel.policy.WorldModelPolicy/">WorldModelPolicy</a></li>
+</ul>
+</li>
+<li class="toctree-l1" x-data="{ expanded: $el.classList.contains('current') ? true : false }"><a :class="{ 'expanded' : expanded }" @click="expanded = !expanded" class="reference internal expandable" href="../../api/spaces/">Space<button @click.prevent.stop="expanded = !expanded" type="button"><span class="sr-only"></span><svg fill="currentColor" height="18px" stroke="none" viewbox="0 0 24 24" width="18px" xmlns="http://www.w3.org/2000/svg"><path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"></path></svg></button></a><ul x-show="expanded">
+<li class="toctree-l2"><a class="reference internal" href="../../api/generated/stable_worldmodel.spaces.Discrete/">Discrete</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../api/generated/stable_worldmodel.spaces.MultiDiscrete/">MultiDiscrete</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../api/generated/stable_worldmodel.spaces.Box/">Box</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../api/generated/stable_worldmodel.spaces.RGBBox/">RGBBox</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../api/generated/stable_worldmodel.spaces.Dict/">Dict</a></li>
+</ul>
+</li>
+<li class="toctree-l1" x-data="{ expanded: $el.classList.contains('current') ? true : false }"><a :class="{ 'expanded' : expanded }" @click="expanded = !expanded" class="reference internal expandable" href="../../api/wrappers/">Wrappers<button @click.prevent.stop="expanded = !expanded" type="button"><span class="sr-only"></span><svg fill="currentColor" height="18px" stroke="none" viewbox="0 0 24 24" width="18px" xmlns="http://www.w3.org/2000/svg"><path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"></path></svg></button></a><ul x-show="expanded">
+<li class="toctree-l2"><a class="reference internal" href="../../api/generated/stable_worldmodel.wrappers.EnsureInfoKeysWrapper/">EnsureInfoKeysWrapper</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../api/generated/stable_worldmodel.wrappers.EnsureImageShape/">EnsureImageShape</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../api/generated/stable_worldmodel.wrappers.EnsureGoalInfoWrapper/">EnsureGoalInfoWrapper</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../api/generated/stable_worldmodel.wrappers.EverythingToInfoWrapper/">EverythingToInfoWrapper</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../api/generated/stable_worldmodel.wrappers.AddPixelsWrapper/">AddPixelsWrapper</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../api/generated/stable_worldmodel.wrappers.ResizeGoalWrapper/">ResizeGoalWrapper</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../api/generated/stable_worldmodel.wrappers.MegaWrapper/">MegaWrapper</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../api/generated/stable_worldmodel.wrappers.VariationWrapper/">VariationWrapper</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Tutorials</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../tutorials/dinowm/">Reproducing DINO-WM</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tutorials/new-world/">Adding New World</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Worlds</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../world/pusht/">PushT</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../world/simple-pointmaze/">Simple Point-Maze</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../world/two_room/">Two Rooms</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../world/voidrun/">Void Run</a></li>
+<li class="toctree-l1" x-data="{ expanded: $el.classList.contains('current') ? true : false }"><a :class="{ 'expanded' : expanded }" @click="expanded = !expanded" class="reference internal expandable" href="../../world/OGBench/">OGBench<button @click.prevent.stop="expanded = !expanded" type="button"><span class="sr-only"></span><svg fill="currentColor" height="18px" stroke="none" viewbox="0 0 24 24" width="18px" xmlns="http://www.w3.org/2000/svg"><path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"></path></svg></button></a><ul x-show="expanded">
+<li class="toctree-l2"><a class="reference internal" href="../../world/OGBench/cube/">Cube</a></li>
+</ul>
+</li>
+</ul>
+</nav>
+</div>
+</div>
+<button @click="showSidebar = false" class="absolute md:hidden right-4 top-4 rounded-sm opacity-70 transition-opacity hover:opacity-100" type="button">
+<svg class="h-4 w-4" fill="currentColor" height="24" stroke="none" viewbox="0 96 960 960" width="24" xmlns="http://www.w3.org/2000/svg">
+<path d="M480 632 284 828q-11 11-28 11t-28-11q-11-11-11-28t11-28l196-196-196-196q-11-11-11-28t11-28q11-11 28-11t28 11l196 196 196-196q11-11 28-11t28 11q11 11 11 28t-11 28L536 576l196 196q11 11 11 28t-11 28q-11 11-28 11t-28-11L480 632Z"></path>
+</svg>
+</button>
+</aside>
+<main class="relative py-6 lg:gap-10 lg:py-8 xl:grid xl:grid-cols-[1fr_300px]">
+<div class="w-full min-w-0 mx-auto">
+<nav aria-label="breadcrumbs" class="flex items-center mb-4 space-x-1 text-sm text-muted-foreground">
+<a class="overflow-hidden text-ellipsis whitespace-nowrap hover:text-foreground" href="../../">
+<span class="hidden md:inline">stable-worldmodel</span>
+<svg aria-label="Home" class="md:hidden" fill="currentColor" height="18" stroke="none" viewbox="0 96 960 960" width="18" xmlns="http://www.w3.org/2000/svg">
+<path d="M240 856h120V616h240v240h120V496L480 316 240 496v360Zm-80 80V456l320-240 320 240v480H520V696h-80v240H160Zm320-350Z"></path>
+</svg>
+</a>
+<div class="mr-1">/</div><span aria-current="page" class="font-medium text-foreground overflow-hidden text-ellipsis whitespace-nowrap">Contributing</span>
+</nav>
+<div id="content" role="main">
+<section id="contributing">
+<h1>Contributing<a class="headerlink" href="#contributing" title="Link to this heading"><svg height="1em" viewbox="0 0 24 24" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"></path></svg></a></h1>
+<section id="contributing">
+<h2>Contributing<a class="headerlink" href="#contributing" title="Link to this heading" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#contributing'"><svg height="1em" viewbox="0 0 24 24" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"></path></svg></a></h2>
+<p>Thank you for your interest in contributing to stable-worldmodel! This library is a community-driven project, and we greatly appreciate contributions of all kinds.</p>
+<p>If you encounter any issues or have suggestions, please open an issue on our <a class="reference external" href="https://github.com/rbalestr-lab/stable-worldmodel/issues" rel="nofollow noopener">issue tracker<svg fill="currentColor" height="1em" stroke="none" viewbox="0 96 960 960" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M188 868q-11-11-11-28t11-28l436-436H400q-17 0-28.5-11.5T360 336q0-17 11.5-28.5T400 296h320q17 0 28.5 11.5T760 336v320q0 17-11.5 28.5T720 696q-17 0-28.5-11.5T680 656V432L244 868q-11 11-28 11t-28-11Z"></path></svg></a>. This allows us to address problems and gather feedback from the community.</p>
+<p>For those who want to contribute code or documentation, you can submit a pull request. Below, you will find details on how to prepare and submit your pull request effectively.</p>
+<section id="pr-tutorial">
+<h3>PR Tutorial<a class="headerlink" href="#pr-tutorial" title="Link to this heading" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#pr-tutorial'"><svg height="1em" viewbox="0 0 24 24" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"></path></svg></a></h3>
+<p>The preferred workflow for contributing to stable-worldmodel is to fork the main repository on GitHub, clone, and develop on a branch. Steps:</p>
+<ol class="arabic">
+<li><p><strong>Fork the repository</strong>: Fork the project repository by clicking on the ‘Fork’ button near the top right of the page. This creates a copy of the code under your GitHub user account. For more details on how to fork a repository see <a class="reference external" href="https://docs.github.com/en/get-started/quickstart/fork-a-repo" rel="nofollow noopener">this guide<svg fill="currentColor" height="1em" stroke="none" viewbox="0 96 960 960" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M188 868q-11-11-11-28t11-28l436-436H400q-17 0-28.5-11.5T360 336q0-17 11.5-28.5T400 296h320q17 0 28.5 11.5T760 336v320q0 17-11.5 28.5T720 696q-17 0-28.5-11.5T680 656V432L244 868q-11 11-28 11t-28-11Z"></path></svg></a>.</p></li>
+<li><p><strong>Clone your fork</strong> of the stable-worldmodel repo from your GitHub account to your local disk:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><code><span id="line-1">git<span class="w"> </span>clone<span class="w"> </span>git@github.com:YourLogin/stable-worldmodel.git
+</span><span id="line-2"><span class="nb">cd</span><span class="w"> </span>stable-worldmodel
+</span></code></pre></div>
+</div>
+</li>
+<li><p><strong>Install the package</strong> in editable mode with the development dependencies, as well as the pre-commit hooks that will run on every commit:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><code><span id="line-1"><span class="c1"># Using uv (recommended)</span>
+</span><span id="line-2">uv<span class="w"> </span>pip<span class="w"> </span>install<span class="w"> </span>-e<span class="w"> </span><span class="s2">".[dev,doc]"</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>pre-commit<span class="w"> </span>install
+</span><span id="line-3">
+</span><span id="line-4"><span class="c1"># Or using pip</span>
+</span><span id="line-5">pip<span class="w"> </span>install<span class="w"> </span>-e<span class="w"> </span><span class="s2">".[dev,doc]"</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>pre-commit<span class="w"> </span>install
+</span></code></pre></div>
+</div>
+</li>
+<li><p><strong>Create a feature branch</strong> to hold your development changes:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><code><span id="line-1">git<span class="w"> </span>checkout<span class="w"> </span>-b<span class="w"> </span>my-feature
+</span></code></pre></div>
+</div>
+<p>Always use a feature branch. It’s good practice to never work on the <code class="docutils literal notranslate"><span class="pre">main</span></code> branch!</p>
+</li>
+<li><p><strong>Develop the feature</strong> on your feature branch. Add changed files using <code class="docutils literal notranslate"><span class="pre">git</span> <span class="pre">add</span></code> and then commit the changes using <code class="docutils literal notranslate"><span class="pre">git</span> <span class="pre">commit</span></code>:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><code><span id="line-1">git<span class="w"> </span>add<span class="w"> </span>modified_files
+</span><span id="line-2">git<span class="w"> </span>commit<span class="w"> </span>-m<span class="w"> </span><span class="s2">"Your commit message here"</span>
+</span></code></pre></div>
+</div>
+</li>
+<li><p><strong>Push the changes</strong> to your GitHub account:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><code><span id="line-1">git<span class="w"> </span>push<span class="w"> </span>-u<span class="w"> </span>origin<span class="w"> </span>my-feature
+</span></code></pre></div>
+</div>
+</li>
+<li><p>Follow <a class="reference external" href="https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/proposing-changes-to-your-work-with-pull-requests/creating-a-pull-request-from-a-fork" rel="nofollow noopener">these instructions<svg fill="currentColor" height="1em" stroke="none" viewbox="0 96 960 960" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M188 868q-11-11-11-28t11-28l436-436H400q-17 0-28.5-11.5T360 336q0-17 11.5-28.5T400 296h320q17 0 28.5 11.5T760 336v320q0 17-11.5 28.5T720 696q-17 0-28.5-11.5T680 656V432L244 868q-11 11-28 11t-28-11Z"></path></svg></a> to create a pull request from your fork. Then, a project maintainer will review your changes.</p></li>
+</ol>
+</section>
+<section id="pr-checklist">
+<h3>PR Checklist<a class="headerlink" href="#pr-checklist" title="Link to this heading" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#pr-checklist'"><svg height="1em" viewbox="0 0 24 24" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"></path></svg></a></h3>
+<p>When preparing a PR, please make sure to check the following points:</p>
+<section id="tests">
+<h4>1. Tests<a class="headerlink" href="#tests" title="Link to this heading"><svg height="1em" viewbox="0 0 24 24" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"></path></svg></a></h4>
+<ul>
+<li><p><strong>All automatic tests pass</strong> on your local machine. Run tests using:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><code><span id="line-1">pytest<span class="w"> </span>--cov<span class="o">=</span>stable_worldmodel<span class="w"> </span>--cov-report<span class="o">=</span>term-missing
+</span></code></pre></div>
+</div>
+</li>
+<li><p><strong>Add tests for your changes</strong>. We use <a class="reference external" href="https://docs.pytest.org/en/stable/getting-started.html" rel="nofollow noopener">pytest<svg fill="currentColor" height="1em" stroke="none" viewbox="0 96 960 960" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M188 868q-11-11-11-28t11-28l436-436H400q-17 0-28.5-11.5T360 336q0-17 11.5-28.5T400 296h320q17 0 28.5 11.5T760 336v320q0 17-11.5 28.5T720 696q-17 0-28.5-11.5T680 656V432L244 868q-11 11-28 11t-28-11Z"></path></svg></a> for testing. All new features and bug fixes should include appropriate test coverage.</p></li>
+<li><p><strong>Test files</strong> should be placed in the <code class="docutils literal notranslate"><span class="pre">stable_worldmodel/tests/</span></code> directory and follow the naming convention <code class="docutils literal notranslate"><span class="pre">test_*.py</span></code>.</p></li>
+</ul>
+</section>
+<section id="documentation">
+<h4>2. Documentation<a class="headerlink" href="#documentation" title="Link to this heading"><svg height="1em" viewbox="0 0 24 24" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"></path></svg></a></h4>
+<p>Each PR should include comprehensive documentation:</p>
+<ul>
+<li><p><strong>Docstrings</strong>: All new functions, classes, and methods must include docstrings following the <a class="reference external" href="https://www.sphinx-doc.org/en/master/usage/extensions/example_google.html" rel="nofollow noopener">Google style<svg fill="currentColor" height="1em" stroke="none" viewbox="0 96 960 960" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M188 868q-11-11-11-28t11-28l436-436H400q-17 0-28.5-11.5T360 336q0-17 11.5-28.5T400 296h320q17 0 28.5 11.5T760 336v320q0 17-11.5 28.5T720 696q-17 0-28.5-11.5T680 656V432L244 868q-11 11-28 11t-28-11Z"></path></svg></a>.</p></li>
+<li><p><strong>Documentation pages</strong>: Update or add documentation in the <code class="docutils literal notranslate"><span class="pre">docs/source/</span></code> directory. We use <a class="reference external" href="https://www.sphinx-doc.org/en/master/usage/quickstart.html" rel="nofollow noopener">Sphinx<svg fill="currentColor" height="1em" stroke="none" viewbox="0 96 960 960" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M188 868q-11-11-11-28t11-28l436-436H400q-17 0-28.5-11.5T360 336q0-17 11.5-28.5T400 296h320q17 0 28.5 11.5T760 336v320q0 17-11.5 28.5T720 696q-17 0-28.5-11.5T680 656V432L244 868q-11 11-28 11t-28-11Z"></path></svg></a> with the <a class="reference external" href="https://sphinxawesome.xyz/" rel="nofollow noopener">Awesome Sphinx Theme<svg fill="currentColor" height="1em" stroke="none" viewbox="0 96 960 960" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M188 868q-11-11-11-28t11-28l436-436H400q-17 0-28.5-11.5T360 336q0-17 11.5-28.5T400 296h320q17 0 28.5 11.5T760 336v320q0 17-11.5 28.5T720 696q-17 0-28.5-11.5T680 656V432L244 868q-11 11-28 11t-28-11Z"></path></svg></a>.</p></li>
+<li><p><strong>Build documentation locally</strong> to verify your changes:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><code><span id="line-1"><span class="nb">cd</span><span class="w"> </span>docs
+</span><span id="line-2">make<span class="w"> </span>clean
+</span><span id="line-3">make<span class="w"> </span>html
+</span></code></pre></div>
+</div>
+<p>The resulting HTML files will be in <code class="docutils literal notranslate"><span class="pre">docs/build/html/</span></code> and are viewable in a web browser.</p>
+</li>
+</ul>
+</section>
+<section id="pr-description">
+<h4>3. PR Description<a class="headerlink" href="#pr-description" title="Link to this heading"><svg height="1em" viewbox="0 0 24 24" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"></path></svg></a></h4>
+<ul class="simple">
+<li><p><strong>Link to issues</strong>: If your pull request addresses an issue, please use the pull request title to describe the issue and mention the issue number in the pull request description (e.g., “Fixes #123”).</p></li>
+<li><p><strong>Explicitly describe changes</strong>: Your PR description should clearly explain:</p>
+<ul>
+<li><p><strong>What</strong> changed (list of modifications)</p></li>
+<li><p><strong>Why</strong> the change was necessary (problem being solved)</p></li>
+<li><p><strong>How</strong> it works (implementation approach if non-trivial)</p></li>
+</ul>
+</li>
+</ul>
+</section>
+<section id="pr-prefixes">
+<h4>4. PR Prefixes<a class="headerlink" href="#pr-prefixes" title="Link to this heading"><svg height="1em" viewbox="0 0 24 24" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"></path></svg></a></h4>
+<p>When creating a pull request, use the appropriate prefix to indicate its status and type:</p>
+<p><strong>Status prefix:</strong></p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">[WIP]</span></code> (Work in Progress): Use this prefix for an incomplete contribution where further work is planned before seeking a full review. Consider including a task list in your PR description to outline planned work or track progress. Remove the <code class="docutils literal notranslate"><span class="pre">[WIP]</span></code> prefix once the PR is ready for review.</p></li>
+</ul>
+<p><strong>Type prefix</strong> (use when PR is ready):</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">[BugFix]</span></code>: For bug fixes and patches</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">[Feature]</span></code>: For new features or enhancements</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">[Environment]</span></code>: For adding or updating world environments</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">[Benchmark]</span></code>: For benchmark-related changes</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">[Doc]</span></code>: For documentation updates</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">[Test]</span></code>: For test additions or improvements</p></li>
+</ul>
+<p><strong>Examples:</strong></p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">[WIP][Feature]</span> <span class="pre">Add</span> <span class="pre">new</span> <span class="pre">MPPI</span> <span class="pre">solver</span> <span class="pre">implementation</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">[BugFix]</span> <span class="pre">Fix</span> <span class="pre">reward</span> <span class="pre">calculation</span> <span class="pre">in</span> <span class="pre">PushT</span> <span class="pre">environment</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">[Environment]</span> <span class="pre">Add</span> <span class="pre">Maze2D</span> <span class="pre">environment</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">[Doc]</span> <span class="pre">Update</span> <span class="pre">tutorial</span> <span class="pre">for</span> <span class="pre">DINO-WM</span> <span class="pre">reproduction</span></code></p></li>
+</ul>
+<p>A <code class="docutils literal notranslate"><span class="pre">[WIP]</span></code> PR can serve multiple purposes:</p>
+<ol class="arabic simple">
+<li><p>Indicate that you are actively working on something to prevent duplicated efforts by others.</p></li>
+<li><p>Request early feedback on functionality, design, or API.</p></li>
+<li><p>Seek collaborators to assist with development.</p></li>
+</ol>
+</section>
+</section>
+<section id="code-style">
+<h3>Code Style<a class="headerlink" href="#code-style" title="Link to this heading" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#code-style'"><svg height="1em" viewbox="0 0 24 24" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"></path></svg></a></h3>
+<p>We use <code class="docutils literal notranslate"><span class="pre">ruff</span></code> for code formatting and linting. The pre-commit hooks will automatically format your code, but you can also run it manually:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><code><span id="line-1"><span class="c1"># Format code</span>
+</span><span id="line-2">ruff<span class="w"> </span>format<span class="w"> </span>.
+</span><span id="line-3">
+</span><span id="line-4"><span class="c1"># Lint code</span>
+</span><span id="line-5">ruff<span class="w"> </span>check<span class="w"> </span>.<span class="w"> </span>--fix
+</span></code></pre></div>
+</div>
+</section>
+<section id="adding-new-environments">
+<h3>Adding New Environments<a class="headerlink" href="#adding-new-environments" title="Link to this heading" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#adding-new-environments'"><svg height="1em" viewbox="0 0 24 24" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"></path></svg></a></h3>
+<p>If you’re contributing a new world environment:</p>
+<ol class="arabic simple">
+<li><p>Create your environment class in <code class="docutils literal notranslate"><span class="pre">stable_worldmodel/envs/</span></code></p></li>
+<li><p>Register it in <code class="docutils literal notranslate"><span class="pre">stable_worldmodel/__init__.py</span></code> using the <code class="docutils literal notranslate"><span class="pre">register()</span></code> function</p></li>
+<li><p>Add comprehensive docstrings explaining the environment</p></li>
+<li><p>Include a <code class="docutils literal notranslate"><span class="pre">variation_space</span></code> to define controllable factors</p></li>
+<li><p>Add tests in <code class="docutils literal notranslate"><span class="pre">stable_worldmodel/tests/</span></code></p></li>
+<li><p>Create documentation in <code class="docutils literal notranslate"><span class="pre">docs/source/world/</span></code> describing:</p>
+<ul class="simple">
+<li><p>Environment description and goal</p></li>
+<li><p>Action and observation spaces</p></li>
+<li><p>Difficulty</p></li>
+<li><p>Variations and factors of variation</p></li>
+<li><p>Example usage</p></li>
+</ul>
+</li>
+</ol>
+</section>
+<section id="testing">
+<h3>Testing<a class="headerlink" href="#testing" title="Link to this heading" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#testing'"><svg height="1em" viewbox="0 0 24 24" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"></path></svg></a></h3>
+<p>All contributions should include appropriate tests:</p>
+<ul class="simple">
+<li><p><strong>Unit tests</strong>: Test individual functions and classes in isolation</p></li>
+<li><p><strong>Integration tests</strong>: Test how components work together</p></li>
+<li><p><strong>Environment tests</strong>: Ensure environments follow Gymnasium API</p></li>
+</ul>
+<p>Run specific test files:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><code><span id="line-1">pytest<span class="w"> </span>stable_worldmodel/tests/test_world.py
+</span></code></pre></div>
+</div>
+<p>Run tests with coverage report:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><code><span id="line-1">pytest<span class="w"> </span>--cov<span class="o">=</span>stable_worldmodel<span class="w"> </span>--cov-report<span class="o">=</span>term-missing
+</span></code></pre></div>
+</div>
+</section>
+<section id="new-contributor-tips">
+<h3>New Contributor Tips<a class="headerlink" href="#new-contributor-tips" title="Link to this heading" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#new-contributor-tips'"><svg height="1em" viewbox="0 0 24 24" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"></path></svg></a></h3>
+<p>A great way to start contributing to stable-worldmodel is to:</p>
+<ol class="arabic simple">
+<li><p><strong>Pick a good first issue</strong>: Check the <a class="reference external" href="https://github.com/rbalestr-lab/stable-worldmodel/labels/good%20first%20issue" rel="nofollow noopener">good first issues<svg fill="currentColor" height="1em" stroke="none" viewbox="0 96 960 960" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M188 868q-11-11-11-28t11-28l436-436H400q-17 0-28.5-11.5T360 336q0-17 11.5-28.5T400 296h320q17 0 28.5 11.5T760 336v320q0 17-11.5 28.5T720 696q-17 0-28.5-11.5T680 656V432L244 868q-11 11-28 11t-28-11Z"></path></svg></a> in the issue tracker</p></li>
+<li><p><strong>Improve documentation</strong>: Fix typos, clarify explanations, or add examples</p></li>
+<li><p><strong>Add tests</strong>: Increase test coverage for existing functionality</p></li>
+<li><p><strong>Review PRs</strong>: Help review other contributors’ pull requests</p></li>
+</ol>
+</section>
+<section id="questions">
+<h3>Questions?<a class="headerlink" href="#questions" title="Link to this heading" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#questions'"><svg height="1em" viewbox="0 0 24 24" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"></path></svg></a></h3>
+<p>If you have questions about contributing, feel free to:</p>
+<ul class="simple">
+<li><p>Open a <a class="reference external" href="https://github.com/rbalestr-lab/stable-worldmodel/discussions" rel="nofollow noopener">discussion<svg fill="currentColor" height="1em" stroke="none" viewbox="0 96 960 960" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M188 868q-11-11-11-28t11-28l436-436H400q-17 0-28.5-11.5T360 336q0-17 11.5-28.5T400 296h320q17 0 28.5 11.5T760 336v320q0 17-11.5 28.5T720 696q-17 0-28.5-11.5T680 656V432L244 868q-11 11-28 11t-28-11Z"></path></svg></a></p></li>
+<li><p>Join our <a class="reference external" href="https://discord.com/invite/adzpqWKM25" rel="nofollow noopener">Discord server<svg fill="currentColor" height="1em" stroke="none" viewbox="0 96 960 960" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M188 868q-11-11-11-28t11-28l436-436H400q-17 0-28.5-11.5T360 336q0-17 11.5-28.5T400 296h320q17 0 28.5 11.5T760 336v320q0 17-11.5 28.5T720 696q-17 0-28.5-11.5T680 656V432L244 868q-11 11-28 11t-28-11Z"></path></svg></a></p></li>
+<li><p>Ask in an issue or pull request</p></li>
+</ul>
+<p>Thank you for contributing to stable-worldmodel! 🌎</p>
+</section>
+</section>
+</section>
+</div></div><aside class="hidden text-sm xl:block" id="right-sidebar">
+<div class="sticky top-16 -mt-10 max-h-[calc(100vh-5rem)] overflow-y-auto pt-6 space-y-2"><p class="font-medium">On this page</p>
+<ul>
+<li><a :data-current="activeSection === '#contributing'" class="reference internal" href="#contributing">Contributing</a><ul>
+<li><a :data-current="activeSection === '#pr-tutorial'" class="reference internal" href="#pr-tutorial">PR Tutorial</a></li>
+<li><a :data-current="activeSection === '#pr-checklist'" class="reference internal" href="#pr-checklist">PR Checklist</a><ul>
+<li><a :data-current="activeSection === '#tests'" class="reference internal" href="#tests">1. Tests</a></li>
+<li><a :data-current="activeSection === '#documentation'" class="reference internal" href="#documentation">2. Documentation</a></li>
+<li><a :data-current="activeSection === '#pr-description'" class="reference internal" href="#pr-description">3. PR Description</a></li>
+<li><a :data-current="activeSection === '#pr-prefixes'" class="reference internal" href="#pr-prefixes">4. PR Prefixes</a></li>
+</ul>
+</li>
+<li><a :data-current="activeSection === '#code-style'" class="reference internal" href="#code-style">Code Style</a></li>
+<li><a :data-current="activeSection === '#adding-new-environments'" class="reference internal" href="#adding-new-environments">Adding New Environments</a></li>
+<li><a :data-current="activeSection === '#testing'" class="reference internal" href="#testing">Testing</a></li>
+<li><a :data-current="activeSection === '#new-contributor-tips'" class="reference internal" href="#new-contributor-tips">New Contributor Tips</a></li>
+<li><a :data-current="activeSection === '#questions'" class="reference internal" href="#questions">Questions?</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</aside>
+</main>
+</div>
+</div><footer class="py-6 border-t border-border md:py-0">
+<div class="container flex flex-col items-center justify-between gap-4 md:h-24 md:flex-row">
+<div class="flex flex-col items-center gap-4 px-8 md:flex-row md:gap-2 md:px-0">
+<p class="text-sm leading-loose text-center text-muted-foreground md:text-left">© 2025 Built with <a class="font-medium underline underline-offset-4" href="https://www.sphinx-doc.org" rel="noreferrer">Sphinx 8.2.3</a></p>
+</div>
+</div>
+</footer>
+</div><button :class="{'opacity-0 invisible' : !showScrollTop}" @click="window.scrollTo({top: 0, behavior: 'smooth'})" class="fixed bottom-8 right-8 p-2 z-10 rounded-sm bg-gray-700 text-xs text-white transition-all duration-1000 hover:bg-gray-950 focus:bg-gray-950" id="scrolltop" x-cloak="">
+<svg aria-hidden="true" class="inline fill-current mb-[2px]" height="14" viewbox="0 96 960 960" width="14" xmlns="http://www.w3.org/2000/svg">
+<path d="M450 896V370L202 618l-42-42 320-320 320 320-42 42-248-248v526h-60Z"></path>
+</svg>
+  Back to top
+</button>
+<script src="../../_static/documentation_options.js?v=2c52d5bf"></script>
+<script src="../../_static/doctools.js?v=9bcbadda"></script>
+<script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+<script defer="defer" src="../../_static/theme.js?v=073f68d9"></script>
+<script src="../../_static/design-tabs.js?v=f930bc37"></script>
+</body>
+</html>

@@ -117,6 +117,7 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../introduction/quickstart/">Quick Start</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../introduction/showcase/">Showcase</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../introduction/contributing/">Contributing</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
 <ul>
@@ -597,54 +598,6 @@
 </span><span id="line-323">    <span class="k">def</span><span class="w"> </span><span class="nf">envs</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 </span><span id="line-324">        <span class="k">return</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">env</span><span class="p">,</span> <span class="s2">&quot;envs&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span></div>
 
-</span><span id="line-325">
-</span><span id="line-326">
-</span><span id="line-327"><span class="c1"># class TransformObservation(gym.ObservationWrapper):</span>
-</span><span id="line-328"><span class="c1">#     def __init__(</span>
-</span><span id="line-329"><span class="c1">#         self,</span>
-</span><span id="line-330"><span class="c1">#         env,</span>
-</span><span id="line-331"><span class="c1">#         transform=None,</span>
-</span><span id="line-332"><span class="c1">#         image_shape=(3, 224, 224),</span>
-</span><span id="line-333"><span class="c1">#         mean=None,</span>
-</span><span id="line-334"><span class="c1">#         std=None,</span>
-</span><span id="line-335"><span class="c1">#         source_key=&quot;pixels&quot;,</span>
-</span><span id="line-336"><span class="c1">#         target_key=&quot;pixels&quot;,</span>
-</span><span id="line-337"><span class="c1">#     ):</span>
-</span><span id="line-338"><span class="c1">#         super().__init__(env)</span>
-</span><span id="line-339"><span class="c1">#         self.source_key = source_key</span>
-</span><span id="line-340"><span class="c1">#         self.target_key = target_key</span>
-</span><span id="line-341">
-</span><span id="line-342"><span class="c1">#         assert len(image_shape) == 3</span>
-</span><span id="line-343"><span class="c1">#         if transform:</span>
-</span><span id="line-344"><span class="c1">#             self.transform = transform</span>
-</span><span id="line-345"><span class="c1">#         else:</span>
-</span><span id="line-346"><span class="c1">#             if image_shape[0] == 3:</span>
-</span><span id="line-347"><span class="c1">#                 t = [transforms.RGB()]</span>
-</span><span id="line-348"><span class="c1">#             elif image_shape[0] == 1:</span>
-</span><span id="line-349"><span class="c1">#                 t = [transforms.Grayscale()]</span>
-</span><span id="line-350"><span class="c1">#             t.extend(</span>
-</span><span id="line-351"><span class="c1">#                 [</span>
-</span><span id="line-352"><span class="c1">#                     transforms.Resize((224, 224)),  # Resize the image</span>
-</span><span id="line-353"><span class="c1">#                     transforms.ToImage(),</span>
-</span><span id="line-354"><span class="c1">#                     transforms.ToDtype(torch.float, scale=True),</span>
-</span><span id="line-355"><span class="c1">#                 ]</span>
-</span><span id="line-356"><span class="c1">#             )</span>
-</span><span id="line-357"><span class="c1">#             if mean is not None and std is not None:</span>
-</span><span id="line-358"><span class="c1">#                 t.append(transforms.Normalize(mean=mean, std=std))</span>
-</span><span id="line-359"><span class="c1">#             t = transforms.Compose(t)</span>
-</span><span id="line-360"><span class="c1">#             self.transform = t</span>
-</span><span id="line-361"><span class="c1">#         # Update the observation space to include the new transformed observation</span>
-</span><span id="line-362"><span class="c1">#         original_space = self.observation_space</span>
-</span><span id="line-363"><span class="c1">#         transformed_space = gym.spaces.Box(low=0, high=1, shape=image_shape, dtype=np.float32)</span>
-</span><span id="line-364"><span class="c1">#         original_space[self.source_key] = transformed_space</span>
-</span><span id="line-365"><span class="c1">#         self.observation_space = original_space</span>
-</span><span id="line-366">
-</span><span id="line-367"><span class="c1">#     def observation(self, observation):</span>
-</span><span id="line-368"><span class="c1">#         pixels = torch.from_numpy(observation[self.source_key].copy())</span>
-</span><span id="line-369"><span class="c1">#         pixels = pixels.permute(2, 0, 1)</span>
-</span><span id="line-370"><span class="c1">#         pixels = self.transform(pixels)</span>
-</span><span id="line-371"><span class="c1">#         observation[self.target_key] = pixels</span>
-</span><span id="line-372"><span class="c1">#         return observation</span>
 </span></code></pre></div>
     </div></div>
         </main>

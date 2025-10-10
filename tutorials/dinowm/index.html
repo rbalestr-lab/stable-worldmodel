@@ -124,7 +124,10 @@
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Worlds</span></p>
 <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../world/pusht/">PushT</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../world/simple-pointmaze/">Simple Point-Maze</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../world/two_room/">Two Rooms</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../world/voidrun/">Void Run</a></li>
 <li class="toctree-l1" x-data="{ expanded: $el.classList.contains('current') ? true : false }"><a :class="{ 'expanded' : expanded }" @click="expanded = !expanded" class="reference internal expandable" href="../../world/OGBench/">OGBench<button @click.prevent.stop="expanded = !expanded" type="button"><span class="sr-only"></span><svg fill="currentColor" height="18px" stroke="none" viewbox="0 0 24 24" width="18px" xmlns="http://www.w3.org/2000/svg"><path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"></path></svg></button></a><ul x-show="expanded">
 <li class="toctree-l2"><a class="reference internal" href="../../world/OGBench/cube/">Cube</a></li>
 </ul>
@@ -153,13 +156,13 @@
 <div id="content" role="main">
 <section id="reproducing-dino-wm">
 <h1>Reproducing DINO-WM<a class="headerlink" href="#reproducing-dino-wm" title="Link to this heading"><svg height="1em" viewbox="0 0 24 24" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"></path></svg></a></h1>
-<p>This tutorial illustrates how <code class="docutils literal notranslate"><span class="pre">stable-worldmodel</span></code> can be used to build and end-to-end world modeling pipeline.
-In the example below, we will produce all the code necessary to train and evaluate <a class="reference external" href="https://arxiv.org/abs/2411.04983" rel="nofollow noopener">DINO World Model<svg fill="currentColor" height="1em" stroke="none" viewbox="0 96 960 960" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M188 868q-11-11-11-28t11-28l436-436H400q-17 0-28.5-11.5T360 336q0-17 11.5-28.5T400 296h320q17 0 28.5 11.5T760 336v320q0 17-11.5 28.5T720 696q-17 0-28.5-11.5T680 656V432L244 868q-11 11-28 11t-28-11Z"></path></svg></a> (DINO-WM) on PushT environment.</p>
+<p>This tutorial illustrates how <code class="docutils literal notranslate"><span class="pre">stable-worldmodel</span></code> can be used to build an end-to-end world modeling pipeline.
+In the example below, we will produce all the code necessary to train and evaluate the <a class="reference external" href="https://arxiv.org/abs/2411.04983" rel="nofollow noopener">DINO World Model<svg fill="currentColor" height="1em" stroke="none" viewbox="0 96 960 960" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M188 868q-11-11-11-28t11-28l436-436H400q-17 0-28.5-11.5T360 336q0-17 11.5-28.5T400 296h320q17 0 28.5 11.5T760 336v320q0 17-11.5 28.5T720 696q-17 0-28.5-11.5T680 656V432L244 868q-11 11-28 11t-28-11Z"></path></svg></a> (DINO-WM) on the PushT environment.</p>
 <p>More specifically, we will cover:</p>
 <ol class="arabic simple">
-<li><p>Setup the world environment (PushT).</p></li>
+<li><p>Set up the world environment (PushT).</p></li>
 <li><p>Collect a dataset of environment interactions from a random policy.</p></li>
-<li><p>Pre-Train DINO-WM predictor on the collected dataset, using <a class="reference external" href="https://github.com/rbalestr-lab/stable-pretraining" rel="nofollow noopener">stable-pretraining<svg fill="currentColor" height="1em" stroke="none" viewbox="0 96 960 960" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M188 868q-11-11-11-28t11-28l436-436H400q-17 0-28.5-11.5T360 336q0-17 11.5-28.5T400 296h320q17 0 28.5 11.5T760 336v320q0 17-11.5 28.5T720 696q-17 0-28.5-11.5T680 656V432L244 868q-11 11-28 11t-28-11Z"></path></svg></a> library.</p></li>
+<li><p>Pre-train DINO-WM predictor on the collected dataset using the <a class="reference external" href="https://github.com/rbalestr-lab/stable-pretraining" rel="nofollow noopener">stable-pretraining<svg fill="currentColor" height="1em" stroke="none" viewbox="0 96 960 960" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M188 868q-11-11-11-28t11-28l436-436H400q-17 0-28.5-11.5T360 336q0-17 11.5-28.5T400 296h320q17 0 28.5 11.5T760 336v320q0 17-11.5 28.5T720 696q-17 0-28.5-11.5T680 656V432L244 868q-11 11-28 11t-28-11Z"></path></svg></a> library.</p></li>
 <li><p>Leverage the trained model to perform planning with Model Predictive Control (MPC).</p></li>
 <li><p>Evaluate the performance of the trained model in the world environment.</p></li>
 <li><p>Visualize the agent’s behavior.</p></li>
@@ -167,7 +170,7 @@ In the example below, we will produce all the code necessary to train and evalua
 <hr class="docutils"/>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>💡 Fun fact: the original dino-wm repo had 14,903 lines of code. We managed to recreate everything in less than X lines!</p>
+<p>💡 Fun fact: the original DINO-WM repo had 14,903 lines of code. We managed to recreate everything in less than X lines!</p>
 </div>
 </section>
 </div></div>

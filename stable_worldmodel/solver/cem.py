@@ -102,7 +102,7 @@ class CEMSolver:
                 for k, v in info_dict.items():
                     v_traj = v[traj]
                     if torch.is_tensor(v):
-                        v_traj = v_traj.unsqueeze(0).repeat(self.num_samples)
+                        v_traj = v_traj.unsqueeze(0).repeat_interleave(self.num_samples, dim=0)
                     elif isinstance(v, np.ndarray):
                         v_traj = np.repeat(v_traj[None, ...], self.num_samples, axis=0)
 

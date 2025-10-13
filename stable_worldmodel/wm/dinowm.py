@@ -9,8 +9,8 @@ from torchvision import transforms
 
 
 def transform(info_dict, device="cpu"):
-    mean = [0.485, 0.456, 0.406]
-    std = [0.229, 0.224, 0.225]
+    mean = [0.5, 0.5, 0.5]
+    std = [0.5, 0.5, 0.5]
     transform = spt.data.transforms.Compose(
         spt.data.transforms.ToImage(
             mean=mean,
@@ -109,6 +109,7 @@ class DINOWM(torch.nn.Module):
         # == action embeddings
         if action_key is not None:
             action = info[action_key].float()
+
             action_embed = self.action_encoder(action)  # (B, T, A) -> (B, T, A_emb)
             info[f"action_{target}"] = action_embed
 

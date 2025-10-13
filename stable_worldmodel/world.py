@@ -41,6 +41,7 @@ class World:
         )
 
         self.envs = VariationWrapper(self.envs)
+        self.envs.unwrapped.autoreset_mode = gym.vector.AutoresetMode.DISABLED
 
         if verbose > 0:
             logging.info(f"🌍🌍🌍 World {env_name} initialized 🌍🌍🌍")
@@ -94,7 +95,7 @@ class World:
         """Advance all environments by one step using the current policy."""
         # note: reset happens before because of auto-reset, should fix that
         actions = self.policy.get_action(self.infos)
-        (self.states, self.rewards, self.terminateds, self.truncateds, self.infos) = self.envs.step(actions)
+        self.states, self.rewards, self.terminateds, self.truncateds, self.infos = self.envs.step(actions)
 
     def reset(self, seed=None, options=None):
         """Reset all environments."""
@@ -372,6 +373,9 @@ class World:
 
     def evaluate(self, episodes=10, eval_keys=None, seed=None, options=None):
         """Evaluate the current policy over a number of episodes and return metrics."""
+
+        options = options or {}
+
         metrics = {
             "success_rate": 0,
             "episode_successes": np.zeros(episodes),
@@ -393,47 +397,39 @@ class World:
         eval_done = False
 
         while True:
-            # take before step to handle the auto-reset
-            truncations_before = self.truncateds.copy()
-            terminations_before = self.terminateds.copy()
-
-            # take step
             self.step()
-
             # start new episode for done envs
             for i in range(self.num_envs):
-                if terminations_before[i] or truncations_before[i]:
+                if self.terminateds[i] or self.truncateds[i]:
                     # record eval info
-                    ep_idx = episode_idx[i] - 1
-                    metrics["episode_successes"][ep_idx] = terminations_before[i]
+                    ep_idx = episode_idx[i]
+                    metrics["episode_successes"][ep_idx] = self.terminateds[i]
                     metrics["seeds"][ep_idx] = self.envs.envs[i].unwrapped.np_random_seed
-
-                    logging.error(
-                        "EXTRACTED SEED : ", metrics["seeds"][ep_idx], self.envs.envs[i].unwrapped.np_random_seed
-                    )
 
                     if eval_keys:
                         for key in eval_keys:
                             assert key in self.infos, f"key {key} not found in infos"
                             metrics[key][ep_idx] = self.infos[key][i]
 
+                    # determine new episode idx
+                    # re-reset env with seed and options (no supported by auto-reset)
+                    new_seed = root_seed + eval_ep_count if seed is not None else None
+                    next_ep_idx = episode_idx.max() + 1
+                    episode_idx[i] = next_ep_idx
+                    eval_ep_count += 1
+
+                    print("eval episode count: ", eval_ep_count)
+
                     # break if enough episodes evaluated
                     if eval_ep_count >= episodes:
                         eval_done = True
                         break
 
-                    # determine new episode idx
-                    next_ep_idx = episode_idx.max() + 1
-                    episode_idx[i] = next_ep_idx
-                    eval_ep_count += 1
-
-                    # re-reset env with seed and options (no supported by auto-reset)
-                    new_seed = root_seed + eval_ep_count if seed is not None else None
-
+                    self.envs.unwrapped._autoreset_envs = np.zeros((self.num_envs,), dtype=np.bool_)
                     _, infos = self.envs.envs[i].reset(seed=new_seed, options=options)
 
                     for k, v in infos.items():
-                        self.infos[k][i] = v
+                        self.infos[k][i] = np.asarray(v)
 
             if eval_done:
                 break

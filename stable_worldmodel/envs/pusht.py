@@ -7,6 +7,7 @@ import pygame
 import pymunk
 import pymunk.pygame_util
 from gymnasium import spaces
+from loguru import logger as logging
 from pymunk.vec2d import Vec2d
 
 import stable_worldmodel as swm
@@ -33,6 +34,7 @@ class PushT(gym.Env):
         resolution=224,
         with_target=True,
         render_mode="rgb_array",
+        fix_action_sample=True,
     ):
         self._seed = None
         self.window_size = ws = 512  # The size of the PyGame window
@@ -79,7 +81,7 @@ class PushT(gym.Env):
                             shape=(),
                             dtype=np.float32,
                         ),
-                        "shape": swm.spaces.Discrete(len(self.shapes), start=0, init_value=3),
+                        "shape": swm.spaces.Discrete(len(self.shapes), start=0, init_value=0),
                         "angle": swm.spaces.Box(
                             low=-2 * np.pi,
                             high=2 * np.pi,
@@ -176,6 +178,9 @@ class PushT(gym.Env):
         self.render_action = render_action
         self.render_mode = render_mode
 
+        if fix_action_sample:
+            self.fix_action_sample()
+
         """
         If human-rendering is used, `self.window` will be a reference
         to the window that we draw to. `self.clock` will be a clock that is used
@@ -198,6 +203,7 @@ class PushT(gym.Env):
         super().reset(seed=seed, options=options)
         self.observation_space.seed(seed)
         self.action_space.seed(seed)
+        self.rng = np.random.default_rng(seed)
 
         if hasattr(self, "variation_space"):
             self.variation_space.seed(seed)
@@ -206,13 +212,12 @@ class PushT(gym.Env):
 
         self.variation_space.reset()
 
-        if "variation" not in options:
-            options["variation"] = DEFAULT_VARIATIONS
+        variations = options.get("variation", DEFAULT_VARIATIONS)
 
-        elif not isinstance(options["variation"], Sequence):
+        if not isinstance(variations, Sequence):
             raise ValueError("variation option must be a Sequence containing variations names to sample")
 
-        self.variation_space.update(options["variation"])
+        self.variation_space.update(variations)
 
         assert self.variation_space.check(debug=True), "Variation values must be within variation space!"
 
@@ -800,3 +805,24 @@ class PushT(gym.Env):
             return self.add_plus(*args, **kwargs)
         else:
             raise ValueError(f"Unknown shape type: {shape}")
+
+    def fix_action_sample(self):
+        logging.warning(
+            "The action space sample method is being overridden to improve sampling. "
+            "This is a temporary fix and will be removed in future versions."
+        )
+
+        # Save original sample method
+        self.original_sample = self.action_space.sample
+
+        def better_sample():
+            # sample in a 100x100 box around the block
+            block_pos = np.array((self.block.position.x, self.block.position.y))
+            action = self.rng.uniform(block_pos - 50, block_pos + 50)
+
+            # Clip to action space bounds
+            action = np.clip(action, self.action_space.low, self.action_space.high)
+            return action
+
+        # Override with new method
+        self.action_space.sample = better_sample

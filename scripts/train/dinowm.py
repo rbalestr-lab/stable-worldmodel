@@ -3,7 +3,6 @@ from pathlib import Path
 
 import hydra
 import lightning as pl
-import numpy as np
 import stable_pretraining as spt
 import torch
 from lightning.pytorch.callbacks import ModelCheckpoint
@@ -43,9 +42,13 @@ def get_data(dataset_name):
         )
 
     def norm_col_transform(dataset, col="pixels"):
-        data = np.array(dataset[col])
-        mean = torch.from_numpy(np.mean(data, 0)).unsqueeze(0)
-        std = torch.from_numpy(np.std(data, 0)).unsqueeze(0)
+        data = dataset[col][:]
+        mean = data.mean(0).unsqueeze(0)
+        std = data.std(0).unsqueeze(0)
+
+        print("MEAN:", mean)
+        print("STD:", std)
+
         return lambda x: (x - mean) / std
 
     # == load dataset
@@ -62,11 +65,7 @@ def get_data(dataset_name):
     norm_proprio_transform = norm_col_transform(dataset.dataset, "proprio")
 
     transform = spt.data.transforms.Compose(
-        *[
-            get_img_pipeling(f"{col}.{i}", f"{col}.{i}", IMG_SIZE)
-            for col in ["pixels", "goal"]
-            for i in range(N_STEPS)
-        ],
+        *[get_img_pipeling(f"{col}.{i}", f"{col}.{i}", IMG_SIZE) for col in ["pixels"] for i in range(N_STEPS)],
         spt.data.transforms.WrapTorchTransform(
             norm_action_transform,
             source="action",
@@ -93,11 +92,15 @@ def get_data(dataset_name):
         drop_last=True,
         persistent_workers=True,
         pin_memory=True,
-        prefetch_factor=2,
+        prefetch_factor=1,
         shuffle=True,
     )
     val = DataLoader(
-        val_set, batch_size=32, num_workers=2, persistent_workers=False, pin_memory=True
+        val_set,
+        batch_size=32,
+        num_workers=10,
+        persistent_workers=False,
+        pin_memory=True,
     )  # Reduced workers
     data_module = spt.data.DataModule(train=train, val=val)
 
@@ -221,49 +224,17 @@ def get_world_model(action_dim):
         model=world_model,
         forward=forward,
         optim={
-            # "encoder_opt": {
-            #     "modules": "model.backbone",
-            #     "optimizer": {"type": "AdamW", "lr": 1e-6},
-            #     "scheduler": {
-            #         "type": "OneCycleLR",
-            #         "max_lr": 1e-6,
-            #         "total_steps": 10000,
-            #     },
-            #     "interval": "step",
-            #     "frequency": 1,
-            # },
             "predictor_opt": {
                 "modules": "model.predictor",
                 "optimizer": {"type": "AdamW", "lr": 5e-4},
-                "scheduler": {
-                    "type": "OneCycleLR",
-                    "max_lr": 5e-4,
-                    "total_steps": 10000,
-                },
-                "interval": "step",
-                "frequency": 1,
             },
             "proprio_opt": {
                 "modules": "model.proprio_encoder",
                 "optimizer": {"type": "AdamW", "lr": 5e-4},
-                "scheduler": {
-                    "type": "OneCycleLR",
-                    "max_lr": 5e-4,
-                    "total_steps": 10000,
-                },
-                "interval": "step",
-                "frequency": 1,
             },
             "action_opt": {
                 "modules": "model.action_encoder",
                 "optimizer": {"type": "AdamW", "lr": 5e-4},
-                "scheduler": {
-                    "type": "OneCycleLR",
-                    "max_lr": 5e-4,
-                    "total_steps": 10000,
-                },
-                "interval": "step",
-                "frequency": 1,
             },
         },
     )

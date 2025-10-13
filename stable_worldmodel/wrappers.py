@@ -146,9 +146,9 @@ class EverythingToInfoWrapper(gym.Wrapper):
         assert "reward" not in info
         info["reward"] = reward
         assert "terminated" not in info
-        info["terminated"] = terminated
+        info["terminated"] = bool(terminated)
         assert "truncated" not in info
-        info["truncated"] = truncated
+        info["truncated"] = bool(truncated)
         assert "action" not in info
         info["action"] = action
         assert "step_idx" not in info

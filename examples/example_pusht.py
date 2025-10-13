@@ -46,7 +46,8 @@ if __name__ == "__main__":
 
     model = swm.policy.AutoCostModel("dummy_pusht").to("cuda")
     config = swm.PlanConfig(horizon=5, receding_horizon=5, action_block=5)
-    solver = swm.solver.CEMSolver(model, num_samples=300, var_scale=1.0, n_steps=3, topk=30, device="cuda")
+    # solver = swm.solver.CEMSolver(model, num_samples=300, var_scale=1.0, n_steps=3, topk=30, device="cuda")
+    solver = swm.solver.GDSolver(model, n_steps=10, action_noise=0.003, device="cuda")
     policy = swm.policy.WorldModelPolicy(solver=solver, config=config)
 
     world.set_policy(policy)

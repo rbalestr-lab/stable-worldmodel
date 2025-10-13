@@ -398,6 +398,7 @@ class World:
 
         while True:
             self.step()
+
             # start new episode for done envs
             for i in range(self.num_envs):
                 if self.terminateds[i] or self.truncateds[i]:
@@ -418,18 +419,24 @@ class World:
                     episode_idx[i] = next_ep_idx
                     eval_ep_count += 1
 
-                    print("eval episode count: ", eval_ep_count)
-
                     # break if enough episodes evaluated
                     if eval_ep_count >= episodes:
                         eval_done = True
                         break
 
-                    self.envs.unwrapped._autoreset_envs = np.zeros((self.num_envs,), dtype=np.bool_)
+                    self.envs.unwrapped._autoreset_envs = np.zeros((self.num_envs,))
                     _, infos = self.envs.envs[i].reset(seed=new_seed, options=options)
 
                     for k, v in infos.items():
-                        self.infos[k][i] = np.asarray(v)
+                        if k not in self.infos:
+                            continue  # Skip keys not in vectorized infos
+                        # Convert to array and extract scalar to preserve dtype
+                        v_array = np.asarray(v)
+                        if v_array.ndim == 0:
+                            # 0-d array: extract scalar to avoid dtype=object
+                            self.infos[k][i] = v_array.item()
+                        else:
+                            self.infos[k][i] = v_array
 
             if eval_done:
                 break

@@ -90,7 +90,8 @@ class GDSolver(torch.nn.Module):
 
         # perform gradient descent
         for _ in range(self.n_steps):
-            cost = self.model.get_cost(info_dict, self.init)
+            # copy info dict to avoid in-place modification
+            cost = self.model.get_cost(dict(info_dict), self.init)
 
             assert type(cost) is torch.Tensor, f"Got {type(cost)} cost, expect torch.Tensor"
             assert cost.ndim == 1 and len(cost) == self.n_envs, f"Cost should be of shape (n_envs,), got {cost.shape}"
@@ -106,6 +107,8 @@ class GDSolver(torch.nn.Module):
 
             outputs["cost"].append(cost.item())
             outputs["trajectory"].extend([self.init.detach().cpu().clone()])
+
+            print(f" GD step {_ + 1}/{self.n_steps}, cost: {outputs['cost'][-1]:.4f}")
 
         # TODO break solving if finished self.eval? done break
 

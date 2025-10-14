@@ -28,3 +28,36 @@ wandb:
 
 dataset_name: pusht_expert
 output_model_name: world_model
+
+epochs: 1
+batch_size: 32
+num_workers: 10
+train_split: 0.9
+
+image_size: 224
+patch_size: 16
+
+n_steps: 2
+frameskip: 5
+
+dinowm:
+  history_size: 3
+  num_preds: 1
+  proprio_dim: 4
+  proprio_embed_dim: 10
+  action_dim: 2
+  action_embed_dim: 10
+
+predictor:
+  depth: 6
+  heads: 16
+  mlp_dim: 2048
+  dim_head: 64
+  dropout: 0.1
+  emb_dropout: 0.0
+
+predictor_lr: 5e-4
+proprio_encoder_lr: 5e-4
+action_encoder_lr: 5e-4
+
+dump_object: True

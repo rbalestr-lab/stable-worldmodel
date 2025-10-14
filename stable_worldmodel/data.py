@@ -34,7 +34,7 @@ class StepsDataset(spt.data.HFDataset):
         **kwargs,
     ):
         data_dir = Path(kwargs.get("cache_dir", swm.data.get_cache_dir()), path)
-        super().__init__(os.path.join(data_dir, "records"), *args, **kwargs)
+        super().__init__(str(data_dir), *args, **kwargs)
 
         self.data_dir = data_dir
         self.num_steps = num_steps

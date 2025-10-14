@@ -307,7 +307,7 @@ class World:
         records_ds = records_ds.select(np.nonzero(keep_mask)[0])
 
         # save dataset
-        records_path = dataset_path / "records"
+        records_path = dataset_path  # / "records"
         num_chunks = episodes // 50
         records_path.mkdir(parents=True, exist_ok=True)
         records_ds.save_to_disk(records_path, num_shards=num_chunks or 1)

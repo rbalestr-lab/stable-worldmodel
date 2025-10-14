@@ -1,4 +1,3 @@
-from dataclasses import dataclass
 from pathlib import Path
 
 import hydra
@@ -16,20 +15,11 @@ from transformers import AutoModel
 import stable_worldmodel as swm
 
 
-@dataclass
-class Config:
-    dataset_name: str
-    img_size: int = 224
-    batch_size: int = 32
-    num_workers: int = 4
-
-
 def get_data(dataset_name):
     """Return data and action space dim for training predictor."""
 
     N_STEPS = 2
 
-    # == image transformations
     def get_img_pipeling(key, target, img_size=224):
         return spt.data.transforms.Compose(
             spt.data.transforms.ToImage(
@@ -51,7 +41,6 @@ def get_data(dataset_name):
 
         return lambda x: (x - mean) / std
 
-    # == load dataset
     dataset = swm.data.StepsDataset(
         dataset_name,
         num_steps=N_STEPS,
@@ -165,77 +154,62 @@ def forward(self, batch, stage):
     return batch
 
 
-def get_world_model(action_dim):
+def get_world_model(cfg):
     """Return stable_spt module with world model"""
 
     # encoder = swm.wm.dinowm.DinoV2Encoder("dinov2_vits14", feature_key="x_norm_patchtokens")
     encoder = AutoModel.from_pretrained("facebook/dinov2-small")
-    emb_dim = encoder.config.hidden_size  # encoder.emb_dim  # 384 for vits14
+    embedding_dim = encoder.config.hidden_size
 
-    HISTORY_SIZE = 3
-    PREDICTION_HORIZON = 1
-    proprio_dim = 4
-    proprio_emb_dim = 10
-    action_emb_dim = 10
-    image_size = 224  # 224 for dinov2_vits14
-    patch_size = 16  # 16 size for create 14 patches
+    num_patches = (cfg.image_size // cfg.patch_size) ** 2  # 256 for 224×224
+    embedding_dim += cfg.dinowm.proprio_embed_dim + cfg.dinowm.action_embed_dim
 
-    num_patches = (image_size // patch_size) ** 2  # 256 for 224×224
+    logging.info(f"Encoder: {encoder}, emb_dim: {embedding_dim}, num_patches: {num_patches}")
 
-    logging.info(f"Encoder: {encoder}, emb_dim: {emb_dim}, num_patches: {num_patches}")
-
-    # -- create predictor
     predictor = swm.wm.dinowm.CausalPredictor(
         num_patches=num_patches,
-        num_frames=HISTORY_SIZE,
-        dim=emb_dim + proprio_emb_dim + action_emb_dim,
-        depth=6,
-        heads=16,
-        mlp_dim=2048,
-        pool="mean",
-        dim_head=64,
-        dropout=0.1,
-        emb_dropout=0.0,
+        num_frames=cfg.dinowm.history_size,
+        dim=embedding_dim,
+        **cfg.predictor,
     )
 
     logging.info(f"Predictor: {predictor}")
 
     # -- create action encoder
-    action_encoder = swm.wm.dinowm.Embedder(in_chans=action_dim, emb_dim=action_emb_dim)
+    effective_act_dim = cfg.frameskip * cfg.dinowm.action_dim
+    action_encoder = swm.wm.dinowm.Embedder(in_chans=effective_act_dim, emb_dim=cfg.dinowm.action_embed_dim)
 
-    logging.info(f"Action dim: {action_dim}, action emb dim: {action_emb_dim}")
+    logging.info(f"Action dim: {effective_act_dim}, action emb dim: {cfg.dinowm.action_embed_dim}")
 
     # -- create proprioceptive encoder
-    proprio_encoder = swm.wm.dinowm.Embedder(in_chans=proprio_dim, emb_dim=proprio_emb_dim)
-    logging.info(f"Proprio dim: {proprio_dim}, proprio emb dim: {proprio_emb_dim}")
+    proprio_encoder = swm.wm.dinowm.Embedder(in_chans=cfg.dinowm.proprio_dim, emb_dim=cfg.dinowm.proprio_embed_dim)
+    logging.info(f"Proprio dim: {cfg.dinowm.proprio_dim}, proprio emb dim: {cfg.dinowm.proprio_embed_dim}")
 
     world_model = swm.wm.DINOWM(
         encoder=spt.backbone.EvalOnly(encoder),
         predictor=predictor,
         action_encoder=action_encoder,
         proprio_encoder=proprio_encoder,
-        history_size=HISTORY_SIZE,
-        num_pred=PREDICTION_HORIZON,
+        history_size=cfg.dinowm.history_size,
+        num_pred=cfg.dinowm.num_preds,
         device="cuda",
     )
 
     # -- world model as a stable_spt module
+
+    def add_opt(module_name, lr):
+        return {
+            "modules": str(module_name),
+            "optimizer": {"type": "AdamW", "lr": lr},
+        }
+
     world_model = spt.Module(
         model=world_model,
         forward=forward,
         optim={
-            "predictor_opt": {
-                "modules": "model.predictor",
-                "optimizer": {"type": "AdamW", "lr": 5e-4},
-            },
-            "proprio_opt": {
-                "modules": "model.proprio_encoder",
-                "optimizer": {"type": "AdamW", "lr": 5e-4},
-            },
-            "action_opt": {
-                "modules": "model.action_encoder",
-                "optimizer": {"type": "AdamW", "lr": 5e-4},
-            },
+            "predictor_opt": add_opt("model.predictor", cfg.predictor_lr),
+            "proprio_opt": add_opt("model.proprio_encoder", cfg.proprio_encoder_lr),
+            "action_opt": add_opt("model.action_encoder", cfg.action_encoder_lr),
         },
     )
     return world_model
@@ -265,15 +239,13 @@ def run(cfg):
     wandb_logger = setup_pl_logger(cfg)
 
     data, action_dim = get_data(cfg.dataset_name)
-    world_model = get_world_model(action_dim)
+    world_model = get_world_model(cfg)
 
     cache_dir = swm.data.get_cache_dir()
-    checkpoint_callback = ModelCheckpoint(
-        dirpath=cache_dir, filename=f"{cfg.output_model_name}_weights"
-    )  # , save_last=True)
+    checkpoint_callback = ModelCheckpoint(dirpath=cache_dir, filename=f"{cfg.output_model_name}_weights")
 
     trainer = pl.Trainer(
-        max_epochs=10,
+        max_epochs=cfg.epochs,
         callbacks=[checkpoint_callback],
         num_sanity_val_steps=1,
         logger=wandb_logger,

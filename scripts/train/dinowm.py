@@ -23,7 +23,8 @@ def get_data(dataset_name):
     def get_img_pipeling(key, target, img_size=224):
         return spt.data.transforms.Compose(
             spt.data.transforms.ToImage(
-                **spt.data.dataset_stats.ImageNet,
+                mean=[0.5, 0.5, 0.5],
+                std=[0.5, 0.5, 0.5],
                 source=key,
                 target=target,
             ),
@@ -35,10 +36,6 @@ def get_data(dataset_name):
         data = dataset[col][:]
         mean = data.mean(0).unsqueeze(0)
         std = data.std(0).unsqueeze(0)
-
-        print("MEAN:", mean)
-        print("STD:", std)
-
         return lambda x: (x - mean) / std
 
     dataset = swm.data.StepsDataset(

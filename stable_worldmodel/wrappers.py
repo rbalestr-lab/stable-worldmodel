@@ -111,7 +111,7 @@ class EverythingToInfoWrapper(gym.Wrapper):
         info["step_idx"] = self._step_counter
 
         # add all variations to info if needed
-        options = kwargs.get("options", {})
+        options = kwargs.get("options") or {}
 
         if "variation" in options:
             var_opt = options["variation"]

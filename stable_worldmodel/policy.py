@@ -1,7 +1,9 @@
 from collections import deque
 from dataclasses import dataclass
 from pathlib import Path
+from typing import Protocol
 
+import numpy as np
 import torch
 
 import stable_worldmodel as swm
@@ -21,6 +23,18 @@ class PlanConfig:
     @property
     def plan_len(self):
         return self.horizon * self.action_block
+
+
+class Transformable(Protocol):
+    """Protocol for input transformation."""
+
+    def transform(x) -> torch.Tensor:  # pragma: no cover
+        """Pre-process"""
+        ...
+
+    def inverse_transform(x) -> torch.Tensor:  # pragma: no cover
+        """Revert pre-processed"""
+        ...
 
 
 class BasePolicy:
@@ -76,6 +90,8 @@ class WorldModelPolicy(BasePolicy):
         self,
         solver: Solver,
         config: PlanConfig,
+        process: dict[str, Transformable] | None = None,
+        transform: dict[str, callable] | None = None,
         **kwargs,
     ):
         super().__init__(**kwargs)
@@ -84,18 +100,10 @@ class WorldModelPolicy(BasePolicy):
         self.cfg = config
         self.solver = solver
         self.action_buffer = deque(maxlen=self.flatten_receding_horizon)
+        self.process = process or {}
+        self.transform = transform or {}
         self._action_buffer = None
         self._next_init = None
-
-        action_mean = torch.tensor([[228.0312, 292.9166]])
-        action_std = torch.tensor([[103.2667, 98.6081]])
-
-        proprio_mean = torch.tensor([[228.8125, 292.2306, -2.9210, 2.5488]])
-        proprio_std = torch.tensor([[103.3736, 98.9255, 77.5003, 76.8643]])
-
-        self.normalize_action = lambda x: (x - action_mean) / action_std
-        self.normalize_proprio = lambda x: (x - proprio_mean) / proprio_std
-        self.denormalize_action = lambda x: x * action_std + action_mean
 
     @property
     def flatten_receding_horizon(self):
@@ -114,15 +122,11 @@ class WorldModelPolicy(BasePolicy):
         assert "pixels" in info_dict, "'pixels' must be provided in info_dict"
         assert "goal" in info_dict, "'goal' must be provided in info_dict"
 
-        # TODO: REMOVE : normalize action and proprio
-        # if "action" in info_dict:
-        #     info_dict["action"] = torch.from_numpy(info_dict["action"]).float()
-        #     print(info_dict["action"].shape)
-        #     info_dict["action"] = self.normalize_action(info_dict["action"])
-
-        if "proprio" in info_dict:
-            info_dict["proprio"] = torch.from_numpy(info_dict["proprio"]).float()
-            info_dict["proprio"] = self.normalize_proprio(info_dict["proprio"])
+        # pre-process and transform observations
+        for k, v in info_dict.items():
+            v = self.process[k].transform(v) if k in self.process else v
+            v = torch.stack([self.transform[k](x) for x in v]) if k in self.transform else v
+            info_dict[k] = torch.from_numpy(v) if isinstance(v, (np.ndarray | np.generic)) else v
 
         # need to replan if action buffer is empty
         if len(self._action_buffer) == 0:
@@ -141,11 +145,13 @@ class WorldModelPolicy(BasePolicy):
 
         action = self._action_buffer.popleft()
         action = action.reshape(*self.env.action_space.shape)
+        action = action.numpy()
 
-        # denormalize action
-        action = self.denormalize_action(action)
+        # post-process action
+        if "action" in self.process:
+            action = self.process["action"].inverse_transform(action)
 
-        return action.numpy()  # (num_envs, action_dim)
+        return action  # (num_envs, action_dim)
 
 
 def AutoCostModel(model_name, cache_dir=None):

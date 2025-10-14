@@ -38,6 +38,17 @@ class GDSolver(torch.nn.Module):
         if not isinstance(action_space, Box):
             logging.warning(f"Action space is discrete, got {type(action_space)}. GDSolver may not work as expected.")
 
+    def set_seed(self, seed: int) -> None:
+        """Set random seed for deterministic behavior.
+
+        Args:
+            seed: Random seed to use for numpy and torch
+        """
+        np.random.seed(seed)
+        torch.manual_seed(seed)
+        if torch.cuda.is_available():
+            torch.cuda.manual_seed_all(seed)
+
     @property
     def n_envs(self) -> int:
         return self._n_envs
@@ -82,6 +93,9 @@ class GDSolver(torch.nn.Module):
             "cost": [],
             "trajectory": [],
         }
+
+        # Set model to eval mode to ensure deterministic behavior
+        self.model.eval()
 
         with torch.no_grad():
             self.init_action(init_action)

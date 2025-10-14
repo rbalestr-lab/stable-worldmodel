@@ -35,10 +35,13 @@ class PushT(gym.Env):
         with_target=True,
         render_mode="rgb_array",
         fix_action_sample=True,
+        relative=True,
     ):
         self._seed = None
         self.window_size = ws = 512  # The size of the PyGame window
         self.render_size = resolution
+        self.relative = relative
+        self.action_scale = 100
 
         # physics
         self.control_hz = self.metadata["render_fps"]
@@ -63,7 +66,7 @@ class PushT(gym.Env):
         )
 
         # positional goal for agent
-        self.action_space = spaces.Box(low=0, high=ws, shape=(2,), dtype=np.float32)
+        self.action_space = spaces.Box(low=-1.0, high=1.0, shape=(2,), dtype=np.float32)
 
         self.variation_space = swm.spaces.Dict(
             {
@@ -270,6 +273,11 @@ class PushT(gym.Env):
         n_steps = int(1 / (self.dt * self.control_hz))
 
         self.latest_action = action
+
+        if self.relative:
+            action = self.agent.position + action * self.action_scale
+            action = np.clip(action, 0, self.window_size)
+
         for _ in range(n_steps):
             # Step PD control.
             acceleration = self.k_p * (action - self.agent.position) + self.k_v * (Vec2d(0, 0) - self.agent.velocity)
@@ -280,6 +288,9 @@ class PushT(gym.Env):
 
         # make the observation
         state = self._get_obs()
+
+        # print(state)
+
         proprio = np.concatenate((state[:2], state[-2:]))
         observation = {"proprio": proprio, "state": state}
 
@@ -818,10 +829,10 @@ class PushT(gym.Env):
         def better_sample():
             # sample in a 100x100 box around the block
             block_pos = np.array((self.block.position.x, self.block.position.y))
-            action = self.rng.uniform(block_pos - 50, block_pos + 50)
+            action = self.rng.uniform(block_pos - 50, block_pos + 50) - self.agent.position
 
             # Clip to action space bounds
-            action = np.clip(action, self.action_space.low, self.action_space.high)
+            action = np.clip(action, 0, self.window_size)
             return action
 
         # Override with new method

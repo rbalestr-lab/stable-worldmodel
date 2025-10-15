@@ -1,5 +1,3 @@
-from collections.abc import Iterable, Sequence
-
 import mujoco
 import numpy as np
 from dm_control import mjcf
@@ -49,7 +47,7 @@ class CubeEnv(ManipSpaceEnv):
         """Initialize the Cube environment.
 
         Args:
-            env_type: Environment type. One of 'single', 'double', 'triple', 'quadruple' or 'octuple'.
+            env_type: Environment type corresponding to the number of cubes. One of 'single', 'double', 'triple', 'quadruple' or 'octuple'.
             permute_blocks: Whether to randomly permute the order of the blocks at task initialization.
             multiview: Whether to render the scene from both a front and side view.
             *args: Additional arguments to pass to the parent class.
@@ -617,8 +615,8 @@ class CubeEnv(ManipSpaceEnv):
         self.variation_space.reset()
 
         if "variation" in options:
-            assert isinstance(options["variation"], Sequence), (
-                "variation option must be a Sequence containing variations names to sample"
+            assert isinstance(options["variation"], list | tuple), (
+                "variation option must be a list or tuple containing variation names to sample"
             )
 
             if len(options["variation"]) == 1 and options["variation"][0] == "all":
@@ -1018,7 +1016,7 @@ class CubeEnv(ManipSpaceEnv):
         **kwargs,
     ):
         camera = "front_pixels" if not self._multiview else ["front_pixels", "side_pixels"]
-        if isinstance(camera, Iterable):
+        if isinstance(camera, list | tuple):
             imgs = []
             for cam in camera:
                 img = super().render(camera=cam, *args, **kwargs)

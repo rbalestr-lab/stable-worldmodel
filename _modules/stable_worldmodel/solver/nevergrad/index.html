@@ -131,6 +131,14 @@
 <li class="toctree-l2"><a class="reference internal" href="../../../../api/generated/stable_worldmodel.policy.WorldModelPolicy/">WorldModelPolicy</a></li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/solver/">Solver</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/generated/stable_worldmodel.solver.GDSolver/">GDSolver</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/generated/stable_worldmodel.solver.CEMSolver/">CEMSolver</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/generated/stable_worldmodel.solver.MPPISolver/">MPPISolver</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/generated/stable_worldmodel.solver.NevergradSolver/">NevergradSolver</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/generated/stable_worldmodel.solver.RandomSolver/">RandomSolver</a></li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../api/spaces/">Space</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="../../../../api/generated/stable_worldmodel.spaces.Discrete/">Discrete</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../api/generated/stable_worldmodel.spaces.MultiDiscrete/">MultiDiscrete</a></li>
@@ -219,7 +227,7 @@
 </span><span id="line-9">
 </span><span id="line-10">
 <div class="viewcode-block" id="NevergradSolver">
-<a class="viewcode-back" href="../../../../stable_worldmodel.solver/#stable_worldmodel.solver.nevergrad.NevergradSolver">[docs]</a>
+<a class="viewcode-back" href="../../../../stable_worldmodel.solver/#stable_worldmodel.solver.NevergradSolver">[docs]</a>
 </span><span id="line-11"><span class="k">class</span><span class="w"> </span><span class="nc">NevergradSolver</span><span class="p">:</span>
 </span><span id="line-12"><span class="w">    </span><span class="sd">&quot;&quot;&quot;Nevergrad Solver.</span>
 </span><span id="line-13">
@@ -243,7 +251,7 @@
 </span><span id="line-31">        <span class="bp">self</span><span class="o">.</span><span class="n">device</span> <span class="o">=</span> <span class="n">device</span>
 </span><span id="line-32">
 <div class="viewcode-block" id="NevergradSolver.configure">
-<a class="viewcode-back" href="../../../../stable_worldmodel.solver/#stable_worldmodel.solver.nevergrad.NevergradSolver.configure">[docs]</a>
+<a class="viewcode-back" href="../../../../stable_worldmodel.solver/#stable_worldmodel.solver.NevergradSolver.configure">[docs]</a>
 </span><span id="line-33">    <span class="k">def</span><span class="w"> </span><span class="nf">configure</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">action_space</span><span class="p">,</span> <span class="n">n_envs</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">config</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 </span><span id="line-34">        <span class="bp">self</span><span class="o">.</span><span class="n">_action_space</span> <span class="o">=</span> <span class="n">action_space</span>
 </span><span id="line-35">        <span class="bp">self</span><span class="o">.</span><span class="n">_n_envs</span> <span class="o">=</span> <span class="n">n_envs</span>
@@ -272,7 +280,7 @@
 </span><span id="line-57">        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">solve</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 </span><span id="line-58">
 <div class="viewcode-block" id="NevergradSolver.solve">
-<a class="viewcode-back" href="../../../../stable_worldmodel.solver/#stable_worldmodel.solver.nevergrad.NevergradSolver.solve">[docs]</a>
+<a class="viewcode-back" href="../../../../stable_worldmodel.solver/#stable_worldmodel.solver.NevergradSolver.solve">[docs]</a>
 </span><span id="line-59">    <span class="nd">@torch</span><span class="o">.</span><span class="n">inference_mode</span><span class="p">()</span>
 </span><span id="line-60">    <span class="k">def</span><span class="w"> </span><span class="nf">solve</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">info_dict</span><span class="p">,</span> <span class="n">init_action</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 </span><span id="line-61">        <span class="n">outputs</span> <span class="o">=</span> <span class="p">{</span>

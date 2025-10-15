@@ -131,6 +131,14 @@
 <li class="toctree-l2"><a class="reference internal" href="../../../../api/generated/stable_worldmodel.policy.WorldModelPolicy/">WorldModelPolicy</a></li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/solver/">Solver</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/generated/stable_worldmodel.solver.GDSolver/">GDSolver</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/generated/stable_worldmodel.solver.CEMSolver/">CEMSolver</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/generated/stable_worldmodel.solver.MPPISolver/">MPPISolver</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/generated/stable_worldmodel.solver.NevergradSolver/">NevergradSolver</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/generated/stable_worldmodel.solver.RandomSolver/">RandomSolver</a></li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../api/spaces/">Space</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="../../../../api/generated/stable_worldmodel.spaces.Discrete/">Discrete</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../api/generated/stable_worldmodel.spaces.MultiDiscrete/">MultiDiscrete</a></li>
@@ -217,7 +225,7 @@
 </span><span id="line-7">
 </span><span id="line-8">
 <div class="viewcode-block" id="CEMSolver">
-<a class="viewcode-back" href="../../../../stable_worldmodel.solver/#stable_worldmodel.solver.cem.CEMSolver">[docs]</a>
+<a class="viewcode-back" href="../../../../stable_worldmodel.solver/#stable_worldmodel.solver.CEMSolver">[docs]</a>
 </span><span id="line-9"><span class="k">class</span><span class="w"> </span><span class="nc">CEMSolver</span><span class="p">:</span>
 </span><span id="line-10"><span class="w">    </span><span class="sd">&quot;&quot;&quot;Cross Entropy Method Solver.</span>
 </span><span id="line-11">
@@ -241,7 +249,7 @@
 </span><span id="line-29">        <span class="bp">self</span><span class="o">.</span><span class="n">device</span> <span class="o">=</span> <span class="n">device</span>
 </span><span id="line-30">
 <div class="viewcode-block" id="CEMSolver.configure">
-<a class="viewcode-back" href="../../../../stable_worldmodel.solver/#stable_worldmodel.solver.cem.CEMSolver.configure">[docs]</a>
+<a class="viewcode-back" href="../../../../stable_worldmodel.solver/#stable_worldmodel.solver.CEMSolver.configure">[docs]</a>
 </span><span id="line-31">    <span class="k">def</span><span class="w"> </span><span class="nf">configure</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">action_space</span><span class="p">,</span> <span class="n">n_envs</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">config</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 </span><span id="line-32">        <span class="bp">self</span><span class="o">.</span><span class="n">_action_space</span> <span class="o">=</span> <span class="n">action_space</span>
 </span><span id="line-33">        <span class="bp">self</span><span class="o">.</span><span class="n">_n_envs</span> <span class="o">=</span> <span class="n">n_envs</span>
@@ -270,7 +278,7 @@
 </span><span id="line-55">        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">solve</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 </span><span id="line-56">
 <div class="viewcode-block" id="CEMSolver.init_action_distrib">
-<a class="viewcode-back" href="../../../../stable_worldmodel.solver/#stable_worldmodel.solver.cem.CEMSolver.init_action_distrib">[docs]</a>
+<a class="viewcode-back" href="../../../../stable_worldmodel.solver/#stable_worldmodel.solver.CEMSolver.init_action_distrib">[docs]</a>
 </span><span id="line-57">    <span class="k">def</span><span class="w"> </span><span class="nf">init_action_distrib</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">actions</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 </span><span id="line-58"><span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialize the action distribution params (mu, sigma) given the initial condition.</span>
 </span><span id="line-59">
@@ -293,7 +301,7 @@
 
 </span><span id="line-76">
 <div class="viewcode-block" id="CEMSolver.solve">
-<a class="viewcode-back" href="../../../../stable_worldmodel.solver/#stable_worldmodel.solver.cem.CEMSolver.solve">[docs]</a>
+<a class="viewcode-back" href="../../../../stable_worldmodel.solver/#stable_worldmodel.solver.CEMSolver.solve">[docs]</a>
 </span><span id="line-77">    <span class="nd">@torch</span><span class="o">.</span><span class="n">inference_mode</span><span class="p">()</span>
 </span><span id="line-78">    <span class="k">def</span><span class="w"> </span><span class="nf">solve</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">info_dict</span><span class="p">,</span> <span class="n">init_action</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 </span><span id="line-79">        <span class="n">outputs</span> <span class="o">=</span> <span class="p">{</span>

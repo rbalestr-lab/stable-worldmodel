@@ -131,6 +131,14 @@
 <li class="toctree-l2"><a class="reference internal" href="../../../../api/generated/stable_worldmodel.policy.WorldModelPolicy/">WorldModelPolicy</a></li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/solver/">Solver</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/generated/stable_worldmodel.solver.GDSolver/">GDSolver</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/generated/stable_worldmodel.solver.CEMSolver/">CEMSolver</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/generated/stable_worldmodel.solver.MPPISolver/">MPPISolver</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/generated/stable_worldmodel.solver.NevergradSolver/">NevergradSolver</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/generated/stable_worldmodel.solver.RandomSolver/">RandomSolver</a></li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../api/spaces/">Space</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="../../../../api/generated/stable_worldmodel.spaces.Discrete/">Discrete</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../api/generated/stable_worldmodel.spaces.MultiDiscrete/">MultiDiscrete</a></li>
@@ -264,7 +272,7 @@
 </span><span id="line-54">
 </span><span id="line-55">
 <div class="viewcode-block" id="RandomSolver">
-<a class="viewcode-back" href="../../../../stable_worldmodel.solver/#stable_worldmodel.solver.random.RandomSolver">[docs]</a>
+<a class="viewcode-back" href="../../../../stable_worldmodel.solver/#stable_worldmodel.solver.RandomSolver">[docs]</a>
 </span><span id="line-56"><span class="k">class</span><span class="w"> </span><span class="nc">RandomSolver</span><span class="p">:</span>
 </span><span id="line-57"><span class="w">    </span><span class="sd">&quot;&quot;&quot;Random action sampling solver for model-based planning.</span>
 </span><span id="line-58">
@@ -348,7 +356,7 @@
 </span><span id="line-136"><span class="sd">    &quot;&quot;&quot;</span>
 </span><span id="line-137">
 <div class="viewcode-block" id="RandomSolver.__init__">
-<a class="viewcode-back" href="../../../../stable_worldmodel.solver/#stable_worldmodel.solver.random.RandomSolver.__init__">[docs]</a>
+<a class="viewcode-back" href="../../../../stable_worldmodel.solver/#stable_worldmodel.solver.RandomSolver.__init__">[docs]</a>
 </span><span id="line-138">    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 </span><span id="line-139"><span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialize an unconfigured RandomSolver.</span>
 </span><span id="line-140">
@@ -372,7 +380,7 @@
 
 </span><span id="line-158">
 <div class="viewcode-block" id="RandomSolver.configure">
-<a class="viewcode-back" href="../../../../stable_worldmodel.solver/#stable_worldmodel.solver.random.RandomSolver.configure">[docs]</a>
+<a class="viewcode-back" href="../../../../stable_worldmodel.solver/#stable_worldmodel.solver.RandomSolver.configure">[docs]</a>
 </span><span id="line-159">    <span class="k">def</span><span class="w"> </span><span class="nf">configure</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">action_space</span><span class="p">,</span> <span class="n">n_envs</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">config</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 </span><span id="line-160"><span class="w">        </span><span class="sd">&quot;&quot;&quot;Configure the solver with environment and planning specifications.</span>
 </span><span id="line-161">
@@ -467,7 +475,7 @@
 </span><span id="line-249">        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">solve</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 </span><span id="line-250">
 <div class="viewcode-block" id="RandomSolver.solve">
-<a class="viewcode-back" href="../../../../stable_worldmodel.solver/#stable_worldmodel.solver.random.RandomSolver.solve">[docs]</a>
+<a class="viewcode-back" href="../../../../stable_worldmodel.solver/#stable_worldmodel.solver.RandomSolver.solve">[docs]</a>
 </span><span id="line-251">    <span class="k">def</span><span class="w"> </span><span class="nf">solve</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">info_dict</span><span class="p">,</span> <span class="n">init_action</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
 </span><span id="line-252"><span class="w">        </span><span class="sd">&quot;&quot;&quot;Generate random action sequences for the planning horizon.</span>
 </span><span id="line-253">

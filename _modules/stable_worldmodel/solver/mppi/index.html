@@ -131,6 +131,14 @@
 <li class="toctree-l2"><a class="reference internal" href="../../../../api/generated/stable_worldmodel.policy.WorldModelPolicy/">WorldModelPolicy</a></li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/solver/">Solver</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/generated/stable_worldmodel.solver.GDSolver/">GDSolver</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/generated/stable_worldmodel.solver.CEMSolver/">CEMSolver</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/generated/stable_worldmodel.solver.MPPISolver/">MPPISolver</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/generated/stable_worldmodel.solver.NevergradSolver/">NevergradSolver</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/generated/stable_worldmodel.solver.RandomSolver/">RandomSolver</a></li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../api/spaces/">Space</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="../../../../api/generated/stable_worldmodel.spaces.Discrete/">Discrete</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../api/generated/stable_worldmodel.spaces.MultiDiscrete/">MultiDiscrete</a></li>
@@ -217,7 +225,7 @@
 </span><span id="line-7">
 </span><span id="line-8">
 <div class="viewcode-block" id="MPPISolver">
-<a class="viewcode-back" href="../../../../stable_worldmodel.solver/#stable_worldmodel.solver.mppi.MPPISolver">[docs]</a>
+<a class="viewcode-back" href="../../../../stable_worldmodel.solver/#stable_worldmodel.solver.MPPISolver">[docs]</a>
 </span><span id="line-9"><span class="k">class</span><span class="w"> </span><span class="nc">MPPISolver</span><span class="p">:</span>
 </span><span id="line-10"><span class="w">    </span><span class="sd">&quot;&quot;&quot;Model Predictive Path Integral Solver.</span>
 </span><span id="line-11">
@@ -250,7 +258,7 @@
 </span><span id="line-38">        <span class="bp">self</span><span class="o">.</span><span class="n">device</span> <span class="o">=</span> <span class="n">device</span>
 </span><span id="line-39">
 <div class="viewcode-block" id="MPPISolver.configure">
-<a class="viewcode-back" href="../../../../stable_worldmodel.solver/#stable_worldmodel.solver.mppi.MPPISolver.configure">[docs]</a>
+<a class="viewcode-back" href="../../../../stable_worldmodel.solver/#stable_worldmodel.solver.MPPISolver.configure">[docs]</a>
 </span><span id="line-40">    <span class="k">def</span><span class="w"> </span><span class="nf">configure</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">action_space</span><span class="p">,</span> <span class="n">n_envs</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">config</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 </span><span id="line-41">        <span class="bp">self</span><span class="o">.</span><span class="n">_action_space</span> <span class="o">=</span> <span class="n">action_space</span>
 </span><span id="line-42">        <span class="bp">self</span><span class="o">.</span><span class="n">_n_envs</span> <span class="o">=</span> <span class="n">n_envs</span>
@@ -279,7 +287,7 @@
 </span><span id="line-64">        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">solve</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 </span><span id="line-65">
 <div class="viewcode-block" id="MPPISolver.init_action_distrib">
-<a class="viewcode-back" href="../../../../stable_worldmodel.solver/#stable_worldmodel.solver.mppi.MPPISolver.init_action_distrib">[docs]</a>
+<a class="viewcode-back" href="../../../../stable_worldmodel.solver/#stable_worldmodel.solver.MPPISolver.init_action_distrib">[docs]</a>
 </span><span id="line-66">    <span class="k">def</span><span class="w"> </span><span class="nf">init_action_distrib</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">actions</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 </span><span id="line-67"><span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialize the action distribution params (mu, sigma) given the initial condition.</span>
 </span><span id="line-68">
@@ -302,7 +310,7 @@
 
 </span><span id="line-85">
 <div class="viewcode-block" id="MPPISolver.compute_trajectory_weights">
-<a class="viewcode-back" href="../../../../stable_worldmodel.solver/#stable_worldmodel.solver.mppi.MPPISolver.compute_trajectory_weights">[docs]</a>
+<a class="viewcode-back" href="../../../../stable_worldmodel.solver/#stable_worldmodel.solver.MPPISolver.compute_trajectory_weights">[docs]</a>
 </span><span id="line-86">    <span class="k">def</span><span class="w"> </span><span class="nf">compute_trajectory_weights</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">costs</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
 </span><span id="line-87"><span class="w">        </span><span class="sd">&quot;&quot;&quot;Compute trajectory weights from costs using softmin with temperature.</span>
 </span><span id="line-88">
@@ -318,7 +326,7 @@
 
 </span><span id="line-98">
 <div class="viewcode-block" id="MPPISolver.solve">
-<a class="viewcode-back" href="../../../../stable_worldmodel.solver/#stable_worldmodel.solver.mppi.MPPISolver.solve">[docs]</a>
+<a class="viewcode-back" href="../../../../stable_worldmodel.solver/#stable_worldmodel.solver.MPPISolver.solve">[docs]</a>
 </span><span id="line-99">    <span class="nd">@torch</span><span class="o">.</span><span class="n">inference_mode</span><span class="p">()</span>
 </span><span id="line-100">    <span class="k">def</span><span class="w"> </span><span class="nf">solve</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">info_dict</span><span class="p">,</span> <span class="n">init_action</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 </span><span id="line-101">        <span class="n">outputs</span> <span class="o">=</span> <span class="p">{</span>

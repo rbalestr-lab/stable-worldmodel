@@ -110,10 +110,11 @@ class World:
         if hasattr(self.policy, "seed") and self.policy.seed is not None:
             self.policy.set_seed(self.policy.seed)
 
-    def record_video(self, video_path, max_steps=500, fps=30, seed=None, options=None):
+    def record_video(self, video_path, max_steps=500, fps=30, viewname="pixels", seed=None, options=None):
         """Record rollout videos for each environment under the current policy."""
         import imageio
 
+        viewname = [viewname] if isinstance(viewname, str) else viewname
         out = [
             imageio.get_writer(
                 Path(video_path) / f"env_{i}.mp4",
@@ -126,18 +127,17 @@ class World:
 
         self.reset(seed, options)
         for i, o in enumerate(out):
+            frame = np.vstack([self.infos[v_name][i] for v_name in viewname])
             if "goal" in self.infos:
-                frame = np.vstack([self.infos["pixels"][i], self.infos["goal"][i]])
-            else:
-                frame = self.infos["pixels"][i]
+                frame = np.vstack([frame, self.infos["goal"][i]])
             o.append_data(frame)
+
         for _ in range(max_steps):
             self.step()
             for i, o in enumerate(out):
+                frame = np.vstack([self.infos[v_name][i] for v_name in viewname])
                 if "goal" in self.infos:
                     frame = np.vstack([self.infos["pixels"][i], self.infos["goal"][i]])
-                else:
-                    frame = self.infos["pixels"][i]
                 o.append_data(frame)
             if np.any(self.terminateds) or np.any(self.truncateds):
                 break
@@ -246,7 +246,7 @@ class World:
             for img_col in image_cols:
                 img = records[img_col][i]
                 img_folder = dataset_path / "img" / f"{ep_idx}"
-                img_path = img_folder / f"{step_idx}_{img_col}.jpeg"
+                img_path = img_folder / f"{step_idx}_{img_col.replace('.', '_')}.jpeg"
                 iio.imwrite(img_path, img)
 
                 # replace image in records with relative path
@@ -319,6 +319,7 @@ class World:
         max_steps=500,
         fps=30,
         num_proc=4,
+        viewname: str | list[str] = "pixels",
         cache_dir=None,
     ):
         """Replay stored dataset episodes and export them as MP4 videos."""
@@ -328,8 +329,8 @@ class World:
         dataset_path = Path(cache_dir, dataset_name)
         assert dataset_path.is_dir(), f"Dataset {dataset_name} not found in cache dir {swm.data.get_cache_dir()}"
 
-        if isinstance(episode_idx, int):
-            episode_idx = [episode_idx]
+        episode_idx = [episode_idx] if isinstance(episode_idx, int) else episode_idx
+        viewname = [viewname] if isinstance(viewname, str) else viewname
 
         out = [
             imageio.get_writer(
@@ -356,9 +357,11 @@ class World:
             )
 
             for step_idx in range(min(episode_len, max_steps)):
-                img_path = Path(dataset_path, episode[step_idx]["pixels"])
-                frame = Image.open(img_path)
-                frame = np.array(frame.convert("RGB"), dtype=np.uint8)
+                frame = []
+                for view in viewname:
+                    img_path = Path(dataset_path, episode[step_idx][view])
+                    frame.append(np.array(Image.open(img_path).convert("RGB"), dtype=np.uint8))
+                frame = np.vstack(frame)  # should try hstack?
 
                 if "goal" in episode.column_names:
                     goal_path = Path(dataset_path, episode[step_idx]["goal"])
@@ -366,6 +369,7 @@ class World:
                     goal = np.array(goal.convert("RGB"), dtype=np.uint8)
                     frame = np.vstack([frame, goal])
                 o.append_data(frame)
+
         [o.close() for o in out]
         print(f"Video saved to {video_path}")
 

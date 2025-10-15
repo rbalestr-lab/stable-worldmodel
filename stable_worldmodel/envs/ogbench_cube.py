@@ -26,7 +26,6 @@ Example:
             obs, reward, terminated, truncated, info = env.step(action)
             if info['success']:
                 break
-
 .. _OGBench:
    https://github.com/seohongpark/ogbench/
 """
@@ -1387,7 +1386,6 @@ class CubeEnv(ManipSpaceEnv):
             for cam in camera:
                 img = super().render(camera=cam, *args, **kwargs)
                 imgs.append(img)
-            stacked_views = np.stack(imgs, axis=0)
-            return stacked_views
+            return imgs
         else:
             return super().render(camera=camera, *args, **kwargs)

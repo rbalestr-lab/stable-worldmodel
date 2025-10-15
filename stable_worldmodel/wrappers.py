@@ -192,24 +192,37 @@ class AddPixelsWrapper(gym.Wrapper):
         t0 = time.time()
         img = self.env.render()
         t1 = time.time()
-        # Convert to PIL Image for resizing
-        pil_img = self.Image.fromarray(img)
-        pil_img = pil_img.resize(self.pixels_shape, self.Image.BILINEAR)
-        # Optionally apply torchvision transform
-        if self.torchvision_transform is not None:
-            pixels = self.torchvision_transform(pil_img)
+
+        def _process_img(img_array):
+            # Convert to PIL Image for resizing
+            pil_img = self.Image.fromarray(img_array)
+            pil_img = pil_img.resize(self.pixels_shape, self.Image.BILINEAR)
+            # Optionally apply torchvision transform
+            if self.torchvision_transform is not None:
+                pixels = self.torchvision_transform(pil_img)
+            else:
+                pixels = np.array(pil_img)
+            return pixels
+
+        if isinstance(img, dict):
+            pixels = {f"pixels.{k}": _process_img(v) for k, v in img.items()}
+        elif isinstance(img, (list | tuple)):
+            pixels = {f"pixels.{i}": _process_img(v) for i, v in enumerate(img)}
         else:
-            pixels = np.array(pil_img)
+            pixels = {"pixels": _process_img(img)}
+
         return pixels, t1 - t0
 
     def reset(self, *args, **kwargs):
         obs, info = self.env.reset(*args, **kwargs)
-        info["pixels"], info["render_time"] = self._get_pixels()
+        pixels, info["render_time"] = self._get_pixels()
+        info.update(pixels)
         return obs, info
 
     def step(self, action):
         obs, reward, terminated, truncated, info = self.env.step(action)
-        info["pixels"], info["render_time"] = self._get_pixels()
+        pixels, info["render_time"] = self._get_pixels()
+        info.update(pixels)
         return obs, reward, terminated, truncated, info
 
 

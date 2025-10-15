@@ -256,144 +256,593 @@ in the environment initialised, i.e., <code class="docutils literal notranslate"
 </section>
 <section id="module-stable_worldmodel.envs.ogbench_cube">
 <span id="stable-worldmodel-envs-ogbench-cube-module"></span><h2>stable_worldmodel.envs.ogbench_cube module<a class="headerlink" href="#module-stable_worldmodel.envs.ogbench_cube" title="Link to this heading" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#module-stable_worldmodel.envs.ogbench_cube'"><svg height="1em" viewbox="0 0 24 24" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"></path></svg></a></h2>
+<p>OGBench Cube manipulation environment with multiple task variants.</p>
+<p>This module implements a robotic manipulation environment using cubes with various
+task configurations ranging from single cube pick-and-place to complex multi-cube
+stacking and rearrangement tasks. The environment supports visual variations including
+object colors, sizes, lighting, and camera angles for robust policy learning.</p>
+<p>The environment is built on top of the ManipSpaceEnv from OGBench and uses MuJoCo
+for physics simulation. It provides both pixel-based and state-based observations,
+with support for goal-conditioned learning and data collection modes.</p>
+<p class="rubric">Example</p>
+<p>Basic usage of the cube environment:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><code><span id="line-1"><span class="kn">from</span><span class="w"> </span><span class="nn">stable_worldmodel.envs.ogbench_cube</span><span class="w"> </span><span class="kn">import</span> <span class="n">CubeEnv</span>
+</span><span id="line-2">
+</span><span id="line-3"><span class="c1"># Create a double cube environment with pixel observations</span>
+</span><span id="line-4"><span class="n">env</span> <span class="o">=</span> <span class="n">CubeEnv</span><span class="p">(</span><span class="n">env_type</span><span class="o">=</span><span class="s1">'double'</span><span class="p">,</span> <span class="n">ob_type</span><span class="o">=</span><span class="s1">'pixels'</span><span class="p">,</span> <span class="n">multiview</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</span><span id="line-5">
+</span><span id="line-6"><span class="c1"># Reset with variation sampling</span>
+</span><span id="line-7"><span class="n">obs</span><span class="p">,</span> <span class="n">info</span> <span class="o">=</span> <span class="n">env</span><span class="o">.</span><span class="n">reset</span><span class="p">(</span><span class="n">options</span><span class="o">=</span><span class="p">{</span><span class="s1">'variation'</span><span class="p">:</span> <span class="p">[</span><span class="s1">'all'</span><span class="p">]})</span>
+</span><span id="line-8">
+</span><span id="line-9"><span class="c1"># Run an episode</span>
+</span><span id="line-10"><span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">100</span><span class="p">):</span>
+</span><span id="line-11">    <span class="n">action</span> <span class="o">=</span> <span class="n">env</span><span class="o">.</span><span class="n">action_space</span><span class="o">.</span><span class="n">sample</span><span class="p">()</span>
+</span><span id="line-12">    <span class="n">obs</span><span class="p">,</span> <span class="n">reward</span><span class="p">,</span> <span class="n">terminated</span><span class="p">,</span> <span class="n">truncated</span><span class="p">,</span> <span class="n">info</span> <span class="o">=</span> <span class="n">env</span><span class="o">.</span><span class="n">step</span><span class="p">(</span><span class="n">action</span><span class="p">)</span>
+</span><span id="line-13">    <span class="k">if</span> <span class="n">info</span><span class="p">[</span><span class="s1">'success'</span><span class="p">]:</span>
+</span><span id="line-14">        <span class="k">break</span>
+</span></code></pre></div>
+</div>
 <dl class="py class">
 <dt class="sig sig-object py" id="stable_worldmodel.envs.ogbench_cube.CubeEnv">
-<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">CubeEnv</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">env_type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">permute_blocks</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">multiview</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/stable_worldmodel/envs/ogbench_cube/#CubeEnv"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.envs.ogbench_cube.CubeEnv" title="Link to this definition" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#stable_worldmodel.envs.ogbench_cube.CubeEnv'"><svg height="1em" viewbox="0 0 24 24" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"></path></svg></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">CubeEnv</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">env_type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ob_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'pixels'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">permute_blocks</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">multiview</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/stable_worldmodel/envs/ogbench_cube/#CubeEnv"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.envs.ogbench_cube.CubeEnv" title="Link to this definition" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#stable_worldmodel.envs.ogbench_cube.CubeEnv'"><svg height="1em" viewbox="0 0 24 24" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"></path></svg></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">ManipSpaceEnv</span></code></p>
-<p>Cube environment.</p>
-<p>This environment consists of a single or multiple cubes. The goal is to move the cubes to target positions. It
-supports the following variants:
-- <cite>env_type</cite>: ‘single’, ‘double’, ‘triple’, ‘quadruple’.</p>
-<dl class="py method">
-<dt class="sig sig-object py" id="stable_worldmodel.envs.ogbench_cube.CubeEnv.__init__">
-<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">env_type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">permute_blocks</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">multiview</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/stable_worldmodel/envs/ogbench_cube/#CubeEnv.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.envs.ogbench_cube.CubeEnv.__init__" title="Link to this definition" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#stable_worldmodel.envs.ogbench_cube.CubeEnv.__init__'"><svg height="1em" viewbox="0 0 24 24" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"></path></svg></a></dt>
-<dd><p>Initialize the Cube environment.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>env_type</strong> – Environment type corresponding to the number of cubes. One of ‘single’, ‘double’, ‘triple’, ‘quadruple’ or ‘octuple’.</p></li>
-<li><p><strong>permute_blocks</strong> – Whether to randomly permute the order of the blocks at task initialization.</p></li>
-<li><p><strong>multiview</strong> – Whether to render the scene from both a front and side view.</p></li>
-<li><p><strong>*args</strong> – Additional arguments to pass to the parent class.</p></li>
-<li><p><strong>**kwargs</strong> – Additional keyword arguments to pass to the parent class.</p></li>
+<p>Robotic manipulation environment with cube objects and multiple task variants.</p>
+<p>This environment provides a suite of manipulation tasks involving 1-8 colored cubes
+that must be moved to target positions. It supports various task types including
+pick-and-place, stacking, swapping, and cyclic rearrangement. The environment
+includes comprehensive variation spaces for visual domain randomization.</p>
+<dl class="simple">
+<dt>The environment operates in two modes:</dt><dd><ul class="simple">
+<li><p>‘task’: Goal-conditioned mode where the robot must achieve specific configurations</p></li>
+<li><p>‘data_collection’: Mode for collecting demonstrations with random targets</p></li>
 </ul>
 </dd>
 </dl>
+<dl class="field-list simple">
+<dt class="field-odd">Variables<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>_env_type</strong> (<em>str</em>) – Type of environment determining number of cubes.
+One of: ‘single’, ‘double’, ‘triple’, ‘quadruple’, ‘octuple’.</p></li>
+<li><p><strong>_num_cubes</strong> (<em>int</em>) – Number of cubes in the environment (1, 2, 3, 4, or 8).</p></li>
+<li><p><strong>_permute_blocks</strong> (<em>bool</em>) – Whether to randomly permute cube order at task init.</p></li>
+<li><p><strong>_multiview</strong> (<em>bool</em>) – Whether to render from both front and side cameras.</p></li>
+<li><p><strong>_ob_type</strong> (<em>str</em>) – Observation type, either ‘pixels’ or state-based.</p></li>
+<li><p><strong>_cube_colors</strong> (<em>ndarray</em>) – Array of RGB colors for cubes.</p></li>
+<li><p><strong>_target_task</strong> (<em>str</em>) – Task type identifier, set to ‘cube’.</p></li>
+<li><p><strong>_target_block</strong> (<em>int</em>) – Index of the target cube in data collection mode.</p></li>
+<li><p><strong>variation_space</strong> (<a class="reference internal" href="../stable_worldmodel/#stable_worldmodel.spaces.Dict" title="stable_worldmodel.spaces.Dict"><em>Dict</em></a>) – Hierarchical space defining variation ranges for:
+- cube: color (RGB), size (half-extents)
+- agent: color (RGB)
+- floor: color (two RGB values for checkerboard)
+- camera: angle_delta (yaw/pitch offsets)
+- light: intensity (diffuse lighting strength)</p></li>
+<li><p><strong>task_infos</strong> (<em>list</em>) – List of dictionaries defining task configurations,
+each containing ‘task_name’, ‘init_xyzs’, and ‘goal_xyzs’.</p></li>
+<li><p><strong>cameras</strong> (<em>dict</em>) – Dictionary of camera configurations with position and orientation.</p></li>
+<li><p><strong>_cube_geoms_list</strong> (<em>list</em>) – MuJoCo geom objects for each cube.</p></li>
+<li><p><strong>_cube_target_geoms_list</strong> (<em>list</em>) – MuJoCo geom objects for target visualizations.</p></li>
+<li><p><strong>_cube_geom_ids_list</strong> (<em>list</em>) – MuJoCo geom IDs for each cube.</p></li>
+<li><p><strong>_cube_target_mocap_ids</strong> (<em>list</em>) – MuJoCo mocap body IDs for target positions.</p></li>
+<li><p><strong>_cube_target_geom_ids_list</strong> (<em>list</em>) – MuJoCo geom IDs for target visualizations.</p></li>
+<li><p><strong>_success</strong> (<em>bool</em>) – Whether the current task has been completed successfully.</p></li>
+<li><p><strong>_cur_goal_ob</strong> (<em>ndarray</em>) – Goal observation for goal-conditioned learning.</p></li>
+<li><p><strong>_cur_goal_rendered</strong> (<em>ndarray</em>) – Rendered image of goal state, if enabled.</p></li>
+</ul>
+</dd>
+</dl>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Inherits from ManipSpaceEnv which provides the underlying robotic arm
+control, physics simulation, and base functionality.</p>
+</div>
+<dl class="py method">
+<dt class="sig sig-object py" id="stable_worldmodel.envs.ogbench_cube.CubeEnv.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">env_type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ob_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'pixels'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">permute_blocks</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">multiview</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/stable_worldmodel/envs/ogbench_cube/#CubeEnv.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.envs.ogbench_cube.CubeEnv.__init__" title="Link to this definition" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#stable_worldmodel.envs.ogbench_cube.CubeEnv.__init__'"><svg height="1em" viewbox="0 0 24 24" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"></path></svg></a></dt>
+<dd><p>Initialize the CubeEnv with specified configuration.</p>
+<p>Sets up the manipulation environment with the specified number of cubes
+and configures observation type, block permutation, and camera views.
+Initializes the variation space for visual domain randomization.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>env_type</strong> (<em>str</em>) – Environment type corresponding to number of cubes.
+Must be one of: ‘single’ (1 cube), ‘double’ (2 cubes),
+‘triple’ (3 cubes), ‘quadruple’ (4 cubes), ‘octuple’ (8 cubes).</p></li>
+<li><p><strong>ob_type</strong> (<em>str</em><em>, </em><em>optional</em>) – Type of observation to return. Either ‘pixels’
+for image observations or ‘state’ for proprioceptive/object states.
+Defaults to ‘pixels’.</p></li>
+<li><p><strong>permute_blocks</strong> (<em>bool</em><em>, </em><em>optional</em>) – Whether to randomly shuffle the order
+of cubes at the start of each episode. Helps with generalization.
+Defaults to True.</p></li>
+<li><p><strong>multiview</strong> (<em>bool</em><em>, </em><em>optional</em>) – Whether to render the scene from both front
+and side camera views simultaneously. Returns stacked images when True.
+Defaults to False.</p></li>
+<li><p><strong>*args</strong> – Variable length argument list passed to parent ManipSpaceEnv.</p></li>
+<li><p><strong>**kwargs</strong> – Arbitrary keyword arguments passed to parent ManipSpaceEnv.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>ValueError</strong> – If env_type is not one of the supported values.</p>
+</dd>
+</dl>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The variation_space is automatically configured with appropriate ranges
+for all visual variations including colors, sizes, lighting, and cameras.</p>
+</div>
 </dd></dl>
 <dl class="py method">
 <dt class="sig sig-object py" id="stable_worldmodel.envs.ogbench_cube.CubeEnv.add_object_info">
 <span class="sig-name descname"><span class="pre">add_object_info</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ob_info</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/stable_worldmodel/envs/ogbench_cube/#CubeEnv.add_object_info"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.envs.ogbench_cube.CubeEnv.add_object_info" title="Link to this definition" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#stable_worldmodel.envs.ogbench_cube.CubeEnv.add_object_info'"><svg height="1em" viewbox="0 0 24 24" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"></path></svg></a></dt>
-<dd></dd></dl>
+<dd><p>Add cube-specific information to the observation info dictionary.</p>
+<p>Augments the info dictionary with privileged state information about all cubes
+including positions, orientations, and target information (in data collection mode).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>ob_info</strong> (<em>dict</em>) – Observation info dictionary to augment. Modified in-place.</p>
+</dd>
+</dl>
+<dl class="simple">
+<dt>Adds to ob_info:</dt><dd><ul class="simple">
+<li><p>‘privileged/block_{i}_pos’: 3D position (x, y, z) of cube i</p></li>
+<li><p>‘privileged/block_{i}_quat’: Quaternion (w, x, y, z) of cube i</p></li>
+<li><p>‘privileged/block_{i}_yaw’: Yaw angle in radians of cube i</p></li>
+<li><p>‘privileged/target_task’: Task type string (data collection mode only)</p></li>
+<li><p>‘privileged/target_block’: Index of target cube (data collection mode only)</p></li>
+<li><p>‘privileged/target_block_pos’: Target position (data collection mode only)</p></li>
+<li><p>‘privileged/target_block_yaw’: Target yaw angle (data collection mode only)</p></li>
+</ul>
+</dd>
+</dl>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>All positions are in world coordinates. Quaternions use (w, x, y, z) format.
+Privileged information is typically not available to policies during deployment.</p>
+</div>
+</dd></dl>
 <dl class="py method">
 <dt class="sig sig-object py" id="stable_worldmodel.envs.ogbench_cube.CubeEnv.add_objects">
 <span class="sig-name descname"><span class="pre">add_objects</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">arena_mjcf</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/stable_worldmodel/envs/ogbench_cube/#CubeEnv.add_objects"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.envs.ogbench_cube.CubeEnv.add_objects" title="Link to this definition" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#stable_worldmodel.envs.ogbench_cube.CubeEnv.add_objects'"><svg height="1em" viewbox="0 0 24 24" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"></path></svg></a></dt>
-<dd></dd></dl>
+<dd><p>Add cube objects and cameras to the MuJoCo scene.</p>
+<p>Constructs the manipulation scene by loading cube XML descriptions and
+positioning them appropriately. Sets up multiple camera viewpoints for
+rendering observations.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>arena_mjcf</strong> (<em>mjcf.RootElement</em>) – The MuJoCo XML root element representing
+the arena where objects and cameras will be added.</p>
+</dd>
+</dl>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<ul class="simple">
+<li><p>Cubes are positioned with 0.05m spacing along the y-axis</p></li>
+<li><p>Each cube has both a physical object and a semi-transparent target marker</p></li>
+<li><p>Three cameras are added: ‘front’, ‘front_pixels’, and ‘side_pixels’</p></li>
+<li><p>All cube geoms are stored for later color and property modifications</p></li>
+</ul>
+</div>
+</dd></dl>
 <dl class="py method">
 <dt class="sig sig-object py" id="stable_worldmodel.envs.ogbench_cube.CubeEnv.compute_observation">
 <span class="sig-name descname"><span class="pre">compute_observation</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/stable_worldmodel/envs/ogbench_cube/#CubeEnv.compute_observation"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.envs.ogbench_cube.CubeEnv.compute_observation" title="Link to this definition" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#stable_worldmodel.envs.ogbench_cube.CubeEnv.compute_observation'"><svg height="1em" viewbox="0 0 24 24" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"></path></svg></a></dt>
-<dd><p>Compute the observation at each timestep.</p>
+<dd><p>Compute the current observation based on observation type.</p>
+<p>Generates either pixel-based or state-based observations depending on the
+ob_type configuration. State observations include scaled proprioceptive
+and object state information.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>A dictionary of observation arrays.</p>
+<dd class="field-odd"><p><dl class="simple">
+<dt>Observation array. If ob_type is ‘pixels’, returns image array</dt><dd><p>with shape (H, W, C) or (N, H, W, C) for multiview. If ob_type is
+not ‘pixels’, returns flattened state vector containing:
+- Arm joint positions (6D) and velocities (6D)
+- End-effector position (3D, scaled), yaw angle (2D: cos/sin)
+- Gripper opening (1D, scaled) and contact (binary)
+- For each cube: position (3D, scaled), quaternion (4D), yaw (2D: cos/sin)</p>
 </dd>
 </dl>
+</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>ndarray</p>
+</dd>
+</dl>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>State observations use a centering offset (0.425, 0.0, 0.0) and scaling
+factors (10.0 for positions, 3.0 for gripper) to normalize values.
+Yaw angles are encoded as (cos, sin) pairs for continuity.</p>
+</div>
 </dd></dl>
 <dl class="py method">
 <dt class="sig sig-object py" id="stable_worldmodel.envs.ogbench_cube.CubeEnv.compute_oracle_observation">
 <span class="sig-name descname"><span class="pre">compute_oracle_observation</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/stable_worldmodel/envs/ogbench_cube/#CubeEnv.compute_oracle_observation"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.envs.ogbench_cube.CubeEnv.compute_oracle_observation" title="Link to this definition" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#stable_worldmodel.envs.ogbench_cube.CubeEnv.compute_oracle_observation'"><svg height="1em" viewbox="0 0 24 24" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"></path></svg></a></dt>
-<dd><p>Return the oracle goal representation of the current state.</p>
+<dd><p>Compute oracle goal representation containing only cube positions.</p>
+<p>Returns a compact state representation containing only the positions of all
+cubes, useful for goal-conditioned learning where the goal is defined by
+object configurations rather than the full state.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><dl class="simple">
+<dt>Concatenated cube positions with shape (num_cubes * 3,).</dt><dd><p>Each cube contributes its (x, y, z) position, centered and scaled
+by the same factors used in compute_observation().</p>
+</dd>
+</dl>
+</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>ndarray</p>
+</dd>
+</dl>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>This representation excludes robot state and object orientations,
+focusing only on cube positions. Used primarily in task mode for
+goal specification.</p>
+</div>
 </dd></dl>
 <dl class="py method">
 <dt class="sig sig-object py" id="stable_worldmodel.envs.ogbench_cube.CubeEnv.compute_reward">
 <span class="sig-name descname"><span class="pre">compute_reward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ob</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">action</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/stable_worldmodel/envs/ogbench_cube/#CubeEnv.compute_reward"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.envs.ogbench_cube.CubeEnv.compute_reward" title="Link to this definition" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#stable_worldmodel.envs.ogbench_cube.CubeEnv.compute_reward'"><svg height="1em" viewbox="0 0 24 24" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"></path></svg></a></dt>
-<dd><p>Compute the reward at each timestep.</p>
+<dd><p>Compute the reward for the current step.</p>
+<p>Calculates reward based on task success. If a specific reward_task_id is set,
+uses a custom reward function that counts successful cube placements minus
+the total number of cubes (range: -num_cubes to 0). Otherwise defers to
+parent class reward computation.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>ob</strong> (<em>ndarray</em>) – Current observation (not used in custom reward computation).</p></li>
+<li><p><strong>action</strong> (<em>ndarray</em>) – Action taken in this step (not used in custom reward).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><dl class="simple">
+<dt>Scalar reward value. Custom reward ranges from -num_cubes (all</dt><dd><p>cubes far from targets) to 0 (all cubes at targets). Parent class
+reward depends on its implementation.</p>
+</dd>
+</dl>
+</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The custom reward provides dense feedback about task progress by counting
+how many cubes are successfully positioned. Each successful cube adds 1
+to the base value of -num_cubes.</p>
+</div>
 </dd></dl>
 <dl class="py method">
 <dt class="sig sig-object py" id="stable_worldmodel.envs.ogbench_cube.CubeEnv.get_reset_info">
 <span class="sig-name descname"><span class="pre">get_reset_info</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/stable_worldmodel/envs/ogbench_cube/#CubeEnv.get_reset_info"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.envs.ogbench_cube.CubeEnv.get_reset_info" title="Link to this definition" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#stable_worldmodel.envs.ogbench_cube.CubeEnv.get_reset_info'"><svg height="1em" viewbox="0 0 24 24" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"></path></svg></a></dt>
-<dd><p>Return a dictionary of information to be included in the reset return.</p>
+<dd><p>Get information dictionary at environment reset.</p>
+<p>Compiles observation info along with goal observations (in task mode) and
+success status to provide comprehensive reset information.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><dl class="simple">
+<dt>Dictionary containing:</dt><dd><ul class="simple">
+<li><p>All keys from compute_ob_info() (proprioception and object states)</p></li>
+<li><p>’goal’: Goal observation (task mode only)</p></li>
+<li><p>’success’: Boolean indicating current success status</p></li>
+</ul>
+</dd>
+</dl>
+</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>dict</p>
+</dd>
+</dl>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Called after initialize_episode() to provide initial state information.</p>
+</div>
 </dd></dl>
 <dl class="py method">
 <dt class="sig sig-object py" id="stable_worldmodel.envs.ogbench_cube.CubeEnv.get_step_info">
 <span class="sig-name descname"><span class="pre">get_step_info</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/stable_worldmodel/envs/ogbench_cube/#CubeEnv.get_step_info"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.envs.ogbench_cube.CubeEnv.get_step_info" title="Link to this definition" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#stable_worldmodel.envs.ogbench_cube.CubeEnv.get_step_info'"><svg height="1em" viewbox="0 0 24 24" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"></path></svg></a></dt>
-<dd><p>Return a dictionary of information to be included in the step return.</p>
+<dd><p>Get information dictionary after each environment step.</p>
+<p>Compiles current observation info along with goal observations (in task mode)
+and success status to provide comprehensive step information.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><dl class="simple">
+<dt>Dictionary containing:</dt><dd><ul class="simple">
+<li><p>All keys from compute_ob_info() (proprioception and object states)</p></li>
+<li><p>’goal’: Goal observation (task mode only)</p></li>
+<li><p>’success’: Boolean indicating whether task is completed</p></li>
+</ul>
+</dd>
+</dl>
+</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>dict</p>
+</dd>
+</dl>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Called after each step to provide feedback about current state and progress.</p>
+</div>
 </dd></dl>
 <dl class="py method">
 <dt class="sig sig-object py" id="stable_worldmodel.envs.ogbench_cube.CubeEnv.initialize_episode">
 <span class="sig-name descname"><span class="pre">initialize_episode</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/stable_worldmodel/envs/ogbench_cube/#CubeEnv.initialize_episode"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.envs.ogbench_cube.CubeEnv.initialize_episode" title="Link to this definition" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#stable_worldmodel.envs.ogbench_cube.CubeEnv.initialize_episode'"><svg height="1em" viewbox="0 0 24 24" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"></path></svg></a></dt>
-<dd><p>Initialize the environment at the beginning of each episode.</p>
+<dd><p>Initialize the environment state at the start of an episode.</p>
+<p>Sets up cube colors, arm position, and object placements based on the current
+mode (task or data_collection). In task mode, creates goal observations and
+places cubes according to the current task definition. In data collection mode,
+randomizes cube placements and sets a random target.</p>
+<dl class="simple">
+<dt>The initialization process:</dt><dd><ol class="arabic simple">
+<li><p>Apply cube colors from variation space</p></li>
+<li><p>Reset arm to home position</p></li>
+<li><p>In task mode: Set cubes to task-specific positions, generate goal observation</p></li>
+<li><p>In data_collection mode: Randomize cube positions and orientations</p></li>
+<li><p>Run forward kinematics to stabilize the scene</p></li>
+</ol>
+</dd>
+</dl>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<ul class="simple">
+<li><p>In task mode, goal observation is computed by first placing cubes at
+goal positions, rendering/observing, then resetting to initial positions</p></li>
+<li><p>Small random perturbations (±0.01m) are added to initial positions</p></li>
+<li><p>Random yaw rotations (0-2π) are applied to all cubes</p></li>
+</ul>
+</div>
 </dd></dl>
 <dl class="py method">
 <dt class="sig sig-object py" id="stable_worldmodel.envs.ogbench_cube.CubeEnv.modify_mjcf_model">
 <span class="sig-name descname"><span class="pre">modify_mjcf_model</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mjcf_model</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/stable_worldmodel/envs/ogbench_cube/#CubeEnv.modify_mjcf_model"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.envs.ogbench_cube.CubeEnv.modify_mjcf_model" title="Link to this definition" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#stable_worldmodel.envs.ogbench_cube.CubeEnv.modify_mjcf_model'"><svg height="1em" viewbox="0 0 24 24" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"></path></svg></a></dt>
-<dd><p>Modify the MJCF model at the beginning of each episode.</p>
-<p>This is useful for domain randomization or other forms of model modifications that may require recompilation of
-the MjModel and MjData objects. If the operation performed requires recompilation, call <cite>mark_dirty</cite> to force
-recompilation.</p>
+<dd><p>Apply visual variations to the MuJoCo model based on variation space.</p>
+<p>Modifies the MJCF model XML to apply sampled variations including floor colors,
+robot arm colors, cube sizes, camera angles, and lighting. Only variations
+that are enabled in the variation_options are applied.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>mjcf_model</strong> – Root element of the MJCF model.</p>
+<dd class="field-odd"><p><strong>mjcf_model</strong> (<em>mjcf.RootElement</em>) – The MuJoCo XML model to modify.</p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>The root element of the modified MJCF model.</p>
+<dd class="field-even"><p>The modified model with variations applied.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>mjcf.RootElement</p>
 </dd>
 </dl>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<ul class="simple">
+<li><p>Variations are only applied if specified in variation_options during reset</p></li>
+<li><p>Some variations (size, light) call self.mark_dirty() to trigger recompilation</p></li>
+<li><p>Camera angle perturbations use the perturb_camera_angle helper function</p></li>
+</ul>
+</div>
 </dd></dl>
 <dl class="py method">
 <dt class="sig sig-object py" id="stable_worldmodel.envs.ogbench_cube.CubeEnv.post_compilation_objects">
 <span class="sig-name descname"><span class="pre">post_compilation_objects</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/stable_worldmodel/envs/ogbench_cube/#CubeEnv.post_compilation_objects"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.envs.ogbench_cube.CubeEnv.post_compilation_objects" title="Link to this definition" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#stable_worldmodel.envs.ogbench_cube.CubeEnv.post_compilation_objects'"><svg height="1em" viewbox="0 0 24 24" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"></path></svg></a></dt>
-<dd></dd></dl>
+<dd><p>Extract MuJoCo object IDs after model compilation.</p>
+<p>Retrieves and stores the integer IDs for all cube geoms, target mocap bodies,
+and target geoms. These IDs are used for efficient access during simulation
+and rendering.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Must be called after the MuJoCo model has been compiled. IDs are needed
+for direct manipulation of model properties like colors and positions.</p>
+</div>
+</dd></dl>
 <dl class="py method">
 <dt class="sig sig-object py" id="stable_worldmodel.envs.ogbench_cube.CubeEnv.post_step">
 <span class="sig-name descname"><span class="pre">post_step</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/stable_worldmodel/envs/ogbench_cube/#CubeEnv.post_step"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.envs.ogbench_cube.CubeEnv.post_step" title="Link to this definition" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#stable_worldmodel.envs.ogbench_cube.CubeEnv.post_step'"><svg height="1em" viewbox="0 0 24 24" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"></path></svg></a></dt>
-<dd><p>Perform any post-step operations.</p>
-<p>This can be useful for updating the environment state after the simulation has been stepped. By default, this
-method does nothing.</p>
+<dd><p>Update environment state after each simulation step.</p>
+<p>Computes success status and adjusts target marker visibility based on the
+current mode. In task mode, all cube targets are evaluated. In data collection
+mode, only the designated target cube is evaluated.</p>
+<dl class="simple">
+<dt>Updates:</dt><dd><ul class="simple">
+<li><p>self._success: Set to True if success conditions are met</p></li>
+<li><p>Target geom alpha: Made visible (0.2) for relevant targets when
+visualization is enabled, invisible (0.0) otherwise</p></li>
+</ul>
+</dd>
+</dl>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Success in task mode requires ALL cubes to reach their targets.
+Success in data collection mode requires only the target cube to succeed.</p>
+</div>
 </dd></dl>
 <dl class="py method">
 <dt class="sig sig-object py" id="stable_worldmodel.envs.ogbench_cube.CubeEnv.render">
 <span class="sig-name descname"><span class="pre">render</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">camera</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'front_pixels'</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/stable_worldmodel/envs/ogbench_cube/#CubeEnv.render"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.envs.ogbench_cube.CubeEnv.render" title="Link to this definition" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#stable_worldmodel.envs.ogbench_cube.CubeEnv.render'"><svg height="1em" viewbox="0 0 24 24" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"></path></svg></a></dt>
-<dd><p>Render the current state of the environment.</p>
+<dd><p>Render the current scene from specified camera view(s).</p>
+<p>Generates RGB image(s) of the current environment state from one or more
+camera viewpoints. Automatically handles multiview rendering when configured.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>camera</strong> (<em>str</em><em> or </em><em>list</em><em>, </em><em>optional</em>) – Camera name(s) to render from. Can be
+a single camera name string or list of camera names. If multiview
+is enabled, defaults to [‘front_pixels’, ‘side_pixels’]. Otherwise
+defaults to ‘front_pixels’. Supports any camera defined in self.cameras.</p></li>
+<li><p><strong>*args</strong> – Additional positional arguments passed to parent render method.</p></li>
+<li><p><strong>**kwargs</strong> – Additional keyword arguments passed to parent render method.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><dl class="simple">
+<dt>Rendered image(s). If camera is a single string, returns array</dt><dd><p>with shape (H, W, C). If camera is a list, returns array with shape
+(N, H, W, C) where N is the number of views, stacked along first axis.</p>
+</dd>
+</dl>
+</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>ndarray</p>
+</dd>
+</dl>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The multiview stacking is useful for policies that benefit from multiple
+viewpoints, such as those learning 3D spatial reasoning. The ‘front_pixels’
+camera provides an oblique view while ‘side_pixels’ shows a perpendicular view.</p>
+</div>
 </dd></dl>
 <dl class="py method">
 <dt class="sig sig-object py" id="stable_worldmodel.envs.ogbench_cube.CubeEnv.reset">
 <span class="sig-name descname"><span class="pre">reset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">options</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/stable_worldmodel/envs/ogbench_cube/#CubeEnv.reset"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.envs.ogbench_cube.CubeEnv.reset" title="Link to this definition" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#stable_worldmodel.envs.ogbench_cube.CubeEnv.reset'"><svg height="1em" viewbox="0 0 24 24" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"></path></svg></a></dt>
-<dd><p>Reset the environment to the initial state.</p>
-<ul class="simple">
-<li><p>If this is the first call to <cite>reset</cite>, build the MJCF model with <cite>build_mjcf_model</cite>.</p></li>
-<li><p>Modify the MJCF model by calling <cite>modify_mjcf</cite>.</p></li>
-<li><dl class="simple">
-<dt>If the environment is dirty, MjModel and MjData objects will be recompiled. Otherwise, compilation will be</dt><dd><p>skipped unless this is the first call to <cite>reset</cite>.</p>
+<dd><p>Reset the environment to an initial state.</p>
+<p>Resets the environment and optionally samples from the variation space to
+create visual diversity. Handles both task mode (with predefined goals) and
+data collection mode (with random targets).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>options</strong> (<em>dict</em><em>, </em><em>optional</em>) – <p>Dictionary of reset options. Supported keys:
+- ‘variation’: List/tuple of variation names to sample. Use [‘all’]</p>
+<blockquote>
+<div><p>to sample all variations, or specify individual ones like
+[‘cube.color’, ‘light.intensity’]. Defaults to None (no variation).</p>
+</div></blockquote>
+</p></li>
+<li><p><strong>*args</strong> – Variable length argument list passed to parent reset.</p></li>
+<li><p><strong>**kwargs</strong> – Arbitrary keyword arguments passed to parent reset.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><dl class="simple">
+<dt>(observation, info) where:</dt><dd><ul class="simple">
+<li><p>observation: Current observation based on ob_type configuration</p></li>
+<li><p>info: Dictionary containing reset information and task state</p></li>
+</ul>
 </dd>
 </dl>
-</li>
-<li><p>Reset the simulation with <cite>mujoco.mj_resetData</cite>.</p></li>
-<li><p>Initialize the episode with <cite>initialize_episode</cite>.</p></li>
-<li><p>Compute the first observation with <cite>compute_observation</cite>.</p></li>
-</ul>
+</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>tuple</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>AssertionError</strong> – If variation option is not a list/tuple, or if variation
+    values are outside their defined spaces.</p>
+</dd>
+</dl>
+<p class="rubric">Example</p>
+<p>Reset with all variations enabled:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><code><span id="line-1"><span class="n">obs</span><span class="p">,</span> <span class="n">info</span> <span class="o">=</span> <span class="n">env</span><span class="o">.</span><span class="n">reset</span><span class="p">(</span><span class="n">options</span><span class="o">=</span><span class="p">{</span><span class="s1">'variation'</span><span class="p">:</span> <span class="p">[</span><span class="s1">'all'</span><span class="p">]})</span>
+</span></code></pre></div>
+</div>
+<p>Reset with specific variations:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><code><span id="line-1"><span class="n">obs</span><span class="p">,</span> <span class="n">info</span> <span class="o">=</span> <span class="n">env</span><span class="o">.</span><span class="n">reset</span><span class="p">(</span><span class="n">options</span><span class="o">=</span><span class="p">{</span><span class="s1">'variation'</span><span class="p">:</span> <span class="p">[</span><span class="s1">'cube.color'</span><span class="p">,</span> <span class="s1">'camera.angle_delta'</span><span class="p">]})</span>
+</span></code></pre></div>
+</div>
 </dd></dl>
 <dl class="py method">
 <dt class="sig sig-object py" id="stable_worldmodel.envs.ogbench_cube.CubeEnv.set_new_target">
 <span class="sig-name descname"><span class="pre">set_new_target</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">return_info</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p_stack</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.5</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/stable_worldmodel/envs/ogbench_cube/#CubeEnv.set_new_target"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.envs.ogbench_cube.CubeEnv.set_new_target" title="Link to this definition" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#stable_worldmodel.envs.ogbench_cube.CubeEnv.set_new_target'"><svg height="1em" viewbox="0 0 24 24" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"></path></svg></a></dt>
-<dd><p>Set a new random target for data collection.</p>
+<dd><p>Set a new random target for data collection mode.</p>
+<p>Randomly selects one of the “top” cubes (not stacked under another) as the
+target and assigns it a random goal position. The goal can be either a flat
+surface position or stacked on top of another cube.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>return_info</strong> – Whether to return the observation and reset info.</p></li>
-<li><p><strong>p_stack</strong> – Probability of stacking the target block on top of another block when there are multiple blocks.</p></li>
+<li><p><strong>return_info</strong> (<em>bool</em><em>, </em><em>optional</em>) – Whether to return the observation and reset
+info after setting the new target. Defaults to True.</p></li>
+<li><p><strong>p_stack</strong> (<em>float</em><em>, </em><em>optional</em>) – Probability of setting the target to stack on
+top of another block (when multiple blocks are available). Must be
+in range [0, 1]. Defaults to 0.5.</p></li>
 </ul>
 </dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><dl class="simple">
+<dt>If return_info is True, returns (observation, reset_info).</dt><dd><p>Otherwise returns None.</p>
+</dd>
 </dl>
+</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>tuple or None</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>AssertionError</strong> – If called when mode is not ‘data_collection’.</p>
+</dd>
+</dl>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<ul class="simple">
+<li><p>Only cubes that are not underneath other cubes can be selected as targets</p></li>
+<li><p>Target markers are made visible for the selected cube, invisible for others</p></li>
+<li><p>Stacking targets are positioned 0.04m above the base cube’s z-position</p></li>
+<li><p>Non-stacking targets are randomly sampled from the target sampling bounds</p></li>
+</ul>
+</div>
 </dd></dl>
 <dl class="py method">
 <dt class="sig sig-object py" id="stable_worldmodel.envs.ogbench_cube.CubeEnv.set_tasks">
 <span class="sig-name descname"><span class="pre">set_tasks</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/stable_worldmodel/envs/ogbench_cube/#CubeEnv.set_tasks"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.envs.ogbench_cube.CubeEnv.set_tasks" title="Link to this definition" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#stable_worldmodel.envs.ogbench_cube.CubeEnv.set_tasks'"><svg height="1em" viewbox="0 0 24 24" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"></path></svg></a></dt>
-<dd></dd></dl>
+<dd><p>Define all task configurations for the environment.</p>
+<p>Initializes the task_infos list with predefined manipulation tasks appropriate
+for the current env_type. Each task specifies initial and goal positions for
+all cubes. Tasks increase in complexity from simple pick-and-place to
+multi-object stacking and cyclic rearrangements.</p>
+<dl class="simple">
+<dt>Task types by environment:</dt><dd><ul class="simple">
+<li><p>single: 5 tasks (horizontal, vertical movements, diagonals)</p></li>
+<li><p>double: 5 tasks (single/double pick-place, swap, stack)</p></li>
+<li><p>triple: 5 tasks (single/triple pick-place, unstack, cycle, stack)</p></li>
+<li><p>quadruple: 5 tasks (double/quad pick-place, unstack, cycle, stack)</p></li>
+<li><p>octuple: 5 tasks (quad/octuple pick-place, unstacking, stacking)</p></li>
+</ul>
+</dd>
+</dl>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Also sets the default reward_task_id to 2 if not already configured.
+All positions are in MuJoCo world coordinates (x, y, z) in meters.</p>
+</div>
+</dd></dl>
 </dd></dl>
 <dl class="py function">
 <dt class="sig sig-object py" id="stable_worldmodel.envs.ogbench_cube.perturb_camera_angle">
 <span class="sig-name descname"><span class="pre">perturb_camera_angle</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">xyaxis</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">deg_dif</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[3,</span> <span class="pre">3]</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/stable_worldmodel/envs/ogbench_cube/#perturb_camera_angle"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.envs.ogbench_cube.perturb_camera_angle" title="Link to this definition" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#stable_worldmodel.envs.ogbench_cube.perturb_camera_angle'"><svg height="1em" viewbox="0 0 24 24" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"></path></svg></a></dt>
-<dd></dd></dl>
+<dd><p>Perturb camera orientation by applying yaw and pitch rotations.</p>
+<p>Applies random rotations to the camera’s coordinate frame defined by its
+x and y axes. The perturbation helps create visual variations during training
+to improve policy robustness.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>xyaxis</strong> (<em>array-like</em>) – Six-element array representing the camera’s coordinate
+frame in MuJoCo format. First three elements are the x-axis direction,
+last three elements are the y-axis direction.</p></li>
+<li><p><strong>deg_dif</strong> (<em>list</em><em>, </em><em>optional</em>) – Two-element list specifying [yaw, pitch] rotation
+angles in degrees. Defaults to [3, 3].</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><dl class="simple">
+<dt>Six-element tuple containing the perturbed camera axes in MuJoCo</dt><dd><p>format (xaxis_new, yaxis_new).</p>
+</dd>
+</dl>
+</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>tuple</p>
+</dd>
+</dl>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The z-axis is computed from the cross product of x and y axes and used
+to construct proper rotation matrices.</p>
+</div>
+</dd></dl>
 </section>
 <section id="module-stable_worldmodel.envs.pusht">
 <span id="stable-worldmodel-envs-pusht-module"></span><h2>stable_worldmodel.envs.pusht module<a class="headerlink" href="#module-stable_worldmodel.envs.pusht" title="Link to this heading" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#module-stable_worldmodel.envs.pusht'"><svg height="1em" viewbox="0 0 24 24" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"></path></svg></a></h2>

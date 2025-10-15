@@ -254,8 +254,146 @@ in the environment initialised, i.e., <code class="docutils literal notranslate"
 </dd></dl>
 </dd></dl>
 </section>
-<section id="stable-worldmodel-envs-ogbench-cube-module">
-<h2>stable_worldmodel.envs.ogbench_cube module<a class="headerlink" href="#stable-worldmodel-envs-ogbench-cube-module" title="Link to this heading" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#stable-worldmodel-envs-ogbench-cube-module'"><svg height="1em" viewbox="0 0 24 24" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"></path></svg></a></h2>
+<section id="module-stable_worldmodel.envs.ogbench_cube">
+<span id="stable-worldmodel-envs-ogbench-cube-module"></span><h2>stable_worldmodel.envs.ogbench_cube module<a class="headerlink" href="#module-stable_worldmodel.envs.ogbench_cube" title="Link to this heading" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#module-stable_worldmodel.envs.ogbench_cube'"><svg height="1em" viewbox="0 0 24 24" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"></path></svg></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="stable_worldmodel.envs.ogbench_cube.CubeEnv">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">CubeEnv</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">env_type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">permute_blocks</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">multiview</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/stable_worldmodel/envs/ogbench_cube/#CubeEnv"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.envs.ogbench_cube.CubeEnv" title="Link to this definition" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#stable_worldmodel.envs.ogbench_cube.CubeEnv'"><svg height="1em" viewbox="0 0 24 24" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"></path></svg></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">ManipSpaceEnv</span></code></p>
+<p>Cube environment.</p>
+<p>This environment consists of a single or multiple cubes. The goal is to move the cubes to target positions. It
+supports the following variants:
+- <cite>env_type</cite>: ‘single’, ‘double’, ‘triple’, ‘quadruple’.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="stable_worldmodel.envs.ogbench_cube.CubeEnv.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">env_type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">permute_blocks</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">multiview</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/stable_worldmodel/envs/ogbench_cube/#CubeEnv.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.envs.ogbench_cube.CubeEnv.__init__" title="Link to this definition" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#stable_worldmodel.envs.ogbench_cube.CubeEnv.__init__'"><svg height="1em" viewbox="0 0 24 24" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"></path></svg></a></dt>
+<dd><p>Initialize the Cube environment.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>env_type</strong> – Environment type corresponding to the number of cubes. One of ‘single’, ‘double’, ‘triple’, ‘quadruple’ or ‘octuple’.</p></li>
+<li><p><strong>permute_blocks</strong> – Whether to randomly permute the order of the blocks at task initialization.</p></li>
+<li><p><strong>multiview</strong> – Whether to render the scene from both a front and side view.</p></li>
+<li><p><strong>*args</strong> – Additional arguments to pass to the parent class.</p></li>
+<li><p><strong>**kwargs</strong> – Additional keyword arguments to pass to the parent class.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="stable_worldmodel.envs.ogbench_cube.CubeEnv.add_object_info">
+<span class="sig-name descname"><span class="pre">add_object_info</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ob_info</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/stable_worldmodel/envs/ogbench_cube/#CubeEnv.add_object_info"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.envs.ogbench_cube.CubeEnv.add_object_info" title="Link to this definition" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#stable_worldmodel.envs.ogbench_cube.CubeEnv.add_object_info'"><svg height="1em" viewbox="0 0 24 24" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"></path></svg></a></dt>
+<dd></dd></dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="stable_worldmodel.envs.ogbench_cube.CubeEnv.add_objects">
+<span class="sig-name descname"><span class="pre">add_objects</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">arena_mjcf</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/stable_worldmodel/envs/ogbench_cube/#CubeEnv.add_objects"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.envs.ogbench_cube.CubeEnv.add_objects" title="Link to this definition" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#stable_worldmodel.envs.ogbench_cube.CubeEnv.add_objects'"><svg height="1em" viewbox="0 0 24 24" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"></path></svg></a></dt>
+<dd></dd></dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="stable_worldmodel.envs.ogbench_cube.CubeEnv.compute_observation">
+<span class="sig-name descname"><span class="pre">compute_observation</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/stable_worldmodel/envs/ogbench_cube/#CubeEnv.compute_observation"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.envs.ogbench_cube.CubeEnv.compute_observation" title="Link to this definition" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#stable_worldmodel.envs.ogbench_cube.CubeEnv.compute_observation'"><svg height="1em" viewbox="0 0 24 24" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"></path></svg></a></dt>
+<dd><p>Compute the observation at each timestep.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>A dictionary of observation arrays.</p>
+</dd>
+</dl>
+</dd></dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="stable_worldmodel.envs.ogbench_cube.CubeEnv.compute_oracle_observation">
+<span class="sig-name descname"><span class="pre">compute_oracle_observation</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/stable_worldmodel/envs/ogbench_cube/#CubeEnv.compute_oracle_observation"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.envs.ogbench_cube.CubeEnv.compute_oracle_observation" title="Link to this definition" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#stable_worldmodel.envs.ogbench_cube.CubeEnv.compute_oracle_observation'"><svg height="1em" viewbox="0 0 24 24" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"></path></svg></a></dt>
+<dd><p>Return the oracle goal representation of the current state.</p>
+</dd></dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="stable_worldmodel.envs.ogbench_cube.CubeEnv.compute_reward">
+<span class="sig-name descname"><span class="pre">compute_reward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ob</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">action</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/stable_worldmodel/envs/ogbench_cube/#CubeEnv.compute_reward"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.envs.ogbench_cube.CubeEnv.compute_reward" title="Link to this definition" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#stable_worldmodel.envs.ogbench_cube.CubeEnv.compute_reward'"><svg height="1em" viewbox="0 0 24 24" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"></path></svg></a></dt>
+<dd><p>Compute the reward at each timestep.</p>
+</dd></dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="stable_worldmodel.envs.ogbench_cube.CubeEnv.get_reset_info">
+<span class="sig-name descname"><span class="pre">get_reset_info</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/stable_worldmodel/envs/ogbench_cube/#CubeEnv.get_reset_info"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.envs.ogbench_cube.CubeEnv.get_reset_info" title="Link to this definition" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#stable_worldmodel.envs.ogbench_cube.CubeEnv.get_reset_info'"><svg height="1em" viewbox="0 0 24 24" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"></path></svg></a></dt>
+<dd><p>Return a dictionary of information to be included in the reset return.</p>
+</dd></dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="stable_worldmodel.envs.ogbench_cube.CubeEnv.get_step_info">
+<span class="sig-name descname"><span class="pre">get_step_info</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/stable_worldmodel/envs/ogbench_cube/#CubeEnv.get_step_info"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.envs.ogbench_cube.CubeEnv.get_step_info" title="Link to this definition" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#stable_worldmodel.envs.ogbench_cube.CubeEnv.get_step_info'"><svg height="1em" viewbox="0 0 24 24" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"></path></svg></a></dt>
+<dd><p>Return a dictionary of information to be included in the step return.</p>
+</dd></dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="stable_worldmodel.envs.ogbench_cube.CubeEnv.initialize_episode">
+<span class="sig-name descname"><span class="pre">initialize_episode</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/stable_worldmodel/envs/ogbench_cube/#CubeEnv.initialize_episode"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.envs.ogbench_cube.CubeEnv.initialize_episode" title="Link to this definition" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#stable_worldmodel.envs.ogbench_cube.CubeEnv.initialize_episode'"><svg height="1em" viewbox="0 0 24 24" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"></path></svg></a></dt>
+<dd><p>Initialize the environment at the beginning of each episode.</p>
+</dd></dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="stable_worldmodel.envs.ogbench_cube.CubeEnv.modify_mjcf_model">
+<span class="sig-name descname"><span class="pre">modify_mjcf_model</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mjcf_model</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/stable_worldmodel/envs/ogbench_cube/#CubeEnv.modify_mjcf_model"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.envs.ogbench_cube.CubeEnv.modify_mjcf_model" title="Link to this definition" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#stable_worldmodel.envs.ogbench_cube.CubeEnv.modify_mjcf_model'"><svg height="1em" viewbox="0 0 24 24" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"></path></svg></a></dt>
+<dd><p>Modify the MJCF model at the beginning of each episode.</p>
+<p>This is useful for domain randomization or other forms of model modifications that may require recompilation of
+the MjModel and MjData objects. If the operation performed requires recompilation, call <cite>mark_dirty</cite> to force
+recompilation.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>mjcf_model</strong> – Root element of the MJCF model.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The root element of the modified MJCF model.</p>
+</dd>
+</dl>
+</dd></dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="stable_worldmodel.envs.ogbench_cube.CubeEnv.post_compilation_objects">
+<span class="sig-name descname"><span class="pre">post_compilation_objects</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/stable_worldmodel/envs/ogbench_cube/#CubeEnv.post_compilation_objects"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.envs.ogbench_cube.CubeEnv.post_compilation_objects" title="Link to this definition" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#stable_worldmodel.envs.ogbench_cube.CubeEnv.post_compilation_objects'"><svg height="1em" viewbox="0 0 24 24" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"></path></svg></a></dt>
+<dd></dd></dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="stable_worldmodel.envs.ogbench_cube.CubeEnv.post_step">
+<span class="sig-name descname"><span class="pre">post_step</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/stable_worldmodel/envs/ogbench_cube/#CubeEnv.post_step"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.envs.ogbench_cube.CubeEnv.post_step" title="Link to this definition" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#stable_worldmodel.envs.ogbench_cube.CubeEnv.post_step'"><svg height="1em" viewbox="0 0 24 24" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"></path></svg></a></dt>
+<dd><p>Perform any post-step operations.</p>
+<p>This can be useful for updating the environment state after the simulation has been stepped. By default, this
+method does nothing.</p>
+</dd></dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="stable_worldmodel.envs.ogbench_cube.CubeEnv.render">
+<span class="sig-name descname"><span class="pre">render</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">camera</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'front_pixels'</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/stable_worldmodel/envs/ogbench_cube/#CubeEnv.render"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.envs.ogbench_cube.CubeEnv.render" title="Link to this definition" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#stable_worldmodel.envs.ogbench_cube.CubeEnv.render'"><svg height="1em" viewbox="0 0 24 24" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"></path></svg></a></dt>
+<dd><p>Render the current state of the environment.</p>
+</dd></dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="stable_worldmodel.envs.ogbench_cube.CubeEnv.reset">
+<span class="sig-name descname"><span class="pre">reset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">options</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/stable_worldmodel/envs/ogbench_cube/#CubeEnv.reset"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.envs.ogbench_cube.CubeEnv.reset" title="Link to this definition" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#stable_worldmodel.envs.ogbench_cube.CubeEnv.reset'"><svg height="1em" viewbox="0 0 24 24" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"></path></svg></a></dt>
+<dd><p>Reset the environment to the initial state.</p>
+<ul class="simple">
+<li><p>If this is the first call to <cite>reset</cite>, build the MJCF model with <cite>build_mjcf_model</cite>.</p></li>
+<li><p>Modify the MJCF model by calling <cite>modify_mjcf</cite>.</p></li>
+<li><dl class="simple">
+<dt>If the environment is dirty, MjModel and MjData objects will be recompiled. Otherwise, compilation will be</dt><dd><p>skipped unless this is the first call to <cite>reset</cite>.</p>
+</dd>
+</dl>
+</li>
+<li><p>Reset the simulation with <cite>mujoco.mj_resetData</cite>.</p></li>
+<li><p>Initialize the episode with <cite>initialize_episode</cite>.</p></li>
+<li><p>Compute the first observation with <cite>compute_observation</cite>.</p></li>
+</ul>
+</dd></dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="stable_worldmodel.envs.ogbench_cube.CubeEnv.set_new_target">
+<span class="sig-name descname"><span class="pre">set_new_target</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">return_info</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p_stack</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.5</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/stable_worldmodel/envs/ogbench_cube/#CubeEnv.set_new_target"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.envs.ogbench_cube.CubeEnv.set_new_target" title="Link to this definition" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#stable_worldmodel.envs.ogbench_cube.CubeEnv.set_new_target'"><svg height="1em" viewbox="0 0 24 24" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"></path></svg></a></dt>
+<dd><p>Set a new random target for data collection.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>return_info</strong> – Whether to return the observation and reset info.</p></li>
+<li><p><strong>p_stack</strong> – Probability of stacking the target block on top of another block when there are multiple blocks.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="stable_worldmodel.envs.ogbench_cube.CubeEnv.set_tasks">
+<span class="sig-name descname"><span class="pre">set_tasks</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/stable_worldmodel/envs/ogbench_cube/#CubeEnv.set_tasks"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.envs.ogbench_cube.CubeEnv.set_tasks" title="Link to this definition" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#stable_worldmodel.envs.ogbench_cube.CubeEnv.set_tasks'"><svg height="1em" viewbox="0 0 24 24" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"></path></svg></a></dt>
+<dd></dd></dl>
+</dd></dl>
+<dl class="py function">
+<dt class="sig sig-object py" id="stable_worldmodel.envs.ogbench_cube.perturb_camera_angle">
+<span class="sig-name descname"><span class="pre">perturb_camera_angle</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">xyaxis</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">deg_dif</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[3,</span> <span class="pre">3]</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/stable_worldmodel/envs/ogbench_cube/#perturb_camera_angle"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.envs.ogbench_cube.perturb_camera_angle" title="Link to this definition" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#stable_worldmodel.envs.ogbench_cube.perturb_camera_angle'"><svg height="1em" viewbox="0 0 24 24" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"></path></svg></a></dt>
+<dd></dd></dl>
 </section>
 <section id="module-stable_worldmodel.envs.pusht">
 <span id="stable-worldmodel-envs-pusht-module"></span><h2>stable_worldmodel.envs.pusht module<a class="headerlink" href="#module-stable_worldmodel.envs.pusht" title="Link to this heading" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#module-stable_worldmodel.envs.pusht'"><svg height="1em" viewbox="0 0 24 24" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"></path></svg></a></h2>
@@ -1083,7 +1221,29 @@ a certain timelimit was exceeded, or the physics simulation has entered an inval
 </li>
 </ul>
 </li>
-<li><a :data-current="activeSection === '#stable-worldmodel-envs-ogbench-cube-module'" class="reference internal" href="#stable-worldmodel-envs-ogbench-cube-module">stable_worldmodel.envs.ogbench_cube module</a></li>
+<li><a :data-current="activeSection === '#module-stable_worldmodel.envs.ogbench_cube'" class="reference internal" href="#module-stable_worldmodel.envs.ogbench_cube">stable_worldmodel.envs.ogbench_cube module</a><ul>
+<li><a :data-current="activeSection === '#stable_worldmodel.envs.ogbench_cube.CubeEnv'" class="reference internal" href="#stable_worldmodel.envs.ogbench_cube.CubeEnv"><code class="docutils literal notranslate"><span class="pre">CubeEnv</span></code></a><ul>
+<li><a :data-current="activeSection === '#stable_worldmodel.envs.ogbench_cube.CubeEnv.__init__'" class="reference internal" href="#stable_worldmodel.envs.ogbench_cube.CubeEnv.__init__"><code class="docutils literal notranslate"><span class="pre">CubeEnv.__init__()</span></code></a></li>
+<li><a :data-current="activeSection === '#stable_worldmodel.envs.ogbench_cube.CubeEnv.add_object_info'" class="reference internal" href="#stable_worldmodel.envs.ogbench_cube.CubeEnv.add_object_info"><code class="docutils literal notranslate"><span class="pre">CubeEnv.add_object_info()</span></code></a></li>
+<li><a :data-current="activeSection === '#stable_worldmodel.envs.ogbench_cube.CubeEnv.add_objects'" class="reference internal" href="#stable_worldmodel.envs.ogbench_cube.CubeEnv.add_objects"><code class="docutils literal notranslate"><span class="pre">CubeEnv.add_objects()</span></code></a></li>
+<li><a :data-current="activeSection === '#stable_worldmodel.envs.ogbench_cube.CubeEnv.compute_observation'" class="reference internal" href="#stable_worldmodel.envs.ogbench_cube.CubeEnv.compute_observation"><code class="docutils literal notranslate"><span class="pre">CubeEnv.compute_observation()</span></code></a></li>
+<li><a :data-current="activeSection === '#stable_worldmodel.envs.ogbench_cube.CubeEnv.compute_oracle_observation'" class="reference internal" href="#stable_worldmodel.envs.ogbench_cube.CubeEnv.compute_oracle_observation"><code class="docutils literal notranslate"><span class="pre">CubeEnv.compute_oracle_observation()</span></code></a></li>
+<li><a :data-current="activeSection === '#stable_worldmodel.envs.ogbench_cube.CubeEnv.compute_reward'" class="reference internal" href="#stable_worldmodel.envs.ogbench_cube.CubeEnv.compute_reward"><code class="docutils literal notranslate"><span class="pre">CubeEnv.compute_reward()</span></code></a></li>
+<li><a :data-current="activeSection === '#stable_worldmodel.envs.ogbench_cube.CubeEnv.get_reset_info'" class="reference internal" href="#stable_worldmodel.envs.ogbench_cube.CubeEnv.get_reset_info"><code class="docutils literal notranslate"><span class="pre">CubeEnv.get_reset_info()</span></code></a></li>
+<li><a :data-current="activeSection === '#stable_worldmodel.envs.ogbench_cube.CubeEnv.get_step_info'" class="reference internal" href="#stable_worldmodel.envs.ogbench_cube.CubeEnv.get_step_info"><code class="docutils literal notranslate"><span class="pre">CubeEnv.get_step_info()</span></code></a></li>
+<li><a :data-current="activeSection === '#stable_worldmodel.envs.ogbench_cube.CubeEnv.initialize_episode'" class="reference internal" href="#stable_worldmodel.envs.ogbench_cube.CubeEnv.initialize_episode"><code class="docutils literal notranslate"><span class="pre">CubeEnv.initialize_episode()</span></code></a></li>
+<li><a :data-current="activeSection === '#stable_worldmodel.envs.ogbench_cube.CubeEnv.modify_mjcf_model'" class="reference internal" href="#stable_worldmodel.envs.ogbench_cube.CubeEnv.modify_mjcf_model"><code class="docutils literal notranslate"><span class="pre">CubeEnv.modify_mjcf_model()</span></code></a></li>
+<li><a :data-current="activeSection === '#stable_worldmodel.envs.ogbench_cube.CubeEnv.post_compilation_objects'" class="reference internal" href="#stable_worldmodel.envs.ogbench_cube.CubeEnv.post_compilation_objects"><code class="docutils literal notranslate"><span class="pre">CubeEnv.post_compilation_objects()</span></code></a></li>
+<li><a :data-current="activeSection === '#stable_worldmodel.envs.ogbench_cube.CubeEnv.post_step'" class="reference internal" href="#stable_worldmodel.envs.ogbench_cube.CubeEnv.post_step"><code class="docutils literal notranslate"><span class="pre">CubeEnv.post_step()</span></code></a></li>
+<li><a :data-current="activeSection === '#stable_worldmodel.envs.ogbench_cube.CubeEnv.render'" class="reference internal" href="#stable_worldmodel.envs.ogbench_cube.CubeEnv.render"><code class="docutils literal notranslate"><span class="pre">CubeEnv.render()</span></code></a></li>
+<li><a :data-current="activeSection === '#stable_worldmodel.envs.ogbench_cube.CubeEnv.reset'" class="reference internal" href="#stable_worldmodel.envs.ogbench_cube.CubeEnv.reset"><code class="docutils literal notranslate"><span class="pre">CubeEnv.reset()</span></code></a></li>
+<li><a :data-current="activeSection === '#stable_worldmodel.envs.ogbench_cube.CubeEnv.set_new_target'" class="reference internal" href="#stable_worldmodel.envs.ogbench_cube.CubeEnv.set_new_target"><code class="docutils literal notranslate"><span class="pre">CubeEnv.set_new_target()</span></code></a></li>
+<li><a :data-current="activeSection === '#stable_worldmodel.envs.ogbench_cube.CubeEnv.set_tasks'" class="reference internal" href="#stable_worldmodel.envs.ogbench_cube.CubeEnv.set_tasks"><code class="docutils literal notranslate"><span class="pre">CubeEnv.set_tasks()</span></code></a></li>
+</ul>
+</li>
+<li><a :data-current="activeSection === '#stable_worldmodel.envs.ogbench_cube.perturb_camera_angle'" class="reference internal" href="#stable_worldmodel.envs.ogbench_cube.perturb_camera_angle"><code class="docutils literal notranslate"><span class="pre">perturb_camera_angle()</span></code></a></li>
+</ul>
+</li>
 <li><a :data-current="activeSection === '#module-stable_worldmodel.envs.pusht'" class="reference internal" href="#module-stable_worldmodel.envs.pusht">stable_worldmodel.envs.pusht module</a><ul>
 <li><a :data-current="activeSection === '#stable_worldmodel.envs.pusht.PushT'" class="reference internal" href="#stable_worldmodel.envs.pusht.PushT"><code class="docutils literal notranslate"><span class="pre">PushT</span></code></a><ul>
 <li><a :data-current="activeSection === '#stable_worldmodel.envs.pusht.PushT.add_I'" class="reference internal" href="#stable_worldmodel.envs.pusht.PushT.add_I"><code class="docutils literal notranslate"><span class="pre">PushT.add_I()</span></code></a></li>

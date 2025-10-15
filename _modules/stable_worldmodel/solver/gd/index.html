@@ -253,86 +253,106 @@
 </span><span id="line-39">            <span class="n">logging</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Action space is discrete, got </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">action_space</span><span class="p">)</span><span class="si">}</span><span class="s2">. GDSolver may not work as expected.&quot;</span><span class="p">)</span></div>
 
 </span><span id="line-40">
-</span><span id="line-41">    <span class="nd">@property</span>
-</span><span id="line-42">    <span class="k">def</span><span class="w"> </span><span class="nf">n_envs</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
-</span><span id="line-43">        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_n_envs</span>
-</span><span id="line-44">
-</span><span id="line-45">    <span class="nd">@property</span>
-</span><span id="line-46">    <span class="k">def</span><span class="w"> </span><span class="nf">action_dim</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
-</span><span id="line-47">        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_action_dim</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">_config</span><span class="o">.</span><span class="n">action_block</span>
-</span><span id="line-48">
-</span><span id="line-49">    <span class="nd">@property</span>
-</span><span id="line-50">    <span class="k">def</span><span class="w"> </span><span class="nf">horizon</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
-</span><span id="line-51">        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_config</span><span class="o">.</span><span class="n">horizon</span>
-</span><span id="line-52">
-</span><span id="line-53">    <span class="k">def</span><span class="w"> </span><span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
-</span><span id="line-54">        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">solve</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+<div class="viewcode-block" id="GDSolver.set_seed">
+<a class="viewcode-back" href="../../../../stable_worldmodel.solver/#stable_worldmodel.solver.gd.GDSolver.set_seed">[docs]</a>
+</span><span id="line-41">    <span class="k">def</span><span class="w"> </span><span class="nf">set_seed</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">seed</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+</span><span id="line-42"><span class="w">        </span><span class="sd">&quot;&quot;&quot;Set random seed for deterministic behavior.</span>
+</span><span id="line-43">
+</span><span id="line-44"><span class="sd">        Args:</span>
+</span><span id="line-45"><span class="sd">            seed: Random seed to use for numpy and torch</span>
+</span><span id="line-46"><span class="sd">        &quot;&quot;&quot;</span>
+</span><span id="line-47">        <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="n">seed</span><span class="p">)</span>
+</span><span id="line-48">        <span class="n">torch</span><span class="o">.</span><span class="n">manual_seed</span><span class="p">(</span><span class="n">seed</span><span class="p">)</span>
+</span><span id="line-49">        <span class="k">if</span> <span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">is_available</span><span class="p">():</span>
+</span><span id="line-50">            <span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">manual_seed_all</span><span class="p">(</span><span class="n">seed</span><span class="p">)</span></div>
+
+</span><span id="line-51">
+</span><span id="line-52">    <span class="nd">@property</span>
+</span><span id="line-53">    <span class="k">def</span><span class="w"> </span><span class="nf">n_envs</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+</span><span id="line-54">        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_n_envs</span>
 </span><span id="line-55">
+</span><span id="line-56">    <span class="nd">@property</span>
+</span><span id="line-57">    <span class="k">def</span><span class="w"> </span><span class="nf">action_dim</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+</span><span id="line-58">        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_action_dim</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">_config</span><span class="o">.</span><span class="n">action_block</span>
+</span><span id="line-59">
+</span><span id="line-60">    <span class="nd">@property</span>
+</span><span id="line-61">    <span class="k">def</span><span class="w"> </span><span class="nf">horizon</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+</span><span id="line-62">        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_config</span><span class="o">.</span><span class="n">horizon</span>
+</span><span id="line-63">
+</span><span id="line-64">    <span class="k">def</span><span class="w"> </span><span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
+</span><span id="line-65">        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">solve</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+</span><span id="line-66">
 <div class="viewcode-block" id="GDSolver.init_action">
 <a class="viewcode-back" href="../../../../stable_worldmodel.solver/#stable_worldmodel.solver.gd.GDSolver.init_action">[docs]</a>
-</span><span id="line-56">    <span class="k">def</span><span class="w"> </span><span class="nf">init_action</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">actions</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-</span><span id="line-57"><span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialize the action tensor for the solver.</span>
-</span><span id="line-58">
-</span><span id="line-59"><span class="sd">        set self.init - initial action sequences (n_envs, horizon, action_dim)</span>
-</span><span id="line-60"><span class="sd">        &quot;&quot;&quot;</span>
-</span><span id="line-61">        <span class="k">if</span> <span class="n">actions</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-</span><span id="line-62">            <span class="n">actions</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">_n_envs</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">action_dim</span><span class="p">))</span>
-</span><span id="line-63">
-</span><span id="line-64">        <span class="c1"># fill remaining action</span>
-</span><span id="line-65">        <span class="n">remaining</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">horizon</span> <span class="o">-</span> <span class="n">actions</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
-</span><span id="line-66">
-</span><span id="line-67">        <span class="k">if</span> <span class="n">remaining</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-</span><span id="line-68">            <span class="n">new_actions</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_n_envs</span><span class="p">,</span> <span class="n">remaining</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">action_dim</span><span class="p">)</span>
-</span><span id="line-69">            <span class="n">actions</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">cat</span><span class="p">([</span><span class="n">actions</span><span class="p">,</span> <span class="n">new_actions</span><span class="p">],</span> <span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
-</span><span id="line-70">
-</span><span id="line-71">        <span class="n">actions</span> <span class="o">=</span> <span class="n">actions</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">device</span><span class="p">)</span>
-</span><span id="line-72">
-</span><span id="line-73">        <span class="c1"># reset actions</span>
-</span><span id="line-74">        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;init&quot;</span><span class="p">):</span>
-</span><span id="line-75">            <span class="bp">self</span><span class="o">.</span><span class="n">init</span><span class="o">.</span><span class="n">copy_</span><span class="p">(</span><span class="n">actions</span><span class="p">)</span>
-</span><span id="line-76">        <span class="k">else</span><span class="p">:</span>
-</span><span id="line-77">            <span class="bp">self</span><span class="o">.</span><span class="n">register_parameter</span><span class="p">(</span><span class="s2">&quot;init&quot;</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Parameter</span><span class="p">(</span><span class="n">actions</span><span class="p">))</span></div>
+</span><span id="line-67">    <span class="k">def</span><span class="w"> </span><span class="nf">init_action</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">actions</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+</span><span id="line-68"><span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialize the action tensor for the solver.</span>
+</span><span id="line-69">
+</span><span id="line-70"><span class="sd">        set self.init - initial action sequences (n_envs, horizon, action_dim)</span>
+</span><span id="line-71"><span class="sd">        &quot;&quot;&quot;</span>
+</span><span id="line-72">        <span class="k">if</span> <span class="n">actions</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+</span><span id="line-73">            <span class="n">actions</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">_n_envs</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">action_dim</span><span class="p">))</span>
+</span><span id="line-74">
+</span><span id="line-75">        <span class="c1"># fill remaining action</span>
+</span><span id="line-76">        <span class="n">remaining</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">horizon</span> <span class="o">-</span> <span class="n">actions</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+</span><span id="line-77">
+</span><span id="line-78">        <span class="k">if</span> <span class="n">remaining</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+</span><span id="line-79">            <span class="n">new_actions</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_n_envs</span><span class="p">,</span> <span class="n">remaining</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">action_dim</span><span class="p">)</span>
+</span><span id="line-80">            <span class="n">actions</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">cat</span><span class="p">([</span><span class="n">actions</span><span class="p">,</span> <span class="n">new_actions</span><span class="p">],</span> <span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+</span><span id="line-81">
+</span><span id="line-82">        <span class="n">actions</span> <span class="o">=</span> <span class="n">actions</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">device</span><span class="p">)</span>
+</span><span id="line-83">
+</span><span id="line-84">        <span class="c1"># reset actions</span>
+</span><span id="line-85">        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;init&quot;</span><span class="p">):</span>
+</span><span id="line-86">            <span class="bp">self</span><span class="o">.</span><span class="n">init</span><span class="o">.</span><span class="n">copy_</span><span class="p">(</span><span class="n">actions</span><span class="p">)</span>
+</span><span id="line-87">        <span class="k">else</span><span class="p">:</span>
+</span><span id="line-88">            <span class="bp">self</span><span class="o">.</span><span class="n">register_parameter</span><span class="p">(</span><span class="s2">&quot;init&quot;</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Parameter</span><span class="p">(</span><span class="n">actions</span><span class="p">))</span></div>
 
-</span><span id="line-78">
+</span><span id="line-89">
 <div class="viewcode-block" id="GDSolver.solve">
 <a class="viewcode-back" href="../../../../stable_worldmodel.solver/#stable_worldmodel.solver.gd.GDSolver.solve">[docs]</a>
-</span><span id="line-79">    <span class="k">def</span><span class="w"> </span><span class="nf">solve</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">info_dict</span><span class="p">,</span> <span class="n">init_action</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
-</span><span id="line-80"><span class="w">        </span><span class="sd">&quot;&quot;&quot;Solve the planning optimization problem using gradient descent.&quot;&quot;&quot;</span>
-</span><span id="line-81">        <span class="n">outputs</span> <span class="o">=</span> <span class="p">{</span>
-</span><span id="line-82">            <span class="s2">&quot;cost&quot;</span><span class="p">:</span> <span class="p">[],</span>
-</span><span id="line-83">            <span class="s2">&quot;trajectory&quot;</span><span class="p">:</span> <span class="p">[],</span>
-</span><span id="line-84">        <span class="p">}</span>
-</span><span id="line-85">
-</span><span id="line-86">        <span class="k">with</span> <span class="n">torch</span><span class="o">.</span><span class="n">no_grad</span><span class="p">():</span>
-</span><span id="line-87">            <span class="bp">self</span><span class="o">.</span><span class="n">init_action</span><span class="p">(</span><span class="n">init_action</span><span class="p">)</span>
-</span><span id="line-88">
-</span><span id="line-89">        <span class="n">optim</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">optim</span><span class="o">.</span><span class="n">SGD</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">init</span><span class="p">],</span> <span class="n">lr</span><span class="o">=</span><span class="mf">1.0</span><span class="p">)</span>
-</span><span id="line-90">
-</span><span id="line-91">        <span class="c1"># perform gradient descent</span>
-</span><span id="line-92">        <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_steps</span><span class="p">):</span>
-</span><span id="line-93">            <span class="n">cost</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">get_cost</span><span class="p">(</span><span class="n">info_dict</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">init</span><span class="p">)</span>
-</span><span id="line-94">
-</span><span id="line-95">            <span class="k">assert</span> <span class="nb">type</span><span class="p">(</span><span class="n">cost</span><span class="p">)</span> <span class="ow">is</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;Got </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">cost</span><span class="p">)</span><span class="si">}</span><span class="s2"> cost, expect torch.Tensor&quot;</span>
-</span><span id="line-96">            <span class="k">assert</span> <span class="n">cost</span><span class="o">.</span><span class="n">ndim</span> <span class="o">==</span> <span class="mi">1</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">cost</span><span class="p">)</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_envs</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;Cost should be of shape (n_envs,), got </span><span class="si">{</span><span class="n">cost</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s2">&quot;</span>
-</span><span id="line-97">            <span class="k">assert</span> <span class="n">cost</span><span class="o">.</span><span class="n">requires_grad</span><span class="p">,</span> <span class="s2">&quot;Cost must requires_grad for GD solver.&quot;</span>
-</span><span id="line-98">
-</span><span id="line-99">            <span class="n">cost</span> <span class="o">=</span> <span class="n">cost</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>  <span class="c1"># independent cost for each env</span>
-</span><span id="line-100">            <span class="n">cost</span><span class="o">.</span><span class="n">backward</span><span class="p">()</span>
-</span><span id="line-101">            <span class="n">optim</span><span class="o">.</span><span class="n">step</span><span class="p">()</span>
-</span><span id="line-102">            <span class="n">optim</span><span class="o">.</span><span class="n">zero_grad</span><span class="p">(</span><span class="n">set_to_none</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-</span><span id="line-103">
-</span><span id="line-104">            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">action_noise</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-</span><span id="line-105">                <span class="bp">self</span><span class="o">.</span><span class="n">init</span><span class="o">.</span><span class="n">data</span> <span class="o">+=</span> <span class="n">torch</span><span class="o">.</span><span class="n">randn_like</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">init</span><span class="p">)</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">action_noise</span>
-</span><span id="line-106">
-</span><span id="line-107">            <span class="n">outputs</span><span class="p">[</span><span class="s2">&quot;cost&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cost</span><span class="o">.</span><span class="n">item</span><span class="p">())</span>
-</span><span id="line-108">            <span class="n">outputs</span><span class="p">[</span><span class="s2">&quot;trajectory&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">extend</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">init</span><span class="o">.</span><span class="n">detach</span><span class="p">()</span><span class="o">.</span><span class="n">cpu</span><span class="p">()</span><span class="o">.</span><span class="n">clone</span><span class="p">()])</span>
+</span><span id="line-90">    <span class="k">def</span><span class="w"> </span><span class="nf">solve</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">info_dict</span><span class="p">,</span> <span class="n">init_action</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
+</span><span id="line-91"><span class="w">        </span><span class="sd">&quot;&quot;&quot;Solve the planning optimization problem using gradient descent.&quot;&quot;&quot;</span>
+</span><span id="line-92">        <span class="n">outputs</span> <span class="o">=</span> <span class="p">{</span>
+</span><span id="line-93">            <span class="s2">&quot;cost&quot;</span><span class="p">:</span> <span class="p">[],</span>
+</span><span id="line-94">            <span class="s2">&quot;trajectory&quot;</span><span class="p">:</span> <span class="p">[],</span>
+</span><span id="line-95">        <span class="p">}</span>
+</span><span id="line-96">
+</span><span id="line-97">        <span class="c1"># Set model to eval mode to ensure deterministic behavior</span>
+</span><span id="line-98">        <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">eval</span><span class="p">()</span>
+</span><span id="line-99">
+</span><span id="line-100">        <span class="k">with</span> <span class="n">torch</span><span class="o">.</span><span class="n">no_grad</span><span class="p">():</span>
+</span><span id="line-101">            <span class="bp">self</span><span class="o">.</span><span class="n">init_action</span><span class="p">(</span><span class="n">init_action</span><span class="p">)</span>
+</span><span id="line-102">
+</span><span id="line-103">        <span class="n">optim</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">optim</span><span class="o">.</span><span class="n">SGD</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">init</span><span class="p">],</span> <span class="n">lr</span><span class="o">=</span><span class="mf">1.0</span><span class="p">)</span>
+</span><span id="line-104">
+</span><span id="line-105">        <span class="c1"># perform gradient descent</span>
+</span><span id="line-106">        <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_steps</span><span class="p">):</span>
+</span><span id="line-107">            <span class="c1"># copy info dict to avoid in-place modification</span>
+</span><span id="line-108">            <span class="n">cost</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">get_cost</span><span class="p">(</span><span class="nb">dict</span><span class="p">(</span><span class="n">info_dict</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">init</span><span class="p">)</span>
 </span><span id="line-109">
-</span><span id="line-110">        <span class="c1"># TODO break solving if finished self.eval? done break</span>
-</span><span id="line-111">
-</span><span id="line-112">        <span class="c1"># get the actions to return</span>
-</span><span id="line-113">        <span class="n">outputs</span><span class="p">[</span><span class="s2">&quot;actions&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">init</span><span class="o">.</span><span class="n">detach</span><span class="p">()</span><span class="o">.</span><span class="n">cpu</span><span class="p">()</span>
-</span><span id="line-114">
-</span><span id="line-115">        <span class="k">return</span> <span class="n">outputs</span></div>
+</span><span id="line-110">            <span class="k">assert</span> <span class="nb">type</span><span class="p">(</span><span class="n">cost</span><span class="p">)</span> <span class="ow">is</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;Got </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">cost</span><span class="p">)</span><span class="si">}</span><span class="s2"> cost, expect torch.Tensor&quot;</span>
+</span><span id="line-111">            <span class="k">assert</span> <span class="n">cost</span><span class="o">.</span><span class="n">ndim</span> <span class="o">==</span> <span class="mi">1</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">cost</span><span class="p">)</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_envs</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;Cost should be of shape (n_envs,), got </span><span class="si">{</span><span class="n">cost</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s2">&quot;</span>
+</span><span id="line-112">            <span class="k">assert</span> <span class="n">cost</span><span class="o">.</span><span class="n">requires_grad</span><span class="p">,</span> <span class="s2">&quot;Cost must requires_grad for GD solver.&quot;</span>
+</span><span id="line-113">
+</span><span id="line-114">            <span class="n">cost</span> <span class="o">=</span> <span class="n">cost</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>  <span class="c1"># independent cost for each env</span>
+</span><span id="line-115">            <span class="n">cost</span><span class="o">.</span><span class="n">backward</span><span class="p">()</span>
+</span><span id="line-116">            <span class="n">optim</span><span class="o">.</span><span class="n">step</span><span class="p">()</span>
+</span><span id="line-117">            <span class="n">optim</span><span class="o">.</span><span class="n">zero_grad</span><span class="p">(</span><span class="n">set_to_none</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</span><span id="line-118">
+</span><span id="line-119">            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">action_noise</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+</span><span id="line-120">                <span class="bp">self</span><span class="o">.</span><span class="n">init</span><span class="o">.</span><span class="n">data</span> <span class="o">+=</span> <span class="n">torch</span><span class="o">.</span><span class="n">randn_like</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">init</span><span class="p">)</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">action_noise</span>
+</span><span id="line-121">
+</span><span id="line-122">            <span class="n">outputs</span><span class="p">[</span><span class="s2">&quot;cost&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cost</span><span class="o">.</span><span class="n">item</span><span class="p">())</span>
+</span><span id="line-123">            <span class="n">outputs</span><span class="p">[</span><span class="s2">&quot;trajectory&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">extend</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">init</span><span class="o">.</span><span class="n">detach</span><span class="p">()</span><span class="o">.</span><span class="n">cpu</span><span class="p">()</span><span class="o">.</span><span class="n">clone</span><span class="p">()])</span>
+</span><span id="line-124">
+</span><span id="line-125">            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot; GD step </span><span class="si">{</span><span class="n">_</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">n_steps</span><span class="si">}</span><span class="s2">, cost: </span><span class="si">{</span><span class="n">outputs</span><span class="p">[</span><span class="s1">&#39;cost&#39;</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</span><span id="line-126">
+</span><span id="line-127">        <span class="c1"># TODO break solving if finished self.eval? done break</span>
+</span><span id="line-128">
+</span><span id="line-129">        <span class="c1"># get the actions to return</span>
+</span><span id="line-130">        <span class="n">outputs</span><span class="p">[</span><span class="s2">&quot;actions&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">init</span><span class="o">.</span><span class="n">detach</span><span class="p">()</span><span class="o">.</span><span class="n">cpu</span><span class="p">()</span>
+</span><span id="line-131">
+</span><span id="line-132">        <span class="k">return</span> <span class="n">outputs</span></div>
 </div>
 
 </span></code></pre></div>

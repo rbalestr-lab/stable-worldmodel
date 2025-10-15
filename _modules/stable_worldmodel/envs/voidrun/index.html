@@ -359,12 +359,12 @@
 </span><span id="line-142">
 </span><span id="line-143">        <span class="bp">self</span><span class="o">.</span><span class="n">variation_space</span><span class="o">.</span><span class="n">reset</span><span class="p">()</span>
 </span><span id="line-144">
-</span><span id="line-145">        <span class="k">if</span> <span class="s2">&quot;variation&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">options</span><span class="p">:</span>
-</span><span id="line-146">            <span class="n">options</span><span class="p">[</span><span class="s2">&quot;variation&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">DEFAULT_VARIATIONS</span>
-</span><span id="line-147">        <span class="k">elif</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">options</span><span class="p">[</span><span class="s2">&quot;variation&quot;</span><span class="p">],</span> <span class="n">Sequence</span><span class="p">):</span>
+</span><span id="line-145">        <span class="n">variations</span> <span class="o">=</span> <span class="n">options</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;variation&quot;</span><span class="p">,</span> <span class="n">DEFAULT_VARIATIONS</span><span class="p">)</span>
+</span><span id="line-146">
+</span><span id="line-147">        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">variations</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">):</span>
 </span><span id="line-148">            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;variation option must be a Sequence containing variations names to sample&quot;</span><span class="p">)</span>
 </span><span id="line-149">
-</span><span id="line-150">        <span class="bp">self</span><span class="o">.</span><span class="n">variation_space</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">options</span><span class="p">[</span><span class="s2">&quot;variation&quot;</span><span class="p">])</span>
+</span><span id="line-150">        <span class="bp">self</span><span class="o">.</span><span class="n">variation_space</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">variations</span><span class="p">)</span>
 </span><span id="line-151">
 </span><span id="line-152">        <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">variation_space</span><span class="o">.</span><span class="n">check</span><span class="p">(</span><span class="n">debug</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span> <span class="s2">&quot;Variation values must be within variation space!&quot;</span>
 </span><span id="line-153">

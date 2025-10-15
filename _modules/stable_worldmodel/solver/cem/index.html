@@ -322,7 +322,7 @@
 </span><span id="line-102">                <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">info_dict</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
 </span><span id="line-103">                    <span class="n">v_traj</span> <span class="o">=</span> <span class="n">v</span><span class="p">[</span><span class="n">traj</span><span class="p">]</span>
 </span><span id="line-104">                    <span class="k">if</span> <span class="n">torch</span><span class="o">.</span><span class="n">is_tensor</span><span class="p">(</span><span class="n">v</span><span class="p">):</span>
-</span><span id="line-105">                        <span class="n">v_traj</span> <span class="o">=</span> <span class="n">v_traj</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">repeat</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">num_samples</span><span class="p">)</span>
+</span><span id="line-105">                        <span class="n">v_traj</span> <span class="o">=</span> <span class="n">v_traj</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">repeat_interleave</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">num_samples</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
 </span><span id="line-106">                    <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
 </span><span id="line-107">                        <span class="n">v_traj</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">repeat</span><span class="p">(</span><span class="n">v_traj</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="o">...</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_samples</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
 </span><span id="line-108">
@@ -366,67 +366,6 @@
 </span><span id="line-146">        <span class="k">return</span> <span class="n">outputs</span></div>
 </div>
 
-</span><span id="line-147">
-</span><span id="line-148">
-</span><span id="line-149"><span class="c1"># class CEMNevergrad(BaseSolver):</span>
-</span><span id="line-150"><span class="c1">#     def __init__(</span>
-</span><span id="line-151"><span class="c1">#         self,</span>
-</span><span id="line-152"><span class="c1">#         world_model: torch.nn.Module,</span>
-</span><span id="line-153"><span class="c1">#         n_steps: int,</span>
-</span><span id="line-154"><span class="c1">#         action_space,</span>
-</span><span id="line-155"><span class="c1">#         planning_horizon: int,</span>
-</span><span id="line-156"><span class="c1">#     ):</span>
-</span><span id="line-157"><span class="c1">#         super().__init__(world_model)</span>
-</span><span id="line-158"><span class="c1">#         self.n_steps = n_steps</span>
-</span><span id="line-159"><span class="c1">#         self.planning_horizon = planning_horizon</span>
-</span><span id="line-160"><span class="c1">#         init = torch.from_numpy(</span>
-</span><span id="line-161"><span class="c1">#             np.stack([action_space.sample() for _ in range(planning_horizon)], 0)</span>
-</span><span id="line-162"><span class="c1">#         )</span>
-</span><span id="line-163"><span class="c1">#         self.register_parameter(&quot;init&quot;, torch.nn.Parameter(init))</span>
-</span><span id="line-164">
-</span><span id="line-165"><span class="c1">#     def solve(</span>
-</span><span id="line-166"><span class="c1">#         self, states: torch.Tensor, action_space, goals: torch.Tensor</span>
-</span><span id="line-167"><span class="c1">#     ) -&gt; torch.Tensor:</span>
-</span><span id="line-168"><span class="c1">#         &quot;&quot;&quot;Solve the planning optimization problem using CEM.&quot;&quot;&quot;</span>
-</span><span id="line-169"><span class="c1">#         # Define the action space</span>
-</span><span id="line-170"><span class="c1">#         with torch.no_grad():</span>
-</span><span id="line-171"><span class="c1">#             init = torch.from_numpy(</span>
-</span><span id="line-172"><span class="c1">#                 np.stack(</span>
-</span><span id="line-173"><span class="c1">#                     [action_space.sample() for _ in range(self.planning_horizon)], 0</span>
-</span><span id="line-174"><span class="c1">#                 )</span>
-</span><span id="line-175"><span class="c1">#             )</span>
-</span><span id="line-176"><span class="c1">#             self.init.copy_(init)</span>
-</span><span id="line-177"><span class="c1">#         # Initialize the optimizer</span>
-</span><span id="line-178"><span class="c1">#         optimizer = ng.optimizers.CMA(</span>
-</span><span id="line-179"><span class="c1">#             parametrization=ng.p.Array(</span>
-</span><span id="line-180"><span class="c1">#                 shape=self.init.shape,</span>
-</span><span id="line-181"><span class="c1">#                 lower=np.stack(</span>
-</span><span id="line-182"><span class="c1">#                     [action_space.low for _ in range(self.planning_horizon)], 0</span>
-</span><span id="line-183"><span class="c1">#                 ),</span>
-</span><span id="line-184"><span class="c1">#                 upper=np.stack(</span>
-</span><span id="line-185"><span class="c1">#                     [action_space.high for _ in range(self.planning_horizon)], 0</span>
-</span><span id="line-186"><span class="c1">#                 ),</span>
-</span><span id="line-187"><span class="c1">#             ),</span>
-</span><span id="line-188"><span class="c1">#             budget=self.n_steps,</span>
-</span><span id="line-189"><span class="c1">#         )</span>
-</span><span id="line-190"><span class="c1">#         # Run the optimization</span>
-</span><span id="line-191"><span class="c1">#         for _ in range(self.n_steps):</span>
-</span><span id="line-192"><span class="c1">#             candidate = optimizer.ask()</span>
-</span><span id="line-193"><span class="c1">#             actions = torch.from_numpy(candidate.value.astype(np.float32))</span>
-</span><span id="line-194"><span class="c1">#             rewards = self.evaluate_action_sequence(</span>
-</span><span id="line-195"><span class="c1">#                 states, actions, goals</span>
-</span><span id="line-196"><span class="c1">#             )  # todo how does it works? visual l2 distance with goals is enough? what about other metrics e.g SNR?</span>
-</span><span id="line-197"><span class="c1">#             # Negate rewards to minimize</span>
-</span><span id="line-198"><span class="c1">#             optimizer.tell(candidate, [-r for r in rewards])</span>
-</span><span id="line-199"><span class="c1">#         # Get the best action sequence</span>
-</span><span id="line-200"><span class="c1">#         best_action_sequence = optimizer.provide_recommendation().value</span>
-</span><span id="line-201"><span class="c1">#         return torch.from_numpy(best_action_sequence.astype(np.float32))</span>
-</span><span id="line-202">
-</span><span id="line-203"><span class="c1">#     def evaluate_action_sequence(self, states, actions, goals):</span>
-</span><span id="line-204"><span class="c1">#         with torch.inference_mode():</span>
-</span><span id="line-205"><span class="c1">#             preds = self.world_model(states, actions.unbind(0))</span>
-</span><span id="line-206"><span class="c1">#             rewards = (preds - goals).square().mean(1)</span>
-</span><span id="line-207"><span class="c1">#             return rewards</span>
 </span></code></pre></div>
     </div></div>
         </main>

@@ -5,8 +5,9 @@ import datasets
 import gymnasium as gym
 import imageio.v3 as iio
 import numpy as np
-from datasets import Dataset, Features, Value, load_dataset
+from datasets import Dataset, Features, Value, load_from_disk
 from loguru import logger as logging
+from PIL import Image
 from rich import print
 
 import stable_worldmodel as swm
@@ -164,16 +165,11 @@ class World:
         records["policy"] = [self.policy.type] * self.num_envs
 
         while True:
-            # take before step to handle the auto-reset
-            truncations_before = self.truncateds.copy()
-            terminations_before = self.terminateds.copy()
-
-            # take step
             self.step()
 
             # start new episode for done envs
             for i in range(self.num_envs):
-                if terminations_before[i] or truncations_before[i]:
+                if self.terminateds[i] or self.truncateds[i]:
                     # re-reset env with seed and options (no supported by auto-reset)
                     new_seed = root_seed + recorded_episodes if seed is not None else None
 
@@ -182,10 +178,11 @@ class World:
                     episode_idx[i] = next_ep_idx
                     recorded_episodes += 1
 
-                    states, infos = self.envs.envs[i].reset(seed=new_seed, options=options)
+                    self.envs.unwrapped._autoreset_envs = np.zeros((self.num_envs,))
+                    _, infos = self.envs.envs[i].reset(seed=new_seed, options=options)
 
                     for k, v in infos.items():
-                        self.infos[k][i] = v
+                        self.infos[k][i] = np.asarray(v)
 
             if recorded_episodes >= episodes:
                 break
@@ -344,8 +341,7 @@ class World:
             for i in episode_idx
         ]
 
-        # TODO: should load from disk directly
-        dataset = load_dataset("parquet", data_files=str(Path(dataset_path, "*.parquet")), split="train")
+        dataset = load_from_disk(dataset_path).with_format("numpy")
 
         for i, o in zip(episode_idx, out):
             episode = dataset.filter(lambda ex: ex["episode_idx"] == i, num_proc=num_proc)
@@ -360,11 +356,13 @@ class World:
             )
 
             for step_idx in range(min(episode_len, max_steps)):
-                frame = episode[step_idx]["pixels"]
+                img_path = Path(dataset_path, episode[step_idx]["pixels"])
+                frame = Image.open(img_path)
                 frame = np.array(frame.convert("RGB"), dtype=np.uint8)
 
                 if "goal" in episode.column_names:
-                    goal = episode[step_idx]["goal"]
+                    goal_path = Path(dataset_path, episode[step_idx]["goal"])
+                    goal = Image.open(goal_path)
                     goal = np.array(goal.convert("RGB"), dtype=np.uint8)
                     frame = np.vstack([frame, goal])
                 o.append_data(frame)
@@ -429,14 +427,9 @@ class World:
 
                     for k, v in infos.items():
                         if k not in self.infos:
-                            continue  # Skip keys not in vectorized infos
+                            continue
                         # Convert to array and extract scalar to preserve dtype
-                        v_array = np.asarray(v)
-                        if v_array.ndim == 0:
-                            # 0-d array: extract scalar to avoid dtype=object
-                            self.infos[k][i] = v_array.item()
-                        else:
-                            self.infos[k][i] = v_array
+                        self.infos[k][i] = np.asarray(v)
 
             if eval_done:
                 break

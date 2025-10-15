@@ -342,8 +342,8 @@ class Attention(nn.Module):
         self.to_qkv = nn.Linear(dim, inner_dim * 3, bias=False)
         self.to_out = nn.Sequential(nn.Linear(inner_dim, dim), nn.Dropout(dropout)) if project_out else nn.Identity()
 
-        # TODO: self.register_buffer("bias", self.generate_mask_matrix(num_patches, num_frames))
-        self.bias = self.generate_mask_matrix(num_patches, num_frames).cuda()
+        self.register_buffer("bias", self.generate_mask_matrix(num_patches, num_frames))
+        # self.bias = self.generate_mask_matrix(num_patches, num_frames).cuda()
 
     def forward(self, x):
         B, T, C = x.size()

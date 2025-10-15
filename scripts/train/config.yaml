@@ -31,7 +31,7 @@ output_model_name: world_model
 
 epochs: 1
 batch_size: 32
-num_workers: 10
+num_workers: 3
 train_split: 0.9
 
 image_size: 224

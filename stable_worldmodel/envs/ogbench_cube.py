@@ -1,24 +1,32 @@
 """OGBench Cube manipulation environment with multiple task variants.
+
 This module implements a robotic manipulation environment using cubes with various
 task configurations ranging from single cube pick-and-place to complex multi-cube
 stacking and rearrangement tasks. The environment supports visual variations including
 object colors, sizes, lighting, and camera angles for robust policy learning.
+
 The environment is built on top of the ManipSpaceEnv from OGBench and uses MuJoCo
 for physics simulation. It provides both pixel-based and state-based observations,
 with support for goal-conditioned learning and data collection modes.
+
 Example:
     Basic usage of the cube environment::
+
         from stable_worldmodel.envs.ogbench_cube import CubeEnv
+
         # Create a double cube environment with pixel observations
         env = CubeEnv(env_type='double', ob_type='pixels', multiview=True)
+
         # Reset with variation sampling
         obs, info = env.reset(options={'variation': ['all']})
+
         # Run an episode
         for _ in range(100):
             action = env.action_space.sample()
             obs, reward, terminated, truncated, info = env.step(action)
             if info['success']:
                 break
+
 .. _OGBench:
    https://github.com/seohongpark/ogbench/
 """
@@ -36,13 +44,16 @@ from .utils import perturb_camera_angle
 
 class CubeEnv(ManipSpaceEnv):
     """Robotic manipulation environment with cube objects and multiple task variants.
+
     This environment provides a suite of manipulation tasks involving 1-8 colored cubes
     that must be moved to target positions. It supports various task types including
     pick-and-place, stacking, swapping, and cyclic rearrangement. The environment
     includes comprehensive variation spaces for visual domain randomization.
+
     The environment operates in two modes:
         - 'task': Goal-conditioned mode where the robot must achieve specific configurations
         - 'data_collection': Mode for collecting demonstrations with random targets
+
     Attributes:
         _env_type (str): Type of environment determining number of cubes.
             One of: 'single', 'double', 'triple', 'quadruple', 'octuple'.
@@ -70,6 +81,7 @@ class CubeEnv(ManipSpaceEnv):
         _success (bool): Whether the current task has been completed successfully.
         _cur_goal_ob (ndarray): Goal observation for goal-conditioned learning.
         _cur_goal_rendered (ndarray): Rendered image of goal state, if enabled.
+
     Note:
         Inherits from ManipSpaceEnv which provides the underlying robotic arm
         control, physics simulation, and base functionality.
@@ -81,6 +93,7 @@ class CubeEnv(ManipSpaceEnv):
         Sets up the manipulation environment with the specified number of cubes
         and configures observation type, block permutation, and camera views.
         Initializes the variation space for visual domain randomization.
+
         Args:
             env_type (str): Environment type corresponding to number of cubes.
                 Must be one of: 'single' (1 cube), 'double' (2 cubes),
@@ -96,8 +109,10 @@ class CubeEnv(ManipSpaceEnv):
                 Defaults to False.
             *args: Variable length argument list passed to parent ManipSpaceEnv.
             **kwargs: Arbitrary keyword arguments passed to parent ManipSpaceEnv.
+
         Raises:
             ValueError: If env_type is not one of the supported values.
+
         Note:
             The variation_space is automatically configured with appropriate ranges
             for all visual variations including colors, sizes, lighting, and cameras.
@@ -225,16 +240,19 @@ class CubeEnv(ManipSpaceEnv):
 
     def set_tasks(self):
         """Define all task configurations for the environment.
+
         Initializes the task_infos list with predefined manipulation tasks appropriate
         for the current env_type. Each task specifies initial and goal positions for
         all cubes. Tasks increase in complexity from simple pick-and-place to
         multi-object stacking and cyclic rearrangements.
+
         Task types by environment:
             - single: 5 tasks (horizontal, vertical movements, diagonals)
             - double: 5 tasks (single/double pick-place, swap, stack)
             - triple: 5 tasks (single/triple pick-place, unstack, cycle, stack)
             - quadruple: 5 tasks (double/quad pick-place, unstack, cycle, stack)
             - octuple: 5 tasks (quad/octuple pick-place, unstacking, stacking)
+
         Note:
             Also sets the default reward_task_id to 2 if not already configured.
             All positions are in MuJoCo world coordinates (x, y, z) in meters.
@@ -675,9 +693,11 @@ class CubeEnv(ManipSpaceEnv):
 
     def reset(self, options=None, *args, **kwargs):
         """Reset the environment to an initial state.
+
         Resets the environment and optionally samples from the variation space to
         create visual diversity. Handles both task mode (with predefined goals) and
         data collection mode (with random targets).
+
         Args:
             options (dict, optional): Dictionary of reset options. Supported keys:
                 - 'variation': List/tuple of variation names to sample. Use ['all']
@@ -685,17 +705,23 @@ class CubeEnv(ManipSpaceEnv):
                   ['cube.color', 'light.intensity']. Defaults to None (no variation).
             *args: Variable length argument list passed to parent reset.
             **kwargs: Arbitrary keyword arguments passed to parent reset.
+
         Returns:
             tuple: (observation, info) where:
                 - observation: Current observation based on ob_type configuration
                 - info: Dictionary containing reset information and task state
+
         Raises:
             AssertionError: If variation option is not a list/tuple, or if variation
                 values are outside their defined spaces.
+
         Example:
             Reset with all variations enabled::
+
                 obs, info = env.reset(options={'variation': ['all']})
+
             Reset with specific variations::
+
                 obs, info = env.reset(options={'variation': ['cube.color', 'camera.angle_delta']})
         """
         options = options or {}
@@ -721,12 +747,15 @@ class CubeEnv(ManipSpaceEnv):
 
     def add_objects(self, arena_mjcf):
         """Add cube objects and cameras to the MuJoCo scene.
+
         Constructs the manipulation scene by loading cube XML descriptions and
         positioning them appropriately. Sets up multiple camera viewpoints for
         rendering observations.
+
         Args:
             arena_mjcf (mjcf.RootElement): The MuJoCo XML root element representing
                 the arena where objects and cameras will be added.
+
         Note:
             - Cubes are positioned with 0.05m spacing along the y-axis
             - Each cube has both a physical object and a semi-transparent target marker

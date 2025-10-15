@@ -649,6 +649,16 @@ class CubeEnv(ManipSpaceEnv):
             arena_mjcf.worldbody.add("camera", name=camera_name, **camera_kwargs)
 
     def post_compilation_objects(self):
+        """Extract MuJoCo object IDs after model compilation.
+
+        Retrieves and stores the integer IDs for all cube geoms, target mocap bodies,
+        and target geoms. These IDs are used for efficient access during simulation
+        and rendering.
+
+        Note:
+            Must be called after the MuJoCo model has been compiled. IDs are needed
+            for direct manipulation of model properties like colors and positions.
+        """
         # Cube geom IDs.
         self._cube_geom_ids_list = [
             [self._model.geom(geom.full_identifier).id for geom in cube_geoms] for cube_geoms in self._cube_geoms_list
@@ -662,6 +672,23 @@ class CubeEnv(ManipSpaceEnv):
         ]
 
     def modify_mjcf_model(self, mjcf_model):
+        """Apply visual variations to the MuJoCo model based on variation space.
+
+        Modifies the MJCF model XML to apply sampled variations including floor colors,
+        robot arm colors, cube sizes, camera angles, and lighting. Only variations
+        that are enabled in the variation_options are applied.
+
+        Args:
+            mjcf_model (mjcf.RootElement): The MuJoCo XML model to modify.
+
+        Returns:
+            mjcf.RootElement: The modified model with variations applied.
+
+        Note:
+            - Variations are only applied if specified in variation_options during reset
+            - Some variations (size, light) call self.mark_dirty() to trigger recompilation
+            - Camera angle perturbations use the perturb_camera_angle helper function
+        """
         if "all" in self.variation_options or "floor.color" in self.variation_options:
             # Modify floor color
             grid_texture = mjcf_model.find("texture", "grid")
@@ -712,6 +739,26 @@ class CubeEnv(ManipSpaceEnv):
         return mjcf_model
 
     def initialize_episode(self):
+        """Initialize the environment state at the start of an episode.
+
+        Sets up cube colors, arm position, and object placements based on the current
+        mode (task or data_collection). In task mode, creates goal observations and
+        places cubes according to the current task definition. In data collection mode,
+        randomizes cube placements and sets a random target.
+
+        The initialization process:
+            1. Apply cube colors from variation space
+            2. Reset arm to home position
+            3. In task mode: Set cubes to task-specific positions, generate goal observation
+            4. In data_collection mode: Randomize cube positions and orientations
+            5. Run forward kinematics to stabilize the scene
+
+        Note:
+            - In task mode, goal observation is computed by first placing cubes at
+              goal positions, rendering/observing, then resetting to initial positions
+            - Small random perturbations (±0.01m) are added to initial positions
+            - Random yaw rotations (0-2π) are applied to all cubes
+        """
         # Set cube colors.
         for i in range(self._num_cubes):
             for gid in self._cube_geom_ids_list[i]:
@@ -797,11 +844,31 @@ class CubeEnv(ManipSpaceEnv):
         self._success = False
 
     def set_new_target(self, return_info=True, p_stack=0.5):
-        """Set a new random target for data collection.
+        """Set a new random target for data collection mode.
+
+        Randomly selects one of the "top" cubes (not stacked under another) as the
+        target and assigns it a random goal position. The goal can be either a flat
+        surface position or stacked on top of another cube.
 
         Args:
-            return_info: Whether to return the observation and reset info.
-            p_stack: Probability of stacking the target block on top of another block when there are multiple blocks.
+            return_info (bool, optional): Whether to return the observation and reset
+                info after setting the new target. Defaults to True.
+            p_stack (float, optional): Probability of setting the target to stack on
+                top of another block (when multiple blocks are available). Must be
+                in range [0, 1]. Defaults to 0.5.
+
+        Returns:
+            tuple or None: If return_info is True, returns (observation, reset_info).
+                Otherwise returns None.
+
+        Raises:
+            AssertionError: If called when mode is not 'data_collection'.
+
+        Note:
+            - Only cubes that are not underneath other cubes can be selected as targets
+            - Target markers are made visible for the selected cube, invisible for others
+            - Stacking targets are positioned 0.04m above the base cube's z-position
+            - Non-stacking targets are randomly sampled from the target sampling bounds
         """
         assert self._mode == "data_collection"
 
@@ -862,7 +929,21 @@ class CubeEnv(ManipSpaceEnv):
             return self.compute_observation(), self.get_reset_info()
 
     def _compute_successes(self):
-        """Compute object successes."""
+        """Compute success status for each cube.
+
+        Checks whether each cube is within the success threshold distance of its
+        corresponding target position. A cube is considered successful if the
+        Euclidean distance to its target is ≤ 0.04m.
+
+        Returns:
+            list of bool: Boolean list where each element indicates whether the
+                corresponding cube has reached its target position. Length equals
+                the number of cubes in the environment.
+
+        Note:
+            Success threshold of 0.04m (40mm) allows for small positioning errors
+            while ensuring cubes are substantially at their goals.
+        """
         cube_successes = []
         for i in range(self._num_cubes):
             obj_pos = self._data.joint(f"object_joint_{i}").qpos[:3]
@@ -875,6 +956,21 @@ class CubeEnv(ManipSpaceEnv):
         return cube_successes
 
     def post_step(self):
+        """Update environment state after each simulation step.
+
+        Computes success status and adjusts target marker visibility based on the
+        current mode. In task mode, all cube targets are evaluated. In data collection
+        mode, only the designated target cube is evaluated.
+
+        Updates:
+            - self._success: Set to True if success conditions are met
+            - Target geom alpha: Made visible (0.2) for relevant targets when
+              visualization is enabled, invisible (0.0) otherwise
+
+        Note:
+            Success in task mode requires ALL cubes to reach their targets.
+            Success in data collection mode requires only the target cube to succeed.
+        """
         # Check if the cubes are in the target positions.
         cube_successes = self._compute_successes()
         if self._mode == "data_collection":
@@ -891,14 +987,21 @@ class CubeEnv(ManipSpaceEnv):
                 for gid in self._cube_target_geom_ids_list[i]:
                     self._model.geom(gid).rgba[3] = 0.0
 
-            # if self._visualize_info and cube_successes[i]:
-            #     for gid in self._cube_geom_ids_list[i]:
-            #         self._model.geom(gid).rgba[:3] = self._cube_success_colors[i, :3]
-            # else:
-            #     for gid in self._cube_geom_ids_list[i]:
-            #         self._model.geom(gid).rgba[:3] = self._cube_colors[i, :3]
-
     def get_reset_info(self):
+        """Get information dictionary at environment reset.
+
+        Compiles observation info along with goal observations (in task mode) and
+        success status to provide comprehensive reset information.
+
+        Returns:
+            dict: Dictionary containing:
+                - All keys from compute_ob_info() (proprioception and object states)
+                - 'goal': Goal observation (task mode only)
+                - 'success': Boolean indicating current success status
+
+        Note:
+            Called after initialize_episode() to provide initial state information.
+        """
         reset_info = self.compute_ob_info()
         if self._mode == "task":
             reset_info["goal"] = self._cur_goal_ob
@@ -906,6 +1009,20 @@ class CubeEnv(ManipSpaceEnv):
         return reset_info
 
     def get_step_info(self):
+        """Get information dictionary after each environment step.
+
+        Compiles current observation info along with goal observations (in task mode)
+        and success status to provide comprehensive step information.
+
+        Returns:
+            dict: Dictionary containing:
+                - All keys from compute_ob_info() (proprioception and object states)
+                - 'goal': Goal observation (task mode only)
+                - 'success': Boolean indicating whether task is completed
+
+        Note:
+            Called after each step to provide feedback about current state and progress.
+        """
         ob_info = self.compute_ob_info()
         if self._mode == "task":
             ob_info["goal"] = self._cur_goal_ob
@@ -913,6 +1030,27 @@ class CubeEnv(ManipSpaceEnv):
         return ob_info
 
     def add_object_info(self, ob_info):
+        """Add cube-specific information to the observation info dictionary.
+
+        Augments the info dictionary with privileged state information about all cubes
+        including positions, orientations, and target information (in data collection mode).
+
+        Args:
+            ob_info (dict): Observation info dictionary to augment. Modified in-place.
+
+        Adds to ob_info:
+            - 'privileged/block_{i}_pos': 3D position (x, y, z) of cube i
+            - 'privileged/block_{i}_quat': Quaternion (w, x, y, z) of cube i
+            - 'privileged/block_{i}_yaw': Yaw angle in radians of cube i
+            - 'privileged/target_task': Task type string (data collection mode only)
+            - 'privileged/target_block': Index of target cube (data collection mode only)
+            - 'privileged/target_block_pos': Target position (data collection mode only)
+            - 'privileged/target_block_yaw': Target yaw angle (data collection mode only)
+
+        Note:
+            All positions are in world coordinates. Quaternions use (w, x, y, z) format.
+            Privileged information is typically not available to policies during deployment.
+        """
         # Cube positions and orientations.
         for i in range(self._num_cubes):
             ob_info[f"privileged/block_{i}_pos"] = self._data.joint(f"object_joint_{i}").qpos[:3].copy()
@@ -933,6 +1071,26 @@ class CubeEnv(ManipSpaceEnv):
             )
 
     def compute_observation(self):
+        """Compute the current observation based on observation type.
+
+        Generates either pixel-based or state-based observations depending on the
+        ob_type configuration. State observations include scaled proprioceptive
+        and object state information.
+
+        Returns:
+            ndarray: Observation array. If ob_type is 'pixels', returns image array
+                with shape (H, W, C) or (N, H, W, C) for multiview. If ob_type is
+                not 'pixels', returns flattened state vector containing:
+                - Arm joint positions (6D) and velocities (6D)
+                - End-effector position (3D, scaled), yaw angle (2D: cos/sin)
+                - Gripper opening (1D, scaled) and contact (binary)
+                - For each cube: position (3D, scaled), quaternion (4D), yaw (2D: cos/sin)
+
+        Note:
+            State observations use a centering offset (0.425, 0.0, 0.0) and scaling
+            factors (10.0 for positions, 3.0 for gripper) to normalize values.
+            Yaw angles are encoded as (cos, sin) pairs for continuity.
+        """
         if self._ob_type == "pixels":
             return self.get_pixel_observation()
         else:
@@ -963,7 +1121,22 @@ class CubeEnv(ManipSpaceEnv):
             return np.concatenate(ob)
 
     def compute_oracle_observation(self):
-        """Return the oracle goal representation of the current state."""
+        """Compute oracle goal representation containing only cube positions.
+
+        Returns a compact state representation containing only the positions of all
+        cubes, useful for goal-conditioned learning where the goal is defined by
+        object configurations rather than the full state.
+
+        Returns:
+            ndarray: Concatenated cube positions with shape (num_cubes * 3,).
+                Each cube contributes its (x, y, z) position, centered and scaled
+                by the same factors used in compute_observation().
+
+        Note:
+            This representation excludes robot state and object orientations,
+            focusing only on cube positions. Used primarily in task mode for
+            goal specification.
+        """
         xyz_center = np.array([0.425, 0.0, 0.0])
         xyz_scaler = 10.0
 
@@ -975,6 +1148,27 @@ class CubeEnv(ManipSpaceEnv):
         return np.concatenate(ob)
 
     def compute_reward(self, ob, action):
+        """Compute the reward for the current step.
+
+        Calculates reward based on task success. If a specific reward_task_id is set,
+        uses a custom reward function that counts successful cube placements minus
+        the total number of cubes (range: -num_cubes to 0). Otherwise defers to
+        parent class reward computation.
+
+        Args:
+            ob (ndarray): Current observation (not used in custom reward computation).
+            action (ndarray): Action taken in this step (not used in custom reward).
+
+        Returns:
+            float: Scalar reward value. Custom reward ranges from -num_cubes (all
+                cubes far from targets) to 0 (all cubes at targets). Parent class
+                reward depends on its implementation.
+
+        Note:
+            The custom reward provides dense feedback about task progress by counting
+            how many cubes are successfully positioned. Each successful cube adds 1
+            to the base value of -num_cubes.
+        """
         if self._reward_task_id is None:
             return super().compute_reward(ob, action)
 
@@ -989,6 +1183,29 @@ class CubeEnv(ManipSpaceEnv):
         *args,
         **kwargs,
     ):
+        """Render the current scene from specified camera view(s).
+
+        Generates RGB image(s) of the current environment state from one or more
+        camera viewpoints. Automatically handles multiview rendering when configured.
+
+        Args:
+            camera (str or list, optional): Camera name(s) to render from. Can be
+                a single camera name string or list of camera names. If multiview
+                is enabled, defaults to ['front_pixels', 'side_pixels']. Otherwise
+                defaults to 'front_pixels'. Supports any camera defined in self.cameras.
+            *args: Additional positional arguments passed to parent render method.
+            **kwargs: Additional keyword arguments passed to parent render method.
+
+        Returns:
+            ndarray: Rendered image(s). If camera is a single string, returns array
+                with shape (H, W, C). If camera is a list, returns array with shape
+                (N, H, W, C) where N is the number of views, stacked along first axis.
+
+        Note:
+            The multiview stacking is useful for policies that benefit from multiple
+            viewpoints, such as those learning 3D spatial reasoning. The 'front_pixels'
+            camera provides an oblique view while 'side_pixels' shows a perpendicular view.
+        """
         camera = "front_pixels" if not self._multiview else ["front_pixels", "side_pixels"]
         if isinstance(camera, list | tuple):
             imgs = []

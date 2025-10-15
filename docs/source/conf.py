@@ -6,16 +6,17 @@ sys.path.insert(0, os.path.abspath("../.."))
 
 from datetime import date
 
+from sphinxawesome_theme.postprocess import Icons
+
 from stable_worldmodel import __version__
 
 
+# -- Project information ---
+
 project = "stable-worldmodel"
-copyright = "2025, Randall Balestriero, Dan Haramati, Lucas Maes"
-author = "Randall Balestriero, Dan Haramati, Lucas Maes"
-
-# The full version, including alpha/beta/rc tags
+copyright = "2025, Randall Balestriero, Lucas Maes, Dan Haramati"
+author = "Randall Balestriero, Lucas Maes, Dan Haramati"
 release = __version__
-
 current_year = date.today().year
 copyright = f"{current_year}"
 
@@ -28,17 +29,20 @@ extensions = [
     "sphinx.ext.viewcode",
     "sphinx.ext.napoleon",
     "sphinx.ext.intersphinx",
-    "sphinx.ext.viewcode",
     "sphinx.ext.doctest",
     "sphinx.ext.githubpages",
-    # "sphinx_gallery.gen_gallery",
-    "sphinxcontrib.bibtex",
+    "sphinx.ext.mathjax",
+    "sphinx_design",
     "sphinx.ext.todo",
     "myst_parser",
 ]
 
-todo_include_todos = True
+todo_include_todos = False
+
 autosummary_generate = True
+autosummary_filename_map = {}
+add_module_names = False
+
 autodoc_default_options = {
     "members": True,
     "undoc-members": False,
@@ -56,34 +60,9 @@ copybutton_exclude = ".linenos, .gp"
 templates_path = ["_templates"]
 exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
 
-# sphinx_gallery_conf = {
-#     "examples_dirs": ["../../examples/"],
-#     "gallery_dirs": "auto_examples",  # path to where to save gallery generated output
-#     "filename_pattern": "/demo_",
-#     "run_stale_examples": True,
-#     "ignore_pattern": r"__init__\.py",
-#     "reference_url": {
-#         # The module you locally document uses None
-#         "sphinx_gallery": None
-#     },
-#     # directory where function/class granular galleries are stored
-#     "backreferences_dir": "gen_modules/backreferences",
-#     # Modules for which function/class level galleries are created. In
-#     # this case sphinx_gallery and numpy in a tuple of strings.
-#     "doc_module": ("stable_pretraining",),
-#     # objects to exclude from implicit backreferences. The default option
-#     # is an empty set, i.e. exclude nothing.
-#     "exclude_implicit_doc": {},
-#     "nested_sections": False,
-# }
-
 # how to define macros: https://docs.mathjax.org/en/latest/input/tex/macros.html
 mathjax3_config = {"tex": {"equationNumbers": {"autoNumber": "AMS", "useLabelIds": True}}}
 
-# bibliography
-bibtex_bibfiles = ["references.bib"]
-bibtex_reference_style = "author_year"
-bibtex_default_style = "alpha"
 
 math_numfig = True
 numfig = True
@@ -92,8 +71,12 @@ numfig_secnum_depth = 3
 # -- Options for HTML output -------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
 
+# pygments_style = "tango"
+# pygments_dark_style = "monokai"
+
 pygments_style = "tango"
-pygments_dark_style = "monokai"
+pygments_style_dark = "github-dark"
+html_permalinks_icon = Icons.permalinks_icon
 html_static_path = ["_static"]
 html_css_files = [
     "css/custom.css",
@@ -101,37 +84,45 @@ html_css_files = [
     "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/solid.min.css",
     "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/brands.min.css",
 ]
+
 html_show_sourcelink = False
 html_copy_source = False
-html_title = "stable-worldmodel\nDocumentation"
-html_theme = "furo"
+html_title = "stable-worldmodel"
+html_theme = "sphinxawesome_theme"
 html_favicon = "_static/img/favicon.ico"
+
 html_theme_options = {
-    "light_logo": "img/logo-light.svg",
-    "dark_logo": "img/logo-dark.svg",
-    "source_repository": "https://github.com/randall-lab/stable-worldmodel/",
-    "source_branch": "main",
-    "source_directory": "docs/",
-    "top_of_page_buttons": ["edit"],
-    # TODO change for dark them as well
-    "light_css_variables": {
-        "color-brand-primary": "#202123",
-        "color-brand-content": "#296cde",
-        "color-inline-code-background": "#f8f8f8",
-        "color-brand-visited": "#2757dd",
+    # "logo_light": "_static/img/logo-light.svg",
+    # "logo_dark": "_static/img/logo-dark.svg",
+    "awesome_external_links": True,
+    "show_scrolltop": True,
+    "extra_header_link_icons": {
+        "repository on GitHub": {
+            "link": "https://github.com/rbalestr-lab/stable-worldmodel",
+            "icon": (
+                '<svg height="26px" style="margin-top:-2px;display:inline" '
+                'viewBox="0 0 45 44" '
+                'fill="currentColor" xmlns="http://www.w3.org/2000/svg">'
+                '<path fill-rule="evenodd" clip-rule="evenodd" '
+                'd="M22.477.927C10.485.927.76 10.65.76 22.647c0 9.596 6.223 17.736 '
+                "14.853 20.608 1.087.2 1.483-.47 1.483-1.047 "
+                "0-.516-.019-1.881-.03-3.693-6.04 "
+                "1.312-7.315-2.912-7.315-2.912-.988-2.51-2.412-3.178-2.412-3.178-1.972-1.346.149-1.32.149-1.32 "  # noqa
+                "2.18.154 3.327 2.24 3.327 2.24 1.937 3.318 5.084 2.36 6.321 "
+                "1.803.197-1.403.759-2.36 "
+                "1.379-2.903-4.823-.548-9.894-2.412-9.894-10.734 "
+                "0-2.37.847-4.31 2.236-5.828-.224-.55-.969-2.759.214-5.748 0 0 "
+                "1.822-.584 5.972 2.226 "
+                "1.732-.482 3.59-.722 5.437-.732 1.845.01 3.703.25 5.437.732 "
+                "4.147-2.81 5.967-2.226 "
+                "5.967-2.226 1.185 2.99.44 5.198.217 5.748 1.392 1.517 2.232 3.457 "
+                "2.232 5.828 0 "
+                "8.344-5.078 10.18-9.916 10.717.779.67 1.474 1.996 1.474 4.021 0 "
+                "2.904-.027 5.247-.027 "
+                "5.96 0 .58.392 1.256 1.493 1.044C37.981 40.375 44.2 32.24 44.2 "
+                '22.647c0-11.996-9.726-21.72-21.722-21.72" '
+                'fill="currentColor"/></svg>'
+            ),
+        },
     },
-    "footer_icons": [
-        {
-            "name": "Discord",
-            "url": "https://discord.gg/8M6hT39X",
-            "html": "",
-            "class": "fa-brands fa-solid fa-discord",
-        },
-        {
-            "name": "GitHub",
-            "url": "https://github.com/randall-lab/stable-worldmodel",
-            "html": "",
-            "class": "fa-brands fa-solid fa-github",
-        },
-    ],
 }

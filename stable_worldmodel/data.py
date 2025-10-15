@@ -26,7 +26,7 @@ class StepsDataset(spt.data.HFDataset):
         **kwargs,
     ):
         data_dir = Path(kwargs.get("cache_dir", swm.data.get_cache_dir()), path)
-        super().__init__(os.path.join(data_dir, "records"), *args, **kwargs)
+        super().__init__(str(data_dir), *args, **kwargs)
 
         self.data_dir = data_dir
         self.num_steps = num_steps
@@ -36,8 +36,10 @@ class StepsDataset(spt.data.HFDataset):
         assert "step_idx" in self.dataset.column_names, "Dataset must have 'step_idx' column"
         assert "action" in self.dataset.column_names, "Dataset must have 'action' column"
 
+        self.dataset.set_format("torch")
+
         # get number of episodes
-        ep_indices = self.dataset["episode_idx"]
+        ep_indices = self.dataset["episode_idx"][:]
         self.episodes = np.unique(ep_indices)
 
         # get dataset indices of each episode
@@ -52,18 +54,15 @@ class StepsDataset(spt.data.HFDataset):
         # map from sample to their episode
         self.idx_to_ep = np.searchsorted(self.cum_slices, torch.arange(len(self)), side="right") - 1
 
-        self.dataset.set_format("torch")
         self.img_cols = self.infer_img_path_columns()
 
     def get_episode_slice(self, episode_idx, episode_indices):
         """Return number of possible slices for a given episode index"""
         indices = np.flatnonzero(episode_indices == episode_idx)
-
         if len(indices) <= (self.num_steps * self.frameskip):
             raise ValueError(
                 f"Episode {episode_idx} is too short ({len(indices)} steps) for {self.num_steps} steps with {self.frameskip} frameskip"
             )
-
         return indices
 
     def __len__(self):
@@ -80,13 +79,13 @@ class StepsDataset(spt.data.HFDataset):
 
         for k, v in steps.items():
             if k == "action":
-                steps[k] = v.reshape(self.num_steps, -1)
-            else:
-                v = v[:: self.frameskip]
-                steps[k] = v
+                continue
 
-                if k in self.img_cols:
-                    steps[k] = [PIL.Image.open(self.data_dir / img_path) for img_path in v]
+            v = v[:: self.frameskip]
+            steps[k] = v
+
+            if k in self.img_cols:
+                steps[k] = [PIL.Image.open(self.data_dir / img_path) for img_path in v]
 
         if self.transform:
             steps = self.transform(steps)
@@ -94,6 +93,9 @@ class StepsDataset(spt.data.HFDataset):
         # stack images into a single tensor
         for k in self.img_cols:
             steps[k] = torch.stack(steps[k])
+
+        # reshape action
+        steps["action"] = steps["action"].reshape(self.num_steps, -1)
 
         return steps
 
@@ -147,11 +149,11 @@ class WorldInfo(TypedDict):
     config: dict[str, Any]
 
 
-def get_cache_dir() -> str:
+def get_cache_dir() -> Path:
     """Return the cache directory for stable_worldmodel."""
     cache_dir = os.getenv("XENOWORLDS_HOME", os.path.expanduser("~/.stable_worldmodel"))
     os.makedirs(cache_dir, exist_ok=True)
-    return cache_dir
+    return Path(cache_dir)
 
 
 def list_datasets():

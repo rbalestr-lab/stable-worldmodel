@@ -31,7 +31,8 @@ dependencies = [
     "datasets",
     "pygame",
     "pymunk",
-    "shapely"
+    "shapely",
+    "ogbench",
 ]
 
 dynamic = ["version"]
@@ -61,12 +62,12 @@ dev = [
 # Documentation tools
 docs = [
     "sphinx",
+    "sphinxawesome-theme",
     "sphinx-gallery",
     "sphinx-book-theme",
-    "sphinxcontrib-bibtex",
     "matplotlib",
     "memory_profiler",
-    "furo",
+    "sphinx_design",
     "myst-parser",
 ]
 

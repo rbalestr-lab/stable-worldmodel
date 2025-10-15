@@ -1,8 +1,18 @@
 Wrappers
 ========
 
+.. currentmodule:: stable_worldmodel.wrappers
+
 .. autosummary::
    :toctree: generated/
-   :recursive:
+   :nosignatures:
+   :template: autosummary/class.rst
 
-   stable_worldmodel.wrappers
+   EnsureInfoKeysWrapper
+   EnsureImageShape
+   EnsureGoalInfoWrapper
+   EverythingToInfoWrapper
+   AddPixelsWrapper
+   ResizeGoalWrapper
+   MegaWrapper
+   VariationWrapper

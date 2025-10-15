@@ -1,22 +1,21 @@
 Solver
 ======
 
-.. toctree::
-   :hidden:
-   
-   solver/cem
-   solver/gd
+.. currentmodule:: stable_worldmodel.solver
 
-.. stable_worldmodel.solver
-.. ------------------------
+.. autosummary::
+   :toctree: generated/
+   :nosignatures:
+   :template: autosummary/class.rst
 
-.. .. autoclass:: stable_worldmodel.solver
+   GDSolver
+   CEMSolver
+   MPPISolver
+   NevergradSolver
+   RandomSolver
 
-.. Methods
-.. -------
-
-.. .. autofunction:: minari.DataCollector.step
-.. .. autofunction:: minari.DataCollector.reset
-.. .. autofunction:: minari.DataCollector.create_dataset
-.. .. autofunction:: minari.DataCollector.add_to_dataset
-.. .. autofunction:: minari.DataCollector.close
+.. automodule:: stable_worldmodel.solver.solver
+   :members:
+   :undoc-members:
+   :inherited-members:
+   :show-inheritance:

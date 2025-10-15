@@ -5,8 +5,9 @@ import datasets
 import gymnasium as gym
 import imageio.v3 as iio
 import numpy as np
-from datasets import Dataset, Features, Value, load_dataset
+from datasets import Dataset, Features, Value, load_from_disk
 from loguru import logger as logging
+from PIL import Image
 from rich import print
 
 import stable_worldmodel as swm
@@ -16,93 +17,7 @@ from .wrappers import MegaWrapper, VariationWrapper
 
 
 class World:
-    """A high-level environment manager for vectorized gym environments with support for
-    goal-conditioned tasks, video recording, dataset generation, and evaluation.
-
-    The `World` class wraps multiple parallel environments using Gymnasium’s vectorized API and
-    integrates with custom wrappers (e.g., `MegaWrapper`) to handle image-based observations and goals.
-    It provides utility methods for recording trajectories, saving datasets in HuggingFace Datasets .parquet format,
-    evaluating policies, and exporting video rollouts.
-
-    Parameters
-    ----------
-    env_name : str
-        The name of the Gymnasium environment to instantiate.
-    num_envs : int
-        Number of parallel environments to run.
-    image_shape : tuple[int]
-        Shape of image observations (C, H, W).
-    image_transform : callable, optional
-        Transformation function applied to image observations.
-    goal_shape : tuple[int], optional
-        Shape of goal image observations.
-    goal_transform : callable, optional
-        Transformation function applied to goal observations.
-    seed : int, default=2349867
-        Random seed for environment initialization and goal sampling.
-    max_episode_steps : int, default=100
-        Maximum number of steps per episode.
-    **kwargs : dict
-        Additional keyword arguments passed to `gym.make_vec`.
-
-    Attributes:
-    ----------
-    envs : gym.vector.VectorEnv
-        Vectorized environments wrapped with `MegaWrapper`.
-    goal_envs : gym.vector.VectorEnv
-        Separate vectorized environments for goal sampling.
-    seed : int
-        Random seed for reproducibility.
-    goal_seed : int
-        Secondary random seed for sampling goals.
-    policy : object
-        Policy instance with `get_action` and `set_env` methods.
-
-    Properties
-    ----------
-    num_envs : int
-        Number of environments in the vectorized setup.
-    observation_space : gym.Space
-        Observation space of the environments.
-    action_space : gym.Space
-        Action space of the environments.
-    single_action_space : gym.Space
-        Action space for a single environment.
-    single_observation_space : gym.Space
-        Observation space for a single environment.
-
-    Methods:
-    -------
-    close(**kwargs)
-        Closes all managed environments.
-    denormalize(x)
-        Converts normalized images in [-1, 1] back to [0, 1].
-    set_policy(policy)
-        Assigns a policy object for interaction.
-    reset(seed=None, options=None)
-        Resets the environments and returns initial states and infos.
-    step()
-        Steps all environments using the current policy’s actions.
-    __iter__()
-        Prepares the iterator by resetting environments.
-    __next__()
-        Iterates over environment states until all episodes are done.
-    record_video(video_path, max_steps=500, fps=30, seed=None, options=None)
-        Records a rollout video for each environment.
-    record_dataset(dataset_name, episodes=10, seed=None, options=None)
-        Collects episodes into a HuggingFace Dataset and saves as Parquet shards.
-    record_video_from_dataset(video_path, dataset_name, episode_idx, max_steps=500, fps=30, num_proc=4)
-        Replays stored dataset episodes and exports them as videos.
-    evaluate(episodes=10, eval_keys=None, seed=None, options=None)
-        Evaluates the policy across multiple episodes and computes metrics.
-
-    Notes:
-    -----
-    - Supports parallelized rollout collection with episode tracking.
-    - Integrates tightly with HuggingFace Datasets for storage and replay.
-    - Provides success-rate evaluation with optional custom metrics.
-    - Video export uses `imageio` with `libx264` encoding.
-    """
+    """A high-level environment manager for vectorized gym environments with support for"""
 
     def __init__(
         self,
@@ -127,6 +42,7 @@ class World:
         )
 
         self.envs = VariationWrapper(self.envs)
+        self.envs.unwrapped.autoreset_mode = gym.vector.AutoresetMode.DISABLED
 
         if verbose > 0:
             logging.info(f"🌍🌍🌍 World {env_name} initialized 🌍🌍🌍")
@@ -180,7 +96,7 @@ class World:
         """Advance all environments by one step using the current policy."""
         # note: reset happens before because of auto-reset, should fix that
         actions = self.policy.get_action(self.infos)
-        (self.states, self.rewards, self.terminateds, self.truncateds, self.infos) = self.envs.step(actions)
+        self.states, self.rewards, self.terminateds, self.truncateds, self.infos = self.envs.step(actions)
 
     def reset(self, seed=None, options=None):
         """Reset all environments."""
@@ -195,27 +111,7 @@ class World:
             self.policy.set_seed(self.policy.seed)
 
     def record_video(self, video_path, max_steps=500, fps=30, seed=None, options=None):
-        """Record rollout videos for each environment under the current policy.
-
-        Parameters
-        ----------
-        video_path : str or Path
-            Directory to which MP4 files will be written; one file per env named ``env_{i}.mp4``.
-        max_steps : int, default=500
-            Maximum number of steps to record per environment.
-        fps : int, default=30
-            Frames per second for the output video.
-        seed : int, optional
-            Seed to use for the initial reset prior to recording.
-        options : dict, optional
-            Env reset options.
-
-        Notes:
-        -----
-        - If ``infos`` contains ``"goal"``, the goal image is vertically stacked
-          beneath the observation pixels in the output frames.
-        - Uses ``imageio.get_writer(..., codec="libx264")`` for MP4 encoding.
-        """
+        """Record rollout videos for each environment under the current policy."""
         import imageio
 
         out = [
@@ -249,45 +145,7 @@ class World:
         print(f"Video saved to {video_path}")
 
     def record_dataset(self, dataset_name, episodes=10, seed=None, cache_dir=None, options=None):
-        """Collect episodes with the current policy and save them as a HuggingFace Dataset (Parquet shards).
-
-        Parameters
-        ----------
-        dataset_name : str
-            Name of the dataset directory under the stable_worldmodel cache dir.
-        episodes : int, default=10
-            Number of *complete* episodes to record (across all envs, total).
-        seed : int, optional
-            Base seed used for the initial reset; subsequent resets for per-env continuation
-            derive unique seeds from this value.
-        options : dict, optional
-            Env reset options.
-
-        Side Effects
-        ------------
-        - Creates ``{cache_dir}/{dataset_name}/data_shard_{NNNNN}.parquet`` files.
-        - Appends only *complete* episodes to the shard (partial episodes are dropped).
-        - Re-indexes ``episode_idx`` to be contiguous across shards.
-
-        Dataset Schema
-        --------------
-        The resulting dataset includes (at minimum):
-            - ``pixels`` : :class:`datasets.Image`
-            - ``episode_idx`` : :class:`datasets.Value("int32")`
-            - ``step_idx`` : :class:`datasets.Value("int32")`
-            - ``episode_len`` : :class:`datasets.Value("int32")`
-
-        If available, it may also include:
-            - ``goal`` : :class:`datasets.Image`
-            - ``action`` : array-like feature shaped like the env action space
-            - Per-step scalar/vector fields exposed by the wrapper in ``infos``
-
-        Notes:
-        -----
-        - The function handles action shifting to ensure alignment with continuing episodes.
-        - Sharding logic ensures a new shard index is chosen if prior shards exist.
-        - Only the first ``episodes`` fully completed episodes are persisted for the new shard.
-        """
+        """Collect episodes with the current policy and save them as a HuggingFace Dataset (Parquet shards)."""
         cache_dir = cache_dir or swm.data.get_cache_dir()
         dataset_path = Path(cache_dir, dataset_name)
         dataset_path.mkdir(parents=True, exist_ok=True)
@@ -307,16 +165,11 @@ class World:
         records["policy"] = [self.policy.type] * self.num_envs
 
         while True:
-            # take before step to handle the auto-reset
-            truncations_before = self.truncateds.copy()
-            terminations_before = self.terminateds.copy()
-
-            # take step
             self.step()
 
             # start new episode for done envs
             for i in range(self.num_envs):
-                if terminations_before[i] or truncations_before[i]:
+                if self.terminateds[i] or self.truncateds[i]:
                     # re-reset env with seed and options (no supported by auto-reset)
                     new_seed = root_seed + recorded_episodes if seed is not None else None
 
@@ -325,10 +178,11 @@ class World:
                     episode_idx[i] = next_ep_idx
                     recorded_episodes += 1
 
-                    states, infos = self.envs.envs[i].reset(seed=new_seed, options=options)
+                    self.envs.unwrapped._autoreset_envs = np.zeros((self.num_envs,))
+                    _, infos = self.envs.envs[i].reset(seed=new_seed, options=options)
 
                     for k, v in infos.items():
-                        self.infos[k][i] = v
+                        self.infos[k][i] = np.asarray(v)
 
             if recorded_episodes >= episodes:
                 break
@@ -450,8 +304,8 @@ class World:
         records_ds = records_ds.select(np.nonzero(keep_mask)[0])
 
         # save dataset
-        records_path = dataset_path / "records"
-        num_chunks = episodes // 500
+        records_path = dataset_path  # / "records"
+        num_chunks = episodes // 50
         records_path.mkdir(parents=True, exist_ok=True)
         records_ds.save_to_disk(records_path, num_shards=num_chunks or 1)
 
@@ -467,24 +321,7 @@ class World:
         num_proc=4,
         cache_dir=None,
     ):
-        """Replay stored dataset episodes and export them as MP4 videos.
-
-        Parameters
-        ----------
-        video_path : str or Path
-            Directory to which MP4 files will be written; one file per requested episode
-            named ``episode_{idx}.mp4``.
-        dataset_name : str
-            Name of the dataset directory under the stable_worldmodel cache dir.
-        episode_idx : int or list[int]
-            Episode index or indices to render from the dataset.
-        max_steps : int, default=500
-            Maximum number of steps to render per episode (truncates longer episodes).
-        fps : int, default=30
-            Frames per second for the output video(s).
-        num_proc : int, default=4
-            Degree of parallelism for dataset filtering.
-        """
+        """Replay stored dataset episodes and export them as MP4 videos."""
         import imageio
 
         cache_dir = cache_dir or swm.data.get_cache_dir()
@@ -504,7 +341,7 @@ class World:
             for i in episode_idx
         ]
 
-        dataset = load_dataset("parquet", data_files=str(Path(dataset_path, "*.parquet")), split="train")
+        dataset = load_from_disk(dataset_path).with_format("numpy")
 
         for i, o in zip(episode_idx, out):
             episode = dataset.filter(lambda ex: ex["episode_idx"] == i, num_proc=num_proc)
@@ -519,11 +356,13 @@ class World:
             )
 
             for step_idx in range(min(episode_len, max_steps)):
-                frame = episode[step_idx]["pixels"]
+                img_path = Path(dataset_path, episode[step_idx]["pixels"])
+                frame = Image.open(img_path)
                 frame = np.array(frame.convert("RGB"), dtype=np.uint8)
 
                 if "goal" in episode.column_names:
-                    goal = episode[step_idx]["goal"]
+                    goal_path = Path(dataset_path, episode[step_idx]["goal"])
+                    goal = Image.open(goal_path)
                     goal = np.array(goal.convert("RGB"), dtype=np.uint8)
                     frame = np.vstack([frame, goal])
                 o.append_data(frame)
@@ -531,36 +370,10 @@ class World:
         print(f"Video saved to {video_path}")
 
     def evaluate(self, episodes=10, eval_keys=None, seed=None, options=None):
-        """Evaluate the current policy across multiple episodes and compute metrics.
+        """Evaluate the current policy over a number of episodes and return metrics."""
 
-        Parameters
-        ----------
-        episodes : int, default=10
-            Number of complete episodes to evaluate.
-        eval_keys : list[str], optional
-            Additional keys in ``infos`` to log as episode-wise metrics. Each key will
-            produce a vector of length ``episodes`` in the returned metrics dict.
-        seed : int, optional
-            Base seed for the initial reset; per-env continuation seeds derive from this value.
-        options : dict, optional
-            Env reset options.
+        options = options or {}
 
-        Returns:
-        -------
-        dict
-            Metrics dictionary with the following entries:
-            - ``"success_rate"`` : float
-                Percentage of successful episodes (terminations) in [0, 100].
-            - ``"episode_successes"`` : np.ndarray, shape (episodes,)
-                Boolean array indicating success (True) or failure (False) per episode.
-            - ``"seeds"`` : np.ndarray, shape (episodes,)
-                The per-episode seeds used for evaluation.
-            - Additional arrays for each key in ``eval_keys``, each of shape (episodes,).
-
-        Notes:
-        -----
-        Success is counted using the ``terminated`` signal observed prior to an env's auto-reset.
-        """
         metrics = {
             "success_rate": 0,
             "episode_successes": np.zeros(episodes),
@@ -582,49 +395,41 @@ class World:
         eval_done = False
 
         while True:
-            # take before step to handle the auto-reset
-            truncations_before = self.truncateds.copy()
-            terminations_before = self.terminateds.copy()
-
-            # take step
             self.step()
 
             # start new episode for done envs
             for i in range(self.num_envs):
-                if terminations_before[i] or truncations_before[i]:
+                if self.terminateds[i] or self.truncateds[i]:
                     # record eval info
-                    ep_idx = episode_idx[i] - 1
-                    metrics["episode_successes"][ep_idx] = terminations_before[i]
+                    ep_idx = episode_idx[i]
+                    metrics["episode_successes"][ep_idx] = self.terminateds[i]
                     metrics["seeds"][ep_idx] = self.envs.envs[i].unwrapped.np_random_seed
-
-                    logging.error(
-                        "EXTRACTED SEED : ",
-                        metrics["seeds"][ep_idx],
-                        self.envs.envs[i].unwrapped.np_random_seed,
-                    )
 
                     if eval_keys:
                         for key in eval_keys:
                             assert key in self.infos, f"key {key} not found in infos"
                             metrics[key][ep_idx] = self.infos[key][i]
 
+                    # determine new episode idx
+                    # re-reset env with seed and options (no supported by auto-reset)
+                    new_seed = root_seed + eval_ep_count if seed is not None else None
+                    next_ep_idx = episode_idx.max() + 1
+                    episode_idx[i] = next_ep_idx
+                    eval_ep_count += 1
+
                     # break if enough episodes evaluated
                     if eval_ep_count >= episodes:
                         eval_done = True
                         break
 
-                    # determine new episode idx
-                    next_ep_idx = episode_idx.max() + 1
-                    episode_idx[i] = next_ep_idx
-                    eval_ep_count += 1
-
-                    # re-reset env with seed and options (no supported by auto-reset)
-                    new_seed = root_seed + eval_ep_count if seed is not None else None
-
+                    self.envs.unwrapped._autoreset_envs = np.zeros((self.num_envs,))
                     _, infos = self.envs.envs[i].reset(seed=new_seed, options=options)
 
                     for k, v in infos.items():
-                        self.infos[k][i] = v
+                        if k not in self.infos:
+                            continue
+                        # Convert to array and extract scalar to preserve dtype
+                        self.infos[k][i] = np.asarray(v)
 
             if eval_done:
                 break

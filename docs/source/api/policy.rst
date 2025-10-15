@@ -1,8 +1,15 @@
 Policy
-=======
-    
+======
+
+.. currentmodule:: stable_worldmodel.policy
+
 .. autosummary::
    :toctree: generated/
-   :recursive:
+   :nosignatures:
+   :template: autosummary/class.rst
 
-   stable_worldmodel.policy
+   PlanConfig
+   BasePolicy
+   RandomPolicy
+   ExpertPolicy
+   WorldModelPolicy

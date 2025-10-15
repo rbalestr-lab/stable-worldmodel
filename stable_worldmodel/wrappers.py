@@ -111,8 +111,9 @@ class EverythingToInfoWrapper(gym.Wrapper):
         info["step_idx"] = self._step_counter
 
         # add all variations to info if needed
-        options = kwargs.get("options")
-        if options is not None and "variation" in options:
+        options = kwargs.get("options") or {}
+
+        if "variation" in options:
             var_opt = options["variation"]
             assert isinstance(options["variation"], list | tuple), (
                 "variation option must be a list or tuple containing variation names to sample"
@@ -148,9 +149,9 @@ class EverythingToInfoWrapper(gym.Wrapper):
         assert "reward" not in info
         info["reward"] = reward
         assert "terminated" not in info
-        info["terminated"] = terminated
+        info["terminated"] = bool(terminated)
         assert "truncated" not in info
-        info["truncated"] = truncated
+        info["truncated"] = bool(truncated)
         assert "action" not in info
         info["action"] = action
         assert "step_idx" not in info
@@ -325,51 +326,3 @@ class VariationWrapper(VectorWrapper):
     @property
     def envs(self):
         return getattr(self.env, "envs", None)
-
-
-# class TransformObservation(gym.ObservationWrapper):
-#     def __init__(
-#         self,
-#         env,
-#         transform=None,
-#         image_shape=(3, 224, 224),
-#         mean=None,
-#         std=None,
-#         source_key="pixels",
-#         target_key="pixels",
-#     ):
-#         super().__init__(env)
-#         self.source_key = source_key
-#         self.target_key = target_key
-
-#         assert len(image_shape) == 3
-#         if transform:
-#             self.transform = transform
-#         else:
-#             if image_shape[0] == 3:
-#                 t = [transforms.RGB()]
-#             elif image_shape[0] == 1:
-#                 t = [transforms.Grayscale()]
-#             t.extend(
-#                 [
-#                     transforms.Resize((224, 224)),  # Resize the image
-#                     transforms.ToImage(),
-#                     transforms.ToDtype(torch.float, scale=True),
-#                 ]
-#             )
-#             if mean is not None and std is not None:
-#                 t.append(transforms.Normalize(mean=mean, std=std))
-#             t = transforms.Compose(t)
-#             self.transform = t
-#         # Update the observation space to include the new transformed observation
-#         original_space = self.observation_space
-#         transformed_space = gym.spaces.Box(low=0, high=1, shape=image_shape, dtype=np.float32)
-#         original_space[self.source_key] = transformed_space
-#         self.observation_space = original_space
-
-#     def observation(self, observation):
-#         pixels = torch.from_numpy(observation[self.source_key].copy())
-#         pixels = pixels.permute(2, 0, 1)
-#         pixels = self.transform(pixels)
-#         observation[self.target_key] = pixels
-#         return observation

@@ -1,7 +1,8 @@
 World
-======
+=====
 
-.. autoclass:: stable_worldmodel.world.World
+.. currentmodule:: stable_worldmodel.world
+
+.. autoclass:: World
     :members:
-
-
+    :show-inheritance:

@@ -1,7 +1,6 @@
 import os
 import re
 import shutil
-import time
 from functools import lru_cache
 from pathlib import Path
 from typing import Any, TypedDict
@@ -15,13 +14,6 @@ from datasets import load_from_disk
 from rich import print
 
 import stable_worldmodel as swm
-
-
-def _t(msg, t0=[None]):
-    now = time.perf_counter()
-    if t0[0] is not None:
-        print(f"[LOAD] {msg}: {(now - t0[0]) * 1000:.1f} ms")
-    t0[0] = now
 
 
 class StepsDataset(spt.data.HFDataset):
@@ -43,8 +35,6 @@ class StepsDataset(spt.data.HFDataset):
         assert "episode_idx" in self.dataset.column_names, "Dataset must have 'episode_idx' column"
         assert "step_idx" in self.dataset.column_names, "Dataset must have 'step_idx' column"
         assert "action" in self.dataset.column_names, "Dataset must have 'action' column"
-
-        _t("start")
 
         self.dataset.set_format("torch")
 

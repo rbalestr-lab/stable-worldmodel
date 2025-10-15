@@ -41,14 +41,15 @@ if __name__ == "__main__":
         "./",
         seed=2347,
         options={
-            "variation": (
-                "cube.color",
-                "cube.size",
-                "agent.color",
-                "floor.color",
-                "camera.angle_delta",
-                "light.intensity",
-            )
+            # "variation": (
+            #     "cube.color",
+            #     "cube.size",
+            #     "agent.color",
+            #     "floor.color",
+            #     "camera.angle_delta",
+            #     "light.intensity",
+            # )
+            "variation": ("all",)
         },
     )
     exit()

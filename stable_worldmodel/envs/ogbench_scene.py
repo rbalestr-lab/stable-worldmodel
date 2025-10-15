@@ -80,6 +80,13 @@ class SceneEnv(ManipSpaceEnv):
                     }
                     # sampling_order=["num", "color", "size"]
                 ),
+                "lock_color": swm.spaces.Box(
+                    low=0.0,
+                    high=1.0,
+                    shape=(2, 3),
+                    dtype=np.float64,
+                    init_value=np.array([self._colors["red"][:3], self._colors["red"][:3]]),
+                ),
                 "agent": swm.spaces.Dict(
                     {
                         "color": swm.spaces.Box(
@@ -307,7 +314,12 @@ class SceneEnv(ManipSpaceEnv):
         # Adjust button colors based on the current state.
         for i in range(self._num_buttons):
             for gid in self._button_geom_ids_list[i]:
-                self._model.geom(gid).rgba = self._colors["red" if self._cur_button_states[i] == 0 else "white"]
+                self._model.geom(gid).rgba[:3] = (
+                    self.variation_space["lock_color"].value[i]
+                    if self._cur_button_states[i] == 0
+                    else self._colors["white"][:3]
+                )
+                self._model.geom(gid).rgba[3] = 1.0
 
         # Lock or unlock the drawer and window based on the button states.
         # We adjust the damping of the joints to lock the drawer and window. This needs to be set carefully because
@@ -317,7 +329,8 @@ class SceneEnv(ManipSpaceEnv):
         if self._cur_button_states[0] == 0:
             # Set the damping to a high value to lock the drawer.
             self._model.joint("drawer_slide").damping[0] = 1e6
-            self._model.material("drawer_handle").rgba = self._colors["red"]
+            self._model.material("drawer_handle").rgba[:3] = self.variation_space["lock_color"].value[0]
+            self._model.material("drawer_handle").rgba[3] = 1.0
         else:
             # Unset the damping to unlock the drawer.
             self._model.joint("drawer_slide").damping[0] = 2.0
@@ -325,7 +338,8 @@ class SceneEnv(ManipSpaceEnv):
         if self._cur_button_states[1] == 0:
             # Set the damping to a high value to lock the window.
             self._model.joint("window_slide").damping[0] = 1e6
-            self._model.material("window_handle").rgba = self._colors["red"]
+            self._model.material("window_handle").rgba[:3] = self.variation_space["lock_color"].value[1]
+            self._model.material("window_handle").rgba[3] = 1.0
         else:
             # Unset the damping to unlock the window.
             self._model.joint("window_slide").damping[0] = 2.0

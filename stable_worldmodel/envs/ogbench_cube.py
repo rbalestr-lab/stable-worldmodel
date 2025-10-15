@@ -6,33 +6,7 @@ from ogbench.manipspace.envs.manipspace_env import ManipSpaceEnv
 
 import stable_worldmodel as swm
 
-
-def perturb_camera_angle(xyaxis, deg_dif=[3, 3]):
-    xaxis = np.array(xyaxis[:3])
-    yaxis = np.array(xyaxis[3:])
-
-    # Compute z-axis
-    zaxis = np.cross(xaxis, yaxis)
-    zaxis /= np.linalg.norm(zaxis)
-
-    # Small random rotation (e.g. ±3 degrees)
-    yaw = np.deg2rad(deg_dif[0])
-    pitch = np.deg2rad(deg_dif[1])
-
-    # Build rotation matrices
-    R_yaw = np.array([[np.cos(yaw), -np.sin(yaw), 0], [np.sin(yaw), np.cos(yaw), 0], [0, 0, 1]])
-
-    R_pitch = np.array([[1, 0, 0], [0, np.cos(pitch), -np.sin(pitch)], [0, np.sin(pitch), np.cos(pitch)]])
-
-    # Combine and rotate the basis
-    R = R_pitch @ R_yaw
-    xaxis_new = R @ xaxis
-    yaxis_new = R @ yaxis
-
-    # Flatten back to tuple for MuJoCo
-    xyaxes_new = tuple(np.concatenate([xaxis_new, yaxis_new]))
-
-    return xyaxes_new
+from .utils import perturb_camera_angle
 
 
 class CubeEnv(ManipSpaceEnv):
@@ -40,7 +14,7 @@ class CubeEnv(ManipSpaceEnv):
 
     This environment consists of a single or multiple cubes. The goal is to move the cubes to target positions. It
     supports the following variants:
-    - `env_type`: 'single', 'double', 'triple', 'quadruple'.
+    - `env_type`: 'single', 'double', 'triple', 'quadruple' and 'octuple'.
     """
 
     def __init__(self, env_type, permute_blocks=True, multiview=False, *args, **kwargs):

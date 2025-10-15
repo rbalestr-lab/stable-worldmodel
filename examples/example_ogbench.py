@@ -11,7 +11,8 @@ if __name__ == "__main__":
     ######################
 
     world = swm.World(
-        "swm/OGBCube-v0",
+        # "swm/OGBCube-v0",
+        "swm/OGBScene-v0",
         num_envs=1,
         image_shape=(224, 224),
         max_episode_steps=200,
@@ -50,7 +51,7 @@ if __name__ == "__main__":
             )
         },
     )
-    # exit()
+    exit()
 
     ################
     ##  Pretrain  ##

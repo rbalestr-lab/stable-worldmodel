@@ -20,7 +20,7 @@ class SceneEnv(ManipSpaceEnv):
         `_cur_button_states`.
     """
 
-    def __init__(self, env_type, permute_blocks=True, multiview=False, *args, **kwargs):
+    def __init__(self, env_type, ob_type="pixels", permute_blocks=True, multiview=False, *args, **kwargs):
         """Initialize the Scene environment.
 
         Args:
@@ -34,6 +34,8 @@ class SceneEnv(ManipSpaceEnv):
         self._multiview = multiview
 
         super().__init__(*args, **kwargs)
+
+        self._ob_type = ob_type
 
         # Adjust workspace bounds to a smaller region.
         self._arm_sampling_bounds = np.asarray([[0.25, -0.2, 0.20], [0.6, 0.2, 0.35]])
@@ -112,8 +114,8 @@ class SceneEnv(ManipSpaceEnv):
                 "camera": swm.spaces.Dict(
                     {
                         "angle_delta": swm.spaces.Box(
-                            low=-10.0,
-                            high=10.0,
+                            low=-5.0,
+                            high=5.0,
                             shape=(2, 2) if self._multiview else (1, 2),
                             dtype=np.float64,
                             init_value=np.zeros([2, 2]) if self._multiview else np.zeros([1, 2]),

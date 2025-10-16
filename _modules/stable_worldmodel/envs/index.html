@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="en"
-      data-content_root="../"
+      data-content_root="../../../"
       x-data="{ darkMode: localStorage.getItem('darkMode') || localStorage.setItem('darkMode', 'system'), activeSection: '' }"
       x-init="$watch('darkMode', val => localStorage.setItem('darkMode', val))"
       class="scroll-smooth"
@@ -12,20 +12,20 @@
   <meta name="theme-color" media="(prefers-color-scheme: light)" content="white" />
   <meta name="theme-color" media="(prefers-color-scheme: dark)" content="black" />
   
-    <title>Overview: module code | stable-worldmodel</title>
-    <meta property="og:title" content="Overview: module code | stable-worldmodel" />
-    <meta name="twitter:title" content="Overview: module code | stable-worldmodel" />
-      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=91c1d931" />
-      <link rel="stylesheet" type="text/css" href="../_static/theme.css?v=42baaae4" />
-      <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
-      <link rel="stylesheet" type="text/css" href="../_static/css/custom.css?v=879ef6c1" />
+    <title>stable_worldmodel.envs | stable-worldmodel</title>
+    <meta property="og:title" content="stable_worldmodel.envs | stable-worldmodel" />
+    <meta name="twitter:title" content="stable_worldmodel.envs | stable-worldmodel" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=91c1d931" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/theme.css?v=42baaae4" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/sphinx-design.min.css?v=95c83b7e" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/custom.css?v=879ef6c1" />
       <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/fontawesome.min.css" />
       <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/solid.min.css" />
       <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/brands.min.css" />
-      <link rel="stylesheet" type="text/css" href="../_static/awesome-sphinx-design.css?v=15e0fffa" />
-      <link rel="icon" href="../_static/favicon.ico" />
-        <link rel="search" title="Search" href="../search/" />
-        <link rel="index" title="Index" href="../genindex/" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/awesome-sphinx-design.css?v=15e0fffa" />
+      <link rel="icon" href="../../../_static/favicon.ico" />
+        <link rel="search" title="Search" href="../../../search/" />
+        <link rel="index" title="Index" href="../../../genindex/" />
 
     <script>
     <!-- Prevent Flash of wrong theme -->
@@ -46,7 +46,7 @@
     </a><header
   class="sticky top-0 z-40 w-full border-b shadow-sm border-border supports-backdrop-blur:bg-background/60 bg-background/95 backdrop-blur"><div class="container flex items-center h-14">
     <div class="hidden mr-4 md:flex">
-      <a href="../" class="flex items-center mr-6"><span class="hidden font-bold sm:inline-block text-clip whitespace-nowrap">stable-worldmodel</span>
+      <a href="../../../" class="flex items-center mr-6"><span class="hidden font-bold sm:inline-block text-clip whitespace-nowrap">stable-worldmodel</span>
       </a></div><button
       class="inline-flex items-center justify-center h-10 px-0 py-2 mr-2 text-base font-medium transition-colors rounded-md hover:text-accent-foreground hover:bg-transparent md:hidden"
       type="button" @click="showSidebar = true">
@@ -59,7 +59,7 @@
     </button>
     <div class="flex items-center justify-between flex-1 space-x-2 sm:space-x-4 md:justify-end">
       <div class="flex-1 w-full md:w-auto md:flex-none"><form id="searchbox"
-      action="../search/"
+      action="../../../search/"
       method="get"
       class="relative flex items-center group"
       @keydown.k.window.meta="$refs.search.focus()">
@@ -108,70 +108,70 @@
   class="fixed inset-y-0 left-0 md:top-14 z-50 md:z-30 bg-background md:bg-transparent transition-all duration-100 -translate-x-full md:translate-x-0 ml-0 p-6 md:p-0 md:-ml-2 md:h-[calc(100vh-3.5rem)] w-5/6 md:w-full shrink-0 overflow-y-auto border-r border-border md:sticky"
   :aria-hidden="!showSidebar" :class="{ 'translate-x-0': showSidebar }">
 
-    <a href="../" class="!justify-start text-sm md:!hidden bg-background"><span class="font-bold text-clip whitespace-nowrap">stable-worldmodel</span>
+    <a href="../../../" class="!justify-start text-sm md:!hidden bg-background"><span class="font-bold text-clip whitespace-nowrap">stable-worldmodel</span>
     </a>
 
     <div class="relative overflow-hidden md:overflow-auto my-4 md:my-0 h-[calc(100vh-8rem)] md:h-auto">
       <div class="overflow-y-auto h-full w-full relative pr-6"><nav class="table w-full min-w-full my-6 lg:my-8">
   <p class="caption" role="heading"><span class="caption-text">Introduction</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../introduction/quickstart/">Quick Start</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../introduction/showcase/">Showcase</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../introduction/contributing/">Contributing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../introduction/quickstart/">Quick Start</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../introduction/showcase/">Showcase</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../introduction/contributing/">Contributing</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../api/data/">StepsDataset</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../api/world/">World</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../api/policy/">Policy</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="../api/generated/stable_worldmodel.policy.PlanConfig/">PlanConfig</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../api/generated/stable_worldmodel.policy.BasePolicy/">BasePolicy</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../api/generated/stable_worldmodel.policy.RandomPolicy/">RandomPolicy</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../api/generated/stable_worldmodel.policy.ExpertPolicy/">ExpertPolicy</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../api/generated/stable_worldmodel.policy.WorldModelPolicy/">WorldModelPolicy</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/data/">StepsDataset</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/world/">World</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/policy/">Policy</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../api/generated/stable_worldmodel.policy.PlanConfig/">PlanConfig</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../api/generated/stable_worldmodel.policy.BasePolicy/">BasePolicy</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../api/generated/stable_worldmodel.policy.RandomPolicy/">RandomPolicy</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../api/generated/stable_worldmodel.policy.ExpertPolicy/">ExpertPolicy</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../api/generated/stable_worldmodel.policy.WorldModelPolicy/">WorldModelPolicy</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="../api/solver/">Solver</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="../api/generated/stable_worldmodel.solver.GDSolver/">GDSolver</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../api/generated/stable_worldmodel.solver.CEMSolver/">CEMSolver</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../api/generated/stable_worldmodel.solver.MPPISolver/">MPPISolver</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../api/generated/stable_worldmodel.solver.NevergradSolver/">NevergradSolver</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../api/generated/stable_worldmodel.solver.RandomSolver/">RandomSolver</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/solver/">Solver</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../api/generated/stable_worldmodel.solver.GDSolver/">GDSolver</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../api/generated/stable_worldmodel.solver.CEMSolver/">CEMSolver</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../api/generated/stable_worldmodel.solver.MPPISolver/">MPPISolver</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../api/generated/stable_worldmodel.solver.NevergradSolver/">NevergradSolver</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../api/generated/stable_worldmodel.solver.RandomSolver/">RandomSolver</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="../api/spaces/">Space</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="../api/generated/stable_worldmodel.spaces.Discrete/">Discrete</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../api/generated/stable_worldmodel.spaces.MultiDiscrete/">MultiDiscrete</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../api/generated/stable_worldmodel.spaces.Box/">Box</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../api/generated/stable_worldmodel.spaces.RGBBox/">RGBBox</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../api/generated/stable_worldmodel.spaces.Dict/">Dict</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/spaces/">Space</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../api/generated/stable_worldmodel.spaces.Discrete/">Discrete</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../api/generated/stable_worldmodel.spaces.MultiDiscrete/">MultiDiscrete</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../api/generated/stable_worldmodel.spaces.Box/">Box</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../api/generated/stable_worldmodel.spaces.RGBBox/">RGBBox</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../api/generated/stable_worldmodel.spaces.Dict/">Dict</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="../api/wrappers/">Wrappers</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="../api/generated/stable_worldmodel.wrappers.EnsureInfoKeysWrapper/">EnsureInfoKeysWrapper</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../api/generated/stable_worldmodel.wrappers.EnsureImageShape/">EnsureImageShape</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../api/generated/stable_worldmodel.wrappers.EnsureGoalInfoWrapper/">EnsureGoalInfoWrapper</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../api/generated/stable_worldmodel.wrappers.EverythingToInfoWrapper/">EverythingToInfoWrapper</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../api/generated/stable_worldmodel.wrappers.AddPixelsWrapper/">AddPixelsWrapper</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../api/generated/stable_worldmodel.wrappers.ResizeGoalWrapper/">ResizeGoalWrapper</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../api/generated/stable_worldmodel.wrappers.MegaWrapper/">MegaWrapper</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../api/generated/stable_worldmodel.wrappers.VariationWrapper/">VariationWrapper</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/wrappers/">Wrappers</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../api/generated/stable_worldmodel.wrappers.EnsureInfoKeysWrapper/">EnsureInfoKeysWrapper</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../api/generated/stable_worldmodel.wrappers.EnsureImageShape/">EnsureImageShape</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../api/generated/stable_worldmodel.wrappers.EnsureGoalInfoWrapper/">EnsureGoalInfoWrapper</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../api/generated/stable_worldmodel.wrappers.EverythingToInfoWrapper/">EverythingToInfoWrapper</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../api/generated/stable_worldmodel.wrappers.AddPixelsWrapper/">AddPixelsWrapper</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../api/generated/stable_worldmodel.wrappers.ResizeGoalWrapper/">ResizeGoalWrapper</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../api/generated/stable_worldmodel.wrappers.MegaWrapper/">MegaWrapper</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../api/generated/stable_worldmodel.wrappers.VariationWrapper/">VariationWrapper</a></li>
 </ul>
 </li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Tutorials</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../tutorials/dinowm/">Reproducing DINO-WM</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../tutorials/new-world/">Adding New World</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../tutorials/dinowm/">Reproducing DINO-WM</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../tutorials/new-world/">Adding New World</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Worlds</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../world/pusht/">PushT</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../world/simple-pointmaze/">Simple Point-Maze</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../world/two_room/">Two Rooms</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../world/voidrun/">Void Run</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../world/OGBench/">OGBench</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="../world/OGBench/cube/">Cube</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../world/pusht/">PushT</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../world/simple-pointmaze/">Simple Point-Maze</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../world/two_room/">Two Rooms</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../world/voidrun/">Void Run</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../world/OGBench/">OGBench</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../world/OGBench/cube/">Cube</a></li>
 </ul>
 </li>
 </ul>
@@ -193,7 +193,7 @@
 <nav aria-label="breadcrumbs"
      class="flex items-center mb-4 space-x-1 text-sm text-muted-foreground">
   <a class="overflow-hidden text-ellipsis whitespace-nowrap hover:text-foreground"
-     href="../">
+     href="../../../">
     <span class="hidden md:inline">stable-worldmodel</span>
     <svg xmlns="http://www.w3.org/2000/svg"
          height="18"
@@ -207,36 +207,61 @@
     </svg>
   </a>
   
+<div class="mr-1">/</div><a class="hover:text-foreground overflow-hidden text-ellipsis whitespace-nowrap"
+       href="../../">Module code</a>
+    
 <div class="mr-1">/</div><span aria-current="page"
-        class="font-medium text-foreground overflow-hidden text-ellipsis whitespace-nowrap">Overview: module code</span>
+        class="font-medium text-foreground overflow-hidden text-ellipsis whitespace-nowrap">stable_worldmodel.envs</span>
 </nav>
 
     <div id="content" role="main">
-      <h1>All modules for which code is available</h1>
-<ul><li><a href="stable_worldmodel/cli/">stable_worldmodel.cli</a></li>
-<li><a href="stable_worldmodel/data/">stable_worldmodel.data</a></li>
-<li><a href="stable_worldmodel/envs/">stable_worldmodel.envs</a></li>
-<ul><li><a href="stable_worldmodel/envs/image_positioning/">stable_worldmodel.envs.image_positioning</a></li>
-<li><a href="stable_worldmodel/envs/ogbench_cube/">stable_worldmodel.envs.ogbench_cube</a></li>
-<li><a href="stable_worldmodel/envs/pusht/">stable_worldmodel.envs.pusht</a></li>
-<li><a href="stable_worldmodel/envs/simple_point_maze/">stable_worldmodel.envs.simple_point_maze</a></li>
-<li><a href="stable_worldmodel/envs/two_room/">stable_worldmodel.envs.two_room</a></li>
-<li><a href="stable_worldmodel/envs/utils/">stable_worldmodel.envs.utils</a></li>
-<li><a href="stable_worldmodel/envs/voidrun/">stable_worldmodel.envs.voidrun</a></li>
-</ul><li><a href="stable_worldmodel/policy/">stable_worldmodel.policy</a></li>
-<li><a href="stable_worldmodel/solver/cem/">stable_worldmodel.solver.cem</a></li>
-<li><a href="stable_worldmodel/solver/gd/">stable_worldmodel.solver.gd</a></li>
-<li><a href="stable_worldmodel/solver/mppi/">stable_worldmodel.solver.mppi</a></li>
-<li><a href="stable_worldmodel/solver/nevergrad/">stable_worldmodel.solver.nevergrad</a></li>
-<li><a href="stable_worldmodel/solver/random/">stable_worldmodel.solver.random</a></li>
-<li><a href="stable_worldmodel/solver/solver/">stable_worldmodel.solver.solver</a></li>
-<li><a href="stable_worldmodel/spaces/">stable_worldmodel.spaces</a></li>
-<li><a href="stable_worldmodel/utils/">stable_worldmodel.utils</a></li>
-<li><a href="stable_worldmodel/wm/dinowm/">stable_worldmodel.wm.dinowm</a></li>
-<li><a href="stable_worldmodel/wm/dummy/">stable_worldmodel.wm.dummy</a></li>
-<li><a href="stable_worldmodel/world/">stable_worldmodel.world</a></li>
-<li><a href="stable_worldmodel/wrappers/">stable_worldmodel.wrappers</a></li>
-</ul>
+      <h1>Source code for stable_worldmodel.envs</h1><div class="highlight"><pre>
+<span></span><code><span id="line-1"><span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;0.0.1a0&quot;</span>
+</span><span id="line-2">
+</span><span id="line-3"><span class="kn">from</span><span class="w"> </span><span class="nn">gymnasium.envs</span><span class="w"> </span><span class="kn">import</span> <span class="n">registration</span>
+</span><span id="line-4">
+</span><span id="line-5">
+</span><span id="line-6"><span class="n">WORLDS</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+</span><span id="line-7">
+</span><span id="line-8">
+<div class="viewcode-block" id="register">
+<a class="viewcode-back" href="../../../stable_worldmodel.envs/#stable_worldmodel.envs.register">[docs]</a>
+</span><span id="line-9"><span class="k">def</span><span class="w"> </span><span class="nf">register</span><span class="p">(</span><span class="nb">id</span><span class="p">,</span> <span class="n">entry_point</span><span class="p">):</span>
+</span><span id="line-10">    <span class="n">registration</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="nb">id</span><span class="p">,</span> <span class="n">entry_point</span><span class="o">=</span><span class="n">entry_point</span><span class="p">)</span>
+</span><span id="line-11">    <span class="n">WORLDS</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="nb">id</span><span class="p">)</span></div>
+
+</span><span id="line-12">
+</span><span id="line-13">
+</span><span id="line-14"><span class="c1"># register(</span>
+</span><span id="line-15"><span class="c1">#     id=&quot;swm/ImagePositioning-v1&quot;,</span>
+</span><span id="line-16"><span class="c1">#     entry_point=&quot;stable_worldmodel.envs.image_positioning:ImagePositioning&quot;,</span>
+</span><span id="line-17"><span class="c1"># )</span>
+</span><span id="line-18">
+</span><span id="line-19"><span class="n">register</span><span class="p">(</span>
+</span><span id="line-20">    <span class="nb">id</span><span class="o">=</span><span class="s2">&quot;swm/PushT-v1&quot;</span><span class="p">,</span>
+</span><span id="line-21">    <span class="n">entry_point</span><span class="o">=</span><span class="s2">&quot;stable_worldmodel.envs.pusht:PushT&quot;</span><span class="p">,</span>
+</span><span id="line-22"><span class="p">)</span>
+</span><span id="line-23">
+</span><span id="line-24"><span class="n">register</span><span class="p">(</span>
+</span><span id="line-25">    <span class="nb">id</span><span class="o">=</span><span class="s2">&quot;swm/SimplePointMaze-v0&quot;</span><span class="p">,</span>
+</span><span id="line-26">    <span class="n">entry_point</span><span class="o">=</span><span class="s2">&quot;stable_worldmodel.envs.simple_point_maze:SimplePointMazeEnv&quot;</span><span class="p">,</span>
+</span><span id="line-27"><span class="p">)</span>
+</span><span id="line-28">
+</span><span id="line-29"><span class="n">register</span><span class="p">(</span>
+</span><span id="line-30">    <span class="nb">id</span><span class="o">=</span><span class="s2">&quot;swm/TwoRoom-v0&quot;</span><span class="p">,</span>
+</span><span id="line-31">    <span class="n">entry_point</span><span class="o">=</span><span class="s2">&quot;stable_worldmodel.envs.two_room:TwoRoomEnv&quot;</span><span class="p">,</span>
+</span><span id="line-32"><span class="p">)</span>
+</span><span id="line-33">
+</span><span id="line-34"><span class="c1"># register(</span>
+</span><span id="line-35"><span class="c1">#     id=&quot;swm/VoidRun-v0&quot;,</span>
+</span><span id="line-36"><span class="c1">#     entry_point=&quot;stable_worldmodel.envs.voidrun:VoidRunEnv&quot;,</span>
+</span><span id="line-37"><span class="c1"># )</span>
+</span><span id="line-38">
+</span><span id="line-39"><span class="n">register</span><span class="p">(</span>
+</span><span id="line-40">    <span class="nb">id</span><span class="o">=</span><span class="s2">&quot;swm/OGBCube-v0&quot;</span><span class="p">,</span>
+</span><span id="line-41">    <span class="n">entry_point</span><span class="o">=</span><span class="s2">&quot;stable_worldmodel.envs.ogbench_cube:CubeEnv&quot;</span><span class="p">,</span>
+</span><span id="line-42"><span class="p">)</span>
+</span></code></pre></div>
     </div></div>
         </main>
       </div>
@@ -266,11 +291,11 @@
   Back to top
 </button>
   
-    <script src="../_static/documentation_options.js?v=2c52d5bf"></script>
-    <script src="../_static/doctools.js?v=9bcbadda"></script>
-    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
-    <script defer="defer" src="../_static/theme.js?v=073f68d9"></script>
-    <script src="../_static/design-tabs.js?v=f930bc37"></script>
+    <script src="../../../_static/documentation_options.js?v=2c52d5bf"></script>
+    <script src="../../../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script defer="defer" src="../../../_static/theme.js?v=073f68d9"></script>
+    <script src="../../../_static/design-tabs.js?v=f930bc37"></script>
   
 </body>
 </html>

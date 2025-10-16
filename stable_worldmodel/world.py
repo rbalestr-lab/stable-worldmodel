@@ -125,12 +125,14 @@ class World:
         ]
 
         self.reset(seed, options)
+
         for i, o in enumerate(out):
             if "goal" in self.infos:
                 frame = np.vstack([self.infos["pixels"][i], self.infos["goal"][i]])
             else:
                 frame = self.infos["pixels"][i]
             o.append_data(frame)
+
         for _ in range(max_steps):
             self.step()
 

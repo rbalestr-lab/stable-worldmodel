@@ -133,14 +133,16 @@ class World:
             o.append_data(frame)
         for _ in range(max_steps):
             self.step()
+
+            if np.any(self.terminateds) or np.any(self.truncateds):
+                break
+
             for i, o in enumerate(out):
                 if "goal" in self.infos:
                     frame = np.vstack([self.infos["pixels"][i], self.infos["goal"][i]])
                 else:
                     frame = self.infos["pixels"][i]
                 o.append_data(frame)
-            if np.any(self.terminateds) or np.any(self.truncateds):
-                break
         [o.close() for o in out]
         print(f"Video saved to {video_path}")
 
@@ -166,7 +168,6 @@ class World:
 
         while True:
             self.step()
-
             # start new episode for done envs
             for i in range(self.num_envs):
                 if self.terminateds[i] or self.truncateds[i]:

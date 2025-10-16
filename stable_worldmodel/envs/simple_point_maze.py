@@ -10,9 +10,7 @@ from matplotlib.patches import Circle, Rectangle
 import stable_worldmodel as swm
 
 
-DEFAULT_VARIATIONS = {
-    "agent.position",
-}
+DEFAULT_VARIATIONS = ("agent.position",)
 
 
 class SimplePointMazeEnv(gym.Env):

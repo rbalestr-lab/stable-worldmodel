@@ -132,7 +132,7 @@ class CubeEnv(ManipSpaceEnv):
         control, physics simulation, and base functionality.
     """
 
-    def __init__(self, env_type, ob_type="pixels", permute_blocks=True, multiview=False, *args, **kwargs):
+    def __init__(self, env_type="single", ob_type="pixels", permute_blocks=True, multiview=False, *args, **kwargs):
         """Initialize the CubeEnv with specified configuration.
 
         Sets up the manipulation environment with the specified number of cubes

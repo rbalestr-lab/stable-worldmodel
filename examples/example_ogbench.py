@@ -49,7 +49,7 @@ if __name__ == "__main__":
                 "light.intensity",
             )
         },
-        viewname="pixels.side_pixels",
+        viewname="pixels.front_pixels",
     )
 
     # world.record_video_from_dataset(

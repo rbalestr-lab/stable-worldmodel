@@ -110,7 +110,15 @@ class World:
         if hasattr(self.policy, "seed") and self.policy.seed is not None:
             self.policy.set_seed(self.policy.seed)
 
-    def record_video(self, video_path, max_steps=500, fps=30, viewname="pixels", seed=None, options=None):
+    def record_video(
+        self,
+        video_path,
+        max_steps=500,
+        fps=30,
+        viewname="pixels",
+        seed=None,
+        options=None,
+    ):
         """Record rollout videos for each environment under the current policy."""
         import imageio
 
@@ -137,7 +145,7 @@ class World:
             for i, o in enumerate(out):
                 frame = np.vstack([self.infos[v_name][i] for v_name in viewname])
                 if "goal" in self.infos:
-                    frame = np.vstack([self.infos["pixels"][i], self.infos["goal"][i]])
+                    frame = np.vstack([frame, self.infos["goal"][i]])
                 o.append_data(frame)
             if np.any(self.terminateds) or np.any(self.truncateds):
                 break

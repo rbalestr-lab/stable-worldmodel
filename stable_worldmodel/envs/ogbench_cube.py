@@ -1380,12 +1380,30 @@ class CubeEnv(ManipSpaceEnv):
             viewpoints, such as those learning 3D spatial reasoning. The 'front_pixels'
             camera provides an oblique view while 'side_pixels' shows a perpendicular view.
         """
-        camera = "front_pixels" if not self._multiview else ["front_pixels", "side_pixels"]
-        if isinstance(camera, list | tuple):
-            imgs = []
-            for cam in camera:
-                img = super().render(camera=cam, *args, **kwargs)
-                imgs.append(img)
-            return imgs
-        else:
-            return super().render(camera=camera, *args, **kwargs)
+        return super().render(camera=camera, *args, **kwargs)
+
+    def render_multiview(
+        self,
+        camera="front_pixels",
+        *args,
+        **kwargs,
+    ):
+        """Render the current scene from multiple camera views.
+
+        Generates RGB images from both 'front_pixels' and 'side_pixels' cameras,
+        returning them as a stacked array for multiview observation.
+
+        Args:
+            *args: Additional positional arguments passed to parent render method.
+            **kwargs: Additional keyword arguments passed to parent render method.
+
+        Returns:
+            ndarray: Stacked array of rendered images from all specified camera views.
+        """
+
+        if not self._multiview:
+            return self.render(camera=camera, *args, **kwargs)
+
+        cam_names = ["front_pixels", "side_pixels"]
+        multi_view = {cam: self.render(camera=cam, *args, **kwargs) for cam in cam_names}
+        return multi_view

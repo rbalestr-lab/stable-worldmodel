@@ -25,11 +25,11 @@ if __name__ == "__main__":
         seed=2347,
         options=None,
     )
-    # world.record_video(
-    #     "./",
-    #     seed=2347,
-    #     options={"variation": ("walls.number", "walls.shape", "walls.positions")},
-    # )
+    world.record_video(
+        "./",
+        seed=2347,
+        options={"variation": ("walls.number", "walls.shape", "walls.positions")},
+    )
 
     ################
     ##  Pretrain  ##

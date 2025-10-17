@@ -170,7 +170,7 @@
 <span id="stable-worldmodel-envs-image-positioning-module"></span><h2>stable_worldmodel.envs.image_positioning module<a class="headerlink" href="#module-stable_worldmodel.envs.image_positioning" title="Link to this heading" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#module-stable_worldmodel.envs.image_positioning'"><svg height="1em" viewbox="0 0 24 24" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"></path></svg></a></h2>
 <dl class="py class">
 <dt class="sig sig-object py" id="stable_worldmodel.envs.image_positioning.ImagePositioning">
-<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ImagePositioning</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="pre">resolution:</span> <span class="pre">int,</span> <span class="pre">images:</span> <span class="pre">list[&lt;module</span> <span class="pre">'PIL.Image'</span> <span class="pre">from</span> <span class="pre">'/opt/hostedtoolcache/Python/3.11.13/x64/lib/python3.11/site-packages/PIL/Image.py'&gt;],</span> <span class="pre">render_mode:</span> <span class="pre">str</span> <span class="pre">|</span> <span class="pre">None</span> <span class="pre">=</span> <span class="pre">None,</span> <span class="pre">background_power_decay:</span> <span class="pre">float</span> <span class="pre">|</span> <span class="pre">None</span> <span class="pre">=</span> <span class="pre">1.0</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/stable_worldmodel/envs/image_positioning/#ImagePositioning"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.envs.image_positioning.ImagePositioning" title="Link to this definition" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#stable_worldmodel.envs.image_positioning.ImagePositioning'"><svg height="1em" viewbox="0 0 24 24" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"></path></svg></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ImagePositioning</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="pre">resolution:</span> <span class="pre">int,</span> <span class="pre">images:</span> <span class="pre">list[&lt;module</span> <span class="pre">'PIL.Image'</span> <span class="pre">from</span> <span class="pre">'/opt/hostedtoolcache/Python/3.11.14/x64/lib/python3.11/site-packages/PIL/Image.py'&gt;],</span> <span class="pre">render_mode:</span> <span class="pre">str</span> <span class="pre">|</span> <span class="pre">None</span> <span class="pre">=</span> <span class="pre">None,</span> <span class="pre">background_power_decay:</span> <span class="pre">float</span> <span class="pre">|</span> <span class="pre">None</span> <span class="pre">=</span> <span class="pre">1.0</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/stable_worldmodel/envs/image_positioning/#ImagePositioning"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.envs.image_positioning.ImagePositioning" title="Link to this definition" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#stable_worldmodel.envs.image_positioning.ImagePositioning'"><svg height="1em" viewbox="0 0 24 24" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"></path></svg></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Env</span></code></p>
 <dl class="py method">
 <dt class="sig sig-object py" id="stable_worldmodel.envs.image_positioning.ImagePositioning.close">
@@ -661,24 +661,22 @@ Success in data collection mode requires only the target cube to succeed.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="stable_worldmodel.envs.ogbench_cube.CubeEnv.render">
 <span class="sig-name descname"><span class="pre">render</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">camera</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'front_pixels'</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/stable_worldmodel/envs/ogbench_cube/#CubeEnv.render"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.envs.ogbench_cube.CubeEnv.render" title="Link to this definition" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#stable_worldmodel.envs.ogbench_cube.CubeEnv.render'"><svg height="1em" viewbox="0 0 24 24" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"></path></svg></a></dt>
-<dd><p>Render the current scene from specified camera view(s).</p>
-<p>Generates RGB image(s) of the current environment state from one or more
-camera viewpoints. Automatically handles multiview rendering when configured.</p>
+<dd><p>Render the current scene from a specified camera view.</p>
+<p>Generates an RGB image of the current environment state from a single
+camera viewpoint. This method renders from one camera at a time.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>camera</strong> (<em>str</em><em> or </em><em>list</em><em>, </em><em>optional</em>) – Camera name(s) to render from. Can be
-a single camera name string or list of camera names. If multiview
-is enabled, defaults to [‘front_pixels’, ‘side_pixels’]. Otherwise
-defaults to ‘front_pixels’. Supports any camera defined in self.cameras.</p></li>
+<li><p><strong>camera</strong> (<em>str</em><em>, </em><em>optional</em>) – Camera name to render from. Defaults to
+‘front_pixels’. Supports any camera defined in self.cameras
+(e.g., ‘front_pixels’, ‘side_pixels’).</p></li>
 <li><p><strong>*args</strong> – Additional positional arguments passed to parent render method.</p></li>
 <li><p><strong>**kwargs</strong> – Additional keyword arguments passed to parent render method.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p><dl class="simple">
-<dt>Rendered image(s). If camera is a single string, returns array</dt><dd><p>with shape (H, W, C). If camera is a list, returns array with shape
-(N, H, W, C) where N is the number of views, stacked along first axis.</p>
+<dt>Rendered image with shape (H, W, C) where H is height,</dt><dd><p>W is width, and C is the number of color channels (typically 3 for RGB).</p>
 </dd>
 </dl>
 </p>
@@ -689,14 +687,51 @@ defaults to ‘front_pixels’. Supports any camera defined in self.cameras.</p>
 </dl>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>The multiview stacking is useful for policies that benefit from multiple
-viewpoints, such as those learning 3D spatial reasoning. The ‘front_pixels’
-camera provides an oblique view while ‘side_pixels’ shows a perpendicular view.</p>
+<p>For rendering from multiple cameras simultaneously, use the
+<cite>render_multiview()</cite> method instead.</p>
+</div>
+</dd></dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="stable_worldmodel.envs.ogbench_cube.CubeEnv.render_multiview">
+<span class="sig-name descname"><span class="pre">render_multiview</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">camera</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'front_pixels'</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/stable_worldmodel/envs/ogbench_cube/#CubeEnv.render_multiview"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.envs.ogbench_cube.CubeEnv.render_multiview" title="Link to this definition" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#stable_worldmodel.envs.ogbench_cube.CubeEnv.render_multiview'"><svg height="1em" viewbox="0 0 24 24" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"></path></svg></a></dt>
+<dd><p>Render the current scene from multiple camera views or a fallback single view.</p>
+<p>When multiview mode is enabled (<cite>_multiview=True</cite>), renders the scene from
+both ‘front_pixels’ and ‘side_pixels’ cameras and returns them as a
+dictionary. When multiview is disabled, falls back to rendering from a
+single camera.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>camera</strong> (<em>str</em><em>, </em><em>optional</em>) – Camera name to use for fallback rendering when
+multiview is disabled. Defaults to ‘front_pixels’. Ignored when
+multiview is enabled.</p></li>
+<li><p><strong>*args</strong> – Additional positional arguments passed to the render method.</p></li>
+<li><p><strong>**kwargs</strong> – Additional keyword arguments passed to the render method.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><dl class="simple">
+<dt>If multiview is enabled, returns a dictionary with camera</dt><dd><p>names as keys (‘front_pixels’, ‘side_pixels’) and rendered images as
+values, where each image has shape (H, W, C). If multiview is disabled,
+returns a single rendered image array with shape (H, W, C).</p>
+</dd>
+</dl>
+</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict or ndarray</p>
+</dd>
+</dl>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The multiview dictionary format is useful for policies that process
+multiple viewpoints separately. The ‘front_pixels’ camera provides an
+oblique view while ‘side_pixels’ shows a perpendicular side view.</p>
 </div>
 </dd></dl>
 <dl class="py method">
 <dt class="sig sig-object py" id="stable_worldmodel.envs.ogbench_cube.CubeEnv.reset">
-<span class="sig-name descname"><span class="pre">reset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">options</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/stable_worldmodel/envs/ogbench_cube/#CubeEnv.reset"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.envs.ogbench_cube.CubeEnv.reset" title="Link to this definition" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#stable_worldmodel.envs.ogbench_cube.CubeEnv.reset'"><svg height="1em" viewbox="0 0 24 24" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"></path></svg></a></dt>
+<span class="sig-name descname"><span class="pre">reset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">seed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">options</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/stable_worldmodel/envs/ogbench_cube/#CubeEnv.reset"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.envs.ogbench_cube.CubeEnv.reset" title="Link to this definition" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#stable_worldmodel.envs.ogbench_cube.CubeEnv.reset'"><svg height="1em" viewbox="0 0 24 24" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"></path></svg></a></dt>
 <dd><p>Reset the environment to an initial state.</p>
 <p>Resets the environment and optionally samples from the variation space to
 create visual diversity. Handles both task mode (with predefined goals) and
@@ -1689,6 +1724,7 @@ a certain timelimit was exceeded, or the physics simulation has entered an inval
 <li><a :data-current="activeSection === '#stable_worldmodel.envs.ogbench_cube.CubeEnv.post_compilation_objects'" class="reference internal" href="#stable_worldmodel.envs.ogbench_cube.CubeEnv.post_compilation_objects"><code class="docutils literal notranslate"><span class="pre">CubeEnv.post_compilation_objects()</span></code></a></li>
 <li><a :data-current="activeSection === '#stable_worldmodel.envs.ogbench_cube.CubeEnv.post_step'" class="reference internal" href="#stable_worldmodel.envs.ogbench_cube.CubeEnv.post_step"><code class="docutils literal notranslate"><span class="pre">CubeEnv.post_step()</span></code></a></li>
 <li><a :data-current="activeSection === '#stable_worldmodel.envs.ogbench_cube.CubeEnv.render'" class="reference internal" href="#stable_worldmodel.envs.ogbench_cube.CubeEnv.render"><code class="docutils literal notranslate"><span class="pre">CubeEnv.render()</span></code></a></li>
+<li><a :data-current="activeSection === '#stable_worldmodel.envs.ogbench_cube.CubeEnv.render_multiview'" class="reference internal" href="#stable_worldmodel.envs.ogbench_cube.CubeEnv.render_multiview"><code class="docutils literal notranslate"><span class="pre">CubeEnv.render_multiview()</span></code></a></li>
 <li><a :data-current="activeSection === '#stable_worldmodel.envs.ogbench_cube.CubeEnv.reset'" class="reference internal" href="#stable_worldmodel.envs.ogbench_cube.CubeEnv.reset"><code class="docutils literal notranslate"><span class="pre">CubeEnv.reset()</span></code></a></li>
 <li><a :data-current="activeSection === '#stable_worldmodel.envs.ogbench_cube.CubeEnv.set_new_target'" class="reference internal" href="#stable_worldmodel.envs.ogbench_cube.CubeEnv.set_new_target"><code class="docutils literal notranslate"><span class="pre">CubeEnv.set_new_target()</span></code></a></li>
 <li><a :data-current="activeSection === '#stable_worldmodel.envs.ogbench_cube.CubeEnv.set_tasks'" class="reference internal" href="#stable_worldmodel.envs.ogbench_cube.CubeEnv.set_tasks"><code class="docutils literal notranslate"><span class="pre">CubeEnv.set_tasks()</span></code></a></li>

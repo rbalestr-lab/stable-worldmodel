@@ -71,6 +71,14 @@ docs = [
     "myst-parser",
 ]
 
+# RL Training Libraries
+rl = [
+    "torch==2.6.0",
+    "tensordict-nightly==2025.1.1",
+    "torchrl-nightly==2025.1.1",
+    "termcolor",
+]
+
 
 # =======================
 #         TOOLS

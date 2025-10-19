@@ -48,6 +48,7 @@ def get_data(cfg):
         num_steps=cfg.n_steps,
         frameskip=cfg.frameskip,
         transform=None,
+        cache_dir=cfg.get("cache_dir", None),
     )
 
     # Image size must be multiple of DINO patch size (14)
@@ -83,7 +84,7 @@ def get_data(cfg):
         drop_last=True,
         persistent_workers=True,
         pin_memory=True,
-        sampler=spt.data.sampler.RepeatedRandomSampler(train_set),
+        shuffle=True,
     )
     val = DataLoader(val_set, batch_size=cfg.batch_size, num_workers=cfg.num_workers, pin_memory=True)
 
@@ -133,7 +134,7 @@ def forward(self, batch, stage):
     # Log all losses
     prefix = "train/" if self.training else "val/"
     losses_dict = {f"{prefix}{k}": v.detach() for k, v in batch.items() if "_loss" in k}
-    self.log_dict(losses_dict, on_step=True, sync_dist=True)
+    self.log_dict(losses_dict, on_step=True, sync_dist=True)  # , on_epoch=True, sync_dist=True)
 
     return batch
 
@@ -224,20 +225,16 @@ def run(cfg):
     data = get_data(cfg)
     world_model = get_world_model(cfg)
 
-    cache_dir = swm.data.get_cache_dir()
+    cache_dir = cfg.get("cache_dir", swm.data.get_cache_dir())
     checkpoint_callback = ModelCheckpoint(dirpath=cache_dir, filename=f"{cfg.output_model_name}_weights")
 
     trainer = pl.Trainer(
-        max_epochs=cfg.epochs,
         callbacks=[checkpoint_callback],
         num_sanity_val_steps=1,
         logger=wandb_logger,
         log_every_n_steps=50,
-        precision="16-mixed",
         enable_checkpointing=True,
-        accelerator="gpu",
-        devices=4,
-        strategy="ddp",
+        **cfg.trainer,
     )
 
     manager = spt.Manager(trainer=trainer, module=world_model, data=data)

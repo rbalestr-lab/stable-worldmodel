@@ -168,28 +168,28 @@
 <table class="autosummary longtable docutils align-default">
 <tbody>
 <tr class="row-odd"><td><p><a class="reference internal" href="../../stable_worldmodel/#stable_worldmodel.wrappers.EnsureInfoKeysWrapper" title="stable_worldmodel.wrappers.EnsureInfoKeysWrapper"><code class="xref py py-obj docutils literal notranslate"><span class="pre">EnsureInfoKeysWrapper</span></code></a></p></td>
-<td><p>Ensure certain keys are present in the info dict.</p></td>
+<td><p>Validates that required keys are present in the info dict after reset and step.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="../../stable_worldmodel/#stable_worldmodel.wrappers.EnsureImageShape" title="stable_worldmodel.wrappers.EnsureImageShape"><code class="xref py py-obj docutils literal notranslate"><span class="pre">EnsureImageShape</span></code></a></p></td>
-<td><p>Gymnasium wrapper to ensure certain keys are present in the info dict.</p></td>
+<td><p>Validates that an image in the info dict has the expected spatial dimensions.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="../../stable_worldmodel/#stable_worldmodel.wrappers.EnsureGoalInfoWrapper" title="stable_worldmodel.wrappers.EnsureGoalInfoWrapper"><code class="xref py py-obj docutils literal notranslate"><span class="pre">EnsureGoalInfoWrapper</span></code></a></p></td>
-<td><p></p></td>
+<td><p>Validates that 'goal' key is present in info dict during reset and/or step.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="../../stable_worldmodel/#stable_worldmodel.wrappers.EverythingToInfoWrapper" title="stable_worldmodel.wrappers.EverythingToInfoWrapper"><code class="xref py py-obj docutils literal notranslate"><span class="pre">EverythingToInfoWrapper</span></code></a></p></td>
-<td><p>Gymnasium wrapper to ensure the observation is included in the info dict under a specified key after reset and step.</p></td>
+<td><p>Moves all transition information into the info dict for unified data access.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="../../stable_worldmodel/#stable_worldmodel.wrappers.AddPixelsWrapper" title="stable_worldmodel.wrappers.AddPixelsWrapper"><code class="xref py py-obj docutils literal notranslate"><span class="pre">AddPixelsWrapper</span></code></a></p></td>
-<td><p>Gymnasium wrapper that adds a 'pixels' key to the info dict, containing a rendered and resized image of the environment.</p></td>
+<td><p>Adds rendered environment pixels to info dict with optional resizing and transforms.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="../../stable_worldmodel/#stable_worldmodel.wrappers.ResizeGoalWrapper" title="stable_worldmodel.wrappers.ResizeGoalWrapper"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ResizeGoalWrapper</span></code></a></p></td>
-<td><p></p></td>
+<td><p>Resizes goal images in info dict with optional transforms.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="../../stable_worldmodel/#stable_worldmodel.wrappers.MegaWrapper" title="stable_worldmodel.wrappers.MegaWrapper"><code class="xref py py-obj docutils literal notranslate"><span class="pre">MegaWrapper</span></code></a></p></td>
-<td><p></p></td>
+<td><p>Combines multiple wrappers for comprehensive environment preprocessing.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="../../stable_worldmodel/#stable_worldmodel.wrappers.VariationWrapper" title="stable_worldmodel.wrappers.VariationWrapper"><code class="xref py py-obj docutils literal notranslate"><span class="pre">VariationWrapper</span></code></a></p></td>
-<td><p></p></td>
+<td><p>Manages variation spaces for vectorized environments.</p></td>
 </tr>
 </tbody>
 </table>

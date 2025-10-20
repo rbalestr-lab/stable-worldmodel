@@ -170,8 +170,30 @@
 <dt class="sig sig-object py" id="stable_worldmodel.wrappers.EverythingToInfoWrapper">
 <em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">EverythingToInfoWrapper</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">env</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/stable_worldmodel/wrappers/#EverythingToInfoWrapper"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.wrappers.EverythingToInfoWrapper" title="Link to this definition" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#stable_worldmodel.wrappers.EverythingToInfoWrapper'"><svg height="1em" viewbox="0 0 24 24" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"></path></svg></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Wrapper</span></code></p>
-<p>Gymnasium wrapper to ensure the observation is included in the info dict
-under a specified key after reset and step.</p>
+<p>Moves all transition information into the info dict for unified data access.</p>
+<p>Adds observation, reward, terminated, truncated, action, and step_idx to info.
+Optionally tracks environment variations when specified in reset options.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>env</strong> – The Gymnasium environment to wrap.</p>
+</dd>
+</dl>
+<dl class="simple">
+<dt>Info Keys Added:</dt><dd><ul class="simple">
+<li><p>observation (or dict keys if obs is dict): Current observation.</p></li>
+<li><p>reward: Reward value (NaN after reset).</p></li>
+<li><p>terminated: Episode termination flag.</p></li>
+<li><p>truncated: Episode truncation flag.</p></li>
+<li><p>action: Action taken (NaN sample after reset).</p></li>
+<li><p>step_idx: Current step counter.</p></li>
+<li><p>variation.{key}: Variation values if requested via reset options.</p></li>
+</ul>
+</dd>
+</dl>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Pass options={“variation”: [“key1”, “key2”]} or [“all”] to reset() to track variations.</p>
+</div>
 <dl class="py method">
 <dt class="sig sig-object py" id="stable_worldmodel.wrappers.EverythingToInfoWrapper.reset">
 <span class="sig-name descname"><span class="pre">reset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/stable_worldmodel/wrappers/#EverythingToInfoWrapper.reset"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.wrappers.EverythingToInfoWrapper.reset" title="Link to this definition" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#stable_worldmodel.wrappers.EverythingToInfoWrapper.reset'"><svg height="1em" viewbox="0 0 24 24" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"></path></svg></a></dt>

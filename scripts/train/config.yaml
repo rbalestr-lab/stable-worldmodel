@@ -8,23 +8,23 @@ defaults:
 
 hydra:
   output_subdir: null
-  mode: MULTIRUN
-  launcher:
-    max_num_timeout: 999
-    gpus_per_node: 2
-    tasks_per_node: ${hydra.launcher.gpus_per_node}
-    cpus_per_task: 4
-    mem_gb: 48
-    timeout_min: 3600
-    partition: main
-    signal_delay_s: 120
-    constraint: lovelace
-    # setup:
-    #   [
-    #     "tar -czf \"$SLURM_TMPDIR/stablewm.tgz\" -C \"$STABLEWM_HOME\" .",
-    #     "tar -xzf \"$SLURM_TMPDIR/stablewm.tgz\" -C \"$SLURM_TMPDIR\"",
-    #     "rm -f \"$SLURM_TMPDIR/stablewm.tgz\""
-    #   ]
+  # mode: MULTIRUN
+  # launcher:
+  #   max_num_timeout: 999
+  #   gpus_per_node: 2
+  #   tasks_per_node: ${hydra.launcher.gpus_per_node}
+  #   cpus_per_task: 4
+  #   mem_gb: 48
+  #   timeout_min: 4600
+  #   partition: main
+  #   signal_delay_s: 120
+  #   constraint: lovelace
+  #   # setup:
+  #   [
+  #     "tar -czf \"$SLURM_TMPDIR/stablewm.tgz\" -C \"$STABLEWM_HOME\" .",
+  #     "tar -xzf \"$SLURM_TMPDIR/stablewm.tgz\" -C \"$SLURM_TMPDIR\"",
+  #     "rm -f \"$SLURM_TMPDIR/stablewm.tgz\""
+  #   ]
   run:
     dir: .
 

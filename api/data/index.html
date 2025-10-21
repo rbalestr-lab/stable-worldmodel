@@ -169,15 +169,83 @@
 <dt class="sig sig-object py" id="stable_worldmodel.data.StepsDataset">
 <em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">StepsDataset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_steps</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">frameskip</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cache_dir</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/stable_worldmodel/data/#StepsDataset"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.data.StepsDataset" title="Link to this definition" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#stable_worldmodel.data.StepsDataset'"><svg height="1em" viewbox="0 0 24 24" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"></path></svg></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">HFDataset</span></code></p>
+<p>Dataset for loading multi-step trajectory sequences.</p>
+<p>This dataset loads sequences of consecutive steps from episodic data,
+supporting frame skipping and automatic image loading from file paths.
+Inherits from stable_pretraining’s HFDataset.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Variables<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>data_dir</strong> (<em>Path</em>) – Directory containing the dataset.</p></li>
+<li><p><strong>num_steps</strong> (<em>int</em>) – Number of steps per sequence.</p></li>
+<li><p><strong>frameskip</strong> (<em>int</em>) – Number of steps to skip between frames.</p></li>
+<li><p><strong>episodes</strong> (<em>np.ndarray</em>) – Array of unique episode indices.</p></li>
+<li><p><strong>episode_slices</strong> (<em>dict</em>) – Mapping from episode index to dataset indices.</p></li>
+<li><p><strong>cum_slices</strong> (<em>np.ndarray</em>) – Cumulative sum of valid samples per episode.</p></li>
+<li><p><strong>idx_to_ep</strong> (<em>np.ndarray</em>) – Mapping from sample index to episode.</p></li>
+<li><p><strong>img_cols</strong> (<em>set</em>) – Set of column names containing image paths.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="stable_worldmodel.data.StepsDataset.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_steps</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">frameskip</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cache_dir</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/stable_worldmodel/data/#StepsDataset.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.data.StepsDataset.__init__" title="Link to this definition" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#stable_worldmodel.data.StepsDataset.__init__'"><svg height="1em" viewbox="0 0 24 24" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"></path></svg></a></dt>
+<dd><p>Initialize the StepsDataset.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>path</strong> (<em>str</em>) – Name or path of the dataset within cache directory.</p></li>
+<li><p><strong>*args</strong> – Additional arguments passed to parent class.</p></li>
+<li><p><strong>num_steps</strong> (<em>int</em><em>, </em><em>optional</em>) – Number of consecutive steps per sample. Defaults to 2.</p></li>
+<li><p><strong>frameskip</strong> (<em>int</em><em>, </em><em>optional</em>) – Number of steps between sampled frames. Defaults to 1.</p></li>
+<li><p><strong>cache_dir</strong> (<em>str</em><em>, </em><em>optional</em>) – Cache directory path. Defaults to None (uses default).</p></li>
+<li><p><strong>**kwargs</strong> – Additional keyword arguments passed to parent class.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>AssertionError</strong> – If required columns are missing from dataset.</p></li>
+<li><p><strong>ValueError</strong> – If episodes are too short for the requested num_steps and frameskip.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
 <dl class="py method">
 <dt class="sig sig-object py" id="stable_worldmodel.data.StepsDataset.get_episode_slice">
 <span class="sig-name descname"><span class="pre">get_episode_slice</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">episode_idx</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">episode_indices</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/stable_worldmodel/data/#StepsDataset.get_episode_slice"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.data.StepsDataset.get_episode_slice" title="Link to this definition" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#stable_worldmodel.data.StepsDataset.get_episode_slice'"><svg height="1em" viewbox="0 0 24 24" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"></path></svg></a></dt>
-<dd><p>Return number of possible slices for a given episode index</p>
+<dd><p>Get dataset indices for a specific episode.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>episode_idx</strong> (<em>int</em>) – Episode index to retrieve.</p></li>
+<li><p><strong>episode_indices</strong> (<em>array-like</em>) – Array of episode indices for all steps.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Indices of steps belonging to the specified episode.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>np.ndarray</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>ValueError</strong> – If episode is too short for num_steps and frameskip.</p>
+</dd>
+</dl>
 </dd></dl>
 <dl class="py method">
 <dt class="sig sig-object py" id="stable_worldmodel.data.StepsDataset.infer_img_path_columns">
 <span class="sig-name descname"><span class="pre">infer_img_path_columns</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/stable_worldmodel/data/#StepsDataset.infer_img_path_columns"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.data.StepsDataset.infer_img_path_columns" title="Link to this definition" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#stable_worldmodel.data.StepsDataset.infer_img_path_columns'"><svg height="1em" viewbox="0 0 24 24" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"></path></svg></a></dt>
-<dd><p>Return list of columns that contain image file paths.</p>
+<dd><p>Infer which dataset columns contain image file paths.</p>
+<p>Checks the first dataset element to identify string columns with
+common image file extensions.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Set of column names containing image file paths.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>set</p>
+</dd>
+</dl>
 </dd></dl>
 </dd></dl>
 </section>
@@ -185,6 +253,7 @@
 <div class="sticky top-16 -mt-10 max-h-[calc(100vh-5rem)] overflow-y-auto pt-6 space-y-2"><p class="font-medium">On this page</p>
 <ul>
 <li><a :data-current="activeSection === '#stable_worldmodel.data.StepsDataset'" class="reference internal" href="#stable_worldmodel.data.StepsDataset"><code class="docutils literal notranslate"><span class="pre">StepsDataset</span></code></a><ul>
+<li><a :data-current="activeSection === '#stable_worldmodel.data.StepsDataset.__init__'" class="reference internal" href="#stable_worldmodel.data.StepsDataset.__init__"><code class="docutils literal notranslate"><span class="pre">StepsDataset.__init__()</span></code></a></li>
 <li><a :data-current="activeSection === '#stable_worldmodel.data.StepsDataset.get_episode_slice'" class="reference internal" href="#stable_worldmodel.data.StepsDataset.get_episode_slice"><code class="docutils literal notranslate"><span class="pre">StepsDataset.get_episode_slice()</span></code></a></li>
 <li><a :data-current="activeSection === '#stable_worldmodel.data.StepsDataset.infer_img_path_columns'" class="reference internal" href="#stable_worldmodel.data.StepsDataset.infer_img_path_columns"><code class="docutils literal notranslate"><span class="pre">StepsDataset.infer_img_path_columns()</span></code></a></li>
 </ul>

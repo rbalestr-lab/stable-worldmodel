@@ -216,373 +216,581 @@
 
     <div id="content" role="main">
       <h1>Source code for stable_worldmodel.data</h1><div class="highlight"><pre>
-<span></span><code><span id="line-1"><span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
-</span><span id="line-2"><span class="kn">import</span><span class="w"> </span><span class="nn">re</span>
-</span><span id="line-3"><span class="kn">import</span><span class="w"> </span><span class="nn">shutil</span>
-</span><span id="line-4"><span class="kn">from</span><span class="w"> </span><span class="nn">functools</span><span class="w"> </span><span class="kn">import</span> <span class="n">lru_cache</span>
-</span><span id="line-5"><span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
-</span><span id="line-6"><span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">TypedDict</span>
-</span><span id="line-7">
-</span><span id="line-8"><span class="kn">import</span><span class="w"> </span><span class="nn">gymnasium</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">gym</span>
-</span><span id="line-9"><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
-</span><span id="line-10"><span class="kn">import</span><span class="w"> </span><span class="nn">PIL</span>
-</span><span id="line-11"><span class="kn">import</span><span class="w"> </span><span class="nn">stable_pretraining</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">spt</span>
-</span><span id="line-12"><span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
-</span><span id="line-13"><span class="kn">from</span><span class="w"> </span><span class="nn">datasets</span><span class="w"> </span><span class="kn">import</span> <span class="n">load_from_disk</span>
-</span><span id="line-14"><span class="kn">from</span><span class="w"> </span><span class="nn">rich</span><span class="w"> </span><span class="kn">import</span> <span class="nb">print</span>
-</span><span id="line-15">
-</span><span id="line-16"><span class="kn">import</span><span class="w"> </span><span class="nn">stable_worldmodel</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">swm</span>
-</span><span id="line-17">
-</span><span id="line-18">
+<span></span><code><span id="line-1"><span class="sd">&quot;&quot;&quot;Data management and dataset utilities for Stable World Model.</span>
+</span><span id="line-2">
+</span><span id="line-3"><span class="sd">This module provides utilities for managing datasets, models, and world</span>
+</span><span id="line-4"><span class="sd">information. It includes functionality for loading multi-step trajectories,</span>
+</span><span id="line-5"><span class="sd">querying cached data, and retrieving metadata about environments.</span>
+</span><span id="line-6">
+</span><span id="line-7"><span class="sd">The module supports:</span>
+</span><span id="line-8"><span class="sd">    - Multi-step trajectory datasets with frame skipping</span>
+</span><span id="line-9"><span class="sd">    - Dataset and model cache management</span>
+</span><span id="line-10"><span class="sd">    - World environment introspection</span>
+</span><span id="line-11"><span class="sd">    - Gymnasium space metadata extraction</span>
+</span><span id="line-12"><span class="sd">&quot;&quot;&quot;</span>
+</span><span id="line-13">
+</span><span id="line-14"><span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+</span><span id="line-15"><span class="kn">import</span><span class="w"> </span><span class="nn">re</span>
+</span><span id="line-16"><span class="kn">import</span><span class="w"> </span><span class="nn">shutil</span>
+</span><span id="line-17"><span class="kn">from</span><span class="w"> </span><span class="nn">functools</span><span class="w"> </span><span class="kn">import</span> <span class="n">lru_cache</span>
+</span><span id="line-18"><span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+</span><span id="line-19"><span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">TypedDict</span>
+</span><span id="line-20">
+</span><span id="line-21"><span class="kn">import</span><span class="w"> </span><span class="nn">gymnasium</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">gym</span>
+</span><span id="line-22"><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+</span><span id="line-23"><span class="kn">import</span><span class="w"> </span><span class="nn">PIL</span>
+</span><span id="line-24"><span class="kn">import</span><span class="w"> </span><span class="nn">stable_pretraining</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">spt</span>
+</span><span id="line-25"><span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
+</span><span id="line-26"><span class="kn">from</span><span class="w"> </span><span class="nn">datasets</span><span class="w"> </span><span class="kn">import</span> <span class="n">load_from_disk</span>
+</span><span id="line-27"><span class="kn">from</span><span class="w"> </span><span class="nn">rich</span><span class="w"> </span><span class="kn">import</span> <span class="nb">print</span>
+</span><span id="line-28">
+</span><span id="line-29"><span class="kn">import</span><span class="w"> </span><span class="nn">stable_worldmodel</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">swm</span>
+</span><span id="line-30">
+</span><span id="line-31">
 <div class="viewcode-block" id="StepsDataset">
 <a class="viewcode-back" href="../../../stable_worldmodel/#stable_worldmodel.data.StepsDataset">[docs]</a>
-</span><span id="line-19"><span class="k">class</span><span class="w"> </span><span class="nc">StepsDataset</span><span class="p">(</span><span class="n">spt</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">HFDataset</span><span class="p">):</span>
-</span><span id="line-20">    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
-</span><span id="line-21">        <span class="bp">self</span><span class="p">,</span>
-</span><span id="line-22">        <span class="n">path</span><span class="p">,</span>
-</span><span id="line-23">        <span class="o">*</span><span class="n">args</span><span class="p">,</span>
-</span><span id="line-24">        <span class="n">num_steps</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
-</span><span id="line-25">        <span class="n">frameskip</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
-</span><span id="line-26">        <span class="n">cache_dir</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-</span><span id="line-27">        <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
-</span><span id="line-28">    <span class="p">):</span>
-</span><span id="line-29">        <span class="n">data_dir</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">cache_dir</span> <span class="ow">or</span> <span class="n">swm</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">get_cache_dir</span><span class="p">(),</span> <span class="n">path</span><span class="p">)</span>
-</span><span id="line-30">        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">data_dir</span><span class="p">),</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-</span><span id="line-31">
-</span><span id="line-32">        <span class="bp">self</span><span class="o">.</span><span class="n">data_dir</span> <span class="o">=</span> <span class="n">data_dir</span>
-</span><span id="line-33">        <span class="bp">self</span><span class="o">.</span><span class="n">num_steps</span> <span class="o">=</span> <span class="n">num_steps</span>
-</span><span id="line-34">        <span class="bp">self</span><span class="o">.</span><span class="n">frameskip</span> <span class="o">=</span> <span class="n">frameskip</span>
-</span><span id="line-35">
-</span><span id="line-36">        <span class="k">assert</span> <span class="s2">&quot;episode_idx&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">column_names</span><span class="p">,</span> <span class="s2">&quot;Dataset must have &#39;episode_idx&#39; column&quot;</span>
-</span><span id="line-37">        <span class="k">assert</span> <span class="s2">&quot;step_idx&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">column_names</span><span class="p">,</span> <span class="s2">&quot;Dataset must have &#39;step_idx&#39; column&quot;</span>
-</span><span id="line-38">        <span class="k">assert</span> <span class="s2">&quot;action&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">column_names</span><span class="p">,</span> <span class="s2">&quot;Dataset must have &#39;action&#39; column&quot;</span>
-</span><span id="line-39">
-</span><span id="line-40">        <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">set_format</span><span class="p">(</span><span class="s2">&quot;torch&quot;</span><span class="p">)</span>
-</span><span id="line-41">
-</span><span id="line-42">        <span class="c1"># get number of episodes</span>
-</span><span id="line-43">        <span class="n">ep_indices</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="p">[</span><span class="s2">&quot;episode_idx&quot;</span><span class="p">][:]</span>
-</span><span id="line-44">        <span class="bp">self</span><span class="o">.</span><span class="n">episodes</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">ep_indices</span><span class="p">)</span>
-</span><span id="line-45">
-</span><span id="line-46">        <span class="c1"># get dataset indices of each episode</span>
-</span><span id="line-47">        <span class="bp">self</span><span class="o">.</span><span class="n">episode_slices</span> <span class="o">=</span> <span class="p">{</span><span class="n">e</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_episode_slice</span><span class="p">(</span><span class="n">e</span><span class="p">,</span> <span class="n">ep_indices</span><span class="p">)</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">episodes</span><span class="p">}</span>
-</span><span id="line-48">
-</span><span id="line-49">        <span class="c1"># start index for each episode</span>
-</span><span id="line-50">        <span class="n">valid_samples_per_ep</span> <span class="o">=</span> <span class="p">[</span>
-</span><span id="line-51">            <span class="nb">max</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">ep_slice</span><span class="p">)</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_steps</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">frameskip</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="k">for</span> <span class="n">ep_slice</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">episode_slices</span><span class="o">.</span><span class="n">values</span><span class="p">()</span>
-</span><span id="line-52">        <span class="p">]</span>
-</span><span id="line-53">        <span class="bp">self</span><span class="o">.</span><span class="n">cum_slices</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cumsum</span><span class="p">([</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">valid_samples_per_ep</span><span class="p">)</span>
-</span><span id="line-54">
-</span><span id="line-55">        <span class="c1"># map from sample to their episode</span>
-</span><span id="line-56">        <span class="bp">self</span><span class="o">.</span><span class="n">idx_to_ep</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">searchsorted</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cum_slices</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="p">)),</span> <span class="n">side</span><span class="o">=</span><span class="s2">&quot;right&quot;</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span>
-</span><span id="line-57">
-</span><span id="line-58">        <span class="bp">self</span><span class="o">.</span><span class="n">img_cols</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">infer_img_path_columns</span><span class="p">()</span>
-</span><span id="line-59">
+</span><span id="line-32"><span class="k">class</span><span class="w"> </span><span class="nc">StepsDataset</span><span class="p">(</span><span class="n">spt</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">HFDataset</span><span class="p">):</span>
+</span><span id="line-33"><span class="w">    </span><span class="sd">&quot;&quot;&quot;Dataset for loading multi-step trajectory sequences.</span>
+</span><span id="line-34">
+</span><span id="line-35"><span class="sd">    This dataset loads sequences of consecutive steps from episodic data,</span>
+</span><span id="line-36"><span class="sd">    supporting frame skipping and automatic image loading from file paths.</span>
+</span><span id="line-37"><span class="sd">    Inherits from stable_pretraining&#39;s HFDataset.</span>
+</span><span id="line-38">
+</span><span id="line-39"><span class="sd">    Attributes:</span>
+</span><span id="line-40"><span class="sd">        data_dir (Path): Directory containing the dataset.</span>
+</span><span id="line-41"><span class="sd">        num_steps (int): Number of steps per sequence.</span>
+</span><span id="line-42"><span class="sd">        frameskip (int): Number of steps to skip between frames.</span>
+</span><span id="line-43"><span class="sd">        episodes (np.ndarray): Array of unique episode indices.</span>
+</span><span id="line-44"><span class="sd">        episode_slices (dict): Mapping from episode index to dataset indices.</span>
+</span><span id="line-45"><span class="sd">        cum_slices (np.ndarray): Cumulative sum of valid samples per episode.</span>
+</span><span id="line-46"><span class="sd">        idx_to_ep (np.ndarray): Mapping from sample index to episode.</span>
+</span><span id="line-47"><span class="sd">        img_cols (set): Set of column names containing image paths.</span>
+</span><span id="line-48"><span class="sd">    &quot;&quot;&quot;</span>
+</span><span id="line-49">
+<div class="viewcode-block" id="StepsDataset.__init__">
+<a class="viewcode-back" href="../../../stable_worldmodel/#stable_worldmodel.data.StepsDataset.__init__">[docs]</a>
+</span><span id="line-50">    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+</span><span id="line-51">        <span class="bp">self</span><span class="p">,</span>
+</span><span id="line-52">        <span class="n">path</span><span class="p">,</span>
+</span><span id="line-53">        <span class="o">*</span><span class="n">args</span><span class="p">,</span>
+</span><span id="line-54">        <span class="n">num_steps</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+</span><span id="line-55">        <span class="n">frameskip</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+</span><span id="line-56">        <span class="n">cache_dir</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+</span><span id="line-57">        <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+</span><span id="line-58">    <span class="p">):</span>
+</span><span id="line-59"><span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialize the StepsDataset.</span>
+</span><span id="line-60">
+</span><span id="line-61"><span class="sd">        Args:</span>
+</span><span id="line-62"><span class="sd">            path (str): Name or path of the dataset within cache directory.</span>
+</span><span id="line-63"><span class="sd">            *args: Additional arguments passed to parent class.</span>
+</span><span id="line-64"><span class="sd">            num_steps (int, optional): Number of consecutive steps per sample. Defaults to 2.</span>
+</span><span id="line-65"><span class="sd">            frameskip (int, optional): Number of steps between sampled frames. Defaults to 1.</span>
+</span><span id="line-66"><span class="sd">            cache_dir (str, optional): Cache directory path. Defaults to None (uses default).</span>
+</span><span id="line-67"><span class="sd">            **kwargs: Additional keyword arguments passed to parent class.</span>
+</span><span id="line-68">
+</span><span id="line-69"><span class="sd">        Raises:</span>
+</span><span id="line-70"><span class="sd">            AssertionError: If required columns are missing from dataset.</span>
+</span><span id="line-71"><span class="sd">            ValueError: If episodes are too short for the requested num_steps and frameskip.</span>
+</span><span id="line-72"><span class="sd">        &quot;&quot;&quot;</span>
+</span><span id="line-73">        <span class="n">data_dir</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">cache_dir</span> <span class="ow">or</span> <span class="n">swm</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">get_cache_dir</span><span class="p">(),</span> <span class="n">path</span><span class="p">)</span>
+</span><span id="line-74">        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">data_dir</span><span class="p">),</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+</span><span id="line-75">
+</span><span id="line-76">        <span class="bp">self</span><span class="o">.</span><span class="n">data_dir</span> <span class="o">=</span> <span class="n">data_dir</span>
+</span><span id="line-77">        <span class="bp">self</span><span class="o">.</span><span class="n">num_steps</span> <span class="o">=</span> <span class="n">num_steps</span>
+</span><span id="line-78">        <span class="bp">self</span><span class="o">.</span><span class="n">frameskip</span> <span class="o">=</span> <span class="n">frameskip</span>
+</span><span id="line-79">
+</span><span id="line-80">        <span class="k">assert</span> <span class="s2">&quot;episode_idx&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">column_names</span><span class="p">,</span> <span class="s2">&quot;Dataset must have &#39;episode_idx&#39; column&quot;</span>
+</span><span id="line-81">        <span class="k">assert</span> <span class="s2">&quot;step_idx&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">column_names</span><span class="p">,</span> <span class="s2">&quot;Dataset must have &#39;step_idx&#39; column&quot;</span>
+</span><span id="line-82">        <span class="k">assert</span> <span class="s2">&quot;action&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">column_names</span><span class="p">,</span> <span class="s2">&quot;Dataset must have &#39;action&#39; column&quot;</span>
+</span><span id="line-83">
+</span><span id="line-84">        <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">set_format</span><span class="p">(</span><span class="s2">&quot;torch&quot;</span><span class="p">)</span>
+</span><span id="line-85">
+</span><span id="line-86">        <span class="c1"># get number of episodes</span>
+</span><span id="line-87">        <span class="n">ep_indices</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="p">[</span><span class="s2">&quot;episode_idx&quot;</span><span class="p">][:]</span>
+</span><span id="line-88">        <span class="bp">self</span><span class="o">.</span><span class="n">episodes</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">ep_indices</span><span class="p">)</span>
+</span><span id="line-89">
+</span><span id="line-90">        <span class="c1"># get dataset indices of each episode</span>
+</span><span id="line-91">        <span class="bp">self</span><span class="o">.</span><span class="n">episode_slices</span> <span class="o">=</span> <span class="p">{</span><span class="n">e</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_episode_slice</span><span class="p">(</span><span class="n">e</span><span class="p">,</span> <span class="n">ep_indices</span><span class="p">)</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">episodes</span><span class="p">}</span>
+</span><span id="line-92">
+</span><span id="line-93">        <span class="c1"># start index for each episode</span>
+</span><span id="line-94">        <span class="n">valid_samples_per_ep</span> <span class="o">=</span> <span class="p">[</span>
+</span><span id="line-95">            <span class="nb">max</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">ep_slice</span><span class="p">)</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_steps</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">frameskip</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="k">for</span> <span class="n">ep_slice</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">episode_slices</span><span class="o">.</span><span class="n">values</span><span class="p">()</span>
+</span><span id="line-96">        <span class="p">]</span>
+</span><span id="line-97">        <span class="bp">self</span><span class="o">.</span><span class="n">cum_slices</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cumsum</span><span class="p">([</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">valid_samples_per_ep</span><span class="p">)</span>
+</span><span id="line-98">
+</span><span id="line-99">        <span class="c1"># map from sample to their episode</span>
+</span><span id="line-100">        <span class="bp">self</span><span class="o">.</span><span class="n">idx_to_ep</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">searchsorted</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cum_slices</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="p">)),</span> <span class="n">side</span><span class="o">=</span><span class="s2">&quot;right&quot;</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span>
+</span><span id="line-101">
+</span><span id="line-102">        <span class="bp">self</span><span class="o">.</span><span class="n">img_cols</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">infer_img_path_columns</span><span class="p">()</span></div>
+
+</span><span id="line-103">
 <div class="viewcode-block" id="StepsDataset.get_episode_slice">
 <a class="viewcode-back" href="../../../stable_worldmodel/#stable_worldmodel.data.StepsDataset.get_episode_slice">[docs]</a>
-</span><span id="line-60">    <span class="k">def</span><span class="w"> </span><span class="nf">get_episode_slice</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">episode_idx</span><span class="p">,</span> <span class="n">episode_indices</span><span class="p">):</span>
-</span><span id="line-61"><span class="w">        </span><span class="sd">&quot;&quot;&quot;Return number of possible slices for a given episode index&quot;&quot;&quot;</span>
-</span><span id="line-62">        <span class="n">indices</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">flatnonzero</span><span class="p">(</span><span class="n">episode_indices</span> <span class="o">==</span> <span class="n">episode_idx</span><span class="p">)</span>
-</span><span id="line-63">        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">indices</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">num_steps</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">frameskip</span><span class="p">):</span>
-</span><span id="line-64">            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-</span><span id="line-65">                <span class="sa">f</span><span class="s2">&quot;Episode </span><span class="si">{</span><span class="n">episode_idx</span><span class="si">}</span><span class="s2"> is too short (</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">indices</span><span class="p">)</span><span class="si">}</span><span class="s2"> steps) for </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">num_steps</span><span class="si">}</span><span class="s2"> steps with </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">frameskip</span><span class="si">}</span><span class="s2"> frameskip&quot;</span>
-</span><span id="line-66">            <span class="p">)</span>
-</span><span id="line-67">        <span class="k">return</span> <span class="n">indices</span></div>
-
-</span><span id="line-68">
-</span><span id="line-69">    <span class="k">def</span><span class="w"> </span><span class="fm">__len__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-</span><span id="line-70">        <span class="k">return</span> <span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cum_slices</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
-</span><span id="line-71">
-</span><span id="line-72">    <span class="k">def</span><span class="w"> </span><span class="fm">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">idx</span><span class="p">):</span>
-</span><span id="line-73">        <span class="n">ep</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">idx_to_ep</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span>
-</span><span id="line-74">        <span class="n">episode_indices</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">episode_slices</span><span class="p">[</span><span class="n">ep</span><span class="p">]</span>
-</span><span id="line-75">        <span class="n">offset</span> <span class="o">=</span> <span class="n">idx</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">cum_slices</span><span class="p">[</span><span class="n">ep</span><span class="p">]</span>
-</span><span id="line-76">        <span class="n">start</span> <span class="o">=</span> <span class="n">offset</span>
-</span><span id="line-77">        <span class="n">stop</span> <span class="o">=</span> <span class="n">start</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_steps</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">frameskip</span>
-</span><span id="line-78">        <span class="n">idx_slice</span> <span class="o">=</span> <span class="n">episode_indices</span><span class="p">[</span><span class="n">start</span><span class="p">:</span><span class="n">stop</span><span class="p">]</span>
-</span><span id="line-79">        <span class="n">steps</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="p">[</span><span class="n">idx_slice</span><span class="p">]</span>
-</span><span id="line-80">
-</span><span id="line-81">        <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">steps</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-</span><span id="line-82">            <span class="k">if</span> <span class="n">k</span> <span class="o">==</span> <span class="s2">&quot;action&quot;</span><span class="p">:</span>
-</span><span id="line-83">                <span class="k">continue</span>
-</span><span id="line-84">
-</span><span id="line-85">            <span class="n">v</span> <span class="o">=</span> <span class="n">v</span><span class="p">[::</span> <span class="bp">self</span><span class="o">.</span><span class="n">frameskip</span><span class="p">]</span>
-</span><span id="line-86">            <span class="n">steps</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">v</span>
-</span><span id="line-87">
-</span><span id="line-88">            <span class="k">if</span> <span class="n">k</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">img_cols</span><span class="p">:</span>
-</span><span id="line-89">                <span class="n">steps</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">PIL</span><span class="o">.</span><span class="n">Image</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data_dir</span> <span class="o">/</span> <span class="n">img_path</span><span class="p">)</span> <span class="k">for</span> <span class="n">img_path</span> <span class="ow">in</span> <span class="n">v</span><span class="p">]</span>
-</span><span id="line-90">
-</span><span id="line-91">        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">transform</span><span class="p">:</span>
-</span><span id="line-92">            <span class="n">steps</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">steps</span><span class="p">)</span>
-</span><span id="line-93">
-</span><span id="line-94">        <span class="c1"># stack images into a single tensor</span>
-</span><span id="line-95">        <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">img_cols</span><span class="p">:</span>
-</span><span id="line-96">            <span class="n">steps</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">stack</span><span class="p">(</span><span class="n">steps</span><span class="p">[</span><span class="n">k</span><span class="p">])</span>
-</span><span id="line-97">
-</span><span id="line-98">        <span class="c1"># reshape action</span>
-</span><span id="line-99">        <span class="n">steps</span><span class="p">[</span><span class="s2">&quot;action&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">steps</span><span class="p">[</span><span class="s2">&quot;action&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">num_steps</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
-</span><span id="line-100">
-</span><span id="line-101">        <span class="k">return</span> <span class="n">steps</span>
-</span><span id="line-102">
-<div class="viewcode-block" id="StepsDataset.infer_img_path_columns">
-<a class="viewcode-back" href="../../../stable_worldmodel/#stable_worldmodel.data.StepsDataset.infer_img_path_columns">[docs]</a>
-</span><span id="line-103">    <span class="k">def</span><span class="w"> </span><span class="nf">infer_img_path_columns</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-</span><span id="line-104"><span class="w">        </span><span class="sd">&quot;&quot;&quot;Return list of columns that contain image file paths.&quot;&quot;&quot;</span>
-</span><span id="line-105">
-</span><span id="line-106">        <span class="n">IMG_EXTENSIONS</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;.jpeg&quot;</span><span class="p">,</span> <span class="s2">&quot;.png&quot;</span><span class="p">,</span> <span class="s2">&quot;.jpg&quot;</span><span class="p">)</span>
-</span><span id="line-107">
-</span><span id="line-108">        <span class="n">img_cols</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
-</span><span id="line-109">        <span class="n">first_elem</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-</span><span id="line-110">        <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">column_names</span><span class="p">:</span>
-</span><span id="line-111">            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">first_elem</span><span class="p">[</span><span class="n">col</span><span class="p">],</span> <span class="nb">str</span><span class="p">)</span> <span class="ow">and</span> <span class="n">first_elem</span><span class="p">[</span><span class="n">col</span><span class="p">]</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="n">IMG_EXTENSIONS</span><span class="p">):</span>
-</span><span id="line-112">                <span class="n">img_cols</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">col</span><span class="p">)</span>
-</span><span id="line-113">        <span class="k">return</span> <span class="n">img_cols</span></div>
-</div>
-
-</span><span id="line-114">
-</span><span id="line-115">
-</span><span id="line-116"><span class="c1">#####################</span>
-</span><span id="line-117"><span class="c1">###     utils     ###</span>
-</span><span id="line-118"><span class="c1">#####################</span>
-</span><span id="line-119">
-</span><span id="line-120">
-<div class="viewcode-block" id="is_image">
-<a class="viewcode-back" href="../../../stable_worldmodel/#stable_worldmodel.data.is_image">[docs]</a>
-</span><span id="line-121"><span class="k">def</span><span class="w"> </span><span class="nf">is_image</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
-</span><span id="line-122">    <span class="k">return</span> <span class="nb">type</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="ow">is</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="ow">and</span> <span class="n">x</span><span class="o">.</span><span class="n">ndim</span> <span class="o">==</span> <span class="mi">3</span> <span class="ow">and</span> <span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">]</span> <span class="ow">and</span> <span class="n">x</span><span class="o">.</span><span class="n">dtype</span> <span class="o">==</span> <span class="n">np</span><span class="o">.</span><span class="n">uint8</span></div>
+</span><span id="line-104">    <span class="k">def</span><span class="w"> </span><span class="nf">get_episode_slice</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">episode_idx</span><span class="p">,</span> <span class="n">episode_indices</span><span class="p">):</span>
+</span><span id="line-105"><span class="w">        </span><span class="sd">&quot;&quot;&quot;Get dataset indices for a specific episode.</span>
+</span><span id="line-106">
+</span><span id="line-107"><span class="sd">        Args:</span>
+</span><span id="line-108"><span class="sd">            episode_idx (int): Episode index to retrieve.</span>
+</span><span id="line-109"><span class="sd">            episode_indices (array-like): Array of episode indices for all steps.</span>
+</span><span id="line-110">
+</span><span id="line-111"><span class="sd">        Returns:</span>
+</span><span id="line-112"><span class="sd">            np.ndarray: Indices of steps belonging to the specified episode.</span>
+</span><span id="line-113">
+</span><span id="line-114"><span class="sd">        Raises:</span>
+</span><span id="line-115"><span class="sd">            ValueError: If episode is too short for num_steps and frameskip.</span>
+</span><span id="line-116"><span class="sd">        &quot;&quot;&quot;</span>
+</span><span id="line-117">        <span class="n">indices</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">flatnonzero</span><span class="p">(</span><span class="n">episode_indices</span> <span class="o">==</span> <span class="n">episode_idx</span><span class="p">)</span>
+</span><span id="line-118">        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">indices</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">num_steps</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">frameskip</span><span class="p">):</span>
+</span><span id="line-119">            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+</span><span id="line-120">                <span class="sa">f</span><span class="s2">&quot;Episode </span><span class="si">{</span><span class="n">episode_idx</span><span class="si">}</span><span class="s2"> is too short (</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">indices</span><span class="p">)</span><span class="si">}</span><span class="s2"> steps) for </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">num_steps</span><span class="si">}</span><span class="s2"> steps with </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">frameskip</span><span class="si">}</span><span class="s2"> frameskip&quot;</span>
+</span><span id="line-121">            <span class="p">)</span>
+</span><span id="line-122">        <span class="k">return</span> <span class="n">indices</span></div>
 
 </span><span id="line-123">
-</span><span id="line-124">
-</span><span id="line-125"><span class="c1">#####################</span>
-</span><span id="line-126"><span class="c1">###   CLI Info   ####</span>
-</span><span id="line-127"><span class="c1">#####################</span>
-</span><span id="line-128">
-</span><span id="line-129">
-<div class="viewcode-block" id="SpaceInfo">
-<a class="viewcode-back" href="../../../stable_worldmodel/#stable_worldmodel.data.SpaceInfo">[docs]</a>
-</span><span id="line-130"><span class="k">class</span><span class="w"> </span><span class="nc">SpaceInfo</span><span class="p">(</span><span class="n">TypedDict</span><span class="p">,</span> <span class="n">total</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-</span><span id="line-131">    <span class="n">shape</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span>
-</span><span id="line-132">    <span class="nb">type</span><span class="p">:</span> <span class="nb">str</span>
-</span><span id="line-133">    <span class="n">dtype</span><span class="p">:</span> <span class="nb">str</span>
-</span><span id="line-134">    <span class="n">low</span><span class="p">:</span> <span class="n">Any</span>
-</span><span id="line-135">    <span class="n">high</span><span class="p">:</span> <span class="n">Any</span>
-</span><span id="line-136">    <span class="n">n</span><span class="p">:</span> <span class="nb">int</span>  <span class="c1"># for discrete spaces</span></div>
-
+</span><span id="line-124">    <span class="k">def</span><span class="w"> </span><span class="fm">__len__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+</span><span id="line-125"><span class="w">        </span><span class="sd">&quot;&quot;&quot;Get total number of valid step sequences in the dataset.</span>
+</span><span id="line-126">
+</span><span id="line-127"><span class="sd">        Returns:</span>
+</span><span id="line-128"><span class="sd">            int: Number of valid sequences across all episodes.</span>
+</span><span id="line-129"><span class="sd">        &quot;&quot;&quot;</span>
+</span><span id="line-130">        <span class="k">return</span> <span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cum_slices</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+</span><span id="line-131">
+</span><span id="line-132">    <span class="k">def</span><span class="w"> </span><span class="fm">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">idx</span><span class="p">):</span>
+</span><span id="line-133"><span class="w">        </span><span class="sd">&quot;&quot;&quot;Get a multi-step sequence at the given index.</span>
+</span><span id="line-134">
+</span><span id="line-135"><span class="sd">        Args:</span>
+</span><span id="line-136"><span class="sd">            idx (int): Index of the sequence to retrieve.</span>
 </span><span id="line-137">
-</span><span id="line-138">
-<div class="viewcode-block" id="VariationInfo">
-<a class="viewcode-back" href="../../../stable_worldmodel/#stable_worldmodel.data.VariationInfo">[docs]</a>
-</span><span id="line-139"><span class="k">class</span><span class="w"> </span><span class="nc">VariationInfo</span><span class="p">(</span><span class="n">TypedDict</span><span class="p">):</span>
-</span><span id="line-140">    <span class="n">has_variation</span><span class="p">:</span> <span class="nb">bool</span>
-</span><span id="line-141">    <span class="nb">type</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span>
-</span><span id="line-142">    <span class="n">names</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span></div>
-
-</span><span id="line-143">
-</span><span id="line-144">
-<div class="viewcode-block" id="WorldInfo">
-<a class="viewcode-back" href="../../../stable_worldmodel/#stable_worldmodel.data.WorldInfo">[docs]</a>
-</span><span id="line-145"><span class="k">class</span><span class="w"> </span><span class="nc">WorldInfo</span><span class="p">(</span><span class="n">TypedDict</span><span class="p">):</span>
-</span><span id="line-146">    <span class="n">name</span><span class="p">:</span> <span class="nb">str</span>
-</span><span id="line-147">    <span class="n">observation_space</span><span class="p">:</span> <span class="n">SpaceInfo</span>
-</span><span id="line-148">    <span class="n">action_space</span><span class="p">:</span> <span class="n">SpaceInfo</span>
-</span><span id="line-149">    <span class="n">variation</span><span class="p">:</span> <span class="n">VariationInfo</span>
-</span><span id="line-150">    <span class="n">config</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span></div>
-
-</span><span id="line-151">
-</span><span id="line-152">
-<div class="viewcode-block" id="get_cache_dir">
-<a class="viewcode-back" href="../../../stable_worldmodel/#stable_worldmodel.data.get_cache_dir">[docs]</a>
-</span><span id="line-153"><span class="k">def</span><span class="w"> </span><span class="nf">get_cache_dir</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">Path</span><span class="p">:</span>
-</span><span id="line-154"><span class="w">    </span><span class="sd">&quot;&quot;&quot;Return the cache directory for stable_worldmodel.&quot;&quot;&quot;</span>
-</span><span id="line-155">    <span class="n">cache_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s2">&quot;STABLEWM_HOME&quot;</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">expanduser</span><span class="p">(</span><span class="s2">&quot;~/.stable_worldmodel&quot;</span><span class="p">))</span>
-</span><span id="line-156">    <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">cache_dir</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-</span><span id="line-157">    <span class="k">return</span> <span class="n">Path</span><span class="p">(</span><span class="n">cache_dir</span><span class="p">)</span></div>
-
-</span><span id="line-158">
-</span><span id="line-159">
-<div class="viewcode-block" id="list_datasets">
-<a class="viewcode-back" href="../../../stable_worldmodel/#stable_worldmodel.data.list_datasets">[docs]</a>
-</span><span id="line-160"><span class="k">def</span><span class="w"> </span><span class="nf">list_datasets</span><span class="p">():</span>
-</span><span id="line-161">    <span class="k">with</span> <span class="n">os</span><span class="o">.</span><span class="n">scandir</span><span class="p">(</span><span class="n">get_cache_dir</span><span class="p">())</span> <span class="k">as</span> <span class="n">entries</span><span class="p">:</span>
-</span><span id="line-162">        <span class="k">return</span> <span class="p">[</span><span class="n">e</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">entries</span> <span class="k">if</span> <span class="n">e</span><span class="o">.</span><span class="n">is_dir</span><span class="p">()]</span></div>
-
+</span><span id="line-138"><span class="sd">        Returns:</span>
+</span><span id="line-139"><span class="sd">            dict: Dictionary containing the sequence data with keys for</span>
+</span><span id="line-140"><span class="sd">                observations, actions, and other dataset fields. Images are</span>
+</span><span id="line-141"><span class="sd">                loaded as PIL Images and actions are reshaped to (num_steps, action_dim).</span>
+</span><span id="line-142"><span class="sd">        &quot;&quot;&quot;</span>
+</span><span id="line-143">        <span class="n">ep</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">idx_to_ep</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span>
+</span><span id="line-144">        <span class="n">episode_indices</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">episode_slices</span><span class="p">[</span><span class="n">ep</span><span class="p">]</span>
+</span><span id="line-145">        <span class="n">offset</span> <span class="o">=</span> <span class="n">idx</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">cum_slices</span><span class="p">[</span><span class="n">ep</span><span class="p">]</span>
+</span><span id="line-146">        <span class="n">start</span> <span class="o">=</span> <span class="n">offset</span>
+</span><span id="line-147">        <span class="n">stop</span> <span class="o">=</span> <span class="n">start</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_steps</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">frameskip</span>
+</span><span id="line-148">        <span class="n">idx_slice</span> <span class="o">=</span> <span class="n">episode_indices</span><span class="p">[</span><span class="n">start</span><span class="p">:</span><span class="n">stop</span><span class="p">]</span>
+</span><span id="line-149">        <span class="n">steps</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="p">[</span><span class="n">idx_slice</span><span class="p">]</span>
+</span><span id="line-150">
+</span><span id="line-151">        <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">steps</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+</span><span id="line-152">            <span class="k">if</span> <span class="n">k</span> <span class="o">==</span> <span class="s2">&quot;action&quot;</span><span class="p">:</span>
+</span><span id="line-153">                <span class="k">continue</span>
+</span><span id="line-154">
+</span><span id="line-155">            <span class="n">v</span> <span class="o">=</span> <span class="n">v</span><span class="p">[::</span> <span class="bp">self</span><span class="o">.</span><span class="n">frameskip</span><span class="p">]</span>
+</span><span id="line-156">            <span class="n">steps</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">v</span>
+</span><span id="line-157">
+</span><span id="line-158">            <span class="k">if</span> <span class="n">k</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">img_cols</span><span class="p">:</span>
+</span><span id="line-159">                <span class="n">steps</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">PIL</span><span class="o">.</span><span class="n">Image</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data_dir</span> <span class="o">/</span> <span class="n">img_path</span><span class="p">)</span> <span class="k">for</span> <span class="n">img_path</span> <span class="ow">in</span> <span class="n">v</span><span class="p">]</span>
+</span><span id="line-160">
+</span><span id="line-161">        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">transform</span><span class="p">:</span>
+</span><span id="line-162">            <span class="n">steps</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">steps</span><span class="p">)</span>
 </span><span id="line-163">
-</span><span id="line-164">
-<div class="viewcode-block" id="list_models">
-<a class="viewcode-back" href="../../../stable_worldmodel/#stable_worldmodel.data.list_models">[docs]</a>
-</span><span id="line-165"><span class="k">def</span><span class="w"> </span><span class="nf">list_models</span><span class="p">():</span>
-</span><span id="line-166">    <span class="n">pattern</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;^(.*?)(?=_(?:weights(?:-[^.]*)?|object)\.ckpt$)&quot;</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">IGNORECASE</span><span class="p">)</span>
+</span><span id="line-164">        <span class="c1"># stack images into a single tensor</span>
+</span><span id="line-165">        <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">img_cols</span><span class="p">:</span>
+</span><span id="line-166">            <span class="n">steps</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">stack</span><span class="p">(</span><span class="n">steps</span><span class="p">[</span><span class="n">k</span><span class="p">])</span>
 </span><span id="line-167">
-</span><span id="line-168">    <span class="n">cache_dir</span> <span class="o">=</span> <span class="n">get_cache_dir</span><span class="p">()</span>
-</span><span id="line-169">    <span class="n">models</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+</span><span id="line-168">        <span class="c1"># reshape action</span>
+</span><span id="line-169">        <span class="n">steps</span><span class="p">[</span><span class="s2">&quot;action&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">steps</span><span class="p">[</span><span class="s2">&quot;action&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">num_steps</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
 </span><span id="line-170">
-</span><span id="line-171">    <span class="k">for</span> <span class="n">fname</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">cache_dir</span><span class="p">):</span>
-</span><span id="line-172">        <span class="n">m</span> <span class="o">=</span> <span class="n">pattern</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">fname</span><span class="p">)</span>
-</span><span id="line-173">        <span class="k">if</span> <span class="n">m</span><span class="p">:</span>
-</span><span id="line-174">            <span class="n">models</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">m</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">))</span>
+</span><span id="line-171">        <span class="k">return</span> <span class="n">steps</span>
+</span><span id="line-172">
+<div class="viewcode-block" id="StepsDataset.infer_img_path_columns">
+<a class="viewcode-back" href="../../../stable_worldmodel/#stable_worldmodel.data.StepsDataset.infer_img_path_columns">[docs]</a>
+</span><span id="line-173">    <span class="k">def</span><span class="w"> </span><span class="nf">infer_img_path_columns</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+</span><span id="line-174"><span class="w">        </span><span class="sd">&quot;&quot;&quot;Infer which dataset columns contain image file paths.</span>
 </span><span id="line-175">
-</span><span id="line-176">    <span class="k">return</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">models</span><span class="p">)</span></div>
-
-</span><span id="line-177">
+</span><span id="line-176"><span class="sd">        Checks the first dataset element to identify string columns with</span>
+</span><span id="line-177"><span class="sd">        common image file extensions.</span>
 </span><span id="line-178">
-<div class="viewcode-block" id="dataset_info">
-<a class="viewcode-back" href="../../../stable_worldmodel/#stable_worldmodel.data.dataset_info">[docs]</a>
-</span><span id="line-179"><span class="k">def</span><span class="w"> </span><span class="nf">dataset_info</span><span class="p">(</span><span class="n">name</span><span class="p">):</span>
-</span><span id="line-180">    <span class="c1"># check name exists</span>
-</span><span id="line-181">    <span class="k">if</span> <span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">list_datasets</span><span class="p">():</span>
-</span><span id="line-182">        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Dataset &#39;</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">&#39; not found. Available: </span><span class="si">{</span><span class="n">list_datasets</span><span class="p">()</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</span><span id="line-179"><span class="sd">        Returns:</span>
+</span><span id="line-180"><span class="sd">            set: Set of column names containing image file paths.</span>
+</span><span id="line-181"><span class="sd">        &quot;&quot;&quot;</span>
+</span><span id="line-182">        <span class="n">IMG_EXTENSIONS</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;.jpeg&quot;</span><span class="p">,</span> <span class="s2">&quot;.png&quot;</span><span class="p">,</span> <span class="s2">&quot;.jpg&quot;</span><span class="p">)</span>
 </span><span id="line-183">
-</span><span id="line-184">    <span class="n">dataset</span> <span class="o">=</span> <span class="n">load_from_disk</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">Path</span><span class="p">(</span><span class="n">get_cache_dir</span><span class="p">(),</span> <span class="n">name</span><span class="p">,</span> <span class="s2">&quot;records&quot;</span><span class="p">)))</span>
-</span><span id="line-185">
-</span><span id="line-186">    <span class="n">dataset</span><span class="o">.</span><span class="n">set_format</span><span class="p">(</span><span class="s2">&quot;numpy&quot;</span><span class="p">)</span>
-</span><span id="line-187">
-</span><span id="line-188">    <span class="k">def</span><span class="w"> </span><span class="nf">assert_msg</span><span class="p">(</span><span class="n">col</span><span class="p">):</span>
-</span><span id="line-189">        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;Dataset must have &#39;</span><span class="si">{</span><span class="n">col</span><span class="si">}</span><span class="s2">&#39; column&quot;</span>  <span class="c1"># type: ignore</span>
-</span><span id="line-190">
-</span><span id="line-191">    <span class="k">assert</span> <span class="s2">&quot;episode_idx&quot;</span> <span class="ow">in</span> <span class="n">dataset</span><span class="o">.</span><span class="n">column_names</span><span class="p">,</span> <span class="n">assert_msg</span><span class="p">(</span><span class="s2">&quot;episode_idx&quot;</span><span class="p">)</span>
-</span><span id="line-192">    <span class="k">assert</span> <span class="s2">&quot;step_idx&quot;</span> <span class="ow">in</span> <span class="n">dataset</span><span class="o">.</span><span class="n">column_names</span><span class="p">,</span> <span class="n">assert_msg</span><span class="p">(</span><span class="s2">&quot;step_idx&quot;</span><span class="p">)</span>
-</span><span id="line-193">    <span class="k">assert</span> <span class="s2">&quot;episode_len&quot;</span> <span class="ow">in</span> <span class="n">dataset</span><span class="o">.</span><span class="n">column_names</span><span class="p">,</span> <span class="n">assert_msg</span><span class="p">(</span><span class="s2">&quot;episode_len&quot;</span><span class="p">)</span>
-</span><span id="line-194">    <span class="k">assert</span> <span class="s2">&quot;pixels&quot;</span> <span class="ow">in</span> <span class="n">dataset</span><span class="o">.</span><span class="n">column_names</span><span class="p">,</span> <span class="n">assert_msg</span><span class="p">(</span><span class="s2">&quot;pixels&quot;</span><span class="p">)</span>
-</span><span id="line-195">    <span class="k">assert</span> <span class="s2">&quot;action&quot;</span> <span class="ow">in</span> <span class="n">dataset</span><span class="o">.</span><span class="n">column_names</span><span class="p">,</span> <span class="n">assert_msg</span><span class="p">(</span><span class="s2">&quot;action&quot;</span><span class="p">)</span>
-</span><span id="line-196">    <span class="k">assert</span> <span class="s2">&quot;goal&quot;</span> <span class="ow">in</span> <span class="n">dataset</span><span class="o">.</span><span class="n">column_names</span><span class="p">,</span> <span class="n">assert_msg</span><span class="p">(</span><span class="s2">&quot;goal&quot;</span><span class="p">)</span>
-</span><span id="line-197">
-</span><span id="line-198">    <span class="n">info</span> <span class="o">=</span> <span class="p">{</span>
-</span><span id="line-199">        <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="n">name</span><span class="p">,</span>
-</span><span id="line-200">        <span class="s2">&quot;num_episodes&quot;</span><span class="p">:</span> <span class="nb">len</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">dataset</span><span class="p">[</span><span class="s2">&quot;episode_idx&quot;</span><span class="p">])),</span>
-</span><span id="line-201">        <span class="s2">&quot;num_steps&quot;</span><span class="p">:</span> <span class="nb">len</span><span class="p">(</span><span class="n">dataset</span><span class="p">),</span>
-</span><span id="line-202">        <span class="s2">&quot;columns&quot;</span><span class="p">:</span> <span class="n">dataset</span><span class="o">.</span><span class="n">column_names</span><span class="p">,</span>
-</span><span id="line-203">        <span class="s2">&quot;obs_shape&quot;</span><span class="p">:</span> <span class="n">dataset</span><span class="p">[</span><span class="s2">&quot;pixels&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span>
-</span><span id="line-204">        <span class="s2">&quot;action_shape&quot;</span><span class="p">:</span> <span class="n">dataset</span><span class="p">[</span><span class="s2">&quot;action&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span>
-</span><span id="line-205">        <span class="s2">&quot;goal_shape&quot;</span><span class="p">:</span> <span class="n">dataset</span><span class="p">[</span><span class="s2">&quot;goal&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span>
-</span><span id="line-206">        <span class="s2">&quot;variation&quot;</span><span class="p">:</span> <span class="p">{</span>
-</span><span id="line-207">            <span class="s2">&quot;has_variation&quot;</span><span class="p">:</span> <span class="nb">any</span><span class="p">(</span><span class="n">col</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;variation.&quot;</span><span class="p">)</span> <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">dataset</span><span class="o">.</span><span class="n">column_names</span><span class="p">),</span>
-</span><span id="line-208">            <span class="s2">&quot;names&quot;</span><span class="p">:</span> <span class="p">[</span><span class="n">col</span><span class="o">.</span><span class="n">removeprefix</span><span class="p">(</span><span class="s2">&quot;variation.&quot;</span><span class="p">)</span> <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">dataset</span><span class="o">.</span><span class="n">column_names</span> <span class="k">if</span> <span class="n">col</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;variation.&quot;</span><span class="p">)],</span>
-</span><span id="line-209">        <span class="p">},</span>
-</span><span id="line-210">    <span class="p">}</span>
-</span><span id="line-211">
-</span><span id="line-212">    <span class="k">return</span> <span class="n">info</span></div>
+</span><span id="line-184">        <span class="n">img_cols</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+</span><span id="line-185">        <span class="n">first_elem</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+</span><span id="line-186">        <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">column_names</span><span class="p">:</span>
+</span><span id="line-187">            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">first_elem</span><span class="p">[</span><span class="n">col</span><span class="p">],</span> <span class="nb">str</span><span class="p">)</span> <span class="ow">and</span> <span class="n">first_elem</span><span class="p">[</span><span class="n">col</span><span class="p">]</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="n">IMG_EXTENSIONS</span><span class="p">):</span>
+</span><span id="line-188">                <span class="n">img_cols</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">col</span><span class="p">)</span>
+</span><span id="line-189">        <span class="k">return</span> <span class="n">img_cols</span></div>
+</div>
 
+</span><span id="line-190">
+</span><span id="line-191">
+</span><span id="line-192"><span class="c1">#####################</span>
+</span><span id="line-193"><span class="c1">###     utils     ###</span>
+</span><span id="line-194"><span class="c1">#####################</span>
+</span><span id="line-195">
+</span><span id="line-196">
+<div class="viewcode-block" id="is_image">
+<a class="viewcode-back" href="../../../stable_worldmodel/#stable_worldmodel.data.is_image">[docs]</a>
+</span><span id="line-197"><span class="k">def</span><span class="w"> </span><span class="nf">is_image</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+</span><span id="line-198"><span class="w">    </span><span class="sd">&quot;&quot;&quot;Check if input is a valid image array.</span>
+</span><span id="line-199">
+</span><span id="line-200"><span class="sd">    Args:</span>
+</span><span id="line-201"><span class="sd">        x: Input to check.</span>
+</span><span id="line-202">
+</span><span id="line-203"><span class="sd">    Returns:</span>
+</span><span id="line-204"><span class="sd">        bool: True if x is a uint8 numpy array with shape (H, W, C) where</span>
+</span><span id="line-205"><span class="sd">            C is 1 (grayscale), 3 (RGB), or 4 (RGBA).</span>
+</span><span id="line-206"><span class="sd">    &quot;&quot;&quot;</span>
+</span><span id="line-207">    <span class="k">return</span> <span class="nb">type</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="ow">is</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="ow">and</span> <span class="n">x</span><span class="o">.</span><span class="n">ndim</span> <span class="o">==</span> <span class="mi">3</span> <span class="ow">and</span> <span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">]</span> <span class="ow">and</span> <span class="n">x</span><span class="o">.</span><span class="n">dtype</span> <span class="o">==</span> <span class="n">np</span><span class="o">.</span><span class="n">uint8</span></div>
+
+</span><span id="line-208">
+</span><span id="line-209">
+</span><span id="line-210"><span class="c1">#####################</span>
+</span><span id="line-211"><span class="c1">###   CLI Info   ####</span>
+</span><span id="line-212"><span class="c1">#####################</span>
 </span><span id="line-213">
 </span><span id="line-214">
+<div class="viewcode-block" id="SpaceInfo">
+<a class="viewcode-back" href="../../../stable_worldmodel/#stable_worldmodel.data.SpaceInfo">[docs]</a>
+</span><span id="line-215"><span class="k">class</span><span class="w"> </span><span class="nc">SpaceInfo</span><span class="p">(</span><span class="n">TypedDict</span><span class="p">,</span> <span class="n">total</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+</span><span id="line-216"><span class="w">    </span><span class="sd">&quot;&quot;&quot;Type specification for Gymnasium space metadata.</span>
+</span><span id="line-217">
+</span><span id="line-218"><span class="sd">    Attributes:</span>
+</span><span id="line-219"><span class="sd">        shape: Dimensions of the space.</span>
+</span><span id="line-220"><span class="sd">        type: Class name of the space (e.g., &#39;Box&#39;, &#39;Discrete&#39;).</span>
+</span><span id="line-221"><span class="sd">        dtype: Data type of the space elements.</span>
+</span><span id="line-222"><span class="sd">        low: Lower bounds for Box spaces.</span>
+</span><span id="line-223"><span class="sd">        high: Upper bounds for Box spaces.</span>
+</span><span id="line-224"><span class="sd">        n: Number of discrete values for Discrete spaces.</span>
+</span><span id="line-225"><span class="sd">    &quot;&quot;&quot;</span>
+</span><span id="line-226">
+</span><span id="line-227">    <span class="n">shape</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span>
+</span><span id="line-228">    <span class="nb">type</span><span class="p">:</span> <span class="nb">str</span>
+</span><span id="line-229">    <span class="n">dtype</span><span class="p">:</span> <span class="nb">str</span>
+</span><span id="line-230">    <span class="n">low</span><span class="p">:</span> <span class="n">Any</span>
+</span><span id="line-231">    <span class="n">high</span><span class="p">:</span> <span class="n">Any</span>
+</span><span id="line-232">    <span class="n">n</span><span class="p">:</span> <span class="nb">int</span></div>
+
+</span><span id="line-233">
+</span><span id="line-234">
+<div class="viewcode-block" id="VariationInfo">
+<a class="viewcode-back" href="../../../stable_worldmodel/#stable_worldmodel.data.VariationInfo">[docs]</a>
+</span><span id="line-235"><span class="k">class</span><span class="w"> </span><span class="nc">VariationInfo</span><span class="p">(</span><span class="n">TypedDict</span><span class="p">):</span>
+</span><span id="line-236"><span class="w">    </span><span class="sd">&quot;&quot;&quot;Type specification for environment variation metadata.</span>
+</span><span id="line-237">
+</span><span id="line-238"><span class="sd">    Attributes:</span>
+</span><span id="line-239"><span class="sd">        has_variation: Whether the environment supports variations.</span>
+</span><span id="line-240"><span class="sd">        type: Class name of the variation space if it exists.</span>
+</span><span id="line-241"><span class="sd">        names: List of variation parameter names.</span>
+</span><span id="line-242"><span class="sd">    &quot;&quot;&quot;</span>
+</span><span id="line-243">
+</span><span id="line-244">    <span class="n">has_variation</span><span class="p">:</span> <span class="nb">bool</span>
+</span><span id="line-245">    <span class="nb">type</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span>
+</span><span id="line-246">    <span class="n">names</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span></div>
+
+</span><span id="line-247">
+</span><span id="line-248">
+<div class="viewcode-block" id="WorldInfo">
+<a class="viewcode-back" href="../../../stable_worldmodel/#stable_worldmodel.data.WorldInfo">[docs]</a>
+</span><span id="line-249"><span class="k">class</span><span class="w"> </span><span class="nc">WorldInfo</span><span class="p">(</span><span class="n">TypedDict</span><span class="p">):</span>
+</span><span id="line-250"><span class="w">    </span><span class="sd">&quot;&quot;&quot;Type specification for world environment information.</span>
+</span><span id="line-251">
+</span><span id="line-252"><span class="sd">    Attributes:</span>
+</span><span id="line-253"><span class="sd">        name: Name/ID of the world environment.</span>
+</span><span id="line-254"><span class="sd">        observation_space: Metadata about the observation space.</span>
+</span><span id="line-255"><span class="sd">        action_space: Metadata about the action space.</span>
+</span><span id="line-256"><span class="sd">        variation: Information about environment variations.</span>
+</span><span id="line-257"><span class="sd">        config: Additional configuration parameters.</span>
+</span><span id="line-258"><span class="sd">    &quot;&quot;&quot;</span>
+</span><span id="line-259">
+</span><span id="line-260">    <span class="n">name</span><span class="p">:</span> <span class="nb">str</span>
+</span><span id="line-261">    <span class="n">observation_space</span><span class="p">:</span> <span class="n">SpaceInfo</span>
+</span><span id="line-262">    <span class="n">action_space</span><span class="p">:</span> <span class="n">SpaceInfo</span>
+</span><span id="line-263">    <span class="n">variation</span><span class="p">:</span> <span class="n">VariationInfo</span>
+</span><span id="line-264">    <span class="n">config</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span></div>
+
+</span><span id="line-265">
+</span><span id="line-266">
+<div class="viewcode-block" id="get_cache_dir">
+<a class="viewcode-back" href="../../../stable_worldmodel/#stable_worldmodel.data.get_cache_dir">[docs]</a>
+</span><span id="line-267"><span class="k">def</span><span class="w"> </span><span class="nf">get_cache_dir</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">Path</span><span class="p">:</span>
+</span><span id="line-268"><span class="w">    </span><span class="sd">&quot;&quot;&quot;Get the cache directory for stable_worldmodel data.</span>
+</span><span id="line-269">
+</span><span id="line-270"><span class="sd">    The cache directory can be customized via the STABLEWM_HOME environment</span>
+</span><span id="line-271"><span class="sd">    variable. If not set, defaults to ~/.stable_worldmodel.</span>
+</span><span id="line-272">
+</span><span id="line-273"><span class="sd">    Returns:</span>
+</span><span id="line-274"><span class="sd">        Path: Path to the cache directory. Directory is created if it doesn&#39;t exist.</span>
+</span><span id="line-275"><span class="sd">    &quot;&quot;&quot;</span>
+</span><span id="line-276">    <span class="n">cache_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s2">&quot;STABLEWM_HOME&quot;</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">expanduser</span><span class="p">(</span><span class="s2">&quot;~/.stable_worldmodel&quot;</span><span class="p">))</span>
+</span><span id="line-277">    <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">cache_dir</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</span><span id="line-278">    <span class="k">return</span> <span class="n">Path</span><span class="p">(</span><span class="n">cache_dir</span><span class="p">)</span></div>
+
+</span><span id="line-279">
+</span><span id="line-280">
+<div class="viewcode-block" id="list_datasets">
+<a class="viewcode-back" href="../../../stable_worldmodel/#stable_worldmodel.data.list_datasets">[docs]</a>
+</span><span id="line-281"><span class="k">def</span><span class="w"> </span><span class="nf">list_datasets</span><span class="p">():</span>
+</span><span id="line-282"><span class="w">    </span><span class="sd">&quot;&quot;&quot;List all cached datasets.</span>
+</span><span id="line-283">
+</span><span id="line-284"><span class="sd">    Returns:</span>
+</span><span id="line-285"><span class="sd">        list[str]: Names of all dataset directories in the cache.</span>
+</span><span id="line-286"><span class="sd">    &quot;&quot;&quot;</span>
+</span><span id="line-287">    <span class="k">with</span> <span class="n">os</span><span class="o">.</span><span class="n">scandir</span><span class="p">(</span><span class="n">get_cache_dir</span><span class="p">())</span> <span class="k">as</span> <span class="n">entries</span><span class="p">:</span>
+</span><span id="line-288">        <span class="k">return</span> <span class="p">[</span><span class="n">e</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">entries</span> <span class="k">if</span> <span class="n">e</span><span class="o">.</span><span class="n">is_dir</span><span class="p">()]</span></div>
+
+</span><span id="line-289">
+</span><span id="line-290">
+<div class="viewcode-block" id="list_models">
+<a class="viewcode-back" href="../../../stable_worldmodel/#stable_worldmodel.data.list_models">[docs]</a>
+</span><span id="line-291"><span class="k">def</span><span class="w"> </span><span class="nf">list_models</span><span class="p">():</span>
+</span><span id="line-292"><span class="w">    </span><span class="sd">&quot;&quot;&quot;List all cached model checkpoints.</span>
+</span><span id="line-293">
+</span><span id="line-294"><span class="sd">    Searches for files matching the pattern `&lt;name&gt;_weights*.ckpt` or</span>
+</span><span id="line-295"><span class="sd">    `&lt;name&gt;_object.ckpt` and returns unique model names.</span>
+</span><span id="line-296">
+</span><span id="line-297"><span class="sd">    Returns:</span>
+</span><span id="line-298"><span class="sd">        list[str]: Sorted list of model names found in cache.</span>
+</span><span id="line-299"><span class="sd">    &quot;&quot;&quot;</span>
+</span><span id="line-300">    <span class="n">pattern</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;^(.*?)(?=_(?:weights(?:-[^.]*)?|object)\.ckpt$)&quot;</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">IGNORECASE</span><span class="p">)</span>
+</span><span id="line-301">
+</span><span id="line-302">    <span class="n">cache_dir</span> <span class="o">=</span> <span class="n">get_cache_dir</span><span class="p">()</span>
+</span><span id="line-303">    <span class="n">models</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+</span><span id="line-304">
+</span><span id="line-305">    <span class="k">for</span> <span class="n">fname</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">cache_dir</span><span class="p">):</span>
+</span><span id="line-306">        <span class="n">m</span> <span class="o">=</span> <span class="n">pattern</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">fname</span><span class="p">)</span>
+</span><span id="line-307">        <span class="k">if</span> <span class="n">m</span><span class="p">:</span>
+</span><span id="line-308">            <span class="n">models</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">m</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">))</span>
+</span><span id="line-309">
+</span><span id="line-310">    <span class="k">return</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">models</span><span class="p">)</span></div>
+
+</span><span id="line-311">
+</span><span id="line-312">
+<div class="viewcode-block" id="dataset_info">
+<a class="viewcode-back" href="../../../stable_worldmodel/#stable_worldmodel.data.dataset_info">[docs]</a>
+</span><span id="line-313"><span class="k">def</span><span class="w"> </span><span class="nf">dataset_info</span><span class="p">(</span><span class="n">name</span><span class="p">):</span>
+</span><span id="line-314"><span class="w">    </span><span class="sd">&quot;&quot;&quot;Get metadata about a cached dataset.</span>
+</span><span id="line-315">
+</span><span id="line-316"><span class="sd">    Args:</span>
+</span><span id="line-317"><span class="sd">        name (str): Name of the dataset.</span>
+</span><span id="line-318">
+</span><span id="line-319"><span class="sd">    Returns:</span>
+</span><span id="line-320"><span class="sd">        dict: Dictionary containing dataset metadata including:</span>
+</span><span id="line-321"><span class="sd">            - name: Dataset name</span>
+</span><span id="line-322"><span class="sd">            - num_episodes: Number of unique episodes</span>
+</span><span id="line-323"><span class="sd">            - num_steps: Total number of steps</span>
+</span><span id="line-324"><span class="sd">            - columns: List of column names</span>
+</span><span id="line-325"><span class="sd">            - obs_shape: Shape of observation images</span>
+</span><span id="line-326"><span class="sd">            - action_shape: Shape of action vectors</span>
+</span><span id="line-327"><span class="sd">            - goal_shape: Shape of goal images</span>
+</span><span id="line-328"><span class="sd">            - variation: Dict with variation information</span>
+</span><span id="line-329">
+</span><span id="line-330"><span class="sd">    Raises:</span>
+</span><span id="line-331"><span class="sd">        ValueError: If dataset is not found in cache.</span>
+</span><span id="line-332"><span class="sd">        AssertionError: If required columns are missing.</span>
+</span><span id="line-333"><span class="sd">    &quot;&quot;&quot;</span>
+</span><span id="line-334">    <span class="c1"># check name exists</span>
+</span><span id="line-335">    <span class="k">if</span> <span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">list_datasets</span><span class="p">():</span>
+</span><span id="line-336">        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Dataset &#39;</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">&#39; not found. Available: </span><span class="si">{</span><span class="n">list_datasets</span><span class="p">()</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</span><span id="line-337">
+</span><span id="line-338">    <span class="n">dataset</span> <span class="o">=</span> <span class="n">load_from_disk</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">Path</span><span class="p">(</span><span class="n">get_cache_dir</span><span class="p">(),</span> <span class="n">name</span><span class="p">,</span> <span class="s2">&quot;records&quot;</span><span class="p">)))</span>
+</span><span id="line-339">
+</span><span id="line-340">    <span class="n">dataset</span><span class="o">.</span><span class="n">set_format</span><span class="p">(</span><span class="s2">&quot;numpy&quot;</span><span class="p">)</span>
+</span><span id="line-341">
+</span><span id="line-342">    <span class="k">def</span><span class="w"> </span><span class="nf">assert_msg</span><span class="p">(</span><span class="n">col</span><span class="p">):</span>
+</span><span id="line-343">        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;Dataset must have &#39;</span><span class="si">{</span><span class="n">col</span><span class="si">}</span><span class="s2">&#39; column&quot;</span>  <span class="c1"># type: ignore</span>
+</span><span id="line-344">
+</span><span id="line-345">    <span class="k">assert</span> <span class="s2">&quot;episode_idx&quot;</span> <span class="ow">in</span> <span class="n">dataset</span><span class="o">.</span><span class="n">column_names</span><span class="p">,</span> <span class="n">assert_msg</span><span class="p">(</span><span class="s2">&quot;episode_idx&quot;</span><span class="p">)</span>
+</span><span id="line-346">    <span class="k">assert</span> <span class="s2">&quot;step_idx&quot;</span> <span class="ow">in</span> <span class="n">dataset</span><span class="o">.</span><span class="n">column_names</span><span class="p">,</span> <span class="n">assert_msg</span><span class="p">(</span><span class="s2">&quot;step_idx&quot;</span><span class="p">)</span>
+</span><span id="line-347">    <span class="k">assert</span> <span class="s2">&quot;episode_len&quot;</span> <span class="ow">in</span> <span class="n">dataset</span><span class="o">.</span><span class="n">column_names</span><span class="p">,</span> <span class="n">assert_msg</span><span class="p">(</span><span class="s2">&quot;episode_len&quot;</span><span class="p">)</span>
+</span><span id="line-348">    <span class="k">assert</span> <span class="s2">&quot;pixels&quot;</span> <span class="ow">in</span> <span class="n">dataset</span><span class="o">.</span><span class="n">column_names</span><span class="p">,</span> <span class="n">assert_msg</span><span class="p">(</span><span class="s2">&quot;pixels&quot;</span><span class="p">)</span>
+</span><span id="line-349">    <span class="k">assert</span> <span class="s2">&quot;action&quot;</span> <span class="ow">in</span> <span class="n">dataset</span><span class="o">.</span><span class="n">column_names</span><span class="p">,</span> <span class="n">assert_msg</span><span class="p">(</span><span class="s2">&quot;action&quot;</span><span class="p">)</span>
+</span><span id="line-350">    <span class="k">assert</span> <span class="s2">&quot;goal&quot;</span> <span class="ow">in</span> <span class="n">dataset</span><span class="o">.</span><span class="n">column_names</span><span class="p">,</span> <span class="n">assert_msg</span><span class="p">(</span><span class="s2">&quot;goal&quot;</span><span class="p">)</span>
+</span><span id="line-351">
+</span><span id="line-352">    <span class="n">info</span> <span class="o">=</span> <span class="p">{</span>
+</span><span id="line-353">        <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="n">name</span><span class="p">,</span>
+</span><span id="line-354">        <span class="s2">&quot;num_episodes&quot;</span><span class="p">:</span> <span class="nb">len</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">dataset</span><span class="p">[</span><span class="s2">&quot;episode_idx&quot;</span><span class="p">])),</span>
+</span><span id="line-355">        <span class="s2">&quot;num_steps&quot;</span><span class="p">:</span> <span class="nb">len</span><span class="p">(</span><span class="n">dataset</span><span class="p">),</span>
+</span><span id="line-356">        <span class="s2">&quot;columns&quot;</span><span class="p">:</span> <span class="n">dataset</span><span class="o">.</span><span class="n">column_names</span><span class="p">,</span>
+</span><span id="line-357">        <span class="s2">&quot;obs_shape&quot;</span><span class="p">:</span> <span class="n">dataset</span><span class="p">[</span><span class="s2">&quot;pixels&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span>
+</span><span id="line-358">        <span class="s2">&quot;action_shape&quot;</span><span class="p">:</span> <span class="n">dataset</span><span class="p">[</span><span class="s2">&quot;action&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span>
+</span><span id="line-359">        <span class="s2">&quot;goal_shape&quot;</span><span class="p">:</span> <span class="n">dataset</span><span class="p">[</span><span class="s2">&quot;goal&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span>
+</span><span id="line-360">        <span class="s2">&quot;variation&quot;</span><span class="p">:</span> <span class="p">{</span>
+</span><span id="line-361">            <span class="s2">&quot;has_variation&quot;</span><span class="p">:</span> <span class="nb">any</span><span class="p">(</span><span class="n">col</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;variation.&quot;</span><span class="p">)</span> <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">dataset</span><span class="o">.</span><span class="n">column_names</span><span class="p">),</span>
+</span><span id="line-362">            <span class="s2">&quot;names&quot;</span><span class="p">:</span> <span class="p">[</span><span class="n">col</span><span class="o">.</span><span class="n">removeprefix</span><span class="p">(</span><span class="s2">&quot;variation.&quot;</span><span class="p">)</span> <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">dataset</span><span class="o">.</span><span class="n">column_names</span> <span class="k">if</span> <span class="n">col</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;variation.&quot;</span><span class="p">)],</span>
+</span><span id="line-363">        <span class="p">},</span>
+</span><span id="line-364">    <span class="p">}</span>
+</span><span id="line-365">
+</span><span id="line-366">    <span class="k">return</span> <span class="n">info</span></div>
+
+</span><span id="line-367">
+</span><span id="line-368">
 <div class="viewcode-block" id="list_worlds">
 <a class="viewcode-back" href="../../../stable_worldmodel/#stable_worldmodel.data.list_worlds">[docs]</a>
-</span><span id="line-215"><span class="k">def</span><span class="w"> </span><span class="nf">list_worlds</span><span class="p">():</span>
-</span><span id="line-216">    <span class="k">return</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">swm</span><span class="o">.</span><span class="n">WORLDS</span><span class="p">)</span></div>
+</span><span id="line-369"><span class="k">def</span><span class="w"> </span><span class="nf">list_worlds</span><span class="p">():</span>
+</span><span id="line-370"><span class="w">    </span><span class="sd">&quot;&quot;&quot;List all registered world environments.</span>
+</span><span id="line-371">
+</span><span id="line-372"><span class="sd">    Returns:</span>
+</span><span id="line-373"><span class="sd">        list[str]: Sorted list of world environment IDs.</span>
+</span><span id="line-374"><span class="sd">    &quot;&quot;&quot;</span>
+</span><span id="line-375">    <span class="k">return</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">swm</span><span class="o">.</span><span class="n">envs</span><span class="o">.</span><span class="n">WORLDS</span><span class="p">)</span></div>
 
-</span><span id="line-217">
-</span><span id="line-218">
-</span><span id="line-219"><span class="k">def</span><span class="w"> </span><span class="nf">_space_meta</span><span class="p">(</span><span class="n">space</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">SpaceInfo</span> <span class="o">|</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">SpaceInfo</span><span class="p">]</span> <span class="o">|</span> <span class="nb">list</span><span class="p">[</span><span class="n">SpaceInfo</span><span class="p">]:</span>
-</span><span id="line-220">    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">space</span><span class="p">,</span> <span class="n">gym</span><span class="o">.</span><span class="n">spaces</span><span class="o">.</span><span class="n">Dict</span><span class="p">):</span>
-</span><span id="line-221">        <span class="k">return</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">_space_meta</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">space</span><span class="o">.</span><span class="n">spaces</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
-</span><span id="line-222">
-</span><span id="line-223">    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">space</span><span class="p">,</span> <span class="n">gym</span><span class="o">.</span><span class="n">spaces</span><span class="o">.</span><span class="n">Sequence</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">space</span><span class="p">,</span> <span class="n">gym</span><span class="o">.</span><span class="n">spaces</span><span class="o">.</span><span class="n">Tuple</span><span class="p">):</span>
-</span><span id="line-224">        <span class="k">return</span> <span class="p">[</span><span class="n">_space_meta</span><span class="p">(</span><span class="n">s</span><span class="p">)</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">space</span><span class="o">.</span><span class="n">spaces</span><span class="p">]</span>
-</span><span id="line-225">
-</span><span id="line-226">    <span class="n">info</span><span class="p">:</span> <span class="n">SpaceInfo</span> <span class="o">=</span> <span class="p">{</span>
-</span><span id="line-227">        <span class="s2">&quot;shape&quot;</span><span class="p">:</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">space</span><span class="p">,</span> <span class="s2">&quot;shape&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
-</span><span id="line-228">        <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="nb">type</span><span class="p">(</span><span class="n">space</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span>
-</span><span id="line-229">    <span class="p">}</span>
-</span><span id="line-230">
-</span><span id="line-231">    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">space</span><span class="p">,</span> <span class="s2">&quot;dtype&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">space</span><span class="p">,</span> <span class="s2">&quot;dtype&quot;</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-</span><span id="line-232">        <span class="n">info</span><span class="p">[</span><span class="s2">&quot;dtype&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">space</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span>
-</span><span id="line-233">    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">space</span><span class="p">,</span> <span class="s2">&quot;low&quot;</span><span class="p">):</span>
-</span><span id="line-234">        <span class="n">info</span><span class="p">[</span><span class="s2">&quot;low&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">space</span><span class="p">,</span> <span class="s2">&quot;low&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
-</span><span id="line-235">    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">space</span><span class="p">,</span> <span class="s2">&quot;high&quot;</span><span class="p">):</span>
-</span><span id="line-236">        <span class="n">info</span><span class="p">[</span><span class="s2">&quot;high&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">space</span><span class="p">,</span> <span class="s2">&quot;high&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
-</span><span id="line-237">    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">space</span><span class="p">,</span> <span class="s2">&quot;n&quot;</span><span class="p">):</span>
-</span><span id="line-238">        <span class="n">info</span><span class="p">[</span><span class="s2">&quot;n&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">space</span><span class="p">,</span> <span class="s2">&quot;n&quot;</span><span class="p">)</span>
-</span><span id="line-239">    <span class="k">return</span> <span class="n">info</span>
-</span><span id="line-240">
-</span><span id="line-241">
+</span><span id="line-376">
+</span><span id="line-377">
+</span><span id="line-378"><span class="k">def</span><span class="w"> </span><span class="nf">_space_meta</span><span class="p">(</span><span class="n">space</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">SpaceInfo</span> <span class="o">|</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">SpaceInfo</span><span class="p">]</span> <span class="o">|</span> <span class="nb">list</span><span class="p">[</span><span class="n">SpaceInfo</span><span class="p">]:</span>
+</span><span id="line-379"><span class="w">    </span><span class="sd">&quot;&quot;&quot;Extract metadata from a Gymnasium space.</span>
+</span><span id="line-380">
+</span><span id="line-381"><span class="sd">    Recursively processes Dict, Tuple, and Sequence spaces.</span>
+</span><span id="line-382">
+</span><span id="line-383"><span class="sd">    Args:</span>
+</span><span id="line-384"><span class="sd">        space: A Gymnasium space object.</span>
+</span><span id="line-385">
+</span><span id="line-386"><span class="sd">    Returns:</span>
+</span><span id="line-387"><span class="sd">        SpaceInfo | dict | list: Space metadata. Returns a dict for Dict spaces,</span>
+</span><span id="line-388"><span class="sd">            a list for Tuple/Sequence spaces, or a SpaceInfo dict for simple spaces.</span>
+</span><span id="line-389"><span class="sd">    &quot;&quot;&quot;</span>
+</span><span id="line-390">    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">space</span><span class="p">,</span> <span class="n">gym</span><span class="o">.</span><span class="n">spaces</span><span class="o">.</span><span class="n">Dict</span><span class="p">):</span>
+</span><span id="line-391">        <span class="k">return</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">_space_meta</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">space</span><span class="o">.</span><span class="n">spaces</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
+</span><span id="line-392">
+</span><span id="line-393">    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">space</span><span class="p">,</span> <span class="n">gym</span><span class="o">.</span><span class="n">spaces</span><span class="o">.</span><span class="n">Sequence</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">space</span><span class="p">,</span> <span class="n">gym</span><span class="o">.</span><span class="n">spaces</span><span class="o">.</span><span class="n">Tuple</span><span class="p">):</span>
+</span><span id="line-394">        <span class="k">return</span> <span class="p">[</span><span class="n">_space_meta</span><span class="p">(</span><span class="n">s</span><span class="p">)</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">space</span><span class="o">.</span><span class="n">spaces</span><span class="p">]</span>
+</span><span id="line-395">
+</span><span id="line-396">    <span class="n">info</span><span class="p">:</span> <span class="n">SpaceInfo</span> <span class="o">=</span> <span class="p">{</span>
+</span><span id="line-397">        <span class="s2">&quot;shape&quot;</span><span class="p">:</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">space</span><span class="p">,</span> <span class="s2">&quot;shape&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
+</span><span id="line-398">        <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="nb">type</span><span class="p">(</span><span class="n">space</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span>
+</span><span id="line-399">    <span class="p">}</span>
+</span><span id="line-400">
+</span><span id="line-401">    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">space</span><span class="p">,</span> <span class="s2">&quot;dtype&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">space</span><span class="p">,</span> <span class="s2">&quot;dtype&quot;</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+</span><span id="line-402">        <span class="n">info</span><span class="p">[</span><span class="s2">&quot;dtype&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">space</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span>
+</span><span id="line-403">    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">space</span><span class="p">,</span> <span class="s2">&quot;low&quot;</span><span class="p">):</span>
+</span><span id="line-404">        <span class="n">info</span><span class="p">[</span><span class="s2">&quot;low&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">space</span><span class="p">,</span> <span class="s2">&quot;low&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+</span><span id="line-405">    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">space</span><span class="p">,</span> <span class="s2">&quot;high&quot;</span><span class="p">):</span>
+</span><span id="line-406">        <span class="n">info</span><span class="p">[</span><span class="s2">&quot;high&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">space</span><span class="p">,</span> <span class="s2">&quot;high&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+</span><span id="line-407">    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">space</span><span class="p">,</span> <span class="s2">&quot;n&quot;</span><span class="p">):</span>
+</span><span id="line-408">        <span class="n">info</span><span class="p">[</span><span class="s2">&quot;n&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">space</span><span class="p">,</span> <span class="s2">&quot;n&quot;</span><span class="p">)</span>
+</span><span id="line-409">    <span class="k">return</span> <span class="n">info</span>
+</span><span id="line-410">
+</span><span id="line-411">
 <div class="viewcode-block" id="world_info">
 <a class="viewcode-back" href="../../../stable_worldmodel/#stable_worldmodel.data.world_info">[docs]</a>
-</span><span id="line-242"><span class="nd">@lru_cache</span><span class="p">(</span><span class="n">maxsize</span><span class="o">=</span><span class="mi">128</span><span class="p">)</span>
-</span><span id="line-243"><span class="k">def</span><span class="w"> </span><span class="nf">world_info</span><span class="p">(</span>
-</span><span id="line-244">    <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-</span><span id="line-245">    <span class="o">*</span><span class="p">,</span>
-</span><span id="line-246">    <span class="n">image_shape</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="mi">224</span><span class="p">,</span> <span class="mi">224</span><span class="p">),</span>
-</span><span id="line-247">    <span class="n">render_mode</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;rgb_array&quot;</span><span class="p">,</span>
-</span><span id="line-248"><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">WorldInfo</span><span class="p">:</span>
-</span><span id="line-249">    <span class="k">if</span> <span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">swm</span><span class="o">.</span><span class="n">WORLDS</span><span class="p">:</span>
-</span><span id="line-250">        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;World &#39;</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">&#39; not found. Available: </span><span class="si">{</span><span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">list_worlds</span><span class="p">())</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-</span><span id="line-251">    <span class="n">world</span> <span class="o">=</span> <span class="kc">None</span>
-</span><span id="line-252">
-</span><span id="line-253">    <span class="k">try</span><span class="p">:</span>
-</span><span id="line-254">        <span class="n">world</span> <span class="o">=</span> <span class="n">swm</span><span class="o">.</span><span class="n">World</span><span class="p">(</span>
-</span><span id="line-255">            <span class="n">name</span><span class="p">,</span>
-</span><span id="line-256">            <span class="n">num_envs</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
-</span><span id="line-257">            <span class="n">image_shape</span><span class="o">=</span><span class="n">image_shape</span><span class="p">,</span>
-</span><span id="line-258">            <span class="n">render_mode</span><span class="o">=</span><span class="n">render_mode</span><span class="p">,</span>
-</span><span id="line-259">            <span class="n">verbose</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
-</span><span id="line-260">        <span class="p">)</span>
-</span><span id="line-261">
-</span><span id="line-262">        <span class="n">obs_space</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">world</span><span class="p">,</span> <span class="s2">&quot;single_observation_space&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
-</span><span id="line-263">        <span class="n">act_space</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">world</span><span class="p">,</span> <span class="s2">&quot;single_action_space&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
-</span><span id="line-264">        <span class="n">var_space</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">world</span><span class="p">,</span> <span class="s2">&quot;single_variation_space&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
-</span><span id="line-265">
-</span><span id="line-266">        <span class="n">variation</span><span class="p">:</span> <span class="n">VariationInfo</span> <span class="o">=</span> <span class="p">{</span>
-</span><span id="line-267">            <span class="s2">&quot;has_variation&quot;</span><span class="p">:</span> <span class="n">var_space</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">,</span>
-</span><span id="line-268">            <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="nb">type</span><span class="p">(</span><span class="n">var_space</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span> <span class="k">if</span> <span class="n">var_space</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
-</span><span id="line-269">            <span class="s2">&quot;names&quot;</span><span class="p">:</span> <span class="n">var_space</span><span class="o">.</span><span class="n">names</span><span class="p">()</span> <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">var_space</span><span class="p">,</span> <span class="s2">&quot;names&quot;</span><span class="p">)</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
-</span><span id="line-270">        <span class="p">}</span>
-</span><span id="line-271">
-</span><span id="line-272">        <span class="k">return</span> <span class="p">{</span>
-</span><span id="line-273">            <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="n">name</span><span class="p">,</span>
-</span><span id="line-274">            <span class="s2">&quot;observation_space&quot;</span><span class="p">:</span> <span class="n">_space_meta</span><span class="p">(</span><span class="n">obs_space</span><span class="p">)</span> <span class="k">if</span> <span class="n">obs_space</span> <span class="k">else</span> <span class="p">{},</span>
-</span><span id="line-275">            <span class="s2">&quot;action_space&quot;</span><span class="p">:</span> <span class="n">_space_meta</span><span class="p">(</span><span class="n">act_space</span><span class="p">)</span> <span class="k">if</span> <span class="n">act_space</span> <span class="k">else</span> <span class="p">{},</span>
-</span><span id="line-276">            <span class="s2">&quot;variation&quot;</span><span class="p">:</span> <span class="n">variation</span><span class="p">,</span>
-</span><span id="line-277">        <span class="p">}</span>
-</span><span id="line-278">
-</span><span id="line-279">    <span class="k">finally</span><span class="p">:</span>
-</span><span id="line-280">        <span class="k">if</span> <span class="n">world</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">world</span><span class="p">,</span> <span class="s2">&quot;close&quot;</span><span class="p">):</span>
-</span><span id="line-281">            <span class="k">try</span><span class="p">:</span>
-</span><span id="line-282">                <span class="n">world</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
-</span><span id="line-283">            <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
-</span><span id="line-284">                <span class="k">pass</span></div>
+</span><span id="line-412"><span class="nd">@lru_cache</span><span class="p">(</span><span class="n">maxsize</span><span class="o">=</span><span class="mi">128</span><span class="p">)</span>
+</span><span id="line-413"><span class="k">def</span><span class="w"> </span><span class="nf">world_info</span><span class="p">(</span>
+</span><span id="line-414">    <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+</span><span id="line-415">    <span class="o">*</span><span class="p">,</span>
+</span><span id="line-416">    <span class="n">image_shape</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="mi">224</span><span class="p">,</span> <span class="mi">224</span><span class="p">),</span>
+</span><span id="line-417">    <span class="n">render_mode</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;rgb_array&quot;</span><span class="p">,</span>
+</span><span id="line-418"><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">WorldInfo</span><span class="p">:</span>
+</span><span id="line-419"><span class="w">    </span><span class="sd">&quot;&quot;&quot;Get metadata about a world environment.</span>
+</span><span id="line-420">
+</span><span id="line-421"><span class="sd">    Creates a temporary world instance to extract observation space, action</span>
+</span><span id="line-422"><span class="sd">    space, and variation information. Results are cached for efficiency.</span>
+</span><span id="line-423">
+</span><span id="line-424"><span class="sd">    Args:</span>
+</span><span id="line-425"><span class="sd">        name: ID of the world environment.</span>
+</span><span id="line-426"><span class="sd">        image_shape: Desired image shape for rendering. Defaults to (224, 224).</span>
+</span><span id="line-427"><span class="sd">        render_mode: Rendering mode for the environment. Defaults to &quot;rgb_array&quot;.</span>
+</span><span id="line-428">
+</span><span id="line-429"><span class="sd">    Returns:</span>
+</span><span id="line-430"><span class="sd">        WorldInfo: Dictionary containing world metadata including spaces and variations.</span>
+</span><span id="line-431">
+</span><span id="line-432"><span class="sd">    Raises:</span>
+</span><span id="line-433"><span class="sd">        ValueError: If world name is not registered.</span>
+</span><span id="line-434"><span class="sd">    &quot;&quot;&quot;</span>
+</span><span id="line-435">    <span class="k">if</span> <span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">swm</span><span class="o">.</span><span class="n">envs</span><span class="o">.</span><span class="n">WORLDS</span><span class="p">:</span>
+</span><span id="line-436">        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;World &#39;</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">&#39; not found. Available: </span><span class="si">{</span><span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">list_worlds</span><span class="p">())</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</span><span id="line-437">    <span class="n">world</span> <span class="o">=</span> <span class="kc">None</span>
+</span><span id="line-438">
+</span><span id="line-439">    <span class="k">try</span><span class="p">:</span>
+</span><span id="line-440">        <span class="n">world</span> <span class="o">=</span> <span class="n">swm</span><span class="o">.</span><span class="n">World</span><span class="p">(</span>
+</span><span id="line-441">            <span class="n">name</span><span class="p">,</span>
+</span><span id="line-442">            <span class="n">num_envs</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+</span><span id="line-443">            <span class="n">image_shape</span><span class="o">=</span><span class="n">image_shape</span><span class="p">,</span>
+</span><span id="line-444">            <span class="n">render_mode</span><span class="o">=</span><span class="n">render_mode</span><span class="p">,</span>
+</span><span id="line-445">            <span class="n">verbose</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+</span><span id="line-446">        <span class="p">)</span>
+</span><span id="line-447">
+</span><span id="line-448">        <span class="n">obs_space</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">world</span><span class="p">,</span> <span class="s2">&quot;single_observation_space&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+</span><span id="line-449">        <span class="n">act_space</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">world</span><span class="p">,</span> <span class="s2">&quot;single_action_space&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+</span><span id="line-450">        <span class="n">var_space</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">world</span><span class="p">,</span> <span class="s2">&quot;single_variation_space&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+</span><span id="line-451">
+</span><span id="line-452">        <span class="n">variation</span><span class="p">:</span> <span class="n">VariationInfo</span> <span class="o">=</span> <span class="p">{</span>
+</span><span id="line-453">            <span class="s2">&quot;has_variation&quot;</span><span class="p">:</span> <span class="n">var_space</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">,</span>
+</span><span id="line-454">            <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="nb">type</span><span class="p">(</span><span class="n">var_space</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span> <span class="k">if</span> <span class="n">var_space</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
+</span><span id="line-455">            <span class="s2">&quot;names&quot;</span><span class="p">:</span> <span class="n">var_space</span><span class="o">.</span><span class="n">names</span><span class="p">()</span> <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">var_space</span><span class="p">,</span> <span class="s2">&quot;names&quot;</span><span class="p">)</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
+</span><span id="line-456">        <span class="p">}</span>
+</span><span id="line-457">
+</span><span id="line-458">        <span class="k">return</span> <span class="p">{</span>
+</span><span id="line-459">            <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="n">name</span><span class="p">,</span>
+</span><span id="line-460">            <span class="s2">&quot;observation_space&quot;</span><span class="p">:</span> <span class="n">_space_meta</span><span class="p">(</span><span class="n">obs_space</span><span class="p">)</span> <span class="k">if</span> <span class="n">obs_space</span> <span class="k">else</span> <span class="p">{},</span>
+</span><span id="line-461">            <span class="s2">&quot;action_space&quot;</span><span class="p">:</span> <span class="n">_space_meta</span><span class="p">(</span><span class="n">act_space</span><span class="p">)</span> <span class="k">if</span> <span class="n">act_space</span> <span class="k">else</span> <span class="p">{},</span>
+</span><span id="line-462">            <span class="s2">&quot;variation&quot;</span><span class="p">:</span> <span class="n">variation</span><span class="p">,</span>
+</span><span id="line-463">        <span class="p">}</span>
+</span><span id="line-464">
+</span><span id="line-465">    <span class="k">finally</span><span class="p">:</span>
+</span><span id="line-466">        <span class="k">if</span> <span class="n">world</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">world</span><span class="p">,</span> <span class="s2">&quot;close&quot;</span><span class="p">):</span>
+</span><span id="line-467">            <span class="k">try</span><span class="p">:</span>
+</span><span id="line-468">                <span class="n">world</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+</span><span id="line-469">            <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+</span><span id="line-470">                <span class="k">pass</span></div>
 
-</span><span id="line-285">
-</span><span id="line-286">
+</span><span id="line-471">
+</span><span id="line-472">
 <div class="viewcode-block" id="delete_dataset">
 <a class="viewcode-back" href="../../../stable_worldmodel/#stable_worldmodel.data.delete_dataset">[docs]</a>
-</span><span id="line-287"><span class="k">def</span><span class="w"> </span><span class="nf">delete_dataset</span><span class="p">(</span><span class="n">name</span><span class="p">):</span>
-</span><span id="line-288">    <span class="kn">from</span><span class="w"> </span><span class="nn">datasets</span><span class="w"> </span><span class="kn">import</span> <span class="n">logging</span> <span class="k">as</span> <span class="n">ds_logging</span>
-</span><span id="line-289">
-</span><span id="line-290">    <span class="n">ds_logging</span><span class="o">.</span><span class="n">set_verbosity_error</span><span class="p">()</span>
-</span><span id="line-291">
-</span><span id="line-292">    <span class="k">try</span><span class="p">:</span>
-</span><span id="line-293">        <span class="n">dataset_path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">get_cache_dir</span><span class="p">(),</span> <span class="n">name</span><span class="p">)</span>
-</span><span id="line-294">
-</span><span id="line-295">        <span class="k">if</span> <span class="ow">not</span> <span class="n">dataset_path</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
-</span><span id="line-296">            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Dataset </span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2"> does not exist at </span><span class="si">{</span><span class="n">dataset_path</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-</span><span id="line-297">
-</span><span id="line-298">        <span class="n">dataset</span> <span class="o">=</span> <span class="n">load_from_disk</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">Path</span><span class="p">(</span><span class="n">dataset_path</span><span class="p">,</span> <span class="s2">&quot;records&quot;</span><span class="p">)))</span>
-</span><span id="line-299">
-</span><span id="line-300">        <span class="c1"># remove cache files</span>
-</span><span id="line-301">        <span class="n">dataset</span><span class="o">.</span><span class="n">cleanup_cache_files</span><span class="p">()</span>
-</span><span id="line-302">
-</span><span id="line-303">        <span class="c1"># delete dataset directory</span>
-</span><span id="line-304">        <span class="n">shutil</span><span class="o">.</span><span class="n">rmtree</span><span class="p">(</span><span class="n">dataset_path</span><span class="p">,</span> <span class="n">ignore_errors</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
-</span><span id="line-305">
-</span><span id="line-306">        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;🗑️ Dataset </span><span class="si">{</span><span class="n">dataset_path</span><span class="si">}</span><span class="s2"> deleted!&quot;</span><span class="p">)</span>
-</span><span id="line-307">
-</span><span id="line-308">    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-</span><span id="line-309">        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;[red]Error cleaning up dataset [cyan]</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">[/cyan]: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">[/red]&quot;</span><span class="p">)</span></div>
+</span><span id="line-473"><span class="k">def</span><span class="w"> </span><span class="nf">delete_dataset</span><span class="p">(</span><span class="n">name</span><span class="p">):</span>
+</span><span id="line-474"><span class="w">    </span><span class="sd">&quot;&quot;&quot;Delete a cached dataset and its associated files.</span>
+</span><span id="line-475">
+</span><span id="line-476"><span class="sd">    Args:</span>
+</span><span id="line-477"><span class="sd">        name (str): Name of the dataset to delete.</span>
+</span><span id="line-478">
+</span><span id="line-479"><span class="sd">    Note:</span>
+</span><span id="line-480"><span class="sd">        Prints success or error messages to console.</span>
+</span><span id="line-481"><span class="sd">    &quot;&quot;&quot;</span>
+</span><span id="line-482">    <span class="kn">from</span><span class="w"> </span><span class="nn">datasets</span><span class="w"> </span><span class="kn">import</span> <span class="n">logging</span> <span class="k">as</span> <span class="n">ds_logging</span>
+</span><span id="line-483">
+</span><span id="line-484">    <span class="n">ds_logging</span><span class="o">.</span><span class="n">set_verbosity_error</span><span class="p">()</span>
+</span><span id="line-485">
+</span><span id="line-486">    <span class="k">try</span><span class="p">:</span>
+</span><span id="line-487">        <span class="n">dataset_path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">get_cache_dir</span><span class="p">(),</span> <span class="n">name</span><span class="p">)</span>
+</span><span id="line-488">
+</span><span id="line-489">        <span class="k">if</span> <span class="ow">not</span> <span class="n">dataset_path</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+</span><span id="line-490">            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Dataset </span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2"> does not exist at </span><span class="si">{</span><span class="n">dataset_path</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</span><span id="line-491">
+</span><span id="line-492">        <span class="n">dataset</span> <span class="o">=</span> <span class="n">load_from_disk</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">Path</span><span class="p">(</span><span class="n">dataset_path</span><span class="p">,</span> <span class="s2">&quot;records&quot;</span><span class="p">)))</span>
+</span><span id="line-493">
+</span><span id="line-494">        <span class="c1"># remove cache files</span>
+</span><span id="line-495">        <span class="n">dataset</span><span class="o">.</span><span class="n">cleanup_cache_files</span><span class="p">()</span>
+</span><span id="line-496">
+</span><span id="line-497">        <span class="c1"># delete dataset directory</span>
+</span><span id="line-498">        <span class="n">shutil</span><span class="o">.</span><span class="n">rmtree</span><span class="p">(</span><span class="n">dataset_path</span><span class="p">,</span> <span class="n">ignore_errors</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+</span><span id="line-499">
+</span><span id="line-500">        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;🗑️ Dataset </span><span class="si">{</span><span class="n">dataset_path</span><span class="si">}</span><span class="s2"> deleted!&quot;</span><span class="p">)</span>
+</span><span id="line-501">
+</span><span id="line-502">    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+</span><span id="line-503">        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;[red]Error cleaning up dataset [cyan]</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">[/cyan]: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">[/red]&quot;</span><span class="p">)</span></div>
 
-</span><span id="line-310">
-</span><span id="line-311">
+</span><span id="line-504">
+</span><span id="line-505">
 <div class="viewcode-block" id="delete_model">
 <a class="viewcode-back" href="../../../stable_worldmodel/#stable_worldmodel.data.delete_model">[docs]</a>
-</span><span id="line-312"><span class="k">def</span><span class="w"> </span><span class="nf">delete_model</span><span class="p">(</span><span class="n">name</span><span class="p">):</span>
-</span><span id="line-313">    <span class="n">pattern</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="sa">rf</span><span class="s2">&quot;^</span><span class="si">{</span><span class="n">re</span><span class="o">.</span><span class="n">escape</span><span class="p">(</span><span class="n">name</span><span class="p">)</span><span class="si">}</span><span class="s2">(?:_[^-].*)?\.ckpt$&quot;</span><span class="p">)</span>
-</span><span id="line-314">    <span class="n">cache_dir</span> <span class="o">=</span> <span class="n">get_cache_dir</span><span class="p">()</span>
-</span><span id="line-315">
-</span><span id="line-316">    <span class="k">for</span> <span class="n">fname</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">cache_dir</span><span class="p">):</span>
-</span><span id="line-317">        <span class="k">if</span> <span class="n">pattern</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">fname</span><span class="p">):</span>
-</span><span id="line-318">            <span class="n">filepath</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">cache_dir</span><span class="p">,</span> <span class="n">fname</span><span class="p">)</span>
-</span><span id="line-319">            <span class="k">try</span><span class="p">:</span>
-</span><span id="line-320">                <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">filepath</span><span class="p">)</span>
-</span><span id="line-321">                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;🔮 Model </span><span class="si">{</span><span class="n">fname</span><span class="si">}</span><span class="s2"> deleted&quot;</span><span class="p">)</span>
-</span><span id="line-322">            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-</span><span id="line-323">                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;[red]Error occurred while deleting model [cyan]</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">[/cyan]: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">[/red]&quot;</span><span class="p">)</span></div>
+</span><span id="line-506"><span class="k">def</span><span class="w"> </span><span class="nf">delete_model</span><span class="p">(</span><span class="n">name</span><span class="p">):</span>
+</span><span id="line-507"><span class="w">    </span><span class="sd">&quot;&quot;&quot;Delete cached model checkpoint files.</span>
+</span><span id="line-508">
+</span><span id="line-509"><span class="sd">    Removes all checkpoint files (weights and object files) matching the</span>
+</span><span id="line-510"><span class="sd">    given model name.</span>
+</span><span id="line-511">
+</span><span id="line-512"><span class="sd">    Args:</span>
+</span><span id="line-513"><span class="sd">        name (str): Name of the model to delete.</span>
+</span><span id="line-514">
+</span><span id="line-515"><span class="sd">    Note:</span>
+</span><span id="line-516"><span class="sd">        Prints success or error messages to console for each file deleted.</span>
+</span><span id="line-517"><span class="sd">    &quot;&quot;&quot;</span>
+</span><span id="line-518">    <span class="n">pattern</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="sa">rf</span><span class="s2">&quot;^</span><span class="si">{</span><span class="n">re</span><span class="o">.</span><span class="n">escape</span><span class="p">(</span><span class="n">name</span><span class="p">)</span><span class="si">}</span><span class="s2">(?:_[^-].*)?\.ckpt$&quot;</span><span class="p">)</span>
+</span><span id="line-519">    <span class="n">cache_dir</span> <span class="o">=</span> <span class="n">get_cache_dir</span><span class="p">()</span>
+</span><span id="line-520">
+</span><span id="line-521">    <span class="k">for</span> <span class="n">fname</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">cache_dir</span><span class="p">):</span>
+</span><span id="line-522">        <span class="k">if</span> <span class="n">pattern</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">fname</span><span class="p">):</span>
+</span><span id="line-523">            <span class="n">filepath</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">cache_dir</span><span class="p">,</span> <span class="n">fname</span><span class="p">)</span>
+</span><span id="line-524">            <span class="k">try</span><span class="p">:</span>
+</span><span id="line-525">                <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">filepath</span><span class="p">)</span>
+</span><span id="line-526">                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;🔮 Model </span><span class="si">{</span><span class="n">fname</span><span class="si">}</span><span class="s2"> deleted&quot;</span><span class="p">)</span>
+</span><span id="line-527">            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+</span><span id="line-528">                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;[red]Error occurred while deleting model [cyan]</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">[/cyan]: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">[/red]&quot;</span><span class="p">)</span></div>
 
 </span></code></pre></div>
     </div></div>

@@ -449,6 +449,38 @@
 </span><span id="line-193">    <span class="n">geom</span> <span class="o">=</span> <span class="n">sg</span><span class="o">.</span><span class="n">MultiPolygon</span><span class="p">(</span><span class="n">geoms</span><span class="p">)</span>
 </span><span id="line-194">    <span class="k">return</span> <span class="n">geom</span></div>
 
+</span><span id="line-195">
+</span><span id="line-196">
+<div class="viewcode-block" id="perturb_camera_angle">
+<a class="viewcode-back" href="../../../../stable_worldmodel.envs/#stable_worldmodel.envs.utils.perturb_camera_angle">[docs]</a>
+</span><span id="line-197"><span class="k">def</span><span class="w"> </span><span class="nf">perturb_camera_angle</span><span class="p">(</span><span class="n">xyaxis</span><span class="p">,</span> <span class="n">deg_dif</span><span class="o">=</span><span class="p">[</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">]):</span>
+</span><span id="line-198"><span class="w">    </span><span class="sd">&quot;&quot;&quot;For OGBench Environments: Perturb the camera angle by a small random rotation.&quot;&quot;&quot;</span>
+</span><span id="line-199">    <span class="n">xaxis</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">xyaxis</span><span class="p">[:</span><span class="mi">3</span><span class="p">])</span>
+</span><span id="line-200">    <span class="n">yaxis</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">xyaxis</span><span class="p">[</span><span class="mi">3</span><span class="p">:])</span>
+</span><span id="line-201">
+</span><span id="line-202">    <span class="c1"># Compute z-axis</span>
+</span><span id="line-203">    <span class="n">zaxis</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cross</span><span class="p">(</span><span class="n">xaxis</span><span class="p">,</span> <span class="n">yaxis</span><span class="p">)</span>
+</span><span id="line-204">    <span class="n">zaxis</span> <span class="o">/=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">zaxis</span><span class="p">)</span>
+</span><span id="line-205">
+</span><span id="line-206">    <span class="c1"># Small random rotation (e.g. ±3 degrees)</span>
+</span><span id="line-207">    <span class="n">yaw</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">deg2rad</span><span class="p">(</span><span class="n">deg_dif</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+</span><span id="line-208">    <span class="n">pitch</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">deg2rad</span><span class="p">(</span><span class="n">deg_dif</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+</span><span id="line-209">
+</span><span id="line-210">    <span class="c1"># Build rotation matrices</span>
+</span><span id="line-211">    <span class="n">R_yaw</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">yaw</span><span class="p">),</span> <span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">yaw</span><span class="p">),</span> <span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">yaw</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">yaw</span><span class="p">),</span> <span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]])</span>
+</span><span id="line-212">
+</span><span id="line-213">    <span class="n">R_pitch</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">pitch</span><span class="p">),</span> <span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">pitch</span><span class="p">)],</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">pitch</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">pitch</span><span class="p">)]])</span>
+</span><span id="line-214">
+</span><span id="line-215">    <span class="c1"># Combine and rotate the basis</span>
+</span><span id="line-216">    <span class="n">R</span> <span class="o">=</span> <span class="n">R_pitch</span> <span class="o">@</span> <span class="n">R_yaw</span>
+</span><span id="line-217">    <span class="n">xaxis_new</span> <span class="o">=</span> <span class="n">R</span> <span class="o">@</span> <span class="n">xaxis</span>
+</span><span id="line-218">    <span class="n">yaxis_new</span> <span class="o">=</span> <span class="n">R</span> <span class="o">@</span> <span class="n">yaxis</span>
+</span><span id="line-219">
+</span><span id="line-220">    <span class="c1"># Flatten back to tuple for MuJoCo</span>
+</span><span id="line-221">    <span class="n">xyaxes_new</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">([</span><span class="n">xaxis_new</span><span class="p">,</span> <span class="n">yaxis_new</span><span class="p">]))</span>
+</span><span id="line-222">
+</span><span id="line-223">    <span class="k">return</span> <span class="n">xyaxes_new</span></div>
+
 </span></code></pre></div>
     </div></div>
         </main>

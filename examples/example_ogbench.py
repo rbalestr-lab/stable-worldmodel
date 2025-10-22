@@ -16,8 +16,8 @@ if __name__ == "__main__":
         num_envs=5,
         image_shape=(224, 224),
         max_episode_steps=200,
-        env_type="single",
-        multiview=False,
+        env_type="double",
+        multiview=True,
         width=224,
         height=224,
         visualize_info=False,
@@ -51,6 +51,7 @@ if __name__ == "__main__":
             # )
             "variation": ("all",)
         },
+        viewname="pixels.front_pixels",
     )
 
     # world.record_video_from_dataset(

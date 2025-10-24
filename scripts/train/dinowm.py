@@ -59,7 +59,11 @@ def get_data(cfg):
 
     # Apply transforms to all steps
     transform = spt.data.transforms.Compose(
-        *[get_img_pipeline(f"{col}.{i}", f"{col}.{i}", img_size) for col in ["pixels"] for i in range(cfg.n_steps)],
+        *[
+            get_img_pipeline(f"{col}.{i}", f"{col}.{i}", img_size)
+            for col in ["pixels", "goal"]
+            for i in range(cfg.n_steps)
+        ],
         spt.data.transforms.WrapTorchTransform(
             norm_action_transform,
             source="action",
@@ -240,6 +244,11 @@ class ModelObjectCallBack(Callback):
                 )
                 torch.save(pl_module, output_path)
                 logging.info(f"Saved world model object to {output_path}")
+            # Additionally, save at final epoch
+            if (trainer.current_epoch + 1) == trainer.max_epochs:
+                final_path = self.dirpath / f"{self.filename}.ckpt"
+                torch.save(pl_module, final_path)
+                logging.info(f"Saved final world model object to {final_path}")
 
 
 # ============================================================================

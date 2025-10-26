@@ -19,47 +19,55 @@ if __name__ == "__main__":
     # #######################
     policy = swm.policy.RandomPolicy(42)
     world.set_policy(policy)
-    world.record_dataset("simple-pointmaze", episodes=10, seed=2347, options=None)
 
-    world.set_policy(policy)
-    world.record_video(
-        "./",
-        seed=2347,
-        options={"variation": ("walls.number", "walls.shape", "walls.positions")},
-    )
-
-    world.record_video_from_dataset(
-        "./",
+    world.evaluate_from_dataset(
         "simple-pointmaze",
-        episode_idx=list(range(10)),
-    )
-    world.record_video(
-        "./",
-        seed=2347,
-        options={"variation": ("walls.number", "walls.shape", "walls.positions")},
+        episodes_idx=[0, 1, 2, 2, 2],
+        start_steps=[0, 1, 2, 3, 4],
+        num_steps=3,
     )
 
-    ################
-    ##  Pretrain  ##
-    ################
+    # world.record_dataset("simple-pointmaze", episodes=10, seed=2347, options=None)
 
-    # pre-train world model
-    swm.pretraining(
-        "scripts/train/dummy.py",
-        dataset_name="simple-pointmaze",
-        output_model_name="dummy_test",
-        dump_object=True,
-    )
+    # world.set_policy(policy)
+    # world.record_video(
+    #     "./",
+    #     seed=2347,
+    #     options={"variation": ("walls.number", "walls.shape", "walls.positions")},
+    # )
 
-    ################
-    ##  Evaluate  ##
-    ################
+    # world.record_video_from_dataset(
+    #     "./",
+    #     "simple-pointmaze",
+    #     episode_idx=list(range(10)),
+    # )
+    # world.record_video(
+    #     "./",
+    #     seed=2347,
+    #     options={"variation": ("walls.number", "walls.shape", "walls.positions")},
+    # )
 
-    model = swm.policy.AutoCostModel("dummy_test")  # auto-policy name is confusing
-    config = swm.PlanConfig(horizon=10, receding_horizon=5, action_block=5)
-    solver = swm.solver.GDSolver(model, n_steps=10)
-    policy = swm.policy.WorldModelPolicy(solver=solver, config=config)
-    world.set_policy(policy)
-    results = world.evaluate(episodes=2, seed=2347)  # , options={...})
+    # ################
+    # ##  Pretrain  ##
+    # ################
 
-    print(results)
+    # # pre-train world model
+    # swm.pretraining(
+    #     "scripts/train/dummy.py",
+    #     dataset_name="simple-pointmaze",
+    #     output_model_name="dummy_test",
+    #     dump_object=True,
+    # )
+
+    # ################
+    # ##  Evaluate  ##
+    # ################
+
+    # model = swm.policy.AutoCostModel("dummy_test")  # auto-policy name is confusing
+    # config = swm.PlanConfig(horizon=10, receding_horizon=5, action_block=5)
+    # solver = swm.solver.GDSolver(model, n_steps=10)
+    # policy = swm.policy.WorldModelPolicy(solver=solver, config=config)
+    # world.set_policy(policy)
+    # results = world.evaluate(episodes=2, seed=2347)  # , options={...})
+
+    # print(results)

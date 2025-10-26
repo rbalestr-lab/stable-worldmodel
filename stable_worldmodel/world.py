@@ -871,3 +871,79 @@ class World:
         assert np.unique(metrics["seeds"]).shape[0] == episodes, "Some episode seeds are identical!"
 
         return metrics
+
+    # we give an episode + start_idx + num_steps
+    def evaluate_from_dataset(
+        self,
+        dataset_name: str,
+        episodes_idx: int | list[int],
+        start_steps: int | list[int],
+        num_steps: int,
+        cache_dir=None,
+    ):
+        # Rem: only support dataset generated from by stable-worldmodel
+
+        if isinstance(episodes_idx, int):
+            episodes_idx = [episodes_idx]
+
+        if isinstance(start_steps, int):
+            start_steps = [start_steps]
+
+        episodes_idx = np.array(episodes_idx)
+        start_steps = np.array(start_steps)
+        end_steps = start_steps + num_steps
+
+        if not (len(episodes_idx) == len(start_steps)):
+            raise ValueError("episodes_idx and start_steps must have the same length")
+
+        cache_dir = Path(cache_dir or swm.data.get_cache_dir())
+        dataset = load_from_disk(Path(cache_dir, dataset_name)).with_format("numpy")
+
+        assert "episode_idx" in dataset.column_names, "'episode_idx' column not found in dataset"
+        assert "step_idx" in dataset.column_names, "'step_idx' column not found in dataset"
+
+        episodes_col = dataset["episode_idx"][:]
+        steps_col = dataset["step_idx"][:]
+
+        episodes = np.unique(episodes_col)
+
+        episodes_len = np.full(episodes.max() + 1, -1)
+        np.maximum.at(episodes_len, episodes_col, steps_col)
+
+        assert all(ep in episodes for ep in episodes_idx), "Some episodes_idx are not found in the dataset"
+
+        assert all(end_idx <= episodes_len[ep] for ep, end_idx in zip(episodes_idx, end_steps)), (
+            "Some element from end_steps exceed their episode length in the dataset"
+        )
+
+        # get all indices used during the replay
+        def get_idx_range(episode_idx, start_step, end_step):
+            mask = (episodes_col == episode_idx) & (steps_col >= start_step) & (steps_col < end_step)
+            return np.where(mask)[0]
+
+        replay_indices = []
+        for ep, st, et in zip(episodes_idx, start_steps, end_steps):
+            idx_range = get_idx_range(ep, st, et)
+            replay_indices.append(idx_range)
+        replay_indices = np.array(replay_indices)
+
+        # tweak data to have goal
+        last_steps_idxs = replay_indices[:, -1]
+        last_step = dataset[last_steps_idxs]  # last steps should be the goal
+        last_step["goal"] = last_step["pixels"]
+
+        goal_info = {}
+        for key, value in last_step.items():
+            key = f"goal_{key}" if not key.startswith("goal") else key
+            goal_info[key] = value
+
+        for step in range(num_steps):
+            current_step_idxs = replay_indices[:, step]
+            info = dataset[current_step_idxs]
+            info.update(goal_info)
+
+            print(f"Info shapes - pixels: {info['pixels'].shape}, goal: {info['goal'].shape}")
+
+        # should read the seed and list of variations
+        # should start the env at 0 and give the k first optimal action to reach the starting point
+        # should set the goal from the data also

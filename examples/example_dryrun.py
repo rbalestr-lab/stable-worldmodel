@@ -7,7 +7,7 @@ if __name__ == "__main__":
 
     world = swm.World(
         "swm/SimplePointMaze-v0",
-        num_envs=7,
+        num_envs=5,
         image_shape=(224, 224),
         render_mode="rgb_array",
     )

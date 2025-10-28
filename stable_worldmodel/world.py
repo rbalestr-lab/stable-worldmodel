@@ -52,7 +52,6 @@ Todo:
    https://gymnasium.farama.org/
 """
 
-from collections import OrderedDict
 from collections.abc import Callable
 from pathlib import Path
 
@@ -873,128 +872,6 @@ class World:
 
         return metrics
 
-    # # we give an episode + start_idx + num_steps
-    # def evaluate_from_dataset(
-    #     self,
-    #     dataset_name: str,
-    #     episodes_idx: int | list[int],
-    #     start_steps: int | list[int],
-    #     num_steps: int,
-    #     cache_dir: str | None = None,
-    #     callables: dict | None = None,
-    # ):
-    #     # Rem: only support dataset generated from by stable-worldmodel
-
-    #     if isinstance(episodes_idx, int):
-    #         episodes_idx = [episodes_idx]
-
-    #     if isinstance(start_steps, int):
-    #         start_steps = [start_steps]
-
-    #     episodes_idx = np.array(episodes_idx)
-    #     start_steps = np.array(start_steps)
-    #     end_steps = start_steps + num_steps
-
-    #     if not (len(episodes_idx) == len(start_steps)):
-    #         raise ValueError("episodes_idx and start_steps must have the same length")
-
-    #     cache_dir = Path(cache_dir or swm.data.get_cache_dir())
-    #     dataset = load_from_disk(Path(cache_dir, dataset_name)).with_format("numpy")
-    #     columns = set(dataset.column_names)
-
-    #     assert "episode_idx" in columns, "'episode_idx' column not found in dataset"
-    #     assert "step_idx" in columns, "'step_idx' column not found in dataset"
-
-    #     episodes_col = dataset["episode_idx"][:]
-    #     steps_col = dataset["step_idx"][:]
-
-    #     episodes = np.unique(episodes_col)
-
-    #     episodes_len = np.full(episodes.max() + 1, -1)
-    #     np.maximum.at(episodes_len, episodes_col, steps_col)
-
-    #     assert all(ep in episodes for ep in episodes_idx), (
-    #         "Some episodes_idx are not found in the dataset"
-    #     )
-
-    #     assert all(
-    #         end_idx <= episodes_len[ep] for ep, end_idx in zip(episodes_idx, end_steps)
-    #     ), "Some element from end_steps exceed their episode length in the dataset"
-
-    #     # get all indices used during the replay
-    #     def get_idx_range(episode_idx, start_step, end_step):
-    #         mask = (
-    #             (episodes_col == episode_idx)
-    #             & (steps_col >= start_step)
-    #             & (steps_col < end_step)
-    #         )
-    #         return np.where(mask)[0]
-
-    #     replay_indices = []
-    #     for ep, st, et in zip(episodes_idx, start_steps, end_steps):
-    #         idx_range = get_idx_range(ep, st, et)
-    #         replay_indices.append(idx_range)
-    #     replay_indices = np.array(replay_indices)
-
-    #     # tweak data to have goal
-    #     last_steps_idxs = replay_indices[:, -1]
-    #     last_step = dataset[last_steps_idxs]  # last steps should be the goal
-    #     last_step["goal"] = last_step["pixels"]
-
-    #     # extract seeds (if any)
-    #     seeds = last_step["seed"] if "seed" in last_step else None
-
-    #     # extract variations used
-    #     vkey = "variation."
-    #     variations = [col.removeprefix(vkey) for col in columns if col.startswith(vkey)]
-    #     options = {"variations": variations or None}
-
-    #     goal_info = {}
-    #     for key, value in last_step.items():
-    #         key = f"goal_{key}" if not key.startswith("goal") else key
-    #         goal_info[key] = value
-
-    #     # reset at the correct state for replay
-    #     assert len(seeds) == len(episodes_idx) == self.num_envs, (
-    #         "Number of env used for evaluation should match the number of episodes to evaluate"
-    #     )
-    #     self.reset(seed=seeds, options=options)  # set seeds for all envs
-
-    #     # ----- get the goal ------
-
-    #     # ----- apply callables -------
-    #     callables = callables or {}
-    #     for method_name, col_name in callables.items():
-    #         for env in self.envs.unwrapped.envs:
-    #             if not hasattr(env, method_name):
-    #                 logging.warning(
-    #                     f"Env {env} has no method {method_name}, skipping callable"
-    #                 )
-    #                 continue
-
-    #             # call the method with the first step of each episode
-    #             method = getattr(env, method_name)
-    #             ...
-
-    #     # ----- replay all actions until start_steps -----
-
-    #     # ----- run "normal evaluation" for num_steps -----
-
-    #     for step in range(num_steps):
-    #         current_step_idxs = replay_indices[:, step]
-    #         info = dataset[current_step_idxs]
-    #         info.update(goal_info)
-
-    #         print(
-    #             f"Info shapes - pixels: {info['pixels'].shape}, goal: {info['goal'].shape}"
-    #         )
-
-    #     # should read the seed and list of variations
-    #     # should pass all the
-    #     # should start the env at 0 and give the k first optimal action to reach the starting point
-    #     # should set the goal from the data also
-
-    # we give an episode + start_idx + num_steps
     def evaluate_from_dataset(
         self,
         dataset_name: str,
@@ -1033,18 +910,19 @@ class World:
         episodes_col = dataset["episode_idx"][:]
         steps_col = dataset["step_idx"][:]
 
-        episodes_indexes = OrderedDict()
+        row_steps_idx = []
         for i, ep in enumerate(episodes_idx):
             ep_mask = episodes_col == ep
             ep_indices = np.nonzero(ep_mask)[0]
             sorted_order = np.argsort(steps_col[ep_mask])
-            episodes_indexes[ep] = ep_indices[sorted_order]
+            # episodes_indexes[ep] = ep_indices[sorted_order]
+            row_steps_idx.append(steps_col[ep_mask][sorted_order])
 
             if len(ep_indices) < end_steps[i]:
                 raise ValueError(f"Episode {ep} is too short for the requested steps")
 
-        first_steps = dataset[[idxs[0] for idxs in episodes_indexes.values()]]
-        end_steps = dataset[[idxs[e_step] for e_step, idxs in zip(end_steps, episodes_indexes.values())]]
+        first_steps = dataset[[idxs[0] for idxs in row_steps_idx]]
+        end_steps = dataset[[idxs[e_step] for e_step, idxs in zip(end_steps, row_steps_idx)]]
         seeds = first_steps.get("seed", None)
 
         # goal subdict
@@ -1065,7 +943,9 @@ class World:
         self.reset(seed=seeds, options=options)  # set seeds for all envs
 
         # apply callable list (e.g used for set initial position if not access to seed)
-        for i, env in self.envs.unwrapped.envs:
+        callables = callables or {}
+        for i, env in enumerate(self.envs.unwrapped.envs):
+            env = env.unwrapped
             for method_name, col_name in callables.items():
                 if not hasattr(env, method_name):
                     logging.warning(f"Env {env} has no method {method_name}, skipping callable")
@@ -1080,9 +960,12 @@ class World:
                 method(data)
 
         # replay all actions until start_steps
-        for i, env in self.envs.unwrapped.envs:
-            current_episode = episodes_idx[i]
-            episode_steps_idx = episodes_indexes[current_episode]
+        self.rewards = np.zeros(self.num_envs)
+        self.terminateds = np.zeros(self.num_envs)
+        self.truncateds = np.zeros(self.num_envs)
+
+        for i, env in enumerate(self.envs.unwrapped.envs):
+            episode_steps_idx = row_steps_idx[i]
 
             for step_idx in range(start_steps[i]):
                 sample_idx = episode_steps_idx[step_idx]
@@ -1098,13 +981,28 @@ class World:
                 for k, v in info.items():
                     self.infos[k][i] = np.asarray(v)
 
+        metrics = {
+            "success_rate": 0,
+            "episode_successes": np.zeros(len(episodes_idx)),
+            "seeds": seeds,
+        }
+
         # run normal evaluation for num_steps
         for step in range(num_steps):
-            info.update(goal_info)  # <<< very important !
+            self.infos.update(goal_info)
+            self.step()
 
-            print(f"Info shapes - pixels: {info['pixels'].shape}, goal: {info['goal'].shape}")
+            metrics["episode_successes"] = np.logical_or(metrics["episode_successes"], self.terminateds)
 
-        # should read the seed and list of variations
-        # should pass all the
-        # should start the env at 0 and give the k first optimal action to reach the starting point
-        # should set the goal from the data also
+            # for auto-reset
+            self.envs.unwrapped._autoreset_envs = np.zeros((self.num_envs,))
+
+        n_episodes = len(episodes_idx)
+
+        # compute success rate
+        metrics["success_rate"] = float(np.sum(metrics["episode_successes"])) / n_episodes * 100.0
+
+        if metrics["seeds"] is not None:
+            assert np.unique(metrics["seeds"]).shape[0] == n_episodes, "Some episode seeds are identical!"
+
+        return metrics

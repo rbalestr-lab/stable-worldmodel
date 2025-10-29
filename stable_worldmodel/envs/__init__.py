@@ -22,6 +22,11 @@ register(
 )
 
 register(
+    id="swm/PushTPhysics-v1",
+    entry_point="stable_worldmodel.envs.pusht_physics:PushTPhysics",
+)
+
+register(
     id="swm/SimplePointMaze-v0",
     entry_point="stable_worldmodel.envs.simple_point_maze:SimplePointMazeEnv",
 )

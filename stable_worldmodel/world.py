@@ -57,6 +57,7 @@ from pathlib import Path
 
 import datasets
 import gymnasium as gym
+import imageio
 import imageio.v3 as iio
 import numpy as np
 from datasets import Dataset, Features, Value, load_from_disk
@@ -361,7 +362,6 @@ class World:
                     seed=42
                 )
         """
-        import imageio
 
         viewname = [viewname] if isinstance(viewname, str) else viewname
         out = [
@@ -690,7 +690,6 @@ class World:
                     max_steps=100
                 )
         """
-        import imageio
 
         cache_dir = cache_dir or swm.data.get_cache_dir()
         dataset_path = Path(cache_dir, dataset_name)
@@ -883,6 +882,7 @@ class World:
     ):
         # Rem: only support dataset generated from by stable-worldmodel
         # TODO: check max_steps in self.envs doesn't make trouble here
+        # TODO push-t env has the image not corresponding with the state!
 
         if isinstance(episodes_idx, int):
             episodes_idx = [episodes_idx]
@@ -892,13 +892,16 @@ class World:
 
         episodes_idx = np.array(episodes_idx)
         start_steps = np.array(start_steps)
-        end_steps = start_steps + num_steps
+        end_steps_idx = start_steps + num_steps
 
         if not (len(episodes_idx) == len(start_steps)):
             raise ValueError("episodes_idx and start_steps must have the same length")
 
-        cache_dir = Path(cache_dir or swm.data.get_cache_dir())
-        dataset = load_from_disk(Path(cache_dir, dataset_name)).with_format("numpy")
+        if len(episodes_idx) != self.num_envs:
+            raise ValueError("Number of episodes to evaluate must match number of envs")
+
+        dataset_path = Path(cache_dir or swm.data.get_cache_dir()) / dataset_name
+        dataset = load_from_disk(dataset_path).with_format("numpy")
         columns = set(dataset.column_names)
 
         assert "episode_idx" in columns, "'episode_idx' column not found in dataset"
@@ -908,28 +911,27 @@ class World:
         dataset = dataset.select(np.nonzero(episode_mask)[0])
 
         episodes_col = dataset["episode_idx"][:]
-        steps_col = dataset["step_idx"][:]
-
         row_steps_idx = []
         for i, ep in enumerate(episodes_idx):
             ep_mask = episodes_col == ep
             ep_indices = np.nonzero(ep_mask)[0]
-            sorted_order = np.argsort(steps_col[ep_mask])
-            # episodes_indexes[ep] = ep_indices[sorted_order]
-            row_steps_idx.append(steps_col[ep_mask][sorted_order])
+            sorted_order = np.sort(ep_indices)
+            row_steps_idx.append(sorted_order)
 
-            if len(ep_indices) < end_steps[i]:
+            if len(ep_indices) < end_steps_idx[i]:
                 raise ValueError(f"Episode {ep} is too short for the requested steps")
 
         first_steps = dataset[[idxs[0] for idxs in row_steps_idx]]
-        end_steps = dataset[[idxs[e_step] for e_step, idxs in zip(end_steps, row_steps_idx)]]
+        end_steps = dataset[[idxs[e_step] for e_step, idxs in zip(end_steps_idx, row_steps_idx)]]
         seeds = first_steps.get("seed", None)
 
         # goal subdict
         goal_info = {}
         for key, value in end_steps.items():
             if key == "pixels":
-                goal_info["goal"] = value
+                goal_info["goal"] = [
+                    np.array(Image.open(dataset_path / path).convert("RGB"), dtype=np.uint8) for path in value
+                ]
                 continue
 
             key = f"goal_{key}" if not key.startswith("goal") else key
@@ -959,11 +961,12 @@ class World:
                 data = first_steps[col_name][i]
                 method(data)
 
-        # replay all actions until start_steps
+        # replay all actions until start_steps and record video
         self.rewards = np.zeros(self.num_envs)
         self.terminateds = np.zeros(self.num_envs)
         self.truncateds = np.zeros(self.num_envs)
 
+        # replay actions and record each frame
         for i, env in enumerate(self.envs.unwrapped.envs):
             episode_steps_idx = row_steps_idx[i]
 
@@ -971,10 +974,9 @@ class World:
                 sample_idx = episode_steps_idx[step_idx]
                 data = dataset[sample_idx]
                 action = data["action"]
-                state, reward, terminated, truncated, info = env.step(action)
 
-                self.states[i] = state
-                self.rewards[i] = reward
+                _, _, terminated, truncated, info = env.step(action)
+
                 self.terminateds[i] = terminated
                 self.truncateds[i] = truncated
 
@@ -987,7 +989,7 @@ class World:
             "seeds": seeds,
         }
 
-        # run normal evaluation for num_steps
+        # run normal evaluation for num_steps and record video
         for step in range(num_steps):
             self.infos.update(goal_info)
             self.step()

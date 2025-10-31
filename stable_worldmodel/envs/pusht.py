@@ -446,7 +446,7 @@ class PushT(gym.Env):
         pos_agent = state[:2]
         pos_block = state[2:4]
         rot_block = state[4]
-        vel_block = tuple(state[-2:])
+        vel_block = tuple(state[-2:]) if len(state) == 7 else (0.0, 0.0)
         self.agent.velocity = vel_block
         self.agent.position = pos_agent
         self.block.angle = rot_block

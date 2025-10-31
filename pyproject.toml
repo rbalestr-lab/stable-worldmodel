@@ -24,7 +24,7 @@ dependencies = [
     "tabulate",
     "gymnasium[all]",
     "minari",
-    "stable-pretraining",
+    "stable-pretraining>=0.1.4",
     "nevergrad",
     "einops",
     "datasets",

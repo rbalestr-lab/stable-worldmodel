@@ -24,29 +24,30 @@ if __name__ == "__main__":
     # #######################
 
     world.set_policy(swm.policy.RandomPolicy())
-    # world.record_dataset(
-    #     "example-pusht",
-    #     episodes=10,
-    #     seed=2347,
-    #     options=None,
-    # )
 
-    # world.record_video_from_dataset(
-    #     "./",
-    #     "example-pusht",
-    #     episode_idx=[0, 1],
-    # )
+    world.record_dataset(
+        "example-pusht",
+        episodes=10,
+        seed=2347,
+        options=None,
+    )
+
+    world.record_video_from_dataset(
+        "./",
+        "example-pusht",
+        episode_idx=[0, 1],
+    )
 
     ################
     ##  Pretrain  ##
     ################
 
-    # swm.pretraining(
-    #     "scripts/train/dinowm.py",
-    #     dataset_name="example-pusht",
-    #     output_model_name="dummy_pusht",
-    #     dump_object=True,
-    # )
+    swm.pretraining(
+        "scripts/train/dinowm.py",
+        dataset_name="example-pusht",
+        output_model_name="dummy_pusht",
+        dump_object=True,
+    )
 
     #########################
     ##  Transform/Process  ##
@@ -68,7 +69,7 @@ if __name__ == "__main__":
         "goal": img_transform(),
     }
 
-    dataset_path = swm.data.get_cache_dir() / "full_pusht"  # "example-pusht"
+    dataset_path = swm.data.get_cache_dir() / "example-pusht"
     dataset = datasets.load_from_disk(dataset_path).with_format("numpy")
 
     action_process = preprocessing.StandardScaler()
@@ -87,7 +88,7 @@ if __name__ == "__main__":
     ##  Evaluate  ##
     ################
 
-    model = swm.policy.AutoCostModel("world_model_epoch_99").to("cuda")
+    model = swm.policy.AutoCostModel("dummy_pusht").to("cuda")
     config = swm.PlanConfig(horizon=5, receding_horizon=5, action_block=5)
     solver = swm.solver.CEMSolver(model, num_samples=300, var_scale=1.0, n_steps=30, topk=30, device="cuda")
     policy = swm.policy.WorldModelPolicy(solver=solver, config=config, process=process, transform=transform)
@@ -95,9 +96,9 @@ if __name__ == "__main__":
     world.set_policy(policy)
 
     metrics = world.evaluate_from_dataset(
-        "pusht_eval",
+        "example-pusht",
         start_steps=[135],
-        episodes_idx=[11345],
+        episodes_idx=[0],
         num_steps=25,
         callables={"_set_state": "state", "_set_goal_state": "goal_state"},
     )

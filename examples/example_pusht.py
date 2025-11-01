@@ -95,11 +95,11 @@ if __name__ == "__main__":
     world.set_policy(policy)
 
     metrics = world.evaluate_from_dataset(
-        "full_pusht",
-        start_steps=135,
+        "pusht_eval",
+        start_steps=[135],
         episodes_idx=[11345],
         num_steps=25,
-        callables={"_set_state": "state"},
+        callables={"_set_state": "state", "_set_goal_state": "goal_state"},
     )
 
     print("Evaluation Metrics: ", metrics)

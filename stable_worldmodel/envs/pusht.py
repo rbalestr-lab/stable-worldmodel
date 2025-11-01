@@ -242,7 +242,7 @@ class PushT(gym.Env):
         )
 
         ### generate goal
-        self.goal_state = goal_state
+        self._set_goal_state(goal_state)
         self._set_state(goal_state)
         self._goal = self.render()
 
@@ -309,7 +309,10 @@ class PushT(gym.Env):
         angle_diff = np.abs(goal_state[4] - cur_state[4])
         angle_diff = np.minimum(angle_diff, 2 * np.pi - angle_diff)
         success = pos_diff < 20 and angle_diff < np.pi / 9
-        state_dist = np.linalg.norm(goal_state - cur_state)
+        state_dist = np.linalg.norm(goal_state[:5] - cur_state[:5])
+
+        print(pos_diff, angle_diff, success, state_dist)
+
         return success, state_dist
 
     def render(self):
@@ -439,6 +442,9 @@ class PushT(gym.Env):
 
     def _handle_collision(self, arbiter, space, data):
         self.n_contact_points += len(arbiter.contact_point_set.points)
+
+    def _set_goal_state(self, goal_state):
+        self.goal_state = goal_state[:5]
 
     def _set_state(self, state):
         if isinstance(state, np.ndarray):

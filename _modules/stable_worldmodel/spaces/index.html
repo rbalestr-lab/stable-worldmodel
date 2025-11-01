@@ -1108,6 +1108,22 @@
 </span><span id="line-811">                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Key </span><span class="si">{</span><span class="n">v</span><span class="si">}</span><span class="s2"> not found in Dict space&quot;</span><span class="p">)</span>
 </span><span id="line-812">
 </span><span id="line-813">        <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">check</span><span class="p">(</span><span class="n">debug</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span> <span class="s2">&quot;Values must be within space!&quot;</span></div>
+
+</span><span id="line-814">
+<div class="viewcode-block" id="Dict.to_str">
+<a class="viewcode-back" href="../../../stable_worldmodel/#stable_worldmodel.spaces.Dict.to_str">[docs]</a>
+</span><span id="line-815">    <span class="k">def</span><span class="w"> </span><span class="nf">to_str</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+</span><span id="line-816">        <span class="k">def</span><span class="w"> </span><span class="nf">_tree</span><span class="p">(</span><span class="n">d</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+</span><span id="line-817">            <span class="n">lines</span> <span class="o">=</span> <span class="p">[]</span>
+</span><span id="line-818">            <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">d</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+</span><span id="line-819">                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="p">(</span><span class="nb">dict</span> <span class="o">|</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span> <span class="o">|</span> <span class="n">spaces</span><span class="o">.</span><span class="n">Dict</span><span class="p">)):</span>
+</span><span id="line-820">                    <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;    &quot;</span> <span class="o">*</span> <span class="n">indent</span> <span class="o">+</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">k</span><span class="si">}</span><span class="s2">:&quot;</span><span class="p">)</span>
+</span><span id="line-821">                    <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">_tree</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">indent</span> <span class="o">+</span> <span class="mi">1</span><span class="p">))</span>
+</span><span id="line-822">                <span class="k">else</span><span class="p">:</span>
+</span><span id="line-823">                    <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;    &quot;</span> <span class="o">*</span> <span class="n">indent</span> <span class="o">+</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">k</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">v</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</span><span id="line-824">            <span class="k">return</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">lines</span><span class="p">)</span>
+</span><span id="line-825">
+</span><span id="line-826">        <span class="k">return</span> <span class="n">_tree</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">spaces</span><span class="p">)</span></div>
 </div>
 
 </span></code></pre></div>

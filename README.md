@@ -29,12 +29,22 @@ _World Models Research Made Simple_
 
 - Python >= 3.10
 - CUDA-compatible GPU (recommended for training)
+- SWIG (required for Box2D environments)
+- Bazel (required for ogbench/dm-control)
 
 #### Quick Install
 
-Using [uv](https://github.com/astral-sh/uv) (recommended):
+Using [uv](https://github.com/astral-sh/uv) with conda (recommended):
+
+We use uv package manager to install and maintain packages, but some system dependencies need to be installed via conda first.
 
 ```bash
+# Create conda environment with Python 3.10 and required build tools
+conda create -n stable-worldmodel python=3.10 swig bazel -c conda-forge -y
+
+# Activate the environment
+conda activate stable-worldmodel
+
 # Install uv
 pip install uv
 
@@ -42,7 +52,14 @@ pip install uv
 git clone https://github.com/rbalestr-lab/stable-worldmodel.git
 cd stable-worldmodel
 uv pip install -e .
+
+# Clone and install stable-pretraining
+git clone https://github.com/rbalestr-lab/stable-pretraining.git
+cd stable-pretraining
+uv pip install -e .
 ```
+
+**Note:** Use `uv pip install` (not `uv sync`) to install packages into your conda environment. This ensures the correct Python version and system dependencies are used.
 
 Using pip:
 

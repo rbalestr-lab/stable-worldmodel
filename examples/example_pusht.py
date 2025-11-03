@@ -1,5 +1,6 @@
 if __name__ == "__main__":
     import datasets
+    import torch
     from sklearn import preprocessing
     from torchvision.transforms import v2 as transforms
 
@@ -11,7 +12,7 @@ if __name__ == "__main__":
 
     world = swm.World(
         "swm/PushT-v1",
-        num_envs=2,
+        num_envs=1,
         image_shape=(224, 224),
         max_episode_steps=25,
         render_mode="rgb_array",
@@ -31,11 +32,11 @@ if __name__ == "__main__":
         options=None,
     )
 
-    world.record_video_from_dataset(
-        "./",
-        "example-pusht",
-        episode_idx=[0, 1],
-    )
+    # world.record_video_from_dataset(
+    #     "./",
+    #     "example-pusht",
+    #     episode_idx=[0, 1],
+    # )
 
     ################
     ##  Pretrain  ##
@@ -57,7 +58,8 @@ if __name__ == "__main__":
             [
                 transforms.Resize(size=224),
                 transforms.CenterCrop(size=224),
-                transforms.ToTensor(),
+                transforms.ToImage(),
+                transforms.ToDtype(torch.float32, scale=True),
                 transforms.Normalize(mean=[0.5, 0.5, 0.5], std=[0.5, 0.5, 0.5]),
             ]
         )
@@ -93,6 +95,15 @@ if __name__ == "__main__":
     policy = swm.policy.WorldModelPolicy(solver=solver, config=config, process=process, transform=transform)
 
     world.set_policy(policy)
-    results = world.evaluate(episodes=3, seed=2347)
 
-    print(results)
+    results = world.evaluate(episodes=20, seed=42, dump_every=10)
+
+    # metrics = world.evaluate_from_dataset(
+    #     "example-pusht",
+    #     start_steps=[135],
+    #     episodes_idx=[0],
+    #     num_steps=25,
+    #     callables={"_set_state": "state", "_set_goal_state": "goal_state"},
+    # )
+
+    print("Evaluation results: ", results)

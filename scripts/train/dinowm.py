@@ -59,7 +59,11 @@ def get_data(cfg):
 
     # Apply transforms to all steps
     transform = spt.data.transforms.Compose(
-        *[get_img_pipeline(f"{col}.{i}", f"{col}.{i}", img_size) for col in ["pixels"] for i in range(cfg.n_steps)],
+        *[
+            get_img_pipeline(f"{col}.{i}", f"{col}.{i}", img_size)
+            for col in ["pixels", "goal"]
+            for i in range(cfg.n_steps)
+        ],
         spt.data.transforms.WrapTorchTransform(
             norm_action_transform,
             source="action",
@@ -73,8 +77,10 @@ def get_data(cfg):
     )
 
     dataset.transform = transform
-
-    train_set, val_set = spt.data.random_split(dataset, lengths=[cfg.train_split, 1 - cfg.train_split])
+    rnd_gen = torch.Generator().manual_seed(cfg.seed)
+    train_set, val_set = spt.data.random_split(
+        dataset, lengths=[cfg.train_split, 1 - cfg.train_split], generator=rnd_gen
+    )
     logging.info(f"Train: {len(train_set)}, Val: {len(val_set)}")
 
     train = DataLoader(
@@ -85,6 +91,7 @@ def get_data(cfg):
         persistent_workers=True,
         pin_memory=True,
         shuffle=True,
+        generator=rnd_gen,
     )
     val = DataLoader(val_set, batch_size=cfg.batch_size, num_workers=cfg.num_workers, pin_memory=True)
 
@@ -240,6 +247,11 @@ class ModelObjectCallBack(Callback):
                 )
                 torch.save(pl_module, output_path)
                 logging.info(f"Saved world model object to {output_path}")
+            # Additionally, save at final epoch
+            if (trainer.current_epoch + 1) == trainer.max_epochs:
+                final_path = self.dirpath / f"{self.filename}.ckpt"
+                torch.save(pl_module, final_path)
+                logging.info(f"Saved final world model object to {final_path}")
 
 
 # ============================================================================

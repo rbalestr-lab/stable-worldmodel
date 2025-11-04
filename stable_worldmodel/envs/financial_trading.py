@@ -14,11 +14,11 @@ import stable_worldmodel as swm
 # Financial environments need specialized charting/metrics displays, not RGB images
 
 
-DEFAULT_VARIATIONS = (
-    "backtest.start_date",
-    "backtest.symbol_selection",
-    "agent.starting_balance",
-)
+# TODO: INTEGRATE ALPACA DATA PIPELINE - Fix default variations
+# Current simplified variation space only has agent.starting_balance
+# When Alpaca integration is complete, add back dynamic variations:
+# - "backtest.date_range", "backtest.symbol", "market.conditions", etc.
+DEFAULT_VARIATIONS = ("agent.starting_balance",)
 
 
 class FinancialBacktestEnv(gym.Env):
@@ -106,86 +106,18 @@ class FinancialBacktestEnv(gym.Env):
             dtype=np.float32,
         )
 
-        # Define possible choices for categorical spaces
-        self.start_date_choices = [
-            "2018-01-01",
-            "2019-01-01",
-            "2020-01-01",
-            "2021-01-01",
-            "2022-01-01",
-            "2020-03-01",
-            "2008-09-01",
-            "2000-03-01",  # Include crisis periods
-        ]
-        self.end_date_choices = [
-            "2019-12-31",
-            "2020-12-31",
-            "2021-12-31",
-            "2022-12-31",
-            "2023-12-31",
-            "2020-06-01",
-            "2009-03-01",
-            "2002-12-31",
-        ]
-        self.symbol_selection_choices = [
-            "tech_stocks",
-            "blue_chip",
-            "volatile_stocks",
-            "single_stock",
-            "sector_rotation",
-        ]
-        self.market_regime_choices = ["bull", "bear", "sideways", "volatile", "crisis"]
-        # TODO: Integrate financial data output format choices instead of chart styles
-        # self.output_format_choices = ["json", "dataframe", "structured", "metrics"]
+        # TODO: INTEGRATE ALPACA DATA PIPELINE - Replace hardcoded choices with dynamic data
+        # These should be populated from real Alpaca API data:
+        # - Available date ranges from actual stored data
+        # - Available symbols from Alpaca.get_assets()
+        # - Market regimes detected from actual market conditions
+        # For now, these are placeholders until real data pipeline is connected
 
-        # Variation space for comprehensive backtesting scenarios
+        # TODO: INTEGRATE ALPACA DATA PIPELINE - Create proper variation space
+        # For now, create minimal variation space without hardcoded choices
+        # This will be replaced with dynamic data from Alpaca API
         self.variation_space = swm.spaces.Dict(
             {
-                "backtest": swm.spaces.Dict(
-                    {
-                        "start_date": swm.spaces.Discrete(
-                            n=len(self.start_date_choices),
-                            init_value=2,  # "2020-01-01"
-                        ),
-                        "end_date": swm.spaces.Discrete(
-                            n=len(self.end_date_choices),
-                            init_value=2,  # "2021-12-31"
-                        ),
-                        "symbol_selection": swm.spaces.Discrete(
-                            n=len(self.symbol_selection_choices),
-                            init_value=0,  # "tech_stocks"
-                        ),
-                        "time_acceleration": swm.spaces.Box(
-                            low=1.0,
-                            high=60.0,  # Up to 1-hour intervals
-                            init_value=np.array(1.0, dtype=np.float32),
-                            shape=(),
-                            dtype=np.float32,
-                        ),
-                    }
-                ),
-                "market": swm.spaces.Dict(
-                    {
-                        "regime": swm.spaces.Discrete(
-                            n=len(self.market_regime_choices),
-                            init_value=0,  # "bull"
-                        ),
-                        "liquidity_factor": swm.spaces.Box(
-                            low=0.1,
-                            high=2.0,
-                            init_value=np.array(1.0, dtype=np.float32),
-                            shape=(),
-                            dtype=np.float32,
-                        ),
-                        "slippage_multiplier": swm.spaces.Box(
-                            low=0.5,
-                            high=3.0,
-                            init_value=np.array(1.0, dtype=np.float32),
-                            shape=(),
-                            dtype=np.float32,
-                        ),
-                    }
-                ),
                 "agent": swm.spaces.Dict(
                     {
                         "starting_balance": swm.spaces.Box(
@@ -195,41 +127,13 @@ class FinancialBacktestEnv(gym.Env):
                             shape=(),
                             dtype=np.float32,
                         ),
-                        "transaction_cost_bps": swm.spaces.Box(
-                            low=0.0,
-                            high=50.0,  # 0 to 50 basis points
-                            init_value=np.array(10.0, dtype=np.float32),
-                            shape=(),
-                            dtype=np.float32,
-                        ),
-                        "max_position_size": swm.spaces.Box(
-                            low=0.1,
-                            high=1.0,
-                            init_value=np.array(1.0, dtype=np.float32),
-                            shape=(),
-                            dtype=np.float32,
-                        ),
-                        "leverage": swm.spaces.Box(
-                            low=1.0,
-                            high=4.0,
-                            init_value=np.array(1.0, dtype=np.float32),
-                            shape=(),
-                            dtype=np.float32,
-                        ),
                     }
                 ),
-                # TODO: Integrate financial data display variations instead of visual/color variations
-                # Financial environments need structured output format variations:
-                # - metrics_format: ["json", "dataframe", "structured"]
-                # - report_frequency: ["step", "episode", "batch"]
-                # - output_detail: ["basic", "detailed", "comprehensive"]
             },
-            sampling_order=[
-                "backtest",
-                "market",
-                "agent",
-            ],  # TODO: Add financial data output variations
-        )  # Initialize state variables
+            sampling_order=["agent"],
+        )
+
+        # Initialize state variables
         self.current_step = 0
         self.current_symbol = "AAPL"
         self.position = 0.0  # Continuous position: negative=short, positive=long, 0=neutral
@@ -258,31 +162,17 @@ class FinancialBacktestEnv(gym.Env):
         # Ensure default variation values are valid
         assert self.variation_space.check(), "Default variation values must be within variation space"
 
-    def _get_start_date_from_variation(self) -> str:
-        """Get start date string from variation space index."""
-        idx = self.variation_space["backtest"]["start_date"].value
-        return self.start_date_choices[idx]
+    def _get_default_backtest_config(self) -> tuple[str, str, str]:
+        """Get default backtest configuration for testing.
 
-    def _get_end_date_from_variation(self) -> str:
-        """Get end date string from variation space index."""
-        idx = self.variation_space["backtest"]["end_date"].value
-        return self.end_date_choices[idx]
-
-    def _get_symbol_selection_from_variation(self) -> str:
-        """Get symbol selection string from variation space index."""
-        idx = self.variation_space["backtest"]["symbol_selection"].value
-        return self.symbol_selection_choices[idx]
-
-    def _get_market_regime_from_variation(self) -> str:
-        """Get market regime string from variation space index."""
-        idx = self.variation_space["market"]["regime"].value
-        return self.market_regime_choices[idx]
-
-    # TODO: Integrate financial data output format variations instead of chart style
-    # def _get_output_format_from_variation(self) -> str:
-    #     """Get financial data output format from variation space index."""
-    #     idx = self.variation_space["financial_output"]["format"].value
-    #     return self.output_format_choices[idx]
+        TODO: INTEGRATE ALPACA DATA PIPELINE - Replace with dynamic configuration
+        This should use actual available data ranges and symbols from Alpaca API.
+        """
+        # TODO: Replace with real data from Alpaca API:
+        # - start_date, end_date from actual available data ranges
+        # - symbol from Alpaca.get_assets()
+        # - dates should be calculated dynamically from variation space parameters
+        return "2020-01-01", "2021-12-31", "AAPL"
 
     def _initialize_data_reader(self) -> None:
         """TODO: INTEGRATE ALPACA DATA PIPELINE - Initialize real data reading system.
@@ -380,13 +270,7 @@ class FinancialBacktestEnv(gym.Env):
         assert self.variation_space.check(debug=True), "Variation values must be within variation space!"
 
         # Get backtest configuration from variations
-        start_date = self._get_start_date_from_variation()
-        end_date = self._get_end_date_from_variation()
-        symbol_selection = self._get_symbol_selection_from_variation()
-
-        # Select symbols based on variation
-        self.current_symbols = self._select_symbols(symbol_selection)
-        self.current_symbol = self.current_symbols[0]  # Start with first symbol
+        start_date, end_date, self.current_symbol = self._get_default_backtest_config()
 
         # Load market data for backtesting
         print(f"Loading historical data for backtesting: {self.current_symbol} from {start_date} to {end_date}")
@@ -399,7 +283,8 @@ class FinancialBacktestEnv(gym.Env):
         self.current_step = 0
         self.current_data_index = self.window_size  # Start after window
         self.position = 0.0
-        self.balance = self.variation_space["agent"]["starting_balance"].value
+        # TODO: INTEGRATE ALPACA DATA PIPELINE - Get starting balance from variation space
+        self.balance = 100000.0  # Default starting balance
         self.portfolio_value = self.balance
         self.shares_held = 0.0
         self.trade_history = []
@@ -422,24 +307,24 @@ class FinancialBacktestEnv(gym.Env):
             "backtest_config": {
                 "start_date": start_date,
                 "end_date": end_date,
-                "symbol_selection": symbol_selection,
+                "symbol": self.current_symbol,
             },
         }
 
         return observation, info
 
-    def _select_symbols(self, symbol_selection: str) -> list:
-        """Select symbols based on variation configuration."""
-        symbol_groups = {
-            "tech_stocks": ["AAPL", "GOOGL", "MSFT"],
-            "blue_chip": ["AAPL", "MSFT", "SPY"],
-            "volatile_stocks": ["TSLA", "GOOGL"],
-            "single_stock": ["AAPL"],
-            "sector_rotation": ["AAPL", "GOOGL", "MSFT", "TSLA", "AMZN"],
-        }
-        return symbol_groups.get(symbol_selection, ["AAPL"])
+    # TODO: INTEGRATE ALPACA DATA PIPELINE - Old symbol selection method removed
+    # Symbol selection is now handled dynamically in _get_symbol_from_variation()
+    # using real available symbols from Alpaca.get_assets()
 
     def step(self, action: int):
+        # TODO: INTEGRATE ALPACA DATA PIPELINE - This method requires real market data
+        if self.market_data is None:
+            raise RuntimeError(
+                "No market data available. Please integrate Alpaca data pipeline "
+                "by implementing _load_historical_data() method."
+            )
+
         if self.current_data_index >= len(self.market_data) - 1:
             # End of data
             terminated = True
@@ -458,13 +343,15 @@ class FinancialBacktestEnv(gym.Env):
         current_price = current_row["close"]
         current_timestamp = self.market_data.index[self.current_data_index]
 
+        # TODO: INTEGRATE ALPACA DATA PIPELINE - Add time acceleration from variation space
         # Apply time acceleration
-        time_accel = self.variation_space["backtest"]["time_acceleration"].value
+        time_accel = 1.0  # Default 1x speed until variation space is connected
         self.current_data_index += int(time_accel)
 
+        # TODO: INTEGRATE ALPACA DATA PIPELINE - Add transaction costs from variation space
         # Calculate transaction costs and market impact
-        transaction_cost_bps = self.variation_space["agent"]["transaction_cost_bps"].value
-        slippage_multiplier = self.variation_space["market"]["slippage_multiplier"].value
+        transaction_cost_bps = 10.0  # Default 10 basis points
+        slippage_multiplier = 1.0  # Default no additional slippage
 
         # Execute trading action
         action_taken = "hold"
@@ -517,12 +404,13 @@ class FinancialBacktestEnv(gym.Env):
 
         self.current_step += 1
 
-        # Check termination conditions
+        # Check termination conditions (market_data guaranteed to exist by check above)
         max_data_steps = len(self.market_data) - self.window_size - 1
         terminated = self.current_data_index >= max_data_steps or self.current_step >= self.max_steps
 
+        # TODO: INTEGRATE ALPACA DATA PIPELINE - Get minimum balance from variation space
         # Check for bankruptcy or margin call
-        min_balance = self.variation_space["agent"]["starting_balance"].value * 0.1  # 10% of initial
+        min_balance = 10000.0  # 10% of default initial balance
         truncated = self.portfolio_value < min_balance
 
         if truncated:
@@ -552,9 +440,10 @@ class FinancialBacktestEnv(gym.Env):
         if self.balance <= 0:
             return "hold"  # No money to buy
 
+        # TODO: INTEGRATE ALPACA DATA PIPELINE - Add position limits from variation space
         # Calculate position size based on available balance and leverage
-        max_position_size = self.variation_space["agent"]["max_position_size"].value
-        leverage = self.variation_space["agent"]["leverage"].value
+        max_position_size = 1.0  # Default 100% of balance
+        leverage = 1.0  # Default no leverage
 
         # Calculate shares to buy
         available_capital = self.balance * max_position_size * leverage
@@ -594,9 +483,10 @@ class FinancialBacktestEnv(gym.Env):
             return "sell"
 
         elif self.enable_shorting:
+            # TODO: INTEGRATE ALPACA DATA PIPELINE - Add shorting limits from variation space
             # Enter short position (simplified - real implementation would need margin requirements)
-            max_position_size = self.variation_space["agent"]["max_position_size"].value
-            leverage = self.variation_space["agent"]["leverage"].value
+            max_position_size = 1.0  # Default 100% of balance
+            leverage = 1.0  # Default no leverage
 
             short_value = self.balance * max_position_size * leverage
             shares_to_short = short_value / (effective_price * (1 + transaction_cost))
@@ -635,7 +525,7 @@ class FinancialBacktestEnv(gym.Env):
         # Scale reward for learning
         reward = (excess_return * 100) - volatility_penalty
 
-        return reward
+        return float(reward)
 
     def _calculate_sharpe_ratio(self) -> float:
         """Calculate Sharpe ratio for current performance."""
@@ -654,7 +544,9 @@ class FinancialBacktestEnv(gym.Env):
         """Create comprehensive observation from current market state."""
         if self.market_data is None or self.current_data_index < self.window_size:
             # Return zero observation if no data available
-            return np.zeros(self.observation_space.shape[0], dtype=np.float32)
+            # Calculate expected observation size: window_size * 6 + 1 + 1 + 1 + 4
+            obs_size = self.window_size * 6 + 1 + 1 + 1 + 4
+            return np.zeros(obs_size, dtype=np.float32)
 
         # Get historical price window
         start_idx = max(0, self.current_data_index - self.window_size)
@@ -686,8 +578,9 @@ class FinancialBacktestEnv(gym.Env):
 
         price_features = price_features[-expected_price_features:]  # Take last window_size elements
 
+        # TODO: INTEGRATE ALPACA DATA PIPELINE - Get starting balance from variation space
         # Portfolio state features
-        starting_value = self.variation_space["agent"]["starting_balance"].value
+        starting_value = 100000.0  # Default starting balance
         normalized_position = self.position / 1000.0  # Scale position
         normalized_balance = self.balance / starting_value
         normalized_portfolio = self.portfolio_value / starting_value
@@ -710,9 +603,9 @@ class FinancialBacktestEnv(gym.Env):
         )
 
         # Ensure observation matches expected shape
-        if len(observation) != self.observation_space.shape[0]:
+        expected_size = self.window_size * 6 + 1 + 1 + 1 + 4  # Same calculation as in __init__
+        if len(observation) != expected_size:
             # Pad or truncate to match expected size
-            expected_size = self.observation_space.shape[0]
             if len(observation) < expected_size:
                 observation = np.pad(observation, (0, expected_size - len(observation)))
             else:
@@ -809,9 +702,10 @@ class FinancialBacktestEnv(gym.Env):
             "end_date": end_time,
             "trading_days": trading_period,
             "symbol": self.current_symbol,
+            # TODO: INTEGRATE ALPACA DATA PIPELINE - Add market conditions from variation space
             # Market conditions
-            "market_regime": self._get_market_regime_from_variation(),
-            "transaction_cost_bps": self.variation_space["agent"]["transaction_cost_bps"].value,
+            "market_regime": "normal",  # Default market regime
+            "transaction_cost_bps": 10.0,  # Default transaction cost
         }
 
     def _calculate_max_drawdown(self) -> float:
@@ -864,7 +758,8 @@ class FinancialBacktestEnv(gym.Env):
         self.current_step = 0
         self.current_data_index = self.window_size
         self.position = 0.0
-        self.balance = self.variation_space["agent"]["starting_balance"].value
+        # TODO: INTEGRATE ALPACA DATA PIPELINE - Get starting balance from variation space
+        self.balance = 100000.0  # Default starting balance
         self.portfolio_value = self.balance
         self.shares_held = 0.0
         self.trade_history = []

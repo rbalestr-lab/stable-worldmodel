@@ -40,3 +40,13 @@ register(
     id="swm/OGBCube-v0",
     entry_point="stable_worldmodel.envs.ogbench_cube:CubeEnv",
 )
+
+register(
+    id="swm/FinancialTrading-v0",
+    entry_point="stable_worldmodel.envs.financial_trading:FinancialBacktestEnv",
+)
+
+register(
+    id="swm/FinancialBacktest-v0",
+    entry_point="stable_worldmodel.envs.financial_trading:FinancialBacktestEnv",
+)

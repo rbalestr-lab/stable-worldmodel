@@ -396,6 +396,47 @@ class MegaWrapper(gym.Wrapper):
         return self.env.step(action)
 
 
+class FinancialWrapper(gym.Wrapper):
+    """Undoes AddPixelsWrapper, EnsureGoalInfoWrapper, and ResizeGoalWrapper effects.
+
+    This wrapper removes pixel-related keys from info dict and goal validation,
+    effectively leaving only EverythingToInfoWrapper → EnsureInfoKeysWrapper
+    functionality when used after MegaWrapper.
+
+    Args:
+        env: The Gymnasium environment to wrap.
+    """
+
+    def __init__(self, env):
+        super().__init__(env)
+
+    def _clean_info(self, info):
+        """Remove pixel-related keys and goal from info dict."""
+        cleaned_info = {}
+        for key, value in info.items():
+            # Skip pixel-related keys
+            if key == "pixels" or key.startswith("pixels."):
+                continue
+            # Skip goal key
+            if key == "goal":
+                continue
+            # Skip render_time
+            if key == "render_time":
+                continue
+            cleaned_info[key] = value
+        return cleaned_info
+
+    def reset(self, *args, **kwargs):
+        obs, info = self.env.reset(*args, **kwargs)
+        info = self._clean_info(info)
+        return obs, info
+
+    def step(self, action):
+        obs, reward, terminated, truncated, info = self.env.step(action)
+        info = self._clean_info(info)
+        return obs, reward, terminated, truncated, info
+
+
 class VariationWrapper(VectorWrapper):
     """Manages variation spaces for vectorized environments.
 

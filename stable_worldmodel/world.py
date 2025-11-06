@@ -113,7 +113,7 @@ class World:
         self,
         env_name: str,
         num_envs: int,
-        image_shape: tuple,
+        image_shape: tuple | None = None,
         goal_shape: tuple | None = None,
         goal_transform: Callable | None = None,
         image_transform: Callable | None = None,

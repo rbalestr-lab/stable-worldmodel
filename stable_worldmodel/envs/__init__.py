@@ -40,3 +40,8 @@ register(
     id="swm/OGBCube-v0",
     entry_point="stable_worldmodel.envs.ogbench_cube:CubeEnv",
 )
+
+register(
+    id="swm/OGBScene-v0",
+    entry_point="stable_worldmodel.envs.ogbench_scene:SceneEnv",
+)

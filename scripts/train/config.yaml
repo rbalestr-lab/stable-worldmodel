@@ -31,7 +31,7 @@ hydra:
 wandb:
   enable: true
   project: xenoworlds
-  entity: simon-lacoste-julien
+  entity: basileterv
 
 dataset_name: pusht_expert
 # cache_dir: null #${oc.env:SLURM_TMPDIR, null}

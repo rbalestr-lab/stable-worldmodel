@@ -461,35 +461,35 @@ class MegaWrapper(gym.Wrapper):
         env = ResizeGoalWrapper(env, image_shape, goal_transform)
 
         # We will wrap with StackedWrapper dynamically after we know the keys
-        self._base_env = env
-        self._stacked_env = None
+        self.env = env
         self._n_stacks = n_stacks
+        self._stack_initialized = False
 
-    def _init_stacked_env(self, info: dict):
-        """Dynamically attach StackedWrapper with all keys in info."""
-        if self._stacked_env is not None:
-            return
+    def _init_stack(self, info):
+        """Attach a StackedWrapper around self.env dynamically."""
         keys = list(info.keys())
-        self._stacked_env = StackedWrapper(self._base_env, keys, self._n_stacks)
+        self.env = StackedWrapper(self.env, keys, self._n_stacks)
+        self._stack_initialized = True
+
+        # Initialize buffers manually from the current info
+        for k in self.env.keys:
+            buf = self.env.buffers[k]
+            buf.clear()
+            buf.extend([info[k]] * self.env.n_stacks)
+            info[k] = self.env.get_buffer_data(k)
 
     def reset(self, *args, **kwargs):
-        # Lazily initialize the stacked wrapper
-        if self._stacked_env is None:
-            obs, info = self._base_env.reset(*args, **kwargs)
-            self._init_stacked_env(info)
-            # Now that _stacked_env exists, manually seed its buffers
-            for k in self._stacked_env.keys:
-                buffer = self._stacked_env.buffers[k]
-                buffer.clear()
-                buffer.extend([info[k]] * self._stacked_env.n_stacks)
-                info[k] = self._stacked_env.get_buffer_data(k)
-            return obs, info
-        else:
-            return self._stacked_env.reset(*args, **kwargs)
+        obs, info = self.env.reset(*args, **kwargs)
+
+        if not self._stack_initialized:
+            self._init_stack(info)
+
+        return obs, info
 
     def step(self, action):
-        assert self._stacked_env is not None, "StackedWrapper not yet initialized — call reset() first."
-        return self._stacked_env.step(action)
+        if not self._stack_initialized:
+            raise RuntimeError("StackedWrapper not yet initialized — call reset() first.")
+        return self.env.step(action)
 
 
 class VariationWrapper(VectorWrapper):

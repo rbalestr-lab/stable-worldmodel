@@ -192,7 +192,6 @@ class EverythingToInfoWrapper(gym.Wrapper):
             raise NotImplementedError
         else:
             info["action"] *= np.nan
-
         return obs, info
 
     def step(self, action):
@@ -416,11 +415,12 @@ class StackedWrapper(gym.Wrapper):
 class MegaWrapper(gym.Wrapper):
     """Combines multiple wrappers for comprehensive environment preprocessing.
 
-    Applies in sequence: AddPixelsWrapper → EverythingToInfoWrapper →
-    EnsureInfoKeysWrapper → EnsureGoalInfoWrapper → ResizeGoalWrapper.
+    Applies in sequence:
+        AddPixelsWrapper → EverythingToInfoWrapper → EnsureInfoKeysWrapper →
+        EnsureGoalInfoWrapper → ResizeGoalWrapper → StackedWrapper
 
     This provides a complete preprocessing pipeline with rendered pixels, unified
-    info dict, key validation, goal checking, and goal resizing.
+    info dict, key validation, goal checking, goal resizing, and temporal stacking.
 
     Args:
         env: The Gymnasium environment to wrap.
@@ -430,6 +430,7 @@ class MegaWrapper(gym.Wrapper):
         required_keys: Additional regex patterns for keys that must be in info.
             Pattern ``^pixels(?:\\..*)?$`` is always added.
         separate_goal: If True, validates 'goal' is present in info. Defaults to True.
+        n_stacks: Number of steps to stack (passed to StackedWrapper).
     """
 
     def __init__(
@@ -439,12 +440,16 @@ class MegaWrapper(gym.Wrapper):
         pixels_transform: Callable | None = None,
         goal_transform: Callable | None = None,
         required_keys: Iterable | None = None,
-        separate_goal: Iterable | None = True,
+        separate_goal: Iterable = True,
+        n_stacks: int = 1,
     ):
         super().__init__(env)
+
         if required_keys is None:
             required_keys = []
         required_keys.append(r"^pixels(?:\..*)?$")
+
+        # Build pipeline
         # this adds `pixels` key to info with optional transform
         env = AddPixelsWrapper(env, image_shape, pixels_transform)
         # this removes the info output, everything is in observation!
@@ -453,16 +458,38 @@ class MegaWrapper(gym.Wrapper):
         env = EnsureInfoKeysWrapper(env, required_keys)
         # check goal is provided
         env = EnsureGoalInfoWrapper(env, check_reset=separate_goal, check_step=separate_goal)
+        env = ResizeGoalWrapper(env, image_shape, goal_transform)
 
-        #
+        # We will wrap with StackedWrapper dynamically after we know the keys
+        self._base_env = env
+        self._stacked_env = None
+        self._n_stacks = n_stacks
 
-        self.env = ResizeGoalWrapper(env, image_shape, goal_transform)
+    def _init_stacked_env(self, info: dict):
+        """Dynamically attach StackedWrapper with all keys in info."""
+        if self._stacked_env is not None:
+            return
+        keys = list(info.keys())
+        self._stacked_env = StackedWrapper(self._base_env, keys, self._n_stacks)
 
     def reset(self, *args, **kwargs):
-        return self.env.reset(*args, **kwargs)
+        # Lazily initialize the stacked wrapper
+        if self._stacked_env is None:
+            obs, info = self._base_env.reset(*args, **kwargs)
+            self._init_stacked_env(info)
+            # Now that _stacked_env exists, manually seed its buffers
+            for k in self._stacked_env.keys:
+                buffer = self._stacked_env.buffers[k]
+                buffer.clear()
+                buffer.extend([info[k]] * self._stacked_env.n_stacks)
+                info[k] = self._stacked_env.get_buffer_data(k)
+            return obs, info
+        else:
+            return self._stacked_env.reset(*args, **kwargs)
 
     def step(self, action):
-        return self.env.step(action)
+        assert self._stacked_env is not None, "StackedWrapper not yet initialized — call reset() first."
+        return self._stacked_env.step(action)
 
 
 class VariationWrapper(VectorWrapper):

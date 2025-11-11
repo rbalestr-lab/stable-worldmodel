@@ -14,11 +14,13 @@ class GDSolver(torch.nn.Module):
         model: Costable,
         n_steps: int,
         action_noise=0.0,
+        num_samples=1,
         device="cpu",
     ):
         super().__init__()
         self.model = model
         self.n_steps = n_steps
+        self.num_samples = num_samples
         self.action_noise = action_noise
         self.device = device
 
@@ -70,14 +72,14 @@ class GDSolver(torch.nn.Module):
         set self.init - initial action sequences (n_envs, horizon, action_dim)
         """
         if actions is None:
-            actions = torch.zeros((self._n_envs, 0, self.action_dim))
+            actions = torch.zeros((self._n_envs, self.num_samples, 0, self.action_dim))
 
         # fill remaining action
         remaining = self.horizon - actions.shape[1]
 
         if remaining > 0:
-            new_actions = torch.zeros(self._n_envs, remaining, self.action_dim)
-            actions = torch.cat([actions, new_actions], dim=1)
+            new_actions = torch.zeros(self._n_envs, self.num_samples, remaining, self.action_dim)
+            actions = torch.cat([actions, new_actions], dim=2)
 
         actions = actions.to(self.device)
 
@@ -105,10 +107,24 @@ class GDSolver(torch.nn.Module):
         # perform gradient descent
         for _ in range(self.n_steps):
             # copy info dict to avoid in-place modification
-            cost = self.model.get_cost(dict(info_dict), self.init)
+            expanded_infos = {}
+            for k, v in info_dict.items():
+                if torch.is_tensor(v):
+                    v = v.unsqueeze(1)  # add sample dim
+                    v = v.expand(self.n_envs, self.num_samples, *v.shape[2:])
+                    v = v.unsqueeze(2)  # unsqueeze for history dim
+                    # TODO we should not have to unsqueeze history dim, the input should already have it
+                elif isinstance(v, np.ndarray):
+                    v = np.repeat(v[:, None, None, ...], self.num_samples, axis=1)
+                    # TODO we should not have to unsqueeze history dim, the input should already have it
+                expanded_infos[k] = v
 
-            assert type(cost) is torch.Tensor, f"Got {type(cost)} cost, expect torch.Tensor"
-            assert cost.ndim == 1 and len(cost) == self.n_envs, f"Cost should be of shape (n_envs,), got {cost.shape}"
+            cost = self.model.get_cost(expanded_infos, self.init)
+
+            assert isinstance(cost, torch.Tensor), f"Got {type(cost)} cost, expect torch.Tensor"
+            assert cost.ndim == 2 and cost.shape[0] == self.n_envs and cost.shape[1] == self.num_samples, (
+                f"Cost should be of shape ({self.n_envs}, {self.num_samples}), got {cost.shape}"
+            )
             assert cost.requires_grad, "Cost must requires_grad for GD solver."
 
             cost = cost.sum()  # independent cost for each env

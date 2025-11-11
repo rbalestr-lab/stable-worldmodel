@@ -97,14 +97,18 @@ class CEMSolver:
             # rem: need many memory and split before computing top k
 
             for traj in range(n_envs):
+                traj_start_time = time.time()
                 expanded_infos = {}
 
                 for k, v in info_dict.items():
                     v_traj = v[traj]
                     if torch.is_tensor(v):
-                        v_traj = v_traj.unsqueeze(0).repeat_interleave(self.num_samples, dim=0)
+                        v_traj = v_traj.unsqueeze(0)  # adding sample dim
+                        v_traj = v_traj.expand(self.num_samples, *v_traj.shape[1:])  # expand sample dim
+                        v_traj = v_traj.unsqueeze(0)  # adding traj dim
+                        # v_traj = v_traj.unsqueeze(0).repeat_interleave(self.num_samples, dim=0)
                     elif isinstance(v, np.ndarray):
-                        v_traj = np.repeat(v_traj[None, ...], self.num_samples, axis=0)
+                        v_traj = np.repeat(v_traj[None, None, ...], self.num_samples, axis=1)
 
                     expanded_infos[k] = v_traj
 
@@ -116,18 +120,19 @@ class CEMSolver:
 
                 # make the first action seq being mean
                 candidates[0] = mean[traj]
+                candidates = candidates.unsqueeze(0)  # adding traj dim
 
                 # evaluate the candidates
-                cost = self.model.get_cost(expanded_infos, candidates)
+                cost = self.model.get_cost(expanded_infos, candidates)[0]
 
                 assert type(cost) is torch.Tensor, f"Expected cost to be a torch.Tensor, got {type(cost)}"
-                assert cost.ndim == 1 and len(cost) == self.num_samples, (
-                    f"Expected cost to be of shape num_samples ({self.num_samples},), got {cost.shape}"
+                assert cost.ndim == 1 and cost.shape[0] == self.num_samples, (
+                    f"Expected cost to be of shape (num_samples), got {cost.shape}"
                 )
 
                 # -- get the elites
                 topk_idx = torch.argsort(cost)[: self.topk]
-                topk_candidates = candidates[topk_idx]
+                topk_candidates = candidates[0, topk_idx]
                 costs.append(cost[topk_idx[0]].item())
 
                 # -- update the mean and var

@@ -36,6 +36,10 @@ class DINOWM(torch.nn.Module):
         self.encoder_image_size = num_side_patches * 14
         self.encoder_transform = transforms.Compose([transforms.Resize(self.encoder_image_size)])
 
+        # cache for embedding
+        self._goal_cached_info = None
+        self._init_state_cached_info = None
+
     def encode(
         self,
         info,
@@ -44,7 +48,7 @@ class DINOWM(torch.nn.Module):
         proprio_key=None,
         action_key=None,
     ):
-        assert target not in info, f"{target} key already in info_dict"
+        # assert target not in info, f"{target} key already in info_dict"
 
         # == pixels embeddings
         pixels = info[pixels_key].float()  # (B, T, 3, H, W)
@@ -175,13 +179,23 @@ class DINOWM(torch.nn.Module):
         init_state_info_dict["action"] = act_0
 
         proprio_key = "proprio" if "proprio" in info else None
-        init_state_info_dict = self.encode(
-            init_state_info_dict,
-            pixels_key="pixels",
-            target="embed",
-            proprio_key=proprio_key,
-            action_key="action",
-        )
+        if (
+            self._init_state_cached_info is not None
+            and torch.equal(self._init_state_cached_info["id"], info["id"][:, 0])
+            and torch.equal(self._init_state_cached_info["step_idx"], info["step_idx"][:, 0])
+        ):
+            init_state_info_dict = self._init_state_cached_info
+        else:
+            init_state_info_dict = self.encode(
+                init_state_info_dict,
+                pixels_key="pixels",
+                target="embed",
+                proprio_key=proprio_key,
+                action_key="action",
+            )
+            self._init_state_cached_info = init_state_info_dict
+            self._init_state_cached_info["id"] = info["id"][:, 0]
+            self._init_state_cached_info["step_idx"] = info["step_idx"][:, 0]
 
         # repeat the embedding for each action candidate
         info["embed"] = (
@@ -254,22 +268,29 @@ class DINOWM(torch.nn.Module):
         goal_info_dict = {}
         for k, v in info_dict.items():
             if torch.is_tensor(v):
-                info_dict[k] = v.unsqueeze(2).to(
-                    self.device
-                )  # unsqueeze for history dimension (assume history size of 1)
-                # TODO we should not have to unsqueeze here, the input should already have the history dimension
+                info_dict[k] = v.to(self.device)
                 # goal is the same across samples so we will only embed it once
                 goal_info_dict[k] = info_dict[k][:, 0]  # (B, 1, ...)
 
         # == get the goal embedding
         proprio_key = "goal_proprio" if "goal_proprio" in goal_info_dict else None
-        goal_info_dict = self.encode(
-            goal_info_dict,
-            target="goal_embed",
-            pixels_key="goal",
-            proprio_key=proprio_key,
-            action_key=None,
-        )
+        if (
+            self._goal_cached_info is not None
+            and torch.equal(self._goal_cached_info["id"], info_dict["id"][:, 0])
+            and torch.equal(self._goal_cached_info["step_idx"], info_dict["step_idx"][:, 0])
+        ):
+            goal_info_dict = self._goal_cached_info
+        else:
+            goal_info_dict = self.encode(
+                goal_info_dict,
+                target="goal_embed",
+                pixels_key="goal",
+                proprio_key=proprio_key,
+                action_key=None,
+            )
+            self._goal_cached_info = goal_info_dict
+            self._goal_cached_info["id"] = info_dict["id"][:, 0]
+            self._goal_cached_info["step_idx"] = info_dict["step_idx"][:, 0]
         # repeat the goal for each action candidate
         info_dict["pixels_goal_embed"] = (
             goal_info_dict["pixels_goal_embed"]

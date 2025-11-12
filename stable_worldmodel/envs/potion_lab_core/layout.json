@@ -1,0 +1,55 @@
+{
+  "dispensers": [
+    {
+      "essence_type": 1,
+      "x": 100,
+      "y": 32
+    },
+    {
+      "essence_type": 2,
+      "x": 200,
+      "y": 32
+    },
+    {
+      "essence_type": 3,
+      "x": 300,
+      "y": 32
+    },
+    {
+      "essence_type": 4,
+      "x": 400,
+      "y": 32
+    }
+  ],
+  "tools": {
+    "enchanter": {
+      "x": 100,
+      "y": 164
+    },
+    "refiner": {
+      "x": 400,
+      "y": 164
+    },
+    "cauldron": {
+      "x": 256,
+      "y": 256
+    },
+    "bottler": {
+      "x": 100,
+      "y": 400
+    },
+    "trash_can": {
+      "x": 480,
+      "y": 480
+    },
+    "delivery_window": {
+      "x": 256,
+      "y": 480
+    }
+  },
+  "player": {
+    "x": 384,
+    "y": 352
+  }
+}
+

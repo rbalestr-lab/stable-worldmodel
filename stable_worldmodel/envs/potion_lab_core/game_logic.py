@@ -729,40 +729,52 @@ def create_default_layout(
     space: pymunk.Space,
     map_width: float,
     map_height: float,
-    tile_size: float
+    tile_size: float,
+    layout_file: Optional[str] = None
 ) -> Dict[str, any]:
     """
-    Create the default laboratory layout with tools and dispensers.
+    Create the laboratory layout from a JSON file.
+    
+    Args:
+        space: Pymunk physics space
+        map_width: Width of the map in pixels (unused, kept for compatibility)
+        map_height: Height of the map in pixels (unused, kept for compatibility)
+        tile_size: Size of each tile in pixels
+        layout_file: Path to the layout JSON file. If None, loads default layout.json
     
     Returns a dictionary containing all game objects.
     """
-    # Calculate positions
-    margin = tile_size * 2
-    top_y = margin
-    mid_y = map_height / 2
-    bottom_y = map_height - margin
+    # Load layout from JSON file
+    if layout_file is None:
+        current_dir = os.path.dirname(os.path.abspath(__file__))
+        layout_file = os.path.join(current_dir, 'layout.json')
     
-    # Create dispensers at the top (4 dispensers for Fire, Water, Earth, Air)
+    with open(layout_file, 'r') as f:
+        layout_data = json.load(f)
+    
+    # Create dispensers from layout data
     dispensers = []
-    dispenser_spacing = map_width / 5
-    for i, essence_type in enumerate([1, 2, 3, 4]):  # Fire, Water, Earth, Air
-        x = margin + (i + 1) * dispenser_spacing
-        dispenser = Dispenser(space, (x, top_y), essence_type, tile_size)
+    for dispenser_data in layout_data['dispensers']:
+        dispenser = Dispenser(
+            space,
+            (dispenser_data['x'], dispenser_data['y']),
+            dispenser_data['essence_type'],
+            tile_size
+        )
         dispensers.append(dispenser)
     
-    # Create tools in the middle area
-    enchanter = Enchanter(space, (margin + tile_size * 3, mid_y - tile_size * 2), tile_size)
-    refiner = Refiner(space, (map_width - margin - tile_size * 3, mid_y - tile_size * 2), tile_size)
-    cauldron = Cauldron(space, (map_width / 2, mid_y), tile_size)
-    bottler = Bottler(space, (map_width / 2 + tile_size * 3, mid_y + tile_size * 2), tile_size)
-    trash_can = TrashCan(space, (map_width - margin - tile_size, mid_y - tile_size * 2), tile_size)
+    # Create tools from layout data
+    tools_data = layout_data['tools']
+    enchanter = Enchanter(space, (tools_data['enchanter']['x'], tools_data['enchanter']['y']), tile_size)
+    refiner = Refiner(space, (tools_data['refiner']['x'], tools_data['refiner']['y']), tile_size)
+    cauldron = Cauldron(space, (tools_data['cauldron']['x'], tools_data['cauldron']['y']), tile_size)
+    bottler = Bottler(space, (tools_data['bottler']['x'], tools_data['bottler']['y']), tile_size)
+    trash_can = TrashCan(space, (tools_data['trash_can']['x'], tools_data['trash_can']['y']), tile_size)
+    delivery_window = DeliveryWindow(space, (tools_data['delivery_window']['x'], tools_data['delivery_window']['y']), tile_size)
     
-    # Create delivery window at the bottom
-    delivery_window = DeliveryWindow(space, (map_width / 2, bottom_y), tile_size)
-    
-    # Create player
-    player_start_pos = (map_width / 2 + tile_size * 4, mid_y + tile_size * 3)
-    player = Player(space, player_start_pos, tile_size)
+    # Create player from layout data
+    player_data = layout_data['player']
+    player = Player(space, (player_data['x'], player_data['y']), tile_size)
     
     return {
         'dispensers': dispensers,

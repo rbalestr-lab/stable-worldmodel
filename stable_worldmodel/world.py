@@ -386,9 +386,6 @@ class World:
                 )
         """
 
-        if self._history_size > 1:
-            raise NotImplementedError("Dataset recording with frame history > 1 is not supported.")
-
         viewname = [viewname] if isinstance(viewname, str) else viewname
         out = [
             imageio.get_writer(
@@ -403,9 +400,20 @@ class World:
         self.reset(seed, options)
 
         for i, o in enumerate(out):
-            frame = np.vstack([self.infos[v_name][i] for v_name in viewname])
+            frames_to_stack = []
+            for v_name in viewname:
+                frame_data = self.infos[v_name][i]
+                # if frame_data has a history dimension, take the last frame
+                if frame_data.ndim > 3:
+                    frame_data = frame_data[-1]
+                frames_to_stack.append(frame_data)
+            frame = np.vstack(frames_to_stack)
+
             if "goal" in self.infos:
-                frame = np.vstack([frame, self.infos["goal"][i]])
+                goal_data = self.infos["goal"][i]
+                if goal_data.ndim > 3:
+                    goal_data = goal_data[-1]
+                frame = np.vstack([frame, goal_data])
             o.append_data(frame)
 
         for _ in range(max_steps):
@@ -415,9 +423,20 @@ class World:
                 break
 
             for i, o in enumerate(out):
-                frame = np.vstack([self.infos[v_name][i] for v_name in viewname])
+                frames_to_stack = []
+                for v_name in viewname:
+                    frame_data = self.infos[v_name][i]
+                    # if frame_data has a history dimension, take the last frame
+                    if frame_data.ndim > 3:
+                        frame_data = frame_data[-1]
+                    frames_to_stack.append(frame_data)
+                frame = np.vstack(frames_to_stack)
+
                 if "goal" in self.infos:
-                    frame = np.vstack([frame, self.infos["goal"][i]])
+                    goal_data = self.infos["goal"][i]
+                    if goal_data.ndim > 3:
+                        goal_data = goal_data[-1]
+                    frame = np.vstack([frame, goal_data])
                 o.append_data(frame)
         [o.close() for o in out]
         print(f"Video saved to {video_path}")
@@ -564,6 +583,11 @@ class World:
             records["episode_idx"].extend(list(episode_idx))
             records["policy"].extend([self.policy.type] * self.num_envs)
 
+        # flatten time dimension
+        for k, v in records.items():
+            if isinstance(v[0], np.ndarray):
+                records[k] = [item.squeeze() for item in v]
+
         # add the episode length
         counts = np.bincount(np.array(records["episode_idx"]), minlength=max(records["episode_idx"]) + 1)
         records["episode_len"] = [int(counts[ep]) for ep in records["episode_idx"]]
@@ -592,6 +616,7 @@ class World:
         for i in range(len(records["episode_idx"])):
             ep_idx = records["episode_idx"][i]
             step_idx = records["step_idx"][i]
+
             for img_col in image_cols:
                 img = records[img_col][i]
                 img_folder = dataset_path / "img" / f"{ep_idx}"

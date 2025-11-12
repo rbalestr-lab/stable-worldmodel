@@ -13,23 +13,23 @@
       "description": "Deliver raw Fire Essence"
     },
     {
-        "time_limit": 3600,
-        "required_items": [
-          {
-            "base_essences": [1],
-            "enchanted": [false],
-            "refined": [false],
-            "bottled": false
-          },
-          {
-            "base_essences": [2],
-            "enchanted": [false],
-            "refined": [false],
-            "bottled": false
-          }
-        ],
-        "description": "Deliver raw Fire Essence and raw Water Essence" 
-      },
+      "time_limit": 3600,
+      "required_items": [
+        {
+          "base_essences": [1],
+          "enchanted": [false],
+          "refined": [false],
+          "bottled": false
+        },
+        {
+          "base_essences": [2],
+          "enchanted": [false],
+          "refined": [false],
+          "bottled": false
+        }
+      ],
+      "description": "Deliver raw Fire Essence and raw Water Essence"
+    },
     {
       "time_limit": 3600,
       "required_items": [
@@ -92,4 +92,3 @@
     }
   ]
 }
-

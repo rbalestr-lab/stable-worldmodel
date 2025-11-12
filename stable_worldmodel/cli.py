@@ -570,6 +570,7 @@ def play(
     """
     if env == "potion-lab":
         from stable_worldmodel.envs.potion_lab import play_potion_lab
+
         play_potion_lab()
     else:
         print(f"[red]Unknown environment: {env}[/red]")

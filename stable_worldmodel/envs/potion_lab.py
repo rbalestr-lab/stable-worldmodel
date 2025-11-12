@@ -267,15 +267,13 @@ class PotionLab(gym.Env):
             essence.remove_from_world()
         self.essences.clear()
         
-        # Reset tool states
+        # Reset all tool states using their reset methods
         for tool in self.tools.values():
-            if hasattr(tool, 'state'):
-                tool.state = type(tool.state)(0)  # Reset to first enum value (EMPTY/WAITING)
-                tool.timer = 0
-                if hasattr(tool, 'current_essence'):
-                    tool.current_essence = None
-                if hasattr(tool, 'essence_list'):
-                    tool.essence_list = []
+            tool.reset()
+        
+        # Reset collision handler state
+        if hasattr(self, 'collision_handler'):
+            self.collision_handler.player_stirring_cauldron = False
         
         # Set new requirements
         requirements = round_config['required_items'].copy()

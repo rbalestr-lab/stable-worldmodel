@@ -311,6 +311,13 @@ class Tool:
     def get_display_name(self) -> str:
         """Get the display name for this tool."""
         return self.__class__.__name__
+    
+    def reset(self):
+        """Reset the tool to its initial state. Override in subclasses if needed."""
+        if hasattr(self, 'state'):
+            self.state = type(self.state)(0)  # Reset to first enum value
+        if hasattr(self, 'timer'):
+            self.timer = 0
 
 
 # ============================================================================
@@ -382,6 +389,12 @@ class Enchanter(Tool):
         self.current_essence = None
         self.state = ToolState.EMPTY
         return essence_state
+    
+    def reset(self):
+        """Reset enchanter to initial state."""
+        self.state = ToolState.EMPTY
+        self.timer = 0
+        self.current_essence = None
 
 
 # ============================================================================
@@ -446,6 +459,12 @@ class Refiner(Tool):
         self.current_essence = None
         self.state = ToolState.EMPTY
         return essence_state
+    
+    def reset(self):
+        """Reset refiner to initial state."""
+        self.state = ToolState.EMPTY
+        self.timer = 0
+        self.current_essence = None
 
 
 # ============================================================================
@@ -574,6 +593,14 @@ class Cauldron(Tool):
     def get_num_essences(self) -> int:
         """Get the number of essences currently in the cauldron."""
         return sum(1 for slot in self.essence_slots if slot is not None)
+    
+    def reset(self):
+        """Reset cauldron to initial state."""
+        self.state = CauldronState.EMPTY
+        self.timer = 0
+        self.essence_slots = [None, None, None, None]
+        self.stir_progress = 0
+        self.combined_essence = None
 
 
 # ============================================================================
@@ -633,6 +660,12 @@ class Bottler(Tool):
         self.current_essence = None
         self.state = ToolState.EMPTY
         return essence_state
+    
+    def reset(self):
+        """Reset bottler to initial state."""
+        self.state = ToolState.EMPTY
+        self.timer = 0
+        self.current_essence = None
 
 
 # ============================================================================

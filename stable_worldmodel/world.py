@@ -181,6 +181,7 @@ class World:
                     seed=42
                 )
         """
+
         self.envs = gym.make_vec(
             env_name,
             num_envs=num_envs,
@@ -203,6 +204,8 @@ class World:
 
         self.envs = VariationWrapper(self.envs)
         self.envs.unwrapped.autoreset_mode = gym.vector.AutoresetMode.DISABLED
+
+        self._history_size = history_size
 
         if verbose > 0:
             logging.info(f"🌍🌍🌍 World {env_name} initialized 🌍🌍🌍")
@@ -383,6 +386,9 @@ class World:
                 )
         """
 
+        if self._history_size > 1:
+            raise NotImplementedError("Dataset recording with frame history > 1 is not supported.")
+
         viewname = [viewname] if isinstance(viewname, str) else viewname
         out = [
             imageio.get_writer(
@@ -487,6 +493,9 @@ class World:
                     options={'task_id': 2}
                 )
         """
+        if self._history_size > 1:
+            raise NotImplementedError("Dataset recording with frame history > 1 is not supported.")
+
         cache_dir = cache_dir or swm.data.get_cache_dir()
         dataset_path = Path(cache_dir, dataset_name)
         dataset_path.mkdir(parents=True, exist_ok=True)
@@ -710,7 +719,6 @@ class World:
                     max_steps=100
                 )
         """
-
         cache_dir = cache_dir or swm.data.get_cache_dir()
         dataset_path = Path(cache_dir, dataset_name)
         assert dataset_path.is_dir(), f"Dataset {dataset_name} not found in cache dir {swm.data.get_cache_dir()}"

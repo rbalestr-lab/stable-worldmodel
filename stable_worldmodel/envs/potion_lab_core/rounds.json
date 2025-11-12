@@ -1,0 +1,95 @@
+{
+  "rounds": [
+    {
+      "time_limit": 3600,
+      "required_items": [
+        {
+          "base_essences": [1],
+          "enchanted": [false],
+          "refined": [false],
+          "bottled": false
+        }
+      ],
+      "description": "Deliver raw Fire Essence"
+    },
+    {
+        "time_limit": 3600,
+        "required_items": [
+          {
+            "base_essences": [1],
+            "enchanted": [false],
+            "refined": [false],
+            "bottled": false
+          },
+          {
+            "base_essences": [2],
+            "enchanted": [false],
+            "refined": [false],
+            "bottled": false
+          }
+        ],
+        "description": "Deliver raw Fire Essence and raw Water Essence" 
+      },
+    {
+      "time_limit": 3600,
+      "required_items": [
+        {
+          "base_essences": [1],
+          "enchanted": [true],
+          "refined": [false],
+          "bottled": false
+        }
+      ],
+      "description": "Deliver enchanted Fire Essence"
+    },
+    {
+      "time_limit": 3600,
+      "required_items": [
+        {
+          "base_essences": [2],
+          "enchanted": [false],
+          "refined": [true],
+          "bottled": false
+        }
+      ],
+      "description": "Deliver refined Water Essence"
+    },
+    {
+      "time_limit": 3600,
+      "required_items": [
+        {
+          "base_essences": [1],
+          "enchanted": [false],
+          "refined": [false],
+          "bottled": true
+        }
+      ],
+      "description": "Deliver bottled Fire Essence"
+    },
+    {
+      "time_limit": 5400,
+      "required_items": [
+        {
+          "base_essences": [1, 2],
+          "enchanted": [false, false],
+          "refined": [false, false],
+          "bottled": true
+        }
+      ],
+      "description": "Deliver bottled Fire+Water combination"
+    },
+    {
+      "time_limit": 5400,
+      "required_items": [
+        {
+          "base_essences": [1, 2],
+          "enchanted": [true, false],
+          "refined": [false, false],
+          "bottled": true
+        }
+      ],
+      "description": "Deliver bottled Fire(enchanted)+Water(plain)"
+    }
+  ]
+}
+

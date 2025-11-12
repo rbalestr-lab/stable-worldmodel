@@ -713,89 +713,12 @@ class RoundManager:
     
     @staticmethod
     def create_default_rounds() -> 'RoundManager':
-        """Create a default set of rounds for testing."""
-        rounds = [
-            # Round 1: Deliver raw Fire Essence
-            {
-                "time_limit": 3600,
-                "required_items": [
-                    {
-                        "base_essences": [1],
-                        "enchanted": [False],
-                        "refined": [False],
-                        "bottled": False
-                    }
-                ],
-                "description": "Deliver raw Fire Essence"
-            },
-            # Round 2: Deliver enchanted Fire Essence
-            {
-                "time_limit": 3600,
-                "required_items": [
-                    {
-                        "base_essences": [1],
-                        "enchanted": [True],
-                        "refined": [False],
-                        "bottled": False
-                    }
-                ],
-                "description": "Deliver enchanted Fire Essence"
-            },
-            # Round 3: Deliver refined Water Essence
-            {
-                "time_limit": 3600,
-                "required_items": [
-                    {
-                        "base_essences": [2],
-                        "enchanted": [False],
-                        "refined": [True],
-                        "bottled": False
-                    }
-                ],
-                "description": "Deliver refined Water Essence"
-            },
-            # Round 4: Deliver bottled Fire Essence
-            {
-                "time_limit": 3600,
-                "required_items": [
-                    {
-                        "base_essences": [1],
-                        "enchanted": [False],
-                        "refined": [False],
-                        "bottled": True
-                    }
-                ],
-                "description": "Deliver bottled Fire Essence"
-            },
-            # Round 5: Deliver Fire+Water combination (both plain), bottled
-            {
-                "time_limit": 5400,
-                "required_items": [
-                    {
-                        "base_essences": [1, 2],
-                        "enchanted": [False, False],
-                        "refined": [False, False],
-                        "bottled": True
-                    }
-                ],
-                "description": "Deliver bottled Fire+Water combination"
-            },
-            # Round 6: Deliver Fire(enchanted) + Water(plain), bottled
-            {
-                "time_limit": 5400,
-                "required_items": [
-                    {
-                        "base_essences": [1, 2],
-                        "enchanted": [True, False],
-                        "refined": [False, False],
-                        "bottled": True
-                    }
-                ],
-                "description": "Deliver bottled Fire(enchanted)+Water(plain)"
-            },
-        ]
+        """Load default rounds from rounds.json file."""
+        # Get the directory where this file is located
+        current_dir = os.path.dirname(os.path.abspath(__file__))
+        rounds_file = os.path.join(current_dir, 'rounds.json')
         
-        return RoundManager(rounds)
+        return RoundManager.load_from_file(rounds_file)
 
 
 # ============================================================================

@@ -512,7 +512,7 @@ class PotionLab(gym.Env):
                 if refined[0]:
                     self._draw_dots_on_circle(center, radius, color)
                 
-                # Outline
+                # Outline for single essences
                 pygame.draw.circle(self.canvas, (50, 50, 50), center, radius, 2)
             else:
                 # Multiple essences - draw as pie slices
@@ -542,8 +542,7 @@ class PotionLab(gym.Env):
                     if refined[j]:
                         self._draw_dots_in_slice(center, radius, start_angle, end_angle, color)
                 
-                # Outline
-                pygame.draw.circle(self.canvas, (50, 50, 50), center, radius, 2)
+                # No outline for combined essences
             
             # Checkmark if completed
             if req.get('completed', False):
@@ -551,50 +550,24 @@ class PotionLab(gym.Env):
                 self.canvas.blit(check_text, (box_x + 5, start_y + 5))
     
     def _draw_stripes_on_circle(self, center, radius, base_color):
-        """Draw stripes on a circle (clipped)."""
-        stripe_color = tuple(max(0, c - 60) for c in base_color)
-        spacing = max(3, radius // 4)
-        for offset in range(-radius * 2, radius * 2, spacing):
-            x1 = center[0] - radius + offset
-            y1 = center[1] - radius
-            x2 = center[0] + radius + offset
-            y2 = center[1] + radius
-            pygame.draw.line(self.canvas, stripe_color, (x1, y1), (x2, y2), 1)
+        """Draw stripes on a circle (enchanted) - uses same function as main game."""
+        from .potion_lab_core.game_logic import _draw_stripes
+        _draw_stripes(self.canvas, center, radius, base_color)
     
     def _draw_dots_on_circle(self, center, radius, base_color):
-        """Draw dots on a circle (clipped)."""
-        dot_color = tuple(min(255, c + 60) for c in base_color)
-        dot_radius = max(1, radius // 8)
-        spacing = max(3, radius // 3)
-        
-        for x_offset in range(-radius, radius, spacing):
-            for y_offset in range(-radius, radius, spacing):
-                dot_x = center[0] + x_offset
-                dot_y = center[1] + y_offset
-                dist = np.sqrt(x_offset**2 + y_offset**2)
-                if dist <= radius - dot_radius:
-                    pygame.draw.circle(self.canvas, dot_color, (dot_x, dot_y), dot_radius)
+        """Draw dots on a circle (refined) - uses same function as main game."""
+        from .potion_lab_core.game_logic import _draw_dots
+        _draw_dots(self.canvas, center, radius, base_color)
     
     def _draw_stripes_in_slice(self, center, radius, start_angle, end_angle, base_color):
         """Draw stripes within a pie slice."""
-        stripe_color = tuple(max(0, c - 60) for c in base_color)
-        for angle in range(int(start_angle), int(end_angle), 15):
-            rad = np.deg2rad(angle - 90)
-            x = center[0] + radius * np.cos(rad)
-            y = center[1] + radius * np.sin(rad)
-            pygame.draw.line(self.canvas, stripe_color, center, (int(x), int(y)), 1)
+        from .potion_lab_core.game_logic import _draw_stripes_in_slice
+        _draw_stripes_in_slice(self.canvas, center, radius, start_angle, end_angle, base_color)
     
     def _draw_dots_in_slice(self, center, radius, start_angle, end_angle, base_color):
         """Draw dots within a pie slice."""
-        dot_color = tuple(min(255, c + 60) for c in base_color)
-        dot_radius = max(1, radius // 8)
-        mid_angle = (start_angle + end_angle) / 2
-        rad = np.deg2rad(mid_angle - 90)
-        
-        for r in range(dot_radius * 2, int(radius), int(radius / 3)):
-            x = center[0] + r * np.cos(rad)
-            y = center[1] + r * np.sin(rad)
-            pygame.draw.circle(self.canvas, dot_color, (int(x), int(y)), dot_radius)
+        from .potion_lab_core.game_logic import _draw_dots_in_slice
+        _draw_dots_in_slice(self.canvas, center, radius, start_angle, end_angle, base_color)
     
     def _handle_keyboard_input(self):
         """Handle keyboard input for human control mode."""

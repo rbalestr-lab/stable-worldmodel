@@ -285,8 +285,7 @@ def draw_essence(
             if state.refined_per_essence[i]:
                 _draw_dots_in_slice(canvas, screen_pos, radius, start_angle, end_angle, color)
         
-        # Draw outline
-        pygame.draw.circle(canvas, (50, 50, 50), screen_pos, screen_radius, 2)
+        # No outline for combined essences
     else:
         # Single essence - draw as simple circle
         color = ESSENCE_TYPES[state.essence_types[0]][1]
@@ -445,18 +444,53 @@ def _draw_cauldron_contents(canvas: pygame.Surface, cauldron, tile_size: float):
     for i, essence_state in enumerate(cauldron.essence_slots):
         if essence_state is not None:
             slot_pos = slot_positions[i]
-            # Get primary color
             from .entities import ESSENCE_TYPES
-            color = ESSENCE_TYPES[essence_state.essence_types[0]][1]
-            pygame.draw.circle(canvas, color, (int(slot_pos[0]), int(slot_pos[1])), essence_radius)
             
-            # Draw patterns if enchanted/refined
-            if essence_state.enchanted_per_essence[0]:
-                _draw_stripes(canvas, (int(slot_pos[0]), int(slot_pos[1])), essence_radius, color)
-            if essence_state.refined_per_essence[0]:
-                _draw_dots(canvas, (int(slot_pos[0]), int(slot_pos[1])), essence_radius, color)
-            
-            pygame.draw.circle(canvas, (50, 50, 50), (int(slot_pos[0]), int(slot_pos[1])), essence_radius, 1)
+            # Check if this is a combined essence (multiple types)
+            if essence_state.is_combined and len(essence_state.essence_types) > 1:
+                # Draw as pie chart like in main game
+                num_types = len(essence_state.essence_types)
+                angle_per_type = 360 / num_types
+                
+                for j, essence_type in enumerate(essence_state.essence_types):
+                    color = ESSENCE_TYPES[essence_type][1]
+                    start_angle = j * angle_per_type - 90  # -90 to start from top
+                    end_angle = (j + 1) * angle_per_type - 90
+                    
+                    # Draw pie slice
+                    points = [(int(slot_pos[0]), int(slot_pos[1]))]
+                    for angle in range(int(start_angle), int(end_angle) + 1, 5):
+                        rad = np.deg2rad(angle)
+                        x = slot_pos[0] + essence_radius * np.cos(rad)
+                        y = slot_pos[1] + essence_radius * np.sin(rad)
+                        points.append((int(x), int(y)))
+                    
+                    if len(points) > 2:
+                        pygame.draw.polygon(canvas, color, points)
+                    
+                    # Draw patterns for this slice if needed
+                    if essence_state.enchanted_per_essence[j]:
+                        _draw_stripes_in_slice(canvas, (int(slot_pos[0]), int(slot_pos[1])), 
+                                             essence_radius, start_angle, end_angle, color)
+                    
+                    if essence_state.refined_per_essence[j]:
+                        _draw_dots_in_slice(canvas, (int(slot_pos[0]), int(slot_pos[1])), 
+                                          essence_radius, start_angle, end_angle, color)
+                
+                # No outline for combined essences
+            else:
+                # Single essence - draw as simple circle
+                color = ESSENCE_TYPES[essence_state.essence_types[0]][1]
+                pygame.draw.circle(canvas, color, (int(slot_pos[0]), int(slot_pos[1])), essence_radius)
+                
+                # Draw patterns if enchanted/refined
+                if essence_state.enchanted_per_essence[0]:
+                    _draw_stripes(canvas, (int(slot_pos[0]), int(slot_pos[1])), essence_radius, color)
+                if essence_state.refined_per_essence[0]:
+                    _draw_dots(canvas, (int(slot_pos[0]), int(slot_pos[1])), essence_radius, color)
+                
+                # Outline for single essences
+                pygame.draw.circle(canvas, (50, 50, 50), (int(slot_pos[0]), int(slot_pos[1])), essence_radius, 1)
     
     # Draw stir progress bar if stirring
     if cauldron.state == CauldronState.STIRRING and cauldron.stir_time > 0:

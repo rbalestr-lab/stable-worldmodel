@@ -98,6 +98,7 @@ class CollisionHandler:
         """
         self.env = env
         self.processed_collisions = set()  # Track processed collisions this frame
+        self.player_stirring_cauldron = False  # Track if player is currently stirring
     
     def setup_handlers(self, space: pymunk.Space):
         """Set up collision handlers - this is now a no-op as we check manually."""
@@ -110,6 +111,9 @@ class CollisionHandler:
         
         # Check player collisions with dispensers
         self._check_player_dispenser_collisions()
+        
+        # Check player collisions with cauldron (for stirring)
+        self._check_player_cauldron_collisions()
         
         # Check essence collisions with tools
         self._check_essence_tool_collisions()
@@ -140,6 +144,29 @@ class CollisionHandler:
                             tile_size=self.env.tile_size
                         )
                         self.env.essences.append(essence)
+    
+    def _check_player_cauldron_collisions(self):
+        """Check if player is touching the cauldron to stir it."""
+        player = self.env.player
+        cauldron = self.env.tools.get('cauldron')
+        
+        if cauldron is None:
+            return
+        
+        # Check if player shape overlaps with cauldron shape
+        if self._shapes_overlap(player.shape, cauldron.shape):
+            if not self.player_stirring_cauldron:
+                # Just started stirring
+                cauldron.start_stirring()
+                self.player_stirring_cauldron = True
+            else:
+                # Continue stirring
+                cauldron.stir()
+        else:
+            if self.player_stirring_cauldron:
+                # Stopped stirring
+                cauldron.stop_stirring()
+                self.player_stirring_cauldron = False
     
     def _check_essence_tool_collisions(self):
         """Check if any essences are touching tools."""
@@ -277,37 +304,43 @@ def draw_essence(
 
 
 def _draw_stripes(canvas: pygame.Surface, pos: Tuple[int, int], radius: int, base_color: Tuple[int, int, int]):
-    """Draw diagonal stripe pattern on a circle."""
-    # Create a darker color for stripes
-    stripe_color = tuple(max(0, c - 60) for c in base_color)
+    """Draw diagonal stripe pattern on a circle (enchanted)."""
+    # Create a darker stripe color
+    stripe_color = tuple(max(0, int(c * 0.6)) for c in base_color)
     
-    # Draw diagonal lines
-    spacing = max(4, radius // 4)
+    # Draw diagonal lines clipped to circle
+    spacing = max(3, radius // 5)
+    line_width = max(1, radius // 15)
+    
     for offset in range(-radius * 2, radius * 2, spacing):
-        x1 = pos[0] - radius + offset
-        y1 = pos[1] - radius
-        x2 = pos[0] + radius + offset
-        y2 = pos[1] + radius
-        pygame.draw.line(canvas, stripe_color, (x1, y1), (x2, y2), 2)
+        for y in range(-radius, radius + 1):
+            x = y + offset
+            # Check if point is within circle
+            if x >= -radius and x <= radius:
+                dist_sq = x*x + y*y
+                if dist_sq <= radius * radius:
+                    px = pos[0] + x
+                    py = pos[1] + y
+                    if abs(x - y - offset) < line_width:
+                        canvas.set_at((int(px), int(py)), stripe_color)
 
 
 def _draw_dots(canvas: pygame.Surface, pos: Tuple[int, int], radius: int, base_color: Tuple[int, int, int]):
-    """Draw dotted pattern on a circle."""
-    # Create a lighter color for dots
-    dot_color = tuple(min(255, c + 60) for c in base_color)
+    """Draw dotted pattern on a circle (refined)."""
+    # Create a lighter dot color
+    dot_color = tuple(min(255, int(c * 1.3)) for c in base_color)
     
-    # Draw dots in a grid pattern
-    dot_radius = max(1, radius // 8)
-    spacing = max(4, radius // 3)
+    # Draw dots in a grid pattern, only within circle bounds
+    dot_radius = max(1, radius // 12)
+    spacing = max(3, radius // 4)
     
-    for x_offset in range(-radius, radius, spacing):
-        for y_offset in range(-radius, radius, spacing):
-            dot_x = pos[0] + x_offset
-            dot_y = pos[1] + y_offset
-            
+    for x_offset in range(-radius + spacing//2, radius, spacing):
+        for y_offset in range(-radius + spacing//2, radius, spacing):
             # Only draw if within circle
             dist = np.sqrt(x_offset**2 + y_offset**2)
-            if dist <= radius - dot_radius:
+            if dist <= radius - dot_radius - 2:
+                dot_x = int(pos[0] + x_offset)
+                dot_y = int(pos[1] + y_offset)
                 pygame.draw.circle(canvas, dot_color, (dot_x, dot_y), dot_radius)
 
 
@@ -354,6 +387,8 @@ def _draw_dots_in_slice(
 
 def draw_tool(canvas: pygame.Surface, tool, tile_size: float):
     """Draw a tool with its current state visualization."""
+    from .entities import Cauldron, CauldronState
+    
     pos = tool.position
     size = tool.size
     
@@ -368,21 +403,76 @@ def draw_tool(canvas: pygame.Surface, tool, tile_size: float):
     # Color based on state
     color = tool.color
     if hasattr(tool, 'state'):
-        if tool.state == ToolState.PROCESSING or tool.state == CauldronState.MIXING:
+        if tool.state == ToolState.PROCESSING or tool.state == CauldronState.STIRRING:
             # Pulse effect - make it brighter
             color = tuple(min(255, c + 40) for c in color)
         elif tool.state == ToolState.DONE or tool.state == CauldronState.DONE:
             # Flash green when done
             color = (100, 255, 100)
+        elif tool.state == CauldronState.READY_TO_STIR:
+            # Ready to stir - slight glow
+            color = tuple(min(255, c + 20) for c in color)
     
     pygame.draw.rect(canvas, color, rect)
     pygame.draw.rect(canvas, (50, 50, 50), rect, 3)
+    
+    # Special rendering for Cauldron - show essences in slots
+    if isinstance(tool, Cauldron):
+        _draw_cauldron_contents(canvas, tool, tile_size)
     
     # Draw tool name
     font = pygame.font.SysFont('Arial', 10)
     text = font.render(tool.get_display_name(), True, (255, 255, 255))
     text_rect = text.get_rect(center=(int(pos[0]), int(pos[1])))
     canvas.blit(text, text_rect)
+
+
+def _draw_cauldron_contents(canvas: pygame.Surface, cauldron, tile_size: float):
+    """Draw essences in the cauldron's 4 slots and stir progress."""
+    pos = cauldron.position
+    slot_offset = tile_size * 0.5  # Reduced from 0.6 to keep patterns visible
+    essence_radius = int(tile_size * 0.22)
+    
+    # Positions for 4 slots: top, right, bottom, left
+    slot_positions = [
+        (pos[0], pos[1] - slot_offset),  # Top
+        (pos[0] + slot_offset, pos[1]),  # Right
+        (pos[0], pos[1] + slot_offset),  # Bottom
+        (pos[0] - slot_offset, pos[1]),  # Left
+    ]
+    
+    # Draw essences in slots with patterns
+    for i, essence_state in enumerate(cauldron.essence_slots):
+        if essence_state is not None:
+            slot_pos = slot_positions[i]
+            # Get primary color
+            from .entities import ESSENCE_TYPES
+            color = ESSENCE_TYPES[essence_state.essence_types[0]][1]
+            pygame.draw.circle(canvas, color, (int(slot_pos[0]), int(slot_pos[1])), essence_radius)
+            
+            # Draw patterns if enchanted/refined
+            if essence_state.enchanted_per_essence[0]:
+                _draw_stripes(canvas, (int(slot_pos[0]), int(slot_pos[1])), essence_radius, color)
+            if essence_state.refined_per_essence[0]:
+                _draw_dots(canvas, (int(slot_pos[0]), int(slot_pos[1])), essence_radius, color)
+            
+            pygame.draw.circle(canvas, (50, 50, 50), (int(slot_pos[0]), int(slot_pos[1])), essence_radius, 1)
+    
+    # Draw stir progress bar if stirring
+    if cauldron.state == CauldronState.STIRRING and cauldron.stir_time > 0:
+        progress = cauldron.stir_progress / cauldron.stir_time
+        bar_width = int(cauldron.size[0] * 0.8)
+        bar_height = 6
+        bar_x = int(pos[0] - bar_width / 2)
+        bar_y = int(pos[1] + cauldron.size[1] / 2 - 15)
+        
+        # Background
+        pygame.draw.rect(canvas, (100, 100, 100), (bar_x, bar_y, bar_width, bar_height))
+        # Progress
+        progress_width = int(bar_width * progress)
+        pygame.draw.rect(canvas, (100, 255, 100), (bar_x, bar_y, progress_width, bar_height))
+        # Border
+        pygame.draw.rect(canvas, (50, 50, 50), (bar_x, bar_y, bar_width, bar_height), 1)
 
 
 def draw_player(canvas: pygame.Surface, player: Player):

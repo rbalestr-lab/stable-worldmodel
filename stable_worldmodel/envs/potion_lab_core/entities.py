@@ -99,7 +99,7 @@ class Essence:
         self.tile_size = tile_size
         
         # Physics properties
-        self.radius = 0.15 * tile_size  # 0.15 tiles
+        self.radius = 0.35 * tile_size  # 0.35 tiles (much bigger)
         mass = 0.5
         moment = pymunk.moment_for_circle(mass, 0, self.radius)
         self.body = pymunk.Body(mass, moment)
@@ -255,8 +255,9 @@ class CauldronState(Enum):
     """State enum for the Cauldron."""
     EMPTY = 0
     FILLING = 1
-    MIXING = 2
-    DONE = 3
+    READY_TO_STIR = 2  # Has essences, waiting for player to stir
+    STIRRING = 3  # Player is actively stirring
+    DONE = 4
 
 
 class DeliveryState(Enum):
@@ -342,6 +343,11 @@ class Enchanter(Tool):
         if self.state != ToolState.EMPTY:
             return False
         
+        # Check if essence needs enchanting
+        # Don't accept if all components are already enchanted
+        if all(essence.state.enchanted_per_essence):
+            return False
+        
         # Accept the essence
         self.current_essence = essence.state.copy()
         self.state = ToolState.PROCESSING
@@ -404,6 +410,11 @@ class Refiner(Tool):
         if self.state != ToolState.EMPTY:
             return False
         
+        # Check if essence needs refining
+        # Don't accept if all components are already refined
+        if all(essence.state.refined_per_essence):
+            return False
+        
         self.current_essence = essence.state.copy()
         self.state = ToolState.PROCESSING
         self.timer = self.processing_time
@@ -444,8 +455,7 @@ class Refiner(Tool):
 class Cauldron(Tool):
     """
     Cauldron: Combines multiple essences (2-4) into a single multi-colored essence.
-    Staging time: 60 steps (resets on each new essence)
-    Mixing time: 60 steps
+    Player must stir by colliding with it for the full mixing time.
     """
     
     def __init__(self, space: pymunk.Space, position: Tuple[float, float], tile_size: float = 32.0):
@@ -455,70 +465,89 @@ class Cauldron(Tool):
         
         self.state = CauldronState.EMPTY
         self.timer = 0
-        self.staging_time = 60  # steps
-        self.mixing_time = 60  # steps
+        self.stir_time = 60  # steps - player must stir for this long
         self.eject_delay = 6  # steps
         self.max_essences = 4
         
-        self.essence_list: List[EssenceState] = []
+        # Store essences in specific positions (top, right, bottom, left)
+        self.essence_slots: List[Optional[EssenceState]] = [None, None, None, None]
+        self.stir_progress = 0  # Track how long player has been stirring
     
     def accept_essence(self, essence: Essence) -> bool:
         """Try to accept an essence into the cauldron."""
-        if self.state == CauldronState.DONE:
-            return False
+        if self.state in (CauldronState.STIRRING, CauldronState.DONE):
+            return False  # Can't add more when stirring or done
         
-        # Check capacity
-        if len(self.essence_list) >= self.max_essences:
-            return False  # Reject, cauldron full
+        # Find first empty slot
+        empty_slot = None
+        for i, slot in enumerate(self.essence_slots):
+            if slot is None:
+                empty_slot = i
+                break
         
-        # Accept the essence
-        self.essence_list.append(essence.state.copy())
+        if empty_slot is None:
+            return False  # All slots full
+        
+        # Accept the essence into the slot
+        self.essence_slots[empty_slot] = essence.state.copy()
         essence.remove_from_world()
         
         # Update state
         if self.state == CauldronState.EMPTY:
             self.state = CauldronState.FILLING
         
-        # Reset staging timer
-        self.timer = self.staging_time
+        # Check if we have at least 2 essences to make it ready to stir
+        num_essences = sum(1 for slot in self.essence_slots if slot is not None)
+        if num_essences >= 2:
+            self.state = CauldronState.READY_TO_STIR
+        
         return True
     
-    def update(self, dt: float):
-        """Update cauldron state machine."""
-        if self.state == CauldronState.FILLING:
-            self.timer -= 1
-            if self.timer <= 0:
-                # Start mixing
-                self.state = CauldronState.MIXING
-                self.timer = self.mixing_time
-        
-        elif self.state == CauldronState.MIXING:
-            self.timer -= 1
-            if self.timer <= 0:
-                # Create combined essence
+    def start_stirring(self):
+        """Called when player starts colliding with cauldron."""
+        if self.state == CauldronState.READY_TO_STIR:
+            self.state = CauldronState.STIRRING
+            self.stir_progress = 0
+    
+    def stir(self):
+        """Called each frame player is colliding with cauldron."""
+        if self.state == CauldronState.STIRRING:
+            self.stir_progress += 1
+            if self.stir_progress >= self.stir_time:
+                # Stirring complete!
                 self._combine_essences()
                 self.state = CauldronState.DONE
                 self.timer = self.eject_delay
-        
-        elif self.state == CauldronState.DONE:
+    
+    def stop_stirring(self):
+        """Called when player stops colliding with cauldron."""
+        if self.state == CauldronState.STIRRING:
+            # Reset to ready state and lose progress
+            self.state = CauldronState.READY_TO_STIR
+            self.stir_progress = 0
+    
+    def update(self, dt: float):
+        """Update cauldron state machine."""
+        if self.state == CauldronState.DONE:
             self.timer -= 1
             if self.timer <= 0:
                 pass  # Eject handled by environment
     
     def _combine_essences(self):
-        """Combine all essences in the list into a single combined essence."""
-        if len(self.essence_list) == 0:
-            return
-        
-        # Flatten all essence types and their states
+        """Combine all essences in the slots into a single combined essence."""
+        # Flatten all essence types and their states from slots
         combined_types = []
         combined_enchanted = []
         combined_refined = []
         
-        for essence_state in self.essence_list:
-            combined_types.extend(essence_state.essence_types)
-            combined_enchanted.extend(essence_state.enchanted_per_essence)
-            combined_refined.extend(essence_state.refined_per_essence)
+        for essence_state in self.essence_slots:
+            if essence_state is not None:
+                combined_types.extend(essence_state.essence_types)
+                combined_enchanted.extend(essence_state.enchanted_per_essence)
+                combined_refined.extend(essence_state.refined_per_essence)
+        
+        if len(combined_types) == 0:
+            return
         
         # Create combined essence state
         self.combined_essence = EssenceState(
@@ -528,8 +557,8 @@ class Cauldron(Tool):
             is_bottled=False
         )
         
-        # Clear the essence list
-        self.essence_list = []
+        # Clear the slots
+        self.essence_slots = [None, None, None, None]
     
     def eject_essence(self) -> Optional[EssenceState]:
         """Eject the combined essence and reset state."""
@@ -539,7 +568,12 @@ class Cauldron(Tool):
         essence_state = self.combined_essence
         self.combined_essence = None
         self.state = CauldronState.EMPTY
+        self.stir_progress = 0
         return essence_state
+    
+    def get_num_essences(self) -> int:
+        """Get the number of essences currently in the cauldron."""
+        return sum(1 for slot in self.essence_slots if slot is not None)
 
 
 # ============================================================================
@@ -732,7 +766,7 @@ class DeliveryWindow(Tool):
         """
         Validate if the delivered essence matches any requirement.
         
-        Returns True if valid, False otherwise.
+        Returns True if valid (accepted), False if invalid (trashed).
         """
         if self.state != DeliveryState.WAITING:
             return False
@@ -752,11 +786,11 @@ class DeliveryWindow(Tool):
                 self.timer = self.feedback_duration
                 return True
         
-        # Invalid delivery
+        # Invalid delivery - trash it
         self.state = DeliveryState.REJECTED
         self.timer = self.feedback_duration
-        # Don't remove essence, let it bounce back
-        return False
+        essence.remove_from_world()  # Trash invalid items
+        return True  # Return True so it gets removed from essences list
     
     def update(self, dt: float):
         """Update delivery window state machine."""

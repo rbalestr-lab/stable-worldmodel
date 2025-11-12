@@ -288,7 +288,7 @@ class PotionLab(gym.Env):
     
     def _check_tool_ejections(self):
         """Check if any tools are ready to eject processed essences."""
-        eject_offset = self.tile_size * 0.8
+        eject_offset = self.tile_size * 1.5  # Increased from 0.8 to 1.5
         
         # Check Enchanter
         if hasattr(self.tools['enchanter'], 'eject_essence'):
@@ -495,25 +495,106 @@ class PotionLab(gym.Env):
             pygame.draw.rect(self.canvas, bg_color, (box_x, start_y, box_size, box_size))
             pygame.draw.rect(self.canvas, (50, 50, 50), (box_x, start_y, box_size, box_size), 2)
             
-            # Draw simplified essence representation
+            # Draw simplified essence representation with patterns
             essence_types = req['base_essences']
+            enchanted = req.get('enchanted', [False] * len(essence_types))
+            refined = req.get('refined', [False] * len(essence_types))
+            
             if len(essence_types) == 1:
                 color = ESSENCE_TYPES[essence_types[0]][1]
                 center = (box_x + box_size // 2, start_y + box_size // 2)
-                pygame.draw.circle(self.canvas, color, center, box_size // 3)
+                radius = box_size // 3
+                pygame.draw.circle(self.canvas, color, center, radius)
+                
+                # Draw patterns
+                if enchanted[0]:
+                    self._draw_stripes_on_circle(center, radius, color)
+                if refined[0]:
+                    self._draw_dots_on_circle(center, radius, color)
+                
+                # Outline
+                pygame.draw.circle(self.canvas, (50, 50, 50), center, radius, 2)
             else:
-                # Multiple essences - draw as segments
+                # Multiple essences - draw as pie slices
+                center = (box_x + box_size // 2, start_y + box_size // 2)
+                radius = box_size // 3
                 n_parts = len(essence_types)
-                segment_width = box_size // n_parts
+                angle_per_part = 360 / n_parts
+                
                 for j, etype in enumerate(essence_types):
                     color = ESSENCE_TYPES[etype][1]
-                    seg_rect = pygame.Rect(box_x + j * segment_width, start_y, segment_width, box_size)
-                    pygame.draw.rect(self.canvas, color, seg_rect)
+                    start_angle = j * angle_per_part
+                    end_angle = (j + 1) * angle_per_part
+                    
+                    # Draw pie slice
+                    points = [center]
+                    for angle in range(int(start_angle), int(end_angle) + 1, 10):
+                        rad = np.deg2rad(angle - 90)  # -90 to start from top
+                        x = center[0] + radius * np.cos(rad)
+                        y = center[1] + radius * np.sin(rad)
+                        points.append((int(x), int(y)))
+                    points.append(center)
+                    pygame.draw.polygon(self.canvas, color, points)
+                    
+                    # Draw patterns for this slice
+                    if enchanted[j]:
+                        self._draw_stripes_in_slice(center, radius, start_angle, end_angle, color)
+                    if refined[j]:
+                        self._draw_dots_in_slice(center, radius, start_angle, end_angle, color)
+                
+                # Outline
+                pygame.draw.circle(self.canvas, (50, 50, 50), center, radius, 2)
             
             # Checkmark if completed
             if req.get('completed', False):
                 check_text = font_small.render('✓', True, (255, 255, 255))
                 self.canvas.blit(check_text, (box_x + 5, start_y + 5))
+    
+    def _draw_stripes_on_circle(self, center, radius, base_color):
+        """Draw stripes on a circle (clipped)."""
+        stripe_color = tuple(max(0, c - 60) for c in base_color)
+        spacing = max(3, radius // 4)
+        for offset in range(-radius * 2, radius * 2, spacing):
+            x1 = center[0] - radius + offset
+            y1 = center[1] - radius
+            x2 = center[0] + radius + offset
+            y2 = center[1] + radius
+            pygame.draw.line(self.canvas, stripe_color, (x1, y1), (x2, y2), 1)
+    
+    def _draw_dots_on_circle(self, center, radius, base_color):
+        """Draw dots on a circle (clipped)."""
+        dot_color = tuple(min(255, c + 60) for c in base_color)
+        dot_radius = max(1, radius // 8)
+        spacing = max(3, radius // 3)
+        
+        for x_offset in range(-radius, radius, spacing):
+            for y_offset in range(-radius, radius, spacing):
+                dot_x = center[0] + x_offset
+                dot_y = center[1] + y_offset
+                dist = np.sqrt(x_offset**2 + y_offset**2)
+                if dist <= radius - dot_radius:
+                    pygame.draw.circle(self.canvas, dot_color, (dot_x, dot_y), dot_radius)
+    
+    def _draw_stripes_in_slice(self, center, radius, start_angle, end_angle, base_color):
+        """Draw stripes within a pie slice."""
+        stripe_color = tuple(max(0, c - 60) for c in base_color)
+        for angle in range(int(start_angle), int(end_angle), 15):
+            rad = np.deg2rad(angle - 90)
+            x = center[0] + radius * np.cos(rad)
+            y = center[1] + radius * np.sin(rad)
+            pygame.draw.line(self.canvas, stripe_color, center, (int(x), int(y)), 1)
+    
+    def _draw_dots_in_slice(self, center, radius, start_angle, end_angle, base_color):
+        """Draw dots within a pie slice."""
+        dot_color = tuple(min(255, c + 60) for c in base_color)
+        dot_radius = max(1, radius // 8)
+        mid_angle = (start_angle + end_angle) / 2
+        rad = np.deg2rad(mid_angle - 90)
+        
+        for r in range(dot_radius * 2, int(radius), int(radius / 3)):
+            x = center[0] + r * np.cos(rad)
+            y = center[1] + r * np.sin(rad)
+            pygame.draw.circle(self.canvas, dot_color, (int(x), int(y)), dot_radius)
     
     def _handle_keyboard_input(self):
         """Handle keyboard input for human control mode."""

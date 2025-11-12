@@ -123,15 +123,16 @@ class GDSolver(torch.nn.Module):
                     # TODO we should not have to unsqueeze history dim, the input should already have it
                 expanded_infos[k] = v
 
-            cost = self.model.get_cost(expanded_infos, self.init)
+            actions = self.init.detach().requires_grad_(True)
+            costs = self.model.get_cost(expanded_infos, actions)
 
-            assert isinstance(cost, torch.Tensor), f"Got {type(cost)} cost, expect torch.Tensor"
-            assert cost.ndim == 2 and cost.shape[0] == self.n_envs and cost.shape[1] == self.num_samples, (
-                f"Cost should be of shape ({self.n_envs}, {self.num_samples}), got {cost.shape}"
+            assert isinstance(costs, torch.Tensor), f"Got {type(costs)} cost, expect torch.Tensor"
+            assert costs.ndim == 2 and costs.shape[0] == self.n_envs and costs.shape[1] == self.num_samples, (
+                f"Cost should be of shape ({self.n_envs}, {self.num_samples}), got {costs.shape}"
             )
-            assert cost.requires_grad, "Cost must requires_grad for GD solver."
+            assert costs.requires_grad, "Cost must requires_grad for GD solver."
 
-            cost = cost.sum()  # independent cost for each env
+            cost = costs.sum()  # independent cost for each env and each sample
             cost.backward()
             optim.step()
             optim.zero_grad(set_to_none=True)
@@ -146,7 +147,9 @@ class GDSolver(torch.nn.Module):
 
         # TODO break solving if finished self.eval? done break
 
-        # get the actions to return
-        outputs["actions"] = self.init.detach().cpu()
+        # get the best actions to return
+        top_idx = torch.argsort(costs, dim=1)[:, 0]
+        top_actions = self.init[:, top_idx].squeeze(1)
+        outputs["actions"] = top_actions.detach().cpu()
 
         return outputs

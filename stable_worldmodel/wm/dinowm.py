@@ -193,7 +193,9 @@ class DINOWM(torch.nn.Module):
                 proprio_key=proprio_key,
                 action_key="action",
             )
-            self._init_state_cached_info = init_state_info_dict
+            self._init_state_cached_info = {
+                k: v.detach() if torch.is_tensor(v) else v for k, v in init_state_info_dict.items()
+            }
             self._init_state_cached_info["id"] = info["id"][:, 0]
             self._init_state_cached_info["step_idx"] = info["step_idx"][:, 0]
 
@@ -288,7 +290,7 @@ class DINOWM(torch.nn.Module):
                 proprio_key=proprio_key,
                 action_key=None,
             )
-            self._goal_cached_info = goal_info_dict
+            self._goal_cached_info = {k: v.detach() if torch.is_tensor(v) else v for k, v in goal_info_dict.items()}
             self._goal_cached_info["id"] = info_dict["id"][:, 0]
             self._goal_cached_info["step_idx"] = info_dict["step_idx"][:, 0]
         # repeat the goal for each action candidate

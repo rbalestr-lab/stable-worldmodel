@@ -116,11 +116,8 @@ class GDSolver(torch.nn.Module):
                 if torch.is_tensor(v):
                     v = v.unsqueeze(1)  # add sample dim
                     v = v.expand(self.n_envs, self.num_samples, *v.shape[2:])
-                    v = v.unsqueeze(2)  # unsqueeze for history dim
-                    # TODO we should not have to unsqueeze history dim, the input should already have it
                 elif isinstance(v, np.ndarray):
-                    v = np.repeat(v[:, None, None, ...], self.num_samples, axis=1)
-                    # TODO we should not have to unsqueeze history dim, the input should already have it
+                    v = np.repeat(v[:, None, ...], self.num_samples, axis=1)
                 expanded_infos[k] = v
 
             actions = self.init.detach().requires_grad_(True)

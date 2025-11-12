@@ -98,11 +98,8 @@ class CEMSolver:
                     v_traj = v_traj.unsqueeze(0)  # add sample dim
                     v_traj = v_traj.expand(self.num_samples, *v_traj.shape[1:])
                     v_traj = v_traj.unsqueeze(0)  # add traj dim
-                    v_traj = v_traj.unsqueeze(2)  # unsqueeze for history dimension (assume history size of 1)
-                    # TODO we should not have to unsqueeze here, the input should already have the history dimension from StackedWrapper
                 elif isinstance(v, np.ndarray):
-                    v_traj = np.repeat(v_traj[None, None, None, ...], self.num_samples, axis=1)
-                    # TODO we should not have to unsqueeze 3 times here, the input should already have the history dimension from StackedWrapper
+                    v_traj = np.repeat(v_traj[None, None, ...], self.num_samples, axis=1)
                 expanded_infos[k] = v_traj
 
             # -- optimization loop for this trajectory

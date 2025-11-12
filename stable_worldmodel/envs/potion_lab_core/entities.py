@@ -350,6 +350,10 @@ class Enchanter(Tool):
         if self.state != ToolState.EMPTY:
             return False
         
+        # Don't accept bottled items
+        if essence.state.is_bottled:
+            return False
+        
         # Check if essence needs enchanting
         # Don't accept if all components are already enchanted
         if all(essence.state.enchanted_per_essence):
@@ -421,6 +425,10 @@ class Refiner(Tool):
     def accept_essence(self, essence: Essence) -> bool:
         """Try to accept an essence for processing."""
         if self.state != ToolState.EMPTY:
+            return False
+        
+        # Don't accept bottled items
+        if essence.state.is_bottled:
             return False
         
         # Check if essence needs refining
@@ -496,6 +504,10 @@ class Cauldron(Tool):
         """Try to accept an essence into the cauldron."""
         if self.state in (CauldronState.STIRRING, CauldronState.DONE):
             return False  # Can't add more when stirring or done
+        
+        # Don't accept bottled items
+        if essence.state.is_bottled:
+            return False
         
         # Find first empty slot
         empty_slot = None
@@ -627,6 +639,10 @@ class Bottler(Tool):
     def accept_essence(self, essence: Essence) -> bool:
         """Try to accept an essence for bottling."""
         if self.state != ToolState.EMPTY:
+            return False
+        
+        # Don't accept already bottled items
+        if essence.state.is_bottled:
             return False
         
         self.current_essence = essence.state.copy()

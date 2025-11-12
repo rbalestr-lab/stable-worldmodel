@@ -351,16 +351,40 @@ def _draw_stripes_in_slice(
     end_angle: float,
     base_color: Tuple[int, int, int]
 ):
-    """Draw stripes within a pie slice."""
+    """Draw diagonal stripes within a pie slice - looks like spliced top/bottom."""
     # Use black for stripes
     stripe_color = (0, 0, 0)
     
-    # Draw radial lines
-    for angle in range(int(start_angle), int(end_angle), 15):
+    # Draw diagonal stripes clipped to the pie slice
+    # The stripes are diagonal (same as full circle), just clipped to the slice
+    spacing = max(3, int(radius) // 5)
+    line_width = max(1, int(radius) // 15)
+    
+    # Create list of points that define the pie slice
+    slice_points = [(int(center[0]), int(center[1]))]
+    for angle in range(int(start_angle), int(end_angle) + 1, 2):
         rad = np.deg2rad(angle)
         x = center[0] + radius * np.cos(rad)
         y = center[1] + radius * np.sin(rad)
-        pygame.draw.line(canvas, stripe_color, center, (int(x), int(y)), 2)
+        slice_points.append((int(x), int(y)))
+    slice_points.append((int(center[0]), int(center[1])))
+    
+    # Draw diagonal stripes only within the pie slice
+    for offset in range(-int(radius) * 2, int(radius) * 2, spacing):
+        for y in range(-int(radius), int(radius) + 1):
+            x = y + offset
+            # Check if point is within circle
+            if x >= -radius and x <= radius:
+                dist_sq = x*x + y*y
+                if dist_sq <= radius * radius:
+                    px = int(center[0] + x)
+                    py = int(center[1] + y)
+                    
+                    # Check if point is within the pie slice using angle
+                    angle_to_point = np.rad2deg(np.arctan2(y, x)) % 360
+                    if start_angle <= angle_to_point <= end_angle or (end_angle < start_angle and (angle_to_point >= start_angle or angle_to_point <= end_angle)):
+                        if abs(x - y - offset) < line_width:
+                            canvas.set_at((px, py), stripe_color)
 
 
 def _draw_dots_in_slice(
@@ -371,19 +395,24 @@ def _draw_dots_in_slice(
     end_angle: float,
     base_color: Tuple[int, int, int]
 ):
-    """Draw dots within a pie slice."""
+    """Draw dots within a pie slice - looks like spliced top/bottom."""
     # Use black for dots
     dot_color = (0, 0, 0)
-    dot_radius = max(1, int(radius / 8))
+    dot_radius = max(1, int(radius) // 12)
+    spacing = max(3, int(radius) // 4)
     
-    mid_angle = (start_angle + end_angle) / 2
-    rad = np.deg2rad(mid_angle)
-    
-    # Draw dots along the slice
-    for r in range(dot_radius * 2, int(radius), int(radius / 3)):
-        x = center[0] + r * np.cos(rad)
-        y = center[1] + r * np.sin(rad)
-        pygame.draw.circle(canvas, dot_color, (int(x), int(y)), dot_radius)
+    # Draw dots in grid pattern, only within the pie slice
+    for x_offset in range(-int(radius) + spacing//2, int(radius), spacing):
+        for y_offset in range(-int(radius) + spacing//2, int(radius), spacing):
+            # Check if within circle
+            dist = np.sqrt(x_offset**2 + y_offset**2)
+            if dist <= radius - dot_radius - 2:
+                # Check if point is within the pie slice using angle
+                angle_to_point = np.rad2deg(np.arctan2(y_offset, x_offset)) % 360
+                if start_angle <= angle_to_point <= end_angle or (end_angle < start_angle and (angle_to_point >= start_angle or angle_to_point <= end_angle)):
+                    dot_x = int(center[0] + x_offset)
+                    dot_y = int(center[1] + y_offset)
+                    pygame.draw.circle(canvas, dot_color, (dot_x, dot_y), dot_radius)
 
 
 def draw_tool(canvas: pygame.Surface, tool, tile_size: float):
@@ -431,8 +460,8 @@ def draw_tool(canvas: pygame.Surface, tool, tile_size: float):
 def _draw_cauldron_contents(canvas: pygame.Surface, cauldron, tile_size: float):
     """Draw essences in the cauldron's 4 slots and stir progress."""
     pos = cauldron.position
-    slot_offset = tile_size * 0.5  # Reduced from 0.6 to keep patterns visible
-    essence_radius = int(tile_size * 0.22)
+    slot_offset = tile_size * 0.6  # Increased to accommodate larger essences
+    essence_radius = int(tile_size * 0.35)  # Same size as floor essences
     
     # Positions for 4 slots: top, right, bottom, left
     slot_positions = [

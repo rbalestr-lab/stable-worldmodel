@@ -475,9 +475,11 @@ class PotionLab(gym.Env):
         self.canvas.blit(text_surface, text_rect)
     
     def _draw_requirements(self, requirements: List[dict], width: int, y_offset: int, height: int):
-        """Draw requirements at the bottom."""
+        """Draw requirements at the bottom - matching floor essence display exactly."""
         margin = 10
-        box_size = 50
+        # Use actual essence size (0.35 * tile_size from entities.py)
+        essence_radius = int(0.35 * self.tile_size)
+        box_size = essence_radius * 3  # Give enough space for essence + bottle
         spacing = 10
         start_x = margin
         start_y = y_offset + (height - box_size) // 2
@@ -493,52 +495,72 @@ class PotionLab(gym.Env):
             pygame.draw.rect(self.canvas, bg_color, (box_x, start_y, box_size, box_size))
             pygame.draw.rect(self.canvas, (50, 50, 50), (box_x, start_y, box_size, box_size), 2)
             
-            # Draw simplified essence representation with patterns
+            # Draw essence representation exactly as it appears on the floor
             essence_types = req['base_essences']
             enchanted = req.get('enchanted', [False] * len(essence_types))
             refined = req.get('refined', [False] * len(essence_types))
+            is_bottled = req.get('bottled', False)
             
+            center = (box_x + box_size // 2, start_y + box_size // 2)
+            
+            # Draw bottle if bottled (same as floor rendering)
+            if is_bottled:
+                bottle_rect = pygame.Rect(
+                    center[0] - essence_radius * 0.8,
+                    center[1] - essence_radius * 1.3,
+                    essence_radius * 1.6,
+                    essence_radius * 2.6
+                )
+                pygame.draw.rect(self.canvas, (200, 200, 200), bottle_rect, 2)
+                
+                # Draw neck
+                neck_rect = pygame.Rect(
+                    center[0] - essence_radius * 0.4,
+                    center[1] - essence_radius * 1.8,
+                    essence_radius * 0.8,
+                    essence_radius * 0.5
+                )
+                pygame.draw.rect(self.canvas, (200, 200, 200), neck_rect, 2)
+            
+            # Draw essence with same orientation as floor (no rotation)
             if len(essence_types) == 1:
+                # Single essence
                 color = ESSENCE_TYPES[essence_types[0]][1]
-                center = (box_x + box_size // 2, start_y + box_size // 2)
-                radius = box_size // 3
-                pygame.draw.circle(self.canvas, color, center, radius)
+                pygame.draw.circle(self.canvas, color, center, essence_radius)
                 
                 # Draw patterns
                 if enchanted[0]:
-                    self._draw_stripes_on_circle(center, radius, color)
+                    self._draw_stripes_on_circle(center, essence_radius, color)
                 if refined[0]:
-                    self._draw_dots_on_circle(center, radius, color)
+                    self._draw_dots_on_circle(center, essence_radius, color)
                 
                 # Outline for single essences
-                pygame.draw.circle(self.canvas, (50, 50, 50), center, radius, 2)
+                pygame.draw.circle(self.canvas, (50, 50, 50), center, essence_radius, 2)
             else:
-                # Multiple essences - draw as pie slices
-                center = (box_x + box_size // 2, start_y + box_size // 2)
-                radius = box_size // 3
+                # Multiple essences - draw as pie slices (same orientation as floor)
                 n_parts = len(essence_types)
                 angle_per_part = 360 / n_parts
                 
                 for j, etype in enumerate(essence_types):
                     color = ESSENCE_TYPES[etype][1]
-                    start_angle = j * angle_per_part
+                    start_angle = j * angle_per_part  # Same as floor - no rotation
                     end_angle = (j + 1) * angle_per_part
                     
                     # Draw pie slice
                     points = [center]
-                    for angle in range(int(start_angle), int(end_angle) + 1, 10):
-                        rad = np.deg2rad(angle - 90)  # -90 to start from top
-                        x = center[0] + radius * np.cos(rad)
-                        y = center[1] + radius * np.sin(rad)
+                    for angle in range(int(start_angle), int(end_angle) + 1, 5):
+                        rad = np.deg2rad(angle)  # Same as floor - no -90 offset
+                        x = center[0] + essence_radius * np.cos(rad)
+                        y = center[1] + essence_radius * np.sin(rad)
                         points.append((int(x), int(y)))
                     points.append(center)
                     pygame.draw.polygon(self.canvas, color, points)
                     
                     # Draw patterns for this slice
                     if enchanted[j]:
-                        self._draw_stripes_in_slice(center, radius, start_angle, end_angle, color)
+                        self._draw_stripes_in_slice(center, essence_radius, start_angle, end_angle, color)
                     if refined[j]:
-                        self._draw_dots_in_slice(center, radius, start_angle, end_angle, color)
+                        self._draw_dots_in_slice(center, essence_radius, start_angle, end_angle, color)
                 
                 # No outline for combined essences
             

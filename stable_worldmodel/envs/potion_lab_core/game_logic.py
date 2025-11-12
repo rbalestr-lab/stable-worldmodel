@@ -304,8 +304,8 @@ def draw_essence(
 
 def _draw_stripes(canvas: pygame.Surface, pos: Tuple[int, int], radius: int, base_color: Tuple[int, int, int]):
     """Draw diagonal stripe pattern on a circle (enchanted)."""
-    # Create a darker stripe color
-    stripe_color = tuple(max(0, int(c * 0.6)) for c in base_color)
+    # Use black for stripes
+    stripe_color = (0, 0, 0)
     
     # Draw diagonal lines clipped to circle
     spacing = max(3, radius // 5)
@@ -326,8 +326,8 @@ def _draw_stripes(canvas: pygame.Surface, pos: Tuple[int, int], radius: int, bas
 
 def _draw_dots(canvas: pygame.Surface, pos: Tuple[int, int], radius: int, base_color: Tuple[int, int, int]):
     """Draw dotted pattern on a circle (refined)."""
-    # Create a lighter dot color
-    dot_color = tuple(min(255, int(c * 1.3)) for c in base_color)
+    # Use black for dots
+    dot_color = (0, 0, 0)
     
     # Draw dots in a grid pattern, only within circle bounds
     dot_radius = max(1, radius // 12)
@@ -352,7 +352,8 @@ def _draw_stripes_in_slice(
     base_color: Tuple[int, int, int]
 ):
     """Draw stripes within a pie slice."""
-    stripe_color = tuple(max(0, c - 60) for c in base_color)
+    # Use black for stripes
+    stripe_color = (0, 0, 0)
     
     # Draw radial lines
     for angle in range(int(start_angle), int(end_angle), 15):
@@ -371,7 +372,8 @@ def _draw_dots_in_slice(
     base_color: Tuple[int, int, int]
 ):
     """Draw dots within a pie slice."""
-    dot_color = tuple(min(255, c + 60) for c in base_color)
+    # Use black for dots
+    dot_color = (0, 0, 0)
     dot_radius = max(1, int(radius / 8))
     
     mid_angle = (start_angle + end_angle) / 2
@@ -454,8 +456,8 @@ def _draw_cauldron_contents(canvas: pygame.Surface, cauldron, tile_size: float):
                 
                 for j, essence_type in enumerate(essence_state.essence_types):
                     color = ESSENCE_TYPES[essence_type][1]
-                    start_angle = j * angle_per_type - 90  # -90 to start from top
-                    end_angle = (j + 1) * angle_per_type - 90
+                    start_angle = j * angle_per_type  # Same orientation as ground essences
+                    end_angle = (j + 1) * angle_per_type
                     
                     # Draw pie slice
                     points = [(int(slot_pos[0]), int(slot_pos[1]))]

@@ -72,15 +72,19 @@ class GDSolver(torch.nn.Module):
         set self.init - initial action sequences (n_envs, horizon, action_dim)
         """
         if actions is None:
-            actions = torch.zeros((self._n_envs, self.num_samples, 0, self.action_dim))
+            actions = torch.zeros((self._n_envs, 0, self.action_dim))
 
         # fill remaining action
         remaining = self.horizon - actions.shape[1]
 
         if remaining > 0:
-            new_actions = torch.zeros(self._n_envs, self.num_samples, remaining, self.action_dim)
-            actions = torch.cat([actions, new_actions], dim=2)
+            new_actions = torch.zeros(self._n_envs, remaining, self.action_dim)
+            actions = torch.cat([actions, new_actions], dim=1)
 
+        actions = actions.unsqueeze(1).repeat_interleave(self.num_samples, dim=1)  # add sample dim
+        actions[:, 1:] += (
+            torch.randn_like(actions[:, 1:]) * self.action_noise
+        )  # add small noise to all samples except the first one
         actions = actions.to(self.device)
 
         # reset actions

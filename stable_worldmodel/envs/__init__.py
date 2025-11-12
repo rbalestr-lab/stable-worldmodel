@@ -40,3 +40,8 @@ register(
     id="swm/OGBCube-v0",
     entry_point="stable_worldmodel.envs.ogbench_cube:CubeEnv",
 )
+
+register(
+    id="swm/PotionLab-v0",
+    entry_point="stable_worldmodel.envs.potion_lab:PotionLab",
+)

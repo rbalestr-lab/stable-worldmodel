@@ -122,6 +122,8 @@ class World:
         goal_transform: Callable | None = None,
         image_transform: Callable | None = None,
         seed: int = 2349867,
+        history_size: int = 1,
+        frame_skip: int = 1,
         max_episode_steps: int = 100,
         verbose: int = 1,
         extra_wrappers: list | None = None,
@@ -183,7 +185,17 @@ class World:
             env_name,
             num_envs=num_envs,
             vectorization_mode="sync",
-            wrappers=[lambda x: MegaWrapper(x, image_shape, image_transform, goal_shape, goal_transform)]
+            wrappers=[
+                lambda x: MegaWrapper(
+                    x,
+                    image_shape,
+                    image_transform,
+                    goal_shape,
+                    goal_transform,
+                    history_size=history_size,
+                    frame_skip=frame_skip,
+                )
+            ]
             + (extra_wrappers or []),
             max_episode_steps=max_episode_steps,
             **kwargs,
@@ -923,13 +935,34 @@ class World:
         dataset_name: str,
         episodes_idx: int | list[int],
         start_steps: int | list[int],
-        num_steps: int,
+        goal_offset_steps: int,
+        eval_budget: int,
         cache_dir: str | None = None,
         callables: dict | None = None,
     ):
-        # Rem: only support dataset generated from by stable-worldmodel
-        # TODO: check max_steps in self.envs doesn't make trouble here
+        """Evaluate the current policy similarly to `evaluate` but on goals sampled from a dataset.
+        Note: it only supports datasets generated from stable-worldmodel.
+
+        Args:
+            dataset_name (str): Name of the dataset to load (must exist in cache_dir).
+            episodes_idx (int or list of int): Index or list of indices of the episodes to evaluate from the dataset.
+            start_steps (int or list of int): Step index or list of step indices to  from which to start the evaluation in each episode.
+            goal_offset_steps (int): Number of steps ahead of start_steps to sample the goal from the dataset.
+            eval_budget (int): Number of steps to actually run in the environment.
+            cache_dir (str or Path, optional): Root directory where dataset is stored.
+
+        Returns:
+            dict: Dictionary containing evaluation results:
+                - 'success_rate' (float): Percentage of successful episodes (0-100)
+                - 'episode_successes' (ndarray): Boolean array of episode outcomes
+                - 'seeds' (ndarray): Random seeds used for each episode
+                - Additional keys from eval_keys if specified (ndarray)
+        """
         # TODO push-t env has the image not corresponding with the state!
+
+        assert (
+            self.envs.envs[0].spec.max_episode_steps is None or self.envs.envs[0].spec.max_episode_steps >= eval_budget
+        ), "env max_episode_steps must be greater than eval_budget"
 
         if isinstance(episodes_idx, int):
             episodes_idx = [episodes_idx]
@@ -939,7 +972,7 @@ class World:
 
         episodes_idx = np.array(episodes_idx)
         start_steps = np.array(start_steps)
-        end_steps_idx = start_steps + num_steps
+        end_steps_idx = start_steps + goal_offset_steps
 
         if not (len(episodes_idx) == len(start_steps)):
             raise ValueError("episodes_idx and start_steps must have the same length")
@@ -976,9 +1009,9 @@ class World:
         goal_info = {}
         for key, value in end_steps.items():
             if key == "pixels":
-                goal_info["goal"] = [
-                    np.array(Image.open(dataset_path / path).convert("RGB"), dtype=np.uint8) for path in value
-                ]
+                goal_info["goal"] = np.stack(
+                    [np.array(Image.open(dataset_path / path).convert("RGB"), dtype=np.uint8) for path in value]
+                )
                 continue
 
             key = f"goal_{key}" if not key.startswith("goal") else key
@@ -991,6 +1024,12 @@ class World:
 
         first_steps.update(goal_info)
         self.reset(seed=seeds, options=options)  # set seeds for all envs
+
+        # broadcast goal info to match envs infos shape
+        goal_info = {
+            k: (np.broadcast_to(v[:, None, ...], self.infos[k].shape) if k in self.infos else v)
+            for k, v in goal_info.items()
+        }
 
         # apply callable list (e.g used for set initial position if not access to seed)
         callables = callables or {}
@@ -1038,7 +1077,7 @@ class World:
         }
 
         # run normal evaluation for num_steps and record video
-        for step in range(num_steps):
+        for step in range(eval_budget):
             self.infos.update(goal_info)
             self.step()
 

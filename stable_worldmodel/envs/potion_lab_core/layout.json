@@ -1,4 +1,8 @@
 {
+  "ui": {
+    "top_height": 50,
+    "bottom_height": 80
+  },
   "dispensers": [
     {
       "essence_type": 1,

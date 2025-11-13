@@ -421,8 +421,6 @@ def _draw_dots_in_slice(
 
 def draw_tool(canvas: pygame.Surface, tool, tile_size: float):
     """Draw a tool with its current state visualization."""
-    from .entities import Cauldron, CauldronState
-
     pos = tool.position
     size = tool.size
 
@@ -474,8 +472,6 @@ def _draw_cauldron_contents(canvas: pygame.Surface, cauldron, tile_size: float):
     for i, essence_state in enumerate(cauldron.essence_slots):
         if essence_state is not None:
             slot_pos = slot_positions[i]
-            from .entities import ESSENCE_TYPES
-
             # Check if this is a combined essence (multiple types)
             if essence_state.is_combined and len(essence_state.essence_types) > 1:
                 # Draw as pie chart like in main game

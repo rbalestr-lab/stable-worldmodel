@@ -5,12 +5,18 @@ This environment tests compositional generalization, catastrophic forgetting, an
 long-horizon planning through potion brewing mechanics.
 """
 
+import json
+import os
+from collections.abc import Sequence
 from typing import Any
 
+import cv2
 import gymnasium as gym
 import numpy as np
 import pygame
 from gymnasium import spaces
+
+import stable_worldmodel as swm
 
 # Import core game components
 from .potion_lab_core import (
@@ -26,6 +32,22 @@ from .potion_lab_core import (
     draw_player,
     draw_tool,
     setup_physics_space,
+)
+from .potion_lab_core.game_logic import (
+    _draw_dots,
+    _draw_dots_in_slice,
+    _draw_stripes,
+    _draw_stripes_in_slice,
+)
+
+
+DEFAULT_VARIATIONS = (
+    "player.start_position",
+    "player.color",
+    "player.radius",
+    "player.speed",
+    "physics.damping",
+    "background.color",
 )
 
 
@@ -54,11 +76,9 @@ class PotionLab(gym.Env):
         self,
         render_mode: str | None = "rgb_array",
         resolution: int = 512,
-        map_width: int = 16,
-        map_height: int = 16,
-        tile_size: float = 32.0,
-        rounds_config: list[dict] | None = None,
-        human_control: bool = False,
+        render_action: bool = False,
+        layout_path: str | None = None,
+        rounds_path: str | None = None,
     ):
         """
         Initialize the Potion Lab environment.
@@ -66,38 +86,107 @@ class PotionLab(gym.Env):
         Args:
             render_mode: "human" or "rgb_array"
             resolution: Render resolution (square image)
-            map_width: Width of the map in tiles
-            map_height: Height of the map in tiles
-            tile_size: Size of each tile in pixels
-            rounds_config: Optional list of round configurations
-            human_control: If True, enables keyboard control for human play
+            render_action: Whether to render action indicators
+            layout_path: Path to layout JSON file (default: potion_lab_core/layout.json)
+            rounds_path: Path to rounds JSON file (default: potion_lab_core/rounds.json)
         """
         super().__init__()
 
+        self._seed = None
         self.render_mode = render_mode
-        self.resolution = resolution
-        self.map_width_tiles = map_width
-        self.map_height_tiles = map_height
-        self.tile_size = tile_size
-        self.human_control = human_control
+        self.render_size = resolution
+        self.window_size = 512
+        self.render_action = render_action
 
-        # Calculate actual map dimensions in pixels
-        self.map_width = map_width * tile_size
-        self.map_height = map_height * tile_size
+        # Config files (use defaults if not provided)
+        current_dir = os.path.dirname(os.path.abspath(__file__))
+        self.layout_path = layout_path or os.path.join(current_dir, "potion_lab_core", "layout.json")
+        self.rounds_path = rounds_path or os.path.join(current_dir, "potion_lab_core", "rounds.json")
 
-        # Action space: continuous 2D velocity control
+        # Load UI bar heights
+        with open(self.layout_path) as f:
+            layout_data = json.load(f)
+
+        ui_config = layout_data.get("ui", {})
+        self.ui_top_height = ui_config.get("top_height", 50)
+        self.ui_bottom_height = ui_config.get("bottom_height", 80)
+
+        # Lab fills remaining space between UI bars
+        self.map_width = self.window_size  # Full width: 512
+        self.map_height = self.window_size - self.ui_top_height - self.ui_bottom_height  # Remaining height
+
+        self.map_width_tiles = 16
+        self.map_height_tiles = 16
+        self.tile_size = self.map_width / self.map_width_tiles  # 32.0 if window_size=512
+
         self.action_space = spaces.Box(low=-1.0, high=1.0, shape=(2,), dtype=np.float32)
 
-        # Observation space: RGB image
         self.observation_space = spaces.Dict(
-            {"image": spaces.Box(low=0, high=255, shape=(resolution, resolution, 3), dtype=np.uint8)}
+            {
+                "image": spaces.Box(low=0, high=255, shape=(resolution, resolution, 3), dtype=np.uint8),
+                "proprio": spaces.Box(
+                    low=0,
+                    high=self.window_size,
+                    shape=(4,),  # player x, y, vx, vy
+                    dtype=np.float32,
+                ),
+            }
         )
 
-        # Initialize round manager
-        if rounds_config is None:
-            self.round_manager = RoundManager.create_default_rounds()
-        else:
-            self.round_manager = RoundManager(rounds_config)
+        self.variation_space = swm.spaces.Dict(
+            {
+                "player": swm.spaces.Dict(
+                    {
+                        "color": swm.spaces.RGBBox(init_value=np.array(pygame.Color("RoyalBlue")[:3], dtype=np.uint8)),
+                        "radius": swm.spaces.Box(
+                            low=8.0,
+                            high=16.0,
+                            init_value=12.0,
+                            shape=(),
+                            dtype=np.float32,
+                        ),
+                        "speed": swm.spaces.Box(
+                            low=100.0,
+                            high=300.0,
+                            init_value=200.0,
+                            shape=(),
+                            dtype=np.float32,
+                        ),
+                        "start_position": swm.spaces.Box(
+                            low=50.0,
+                            high=self.window_size - 50.0,
+                            init_value=np.array([384.0, 352.0], dtype=np.float32),
+                            shape=(2,),
+                            dtype=np.float32,
+                        ),
+                    }
+                ),
+                "physics": swm.spaces.Dict(
+                    {
+                        "damping": swm.spaces.Box(
+                            low=0.0,
+                            high=1.0,
+                            init_value=0.8,
+                            shape=(),
+                            dtype=np.float32,
+                        ),
+                        "gravity": swm.spaces.Box(
+                            low=-10.0,
+                            high=10.0,
+                            init_value=np.array([0.0, 0.0], dtype=np.float32),
+                            shape=(2,),
+                            dtype=np.float32,
+                        ),
+                    }
+                ),
+                "background": swm.spaces.Dict(
+                    {
+                        "color": swm.spaces.RGBBox(init_value=np.array([40, 40, 45], dtype=np.uint8)),
+                    }
+                ),
+            },
+            sampling_order=["background", "physics", "player"],
+        )
 
         # Pygame and rendering
         self.window = None
@@ -109,37 +198,82 @@ class PotionLab(gym.Env):
         self.player = None
         self.essences = []
         self.tools = {}
+        self.dispensers = []
         self.collision_handler = None
+        self.round_manager = None
 
         # Timing
         self.step_count = 0
         self.round_time_remaining = 0
 
-        # Human control state
-        self.human_action = np.array([0.0, 0.0], dtype=np.float32)
+        self.rng = None  # gets seeded in reset
+
+        self.latest_action = None
 
     def reset(self, seed: int | None = None, options: dict | None = None):
         """Reset the environment to start a new episode."""
         super().reset(seed=seed)
 
-        # Reset round manager
-        self.round_manager.reset()
+        self.rng = np.random.default_rng(seed)
 
-        # Get the first round configuration
+        if hasattr(self, "variation_space"):
+            self.variation_space.seed(seed)
+
+        options = options or {}
+
+        self.variation_space.reset()
+
+        variations = options.get("variation", DEFAULT_VARIATIONS)
+
+        if not isinstance(variations, Sequence):
+            raise ValueError("variation option must be a Sequence containing variation names to sample")
+
+        self.variation_space.update(variations)
+
+        assert self.variation_space.check(debug=True), "Variation values must be within variation space!"
+
+        self._setup()
+
+        self.round_manager = RoundManager.load_from_file(self.rounds_path)
+
         round_config = self.round_manager.get_current_round()
         if round_config is None:
             raise RuntimeError("No rounds configured!")
 
-        # Create physics space
+        requirements = round_config["required_items"].copy()
+        for req in requirements:
+            req["completed"] = False
+        self.tools["delivery_window"].set_requirements(requirements)
+
+        self.round_time_remaining = round_config["time_limit"]
+        self.step_count = 0
+
+        observation = self._get_obs()
+        info = self._get_info()
+
+        return observation, info
+
+    def _setup(self):
+        """Initialize physics space and game objects."""
         self.space = setup_physics_space()
 
-        # Add walls
+        self.space.gravity = self.variation_space["physics"]["gravity"].value.tolist()
+        self.space.damping = self.variation_space["physics"]["damping"].value
+
         add_walls(self.space, self.map_width, self.map_height)
 
-        # Create layout (tools, dispensers, player)
-        layout = create_default_layout(self.space, self.map_width, self.map_height, self.tile_size)
+        layout = create_default_layout(
+            self.space, self.map_width, self.map_height, self.tile_size, layout_file=self.layout_path
+        )
 
         self.player = layout["player"]
+        self.player.radius = self.variation_space["player"]["radius"].value
+        self.player.speed = self.variation_space["player"]["speed"].value
+        self.player.color = self.variation_space["player"]["color"].value.tolist()
+
+        start_pos = self.variation_space["player"]["start_position"].value
+        self.player.body.position = (float(start_pos[0]), float(start_pos[1]))
+
         self.tools = {
             "enchanter": layout["enchanter"],
             "refiner": layout["refiner"],
@@ -150,28 +284,10 @@ class PotionLab(gym.Env):
         }
         self.dispensers = layout["dispensers"]
 
-        # Set up collision handlers
         self.collision_handler = CollisionHandler(self)
         self.collision_handler.setup_handlers(self.space)
 
-        # Initialize essences list
         self.essences = []
-
-        # Set requirements for delivery window
-        requirements = round_config["required_items"].copy()
-        for req in requirements:
-            req["completed"] = False
-        self.tools["delivery_window"].set_requirements(requirements)
-
-        # Set round timer
-        self.round_time_remaining = round_config["time_limit"]
-        self.step_count = 0
-
-        # Get initial observation
-        observation = self._get_obs()
-        info = self._get_info()
-
-        return observation, info
 
     def step(self, action: np.ndarray):
         """
@@ -183,59 +299,45 @@ class PotionLab(gym.Env):
         Returns:
             observation, reward, terminated, truncated, info
         """
-        # If in human control mode, use keyboard input instead
-        if self.human_control:
-            action = self.human_action
+        self.latest_action = action
 
-        # Apply action to player
         self.player.apply_action(action)
 
-        # Step physics simulation
         self.space.step(PhysicsConfig.TIMESTEP)
 
-        # Check for collisions (player with dispensers, essences with tools)
         self.collision_handler.update()
 
-        # Update all tools
         for tool in self.tools.values():
             tool.update(PhysicsConfig.TIMESTEP)
 
-        # Update dispensers
         for dispenser in self.dispensers:
             dispenser.update(PhysicsConfig.TIMESTEP)
 
-        # Check for ejections from tools
         self._check_tool_ejections()
 
-        # Update timer
         self.round_time_remaining -= 1
         self.step_count += 1
 
-        # Check termination conditions
         terminated = False
         truncated = False
         reward = 0.0
 
-        # Check if round is complete
         if self.tools["delivery_window"].all_requirements_met():
-            # Round complete! Advance to next round
+            # Round is complete!
+            # Give reward here. Here and failure are the only rewards.
             reward = 1.0
             self.round_manager.advance_round()
 
-            # Check if all rounds are complete
             if self.round_manager.is_complete():
                 terminated = True
             else:
-                # Load next round
                 self._load_next_round()
 
-        # Check if time ran out
         elif self.round_time_remaining <= 0:
-            # Round failed
+            # Round failed. Give negative reward here.
             reward = -1.0
             terminated = True
 
-        # Get observation and info
         observation = self._get_obs()
         info = self._get_info()
 
@@ -247,33 +349,27 @@ class PotionLab(gym.Env):
         if round_config is None:
             return
 
-        # Clear all essences
         for essence in self.essences[:]:
             essence.remove_from_world()
         self.essences.clear()
 
-        # Reset all tool states using their reset methods
         for tool in self.tools.values():
             tool.reset()
 
-        # Reset collision handler state
         if hasattr(self, "collision_handler"):
             self.collision_handler.player_stirring_cauldron = False
 
-        # Set new requirements
         requirements = round_config["required_items"].copy()
         for req in requirements:
             req["completed"] = False
         self.tools["delivery_window"].set_requirements(requirements)
 
-        # Reset round timer
         self.round_time_remaining = round_config["time_limit"]
 
     def _check_tool_ejections(self):
         """Check if any tools are ready to eject processed essences."""
         eject_offset = self.tile_size * 1.5  # Increased from 0.8 to 1.5
 
-        # Check Enchanter
         if hasattr(self.tools["enchanter"], "eject_essence"):
             essence_state = self.tools["enchanter"].eject_essence()
             if essence_state is not None:
@@ -281,7 +377,6 @@ class PotionLab(gym.Env):
                 essence = Essence(self.space, pos, essence_state, self.tile_size)
                 self.essences.append(essence)
 
-        # Check Refiner
         if hasattr(self.tools["refiner"], "eject_essence"):
             essence_state = self.tools["refiner"].eject_essence()
             if essence_state is not None:
@@ -289,7 +384,6 @@ class PotionLab(gym.Env):
                 essence = Essence(self.space, pos, essence_state, self.tile_size)
                 self.essences.append(essence)
 
-        # Check Cauldron
         if hasattr(self.tools["cauldron"], "eject_essence"):
             essence_state = self.tools["cauldron"].eject_essence()
             if essence_state is not None:
@@ -297,7 +391,6 @@ class PotionLab(gym.Env):
                 essence = Essence(self.space, pos, essence_state, self.tile_size)
                 self.essences.append(essence)
 
-        # Check Bottler
         if hasattr(self.tools["bottler"], "eject_essence"):
             essence_state = self.tools["bottler"].eject_essence()
             if essence_state is not None:
@@ -307,10 +400,14 @@ class PotionLab(gym.Env):
 
     def _get_obs(self) -> dict[str, np.ndarray]:
         """Get the current observation."""
-        # Render the frame
         img = self.render()
 
-        return {"image": img}
+        # Proprioception vector
+        player_pos = np.array([self.player.body.position.x, self.player.body.position.y], dtype=np.float32)
+        player_vel = np.array([self.player.body.velocity.x, self.player.body.velocity.y], dtype=np.float32)
+        proprio = np.concatenate([player_pos, player_vel])
+
+        return {"image": img, "proprio": proprio}
 
     def _get_info(self) -> dict[str, Any]:
         """Get auxiliary information."""
@@ -322,7 +419,10 @@ class PotionLab(gym.Env):
             "time_limit": round_config["time_limit"] if round_config else 0,
             "requirements_met": self.tools["delivery_window"].all_requirements_met(),
             "num_essences": len(self.essences),
-            "player_pos": np.array([self.player.body.position.x, self.player.body.position.y]),
+            "player_pos": np.array([self.player.body.position.x, self.player.body.position.y], dtype=np.float32),
+            "player_vel": np.array([self.player.body.velocity.x, self.player.body.velocity.y], dtype=np.float32),
+            "round_description": round_config.get("description", "") if round_config else "",
+            "required_items": self.tools["delivery_window"].required_items,
         }
 
     def render(self):
@@ -330,34 +430,28 @@ class PotionLab(gym.Env):
         if self.render_mode is None:
             return None
 
-        # UI padding
-        ui_top_height = 50
-        ui_bottom_height = 80
-        total_height = int(self.map_height + ui_top_height + ui_bottom_height)
-
-        # Initialize pygame if needed
         if self.canvas is None:
             pygame.init()
-            self.canvas = pygame.Surface((int(self.map_width), total_height))
+            # Canvas is always window_size x window_size (512x512)
+            self.canvas = pygame.Surface((self.window_size, self.window_size))
 
             if self.render_mode == "human":
                 pygame.display.init()
-                self.window = pygame.display.set_mode((int(self.map_width), total_height))
+                self.window = pygame.display.set_mode((self.window_size, self.window_size))
                 pygame.display.set_caption("Potion Lab")
                 self.clock = pygame.time.Clock()
 
-        # Clear canvas
-        self.canvas.fill((30, 30, 35))  # Dark background for UI areas
+        bg_color = tuple(self.variation_space["background"]["color"].value.tolist())
+        ui_bg_color = (max(0, bg_color[0] - 10), max(0, bg_color[1] - 10), max(0, bg_color[2] - 10))
 
-        # Fill game area with different color
-        game_area_rect = pygame.Rect(0, ui_top_height, int(self.map_width), int(self.map_height))
-        pygame.draw.rect(self.canvas, (40, 40, 45), game_area_rect)
+        self.canvas.fill(ui_bg_color)
 
-        # Create temporary surface for game area (offset for rendering)
+        game_area_rect = pygame.Rect(0, self.ui_top_height, int(self.map_width), int(self.map_height))
+        pygame.draw.rect(self.canvas, bg_color, game_area_rect)
+
         game_surface = pygame.Surface((int(self.map_width), int(self.map_height)))
-        game_surface.fill((40, 40, 45))
+        game_surface.fill(bg_color)
 
-        # Draw game objects on game surface
         for tool_name, tool in self.tools.items():
             if tool_name != "delivery_window":
                 draw_tool(game_surface, tool, self.tile_size)
@@ -372,49 +466,35 @@ class PotionLab(gym.Env):
 
         draw_player(game_surface, self.player)
 
-        # Blit game surface to main canvas at offset
-        self.canvas.blit(game_surface, (0, ui_top_height))
+        self.canvas.blit(game_surface, (0, self.ui_top_height))
 
-        # Draw UI elements outside game area
         round_config = self.round_manager.get_current_round()
         if round_config:
-            # Draw timer at top
             self._draw_timer_bar(
-                self.round_time_remaining, round_config["time_limit"], int(self.map_width), ui_top_height
+                self.round_time_remaining, round_config["time_limit"], int(self.map_width), self.ui_top_height
             )
 
-            # Draw requirements at bottom
             self._draw_requirements(
                 self.tools["delivery_window"].required_items,
                 int(self.map_width),
-                ui_top_height + int(self.map_height),
-                ui_bottom_height,
+                self.ui_top_height + int(self.map_height),
+                self.ui_bottom_height,
             )
 
         # Handle human mode
         if self.render_mode == "human":
-            # Handle keyboard input for human control
-            if self.human_control:
-                self._handle_keyboard_input()
-
-            # Copy to display window
             self.window.blit(self.canvas, (0, 0))
             pygame.display.flip()
             self.clock.tick(self.metadata["render_fps"])
 
-            # Handle pygame events
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     self.close()
 
-        # Convert to numpy array and resize
         img = np.transpose(np.array(pygame.surfarray.pixels3d(self.canvas)), axes=(1, 0, 2))
 
-        # Resize to target resolution
-        if img.shape[0] != self.resolution or img.shape[1] != self.resolution:
-            import cv2
-
-            img = cv2.resize(img, (self.resolution, self.resolution))
+        if img.shape[0] != self.render_size or img.shape[1] != self.render_size:
+            img = cv2.resize(img, (self.render_size, self.render_size))
 
         return img
 
@@ -426,7 +506,6 @@ class PotionLab(gym.Env):
         bar_x = bar_margin
         bar_y = (height - bar_height) // 2
 
-        # Background
         pygame.draw.rect(self.canvas, (100, 100, 100), (bar_x, bar_y, bar_width, bar_height))
 
         # Progress
@@ -448,14 +527,11 @@ class PotionLab(gym.Env):
     def _draw_requirements(self, requirements: list[dict], width: int, y_offset: int, height: int):
         """Draw requirements at the bottom - matching floor essence display exactly."""
         margin = 10
-        # Use actual essence size (0.35 * tile_size from entities.py)
         essence_radius = int(0.35 * self.tile_size)
-        box_size = essence_radius * 3  # Give enough space for essence + bottle
+        box_size = essence_radius * 3
         spacing = 10
         start_x = margin
         start_y = y_offset + (height - box_size) // 2
-
-        font_small = pygame.font.SysFont("Arial", 12)
 
         for i, req in enumerate(requirements):
             box_x = start_x + i * (box_size + spacing)
@@ -465,7 +541,7 @@ class PotionLab(gym.Env):
             pygame.draw.rect(self.canvas, bg_color, (box_x, start_y, box_size, box_size))
             pygame.draw.rect(self.canvas, (50, 50, 50), (box_x, start_y, box_size, box_size), 2)
 
-            # Draw essence representation exactly as it appears on the floor
+            # Draw essence
             essence_types = req["base_essences"]
             enchanted = req.get("enchanted", [False] * len(essence_types))
             refined = req.get("refined", [False] * len(essence_types))
@@ -476,10 +552,10 @@ class PotionLab(gym.Env):
             # Draw bottle if bottled (same as floor rendering)
             if is_bottled:
                 bottle_rect = pygame.Rect(
-                    center[0] - essence_radius * 0.8,
-                    center[1] - essence_radius * 1.3,
-                    essence_radius * 1.6,
-                    essence_radius * 2.6,
+                    center[0] - essence_radius * 1.2,
+                    center[1] - essence_radius * 1.5,
+                    essence_radius * 2.4,
+                    essence_radius * 3,
                 )
                 pygame.draw.rect(self.canvas, (200, 200, 200), bottle_rect, 2)
 
@@ -492,22 +568,20 @@ class PotionLab(gym.Env):
                 )
                 pygame.draw.rect(self.canvas, (200, 200, 200), neck_rect, 2)
 
-            # Draw essence with same orientation as floor (no rotation)
+            # Draw essence
             if len(essence_types) == 1:
-                # Single essence
                 color = ESSENCE_TYPES[essence_types[0]][1]
                 pygame.draw.circle(self.canvas, color, center, essence_radius)
 
-                # Draw patterns
+                # Draw patterns if enchanted/refined
                 if enchanted[0]:
-                    self._draw_stripes_on_circle(center, essence_radius, color)
+                    _draw_stripes(self.canvas, center, essence_radius, color)
                 if refined[0]:
-                    self._draw_dots_on_circle(center, essence_radius, color)
+                    _draw_dots(self.canvas, center, essence_radius, color)
 
-                # Outline for single essences
                 pygame.draw.circle(self.canvas, (50, 50, 50), center, essence_radius, 2)
             else:
-                # Multiple essences - draw as pie slices (same orientation as floor)
+                # Combined essences
                 n_parts = len(essence_types)
                 angle_per_part = 360 / n_parts
 
@@ -528,40 +602,11 @@ class PotionLab(gym.Env):
 
                     # Draw patterns for this slice
                     if enchanted[j]:
-                        self._draw_stripes_in_slice(center, essence_radius, start_angle, end_angle, color)
+                        _draw_stripes_in_slice(self.canvas, center, essence_radius, start_angle, end_angle, color)
                     if refined[j]:
-                        self._draw_dots_in_slice(center, essence_radius, start_angle, end_angle, color)
+                        _draw_dots_in_slice(self.canvas, center, essence_radius, start_angle, end_angle, color)
 
                 # No outline for combined essences
-
-            # Checkmark if completed
-            if req.get("completed", False):
-                check_text = font_small.render("✓", True, (255, 255, 255))
-                self.canvas.blit(check_text, (box_x + 5, start_y + 5))
-
-    def _draw_stripes_on_circle(self, center, radius, base_color):
-        """Draw stripes on a circle (enchanted) - uses same function as main game."""
-        from .potion_lab_core.game_logic import _draw_stripes
-
-        _draw_stripes(self.canvas, center, radius, base_color)
-
-    def _draw_dots_on_circle(self, center, radius, base_color):
-        """Draw dots on a circle (refined) - uses same function as main game."""
-        from .potion_lab_core.game_logic import _draw_dots
-
-        _draw_dots(self.canvas, center, radius, base_color)
-
-    def _draw_stripes_in_slice(self, center, radius, start_angle, end_angle, base_color):
-        """Draw stripes within a pie slice."""
-        from .potion_lab_core.game_logic import _draw_stripes_in_slice
-
-        _draw_stripes_in_slice(self.canvas, center, radius, start_angle, end_angle, base_color)
-
-    def _draw_dots_in_slice(self, center, radius, start_angle, end_angle, base_color):
-        """Draw dots within a pie slice."""
-        from .potion_lab_core.game_logic import _draw_dots_in_slice
-
-        _draw_dots_in_slice(self.canvas, center, radius, start_angle, end_angle, base_color)
 
     def _handle_keyboard_input(self):
         """Handle keyboard input for human control mode."""
@@ -597,79 +642,3 @@ class PotionLab(gym.Env):
             self.window = None
             self.clock = None
         self.canvas = None
-
-
-# ============================================================================
-# Human Play Function
-# ============================================================================
-
-
-def play_potion_lab():
-    """
-    Launch the Potion Lab environment in human-playable mode.
-
-    Controls:
-    - WASD or Arrow Keys: Move the player
-    - ESC: Quit
-
-    Usage:
-        >>> from stable_worldmodel.envs.potion_lab import play_potion_lab
-        >>> play_potion_lab()
-    """
-    print("=" * 60)
-    print("POTION LAB - Human Play Mode")
-    print("=" * 60)
-    print("\nControls:")
-    print("  WASD or Arrow Keys: Move the player")
-    print("  ESC: Quit")
-    print("\nObjective:")
-    print("  - Collect essences from dispensers (colored squares at top)")
-    print("  - Process them through tools (Enchanter, Refiner, Cauldron)")
-    print("  - Bottle them if required")
-    print("  - Deliver to the delivery window at the bottom")
-    print("\nPress any key in the game window to start...")
-    print("=" * 60)
-
-    env = PotionLab(render_mode="human", resolution=512, human_control=True)
-
-    obs, info = env.reset()
-
-    running = True
-    while running:
-        # Step the environment (human_control=True means keyboard input is used)
-        obs, reward, terminated, truncated, info = env.step(env.human_action)
-
-        # Check for quit
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                running = False
-            elif event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_ESCAPE:
-                    running = False
-
-        # Reset if episode ends
-        if terminated or truncated:
-            if terminated:
-                if reward > 0:
-                    print(f"\nRound {info['round_index']} completed!")
-                else:
-                    print(f"\nRound {info['round_index']} failed (time ran out)")
-
-            # Wait a bit before reset
-            pygame.time.wait(2000)
-
-            # Check if all rounds complete
-            if env.round_manager.is_complete():
-                print("\n" + "=" * 60)
-                print("ALL ROUNDS COMPLETE! Well done!")
-                print("=" * 60)
-                running = False
-            else:
-                obs, info = env.reset()
-
-    env.close()
-    print("\nThanks for playing!")
-
-
-if __name__ == "__main__":
-    play_potion_lab()

@@ -543,42 +543,6 @@ def show(
         display_fn(info_fn(item))
 
 
-@app.command()
-def play(
-    env: Annotated[str, typer.Argument(help="Environment to play: 'potion-lab'")] = "potion-lab",
-):
-    """Play an environment as a human.
-
-    Launch an interactive game environment that you can control with keyboard inputs.
-    Currently supports the Potion Lab environment for testing and demonstration.
-
-    Args:
-        env (str): Name of the environment to play. Currently supports:
-            - 'potion-lab': Launch the Potion Lab brewing environment
-
-    Controls (Potion Lab):
-        - WASD or Arrow Keys: Move the player character
-        - ESC: Quit the game
-
-    Example:
-        Launch Potion Lab::
-
-            $ swm play potion-lab
-
-    Note:
-        Requires pygame to be installed and a display available.
-    """
-    if env == "potion-lab":
-        from stable_worldmodel.envs.potion_lab import play_potion_lab
-
-        play_potion_lab()
-    else:
-        print(f"[red]Unknown environment: {env}[/red]")
-        print("[yellow]Available environments: potion-lab[/yellow]")
-        raise typer.Abort()
-
-
-@app.command()
 def delete(
     kind: Annotated[str, typer.Argument(help="Type to delete: 'model' or 'dataset'")],
     names: Annotated[list[str], typer.Argument(help="Names of models or datasets to delete")],

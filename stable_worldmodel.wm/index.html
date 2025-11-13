@@ -248,8 +248,8 @@ registered hooks while the latter silently ignores them.</p>
 <span class="sig-name descname"><span class="pre">rollout</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">info</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">action_sequence</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/stable_worldmodel/wm/dinowm/#DINOWM.rollout"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.wm.dinowm.DINOWM.rollout" title="Link to this definition" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#stable_worldmodel.wm.dinowm.DINOWM.rollout'"><svg height="1em" viewbox="0 0 24 24" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"></path></svg></a></dt>
 <dd><p>Rollout the world model given an initial observation and a sequence of actions.</p>
 <p>Params:
-obs_start: n current observations (B, n, C, H, W)
-actions: current and predicted actions (B, n+t, action_dim)</p>
+obs_start: n current observations (B, N, n, C, H, W)
+actions: current and predicted actions (B, N, n+t, action_dim)</p>
 <p>Returns:
 z_obs: dict with latent observations (B, n+t+1, n_patches, D)
 z: predicted latent states (B, n+t+1, n_patches, D)</p>
@@ -492,8 +492,8 @@ registered hooks while the latter silently ignores them.</p>
 <span class="sig-name descname"><span class="pre">rollout</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">info</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">action_sequence</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/stable_worldmodel/wm/dinowm/#DINOWM.rollout"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.wm.DINOWM.rollout" title="Link to this definition" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#stable_worldmodel.wm.DINOWM.rollout'"><svg height="1em" viewbox="0 0 24 24" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"></path></svg></a></dt>
 <dd><p>Rollout the world model given an initial observation and a sequence of actions.</p>
 <p>Params:
-obs_start: n current observations (B, n, C, H, W)
-actions: current and predicted actions (B, n+t, action_dim)</p>
+obs_start: n current observations (B, N, n, C, H, W)
+actions: current and predicted actions (B, N, n+t, action_dim)</p>
 <p>Returns:
 z_obs: dict with latent observations (B, n+t+1, n_patches, D)
 z: predicted latent states (B, n+t+1, n_patches, D)</p>

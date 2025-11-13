@@ -24,6 +24,7 @@ from .potion_lab_core import (
     CollisionHandler,
     Essence,
     PhysicsConfig,
+    Player,
     RoundManager,
     add_walls,
     create_default_layout,
@@ -44,9 +45,14 @@ from .potion_lab_core.game_logic import (
 DEFAULT_VARIATIONS = (
     "player.start_position",
     "player.color",
-    "player.radius",
+    "player.size",
+    "player.mass",
+    "player.friction",
+    "player.elasticity",
     "player.speed",
-    "physics.damping",
+    "essence.mass",
+    "essence.friction",
+    "essence.elasticity",
     "background.color",
 )
 
@@ -138,10 +144,31 @@ class PotionLab(gym.Env):
                 "player": swm.spaces.Dict(
                     {
                         "color": swm.spaces.RGBBox(init_value=np.array(pygame.Color("RoyalBlue")[:3], dtype=np.uint8)),
-                        "radius": swm.spaces.Box(
+                        "size": swm.spaces.Box(
                             low=8.0,
                             high=16.0,
                             init_value=12.0,
+                            shape=(),
+                            dtype=np.float32,
+                        ),
+                        "mass": swm.spaces.Box(
+                            low=0.5,
+                            high=3.0,
+                            init_value=1.0,
+                            shape=(),
+                            dtype=np.float32,
+                        ),
+                        "friction": swm.spaces.Box(
+                            low=0.0,
+                            high=1.0,
+                            init_value=0.3,
+                            shape=(),
+                            dtype=np.float32,
+                        ),
+                        "elasticity": swm.spaces.Box(
+                            low=0.0,
+                            high=1.0,
+                            init_value=0.0,
                             shape=(),
                             dtype=np.float32,
                         ),
@@ -161,15 +188,33 @@ class PotionLab(gym.Env):
                         ),
                     }
                 ),
-                "physics": swm.spaces.Dict(
+                "essence": swm.spaces.Dict(
                     {
-                        "damping": swm.spaces.Box(
-                            low=0.0,
-                            high=1.0,
-                            init_value=0.8,
+                        "mass": swm.spaces.Box(
+                            low=0.1,
+                            high=2.0,
+                            init_value=0.5,
                             shape=(),
                             dtype=np.float32,
                         ),
+                        "friction": swm.spaces.Box(
+                            low=0.0,
+                            high=1.0,
+                            init_value=0.5,
+                            shape=(),
+                            dtype=np.float32,
+                        ),
+                        "elasticity": swm.spaces.Box(
+                            low=0.0,
+                            high=1.0,
+                            init_value=0.0,
+                            shape=(),
+                            dtype=np.float32,
+                        ),
+                    }
+                ),
+                "physics": swm.spaces.Dict(
+                    {
                         "gravity": swm.spaces.Box(
                             low=-10.0,
                             high=10.0,
@@ -185,7 +230,7 @@ class PotionLab(gym.Env):
                     }
                 ),
             },
-            sampling_order=["background", "physics", "player"],
+            sampling_order=["background", "physics", "essence", "player"],
         )
 
         # Pygame and rendering
@@ -258,7 +303,6 @@ class PotionLab(gym.Env):
         self.space = setup_physics_space()
 
         self.space.gravity = self.variation_space["physics"]["gravity"].value.tolist()
-        self.space.damping = self.variation_space["physics"]["damping"].value
 
         add_walls(self.space, self.map_width, self.map_height)
 
@@ -266,13 +310,19 @@ class PotionLab(gym.Env):
             self.space, self.map_width, self.map_height, self.tile_size, layout_file=self.layout_path
         )
 
-        self.player = layout["player"]
-        self.player.radius = self.variation_space["player"]["radius"].value
-        self.player.speed = self.variation_space["player"]["speed"].value
-        self.player.color = self.variation_space["player"]["color"].value.tolist()
-
+        # Create player with physics properties from variation space
         start_pos = self.variation_space["player"]["start_position"].value
-        self.player.body.position = (float(start_pos[0]), float(start_pos[1]))
+        self.player = Player(
+            self.space,
+            position=(float(start_pos[0]), float(start_pos[1])),
+            tile_size=self.tile_size,
+            size=self.variation_space["player"]["size"].value,
+            mass=self.variation_space["player"]["mass"].value,
+            friction=self.variation_space["player"]["friction"].value,
+            elasticity=self.variation_space["player"]["elasticity"].value,
+            max_velocity=self.variation_space["player"]["speed"].value,
+            color=tuple(self.variation_space["player"]["color"].value.tolist()),
+        )
 
         self.tools = {
             "enchanter": layout["enchanter"],
@@ -370,32 +420,37 @@ class PotionLab(gym.Env):
         """Check if any tools are ready to eject processed essences."""
         eject_offset = self.tile_size * 1.5  # Increased from 0.8 to 1.5
 
+        # Get essence physics properties from variation space
+        mass = self.variation_space["essence"]["mass"].value
+        friction = self.variation_space["essence"]["friction"].value
+        elasticity = self.variation_space["essence"]["elasticity"].value
+
         if hasattr(self.tools["enchanter"], "eject_essence"):
             essence_state = self.tools["enchanter"].eject_essence()
             if essence_state is not None:
                 pos = (self.tools["enchanter"].position[0] + eject_offset, self.tools["enchanter"].position[1])
-                essence = Essence(self.space, pos, essence_state, self.tile_size)
+                essence = Essence(self.space, pos, essence_state, self.tile_size, mass, friction, elasticity)
                 self.essences.append(essence)
 
         if hasattr(self.tools["refiner"], "eject_essence"):
             essence_state = self.tools["refiner"].eject_essence()
             if essence_state is not None:
                 pos = (self.tools["refiner"].position[0] - eject_offset, self.tools["refiner"].position[1])
-                essence = Essence(self.space, pos, essence_state, self.tile_size)
+                essence = Essence(self.space, pos, essence_state, self.tile_size, mass, friction, elasticity)
                 self.essences.append(essence)
 
         if hasattr(self.tools["cauldron"], "eject_essence"):
             essence_state = self.tools["cauldron"].eject_essence()
             if essence_state is not None:
                 pos = (self.tools["cauldron"].position[0], self.tools["cauldron"].position[1] + eject_offset)
-                essence = Essence(self.space, pos, essence_state, self.tile_size)
+                essence = Essence(self.space, pos, essence_state, self.tile_size, mass, friction, elasticity)
                 self.essences.append(essence)
 
         if hasattr(self.tools["bottler"], "eject_essence"):
             essence_state = self.tools["bottler"].eject_essence()
             if essence_state is not None:
                 pos = (self.tools["bottler"].position[0], self.tools["bottler"].position[1] + eject_offset)
-                essence = Essence(self.space, pos, essence_state, self.tile_size)
+                essence = Essence(self.space, pos, essence_state, self.tile_size, mass, friction, elasticity)
                 self.essences.append(essence)
 
     def _get_obs(self) -> dict[str, np.ndarray]:
@@ -549,7 +604,7 @@ class PotionLab(gym.Env):
 
             center = (box_x + box_size // 2, start_y + box_size // 2)
 
-            # Draw bottle if bottled (same as floor rendering)
+            # Draw bottle
             if is_bottled:
                 bottle_rect = pygame.Rect(
                     center[0] - essence_radius * 1.2,
@@ -559,7 +614,6 @@ class PotionLab(gym.Env):
                 )
                 pygame.draw.rect(self.canvas, (200, 200, 200), bottle_rect, 2)
 
-                # Draw neck
                 neck_rect = pygame.Rect(
                     center[0] - essence_radius * 0.4,
                     center[1] - essence_radius * 1.8,
@@ -575,13 +629,11 @@ class PotionLab(gym.Env):
 
                 # Draw patterns if enchanted/refined
                 if enchanted[0]:
-                    _draw_stripes(self.canvas, center, essence_radius, color)
+                    _draw_stripes(self.canvas, center, essence_radius)
                 if refined[0]:
-                    _draw_dots(self.canvas, center, essence_radius, color)
+                    _draw_dots(self.canvas, center, essence_radius)
 
-                pygame.draw.circle(self.canvas, (50, 50, 50), center, essence_radius, 2)
             else:
-                # Combined essences
                 n_parts = len(essence_types)
                 angle_per_part = 360 / n_parts
 
@@ -602,11 +654,9 @@ class PotionLab(gym.Env):
 
                     # Draw patterns for this slice
                     if enchanted[j]:
-                        _draw_stripes_in_slice(self.canvas, center, essence_radius, start_angle, end_angle, color)
+                        _draw_stripes_in_slice(self.canvas, center, essence_radius, start_angle, end_angle)
                     if refined[j]:
-                        _draw_dots_in_slice(self.canvas, center, essence_radius, start_angle, end_angle, color)
-
-                # No outline for combined essences
+                        _draw_dots_in_slice(self.canvas, center, essence_radius, start_angle, end_angle)
 
     def _handle_keyboard_input(self):
         """Handle keyboard input for human control mode."""

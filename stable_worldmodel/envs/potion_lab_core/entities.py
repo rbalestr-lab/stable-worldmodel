@@ -90,44 +90,34 @@ class Essence:
     """
 
     def __init__(
-        self, space: pymunk.Space, position: tuple[float, float], essence_state: EssenceState, tile_size: float = 32.0
+        self,
+        space: pymunk.Space,
+        position: tuple[float, float],
+        essence_state: EssenceState,
+        tile_size: float = 32.0,
+        mass: float = 0.5,
+        friction: float = 0.5,
+        elasticity: float = 0.0,
     ):
         self.space = space
         self.state = essence_state
         self.tile_size = tile_size
 
         # Physics properties
-        self.radius = 0.35 * tile_size  # 0.35 tiles (much bigger)
-        mass = 0.5
+        self.radius = 0.35 * tile_size
         moment = pymunk.moment_for_circle(mass, 0, self.radius)
         self.body = pymunk.Body(mass, moment)
         self.body.position = position
 
         self.shape = pymunk.Circle(self.body, self.radius)
-        self.shape.friction = 0.5  # Higher friction to stop sliding
-        self.shape.elasticity = 0.0
+        self.shape.friction = friction
+        self.shape.elasticity = elasticity
         self.shape.collision_type = 2  # LAYER_ESSENCE
-
-        # Add damping to the body to prevent sliding
-        self.body.velocity_func = self._velocity_update_func
 
         # Store reference to this essence in the shape
         self.shape.essence_obj = self
 
         space.add(self.body, self.shape)
-
-    def _velocity_update_func(self, body, gravity, damping, dt):
-        """Custom velocity update to add strong damping."""
-        # Apply default physics
-        pymunk.Body.update_velocity(body, gravity, damping, dt)
-
-        # Apply additional velocity damping to stop sliding quickly
-        velocity_damping = 0.85
-        body.velocity = body.velocity * velocity_damping
-
-        # Stop completely if moving very slowly
-        if body.velocity.length < 1.0:
-            body.velocity = (0, 0)
 
     def remove_from_world(self):
         """Remove this essence from the physics simulation."""
@@ -198,29 +188,39 @@ class Player:
         space: pymunk.Space,
         position: tuple[float, float],
         tile_size: float = 32.0,
+        size: float = 12.0,
+        mass: float = 1.0,
+        friction: float = 0.3,
+        elasticity: float = 0.0,
+        max_velocity: float = 96.0,
         color: tuple[int, int, int] = (65, 105, 225),  # Royal Blue
     ):
         self.space = space
         self.tile_size = tile_size
         self.color = color
+        self.size = size
+        self.max_velocity = max_velocity
 
-        # Physics properties
-        self.radius = 0.35 * tile_size  # 0.35 tiles
-        mass = 1.0
+        # Physics properties - square shape
         moment = float("inf")  # No rotation
         self.body = pymunk.Body(mass, moment)
         self.body.position = position
 
-        self.shape = pymunk.Circle(self.body, self.radius)
-        self.shape.friction = 0.3
-        self.shape.elasticity = 0.0
+        # Create square shape (centered on body)
+        half_size = size / 2
+        vertices = [
+            (-half_size, -half_size),
+            (half_size, -half_size),
+            (half_size, half_size),
+            (-half_size, half_size),
+        ]
+        self.shape = pymunk.Poly(self.body, vertices)
+        self.shape.friction = friction
+        self.shape.elasticity = elasticity
         self.shape.collision_type = 1  # LAYER_PLAYER
 
         # Store reference
         self.shape.player_obj = self
-
-        # Movement properties
-        self.max_velocity = 3.0 * tile_size  # tiles/second
 
         space.add(self.body, self.shape)
 

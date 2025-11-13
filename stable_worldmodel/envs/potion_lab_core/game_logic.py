@@ -47,9 +47,9 @@ class PhysicsConfig:
     LAYER_WALL = 4
 
     # Physics constants
-    GRAVITY = (0, 0)  # Top-down view, no gravity
+    GRAVITY = (0, 0)
     DAMPING = 0.95  # Objects slow down naturally (higher = less damping)
-    ITERATIONS = 10  # Collision accuracy
+    ITERATIONS = 10
     TIMESTEP = 1 / 60  # 60 Hz
 
 
@@ -57,7 +57,6 @@ def setup_physics_space() -> pymunk.Space:
     """Create and configure a pymunk physics space."""
     space = pymunk.Space()
     space.gravity = PhysicsConfig.GRAVITY
-    space.damping = PhysicsConfig.DAMPING
     space.iterations = PhysicsConfig.ITERATIONS
     return space
 
@@ -111,22 +110,14 @@ class CollisionHandler:
         self.processed_collisions = set()  # Track processed collisions this frame
         self.player_stirring_cauldron = False  # Track if player is currently stirring
 
-    def setup_handlers(self, space: pymunk.Space):
-        """Set up collision handlers - this is now a no-op as we check manually."""
-        # No pymunk handlers needed - we'll check for overlaps manually in update()
-        pass
-
     def update(self):
         """Check for collisions manually each frame."""
         self.processed_collisions.clear()
 
-        # Check player collisions with dispensers
         self._check_player_dispenser_collisions()
 
-        # Check player collisions with cauldron (for stirring)
         self._check_player_cauldron_collisions()
 
-        # Check essence collisions with tools
         self._check_essence_tool_collisions()
 
     def _check_player_dispenser_collisions(self):
@@ -148,7 +139,14 @@ class CollisionHandler:
                         offset = Vec2d(0, dispenser.tile_size * 0.5)
                         spawn_pos = (position[0] + offset.x, position[1] + offset.y)
 
-                        essence = Essence(self.env.space, spawn_pos, essence_state, tile_size=self.env.tile_size)
+                        # Get essence physics properties from variation space
+                        mass = self.env.variation_space["essence"]["mass"].value
+                        friction = self.env.variation_space["essence"]["friction"].value
+                        elasticity = self.env.variation_space["essence"]["elasticity"].value
+
+                        essence = Essence(
+                            self.env.space, spawn_pos, essence_state, self.env.tile_size, mass, friction, elasticity
+                        )
                         self.env.essences.append(essence)
 
     def _check_player_cauldron_collisions(self):
@@ -162,23 +160,18 @@ class CollisionHandler:
         # Check if player shape overlaps with cauldron shape
         if self._shapes_overlap(player.shape, cauldron.shape):
             if not self.player_stirring_cauldron:
-                # Just started stirring
                 cauldron.start_stirring()
                 self.player_stirring_cauldron = True
             else:
-                # Continue stirring
                 cauldron.stir()
         else:
             if self.player_stirring_cauldron:
-                # Stopped stirring
                 cauldron.stop_stirring()
                 self.player_stirring_cauldron = False
 
     def _check_essence_tool_collisions(self):
         """Check if any essences are touching tools."""
-        # Check each essence against each tool
-        for essence in self.env.essences[:]:  # Copy list as we may modify it
-            # Check against all tools
+        for essence in self.env.essences[:]:
             for tool_name, tool in self.env.tools.items():
                 if self._shapes_overlap(essence.shape, tool.shape):
                     collision_key = (id(essence), id(tool))
@@ -203,11 +196,9 @@ class CollisionHandler:
 
     def _shapes_overlap(self, shape1, shape2):
         """Check if two shapes overlap using bounding boxes."""
-        # Get bounding boxes
         bb1 = shape1.bb
         bb2 = shape2.bb
 
-        # Check if bounding boxes overlap
         return not (bb1.right < bb2.left or bb1.left > bb2.right or bb1.top < bb2.bottom or bb1.bottom > bb2.top)
 
 
@@ -230,13 +221,10 @@ def draw_essence(canvas: pygame.Surface, essence: Essence, tile_size: float):
     pos = essence.body.position
     radius = essence.radius
 
-    # Convert position to pygame coordinates
-    # Pymunk and Pygame both use +Y down for top-down view
     screen_pos = (int(pos.x), int(pos.y))
     screen_radius = int(radius)
 
     if state.is_bottled:
-        # Draw bottle outline
         bottle_rect = pygame.Rect(
             screen_pos[0] - screen_radius * 1.2,
             screen_pos[1] - screen_radius * 1.5,
@@ -245,7 +233,6 @@ def draw_essence(canvas: pygame.Surface, essence: Essence, tile_size: float):
         )
         pygame.draw.rect(canvas, (200, 200, 200), bottle_rect, 2)
 
-        # Draw neck
         neck_rect = pygame.Rect(
             screen_pos[0] - screen_radius * 0.4,
             screen_pos[1] - screen_radius * 1.8,
@@ -254,9 +241,7 @@ def draw_essence(canvas: pygame.Surface, essence: Essence, tile_size: float):
         )
         pygame.draw.rect(canvas, (200, 200, 200), neck_rect, 2)
 
-    # Draw essence circle (split if combined)
     if state.is_combined:
-        # Draw as pie slices
         n_parts = len(state.essence_types)
         angle_per_part = 360 / n_parts
 
@@ -280,31 +265,25 @@ def draw_essence(canvas: pygame.Surface, essence: Essence, tile_size: float):
 
             # Draw patterns for this slice if needed
             if state.enchanted_per_essence[i]:
-                _draw_stripes_in_slice(canvas, screen_pos, radius, start_angle, end_angle, color)
+                _draw_stripes_in_slice(canvas, screen_pos, radius, start_angle, end_angle)
 
             if state.refined_per_essence[i]:
-                _draw_dots_in_slice(canvas, screen_pos, radius, start_angle, end_angle, color)
+                _draw_dots_in_slice(canvas, screen_pos, radius, start_angle, end_angle)
 
-        # No outline for combined essences
     else:
-        # Single essence - draw as simple circle
         color = ESSENCE_TYPES[state.essence_types[0]][1]
         pygame.draw.circle(canvas, color, screen_pos, screen_radius)
 
         # Draw patterns
         if state.enchanted_per_essence[0]:
-            _draw_stripes(canvas, screen_pos, screen_radius, color)
+            _draw_stripes(canvas, screen_pos, screen_radius)
 
         if state.refined_per_essence[0]:
-            _draw_dots(canvas, screen_pos, screen_radius, color)
-
-        # Draw outline
-        pygame.draw.circle(canvas, (50, 50, 50), screen_pos, screen_radius, 2)
+            _draw_dots(canvas, screen_pos, screen_radius)
 
 
-def _draw_stripes(canvas: pygame.Surface, pos: tuple[int, int], radius: int, base_color: tuple[int, int, int]):
+def _draw_stripes(canvas: pygame.Surface, pos: tuple[int, int], radius: int):
     """Draw diagonal stripe pattern on a circle (enchanted)."""
-    # Use black for stripes
     stripe_color = (0, 0, 0)
 
     # Draw diagonal lines clipped to circle
@@ -324,9 +303,8 @@ def _draw_stripes(canvas: pygame.Surface, pos: tuple[int, int], radius: int, bas
                         canvas.set_at((int(px), int(py)), stripe_color)
 
 
-def _draw_dots(canvas: pygame.Surface, pos: tuple[int, int], radius: int, base_color: tuple[int, int, int]):
+def _draw_dots(canvas: pygame.Surface, pos: tuple[int, int], radius: int):
     """Draw dotted pattern on a circle (refined)."""
-    # Use black for dots
     dot_color = (0, 0, 0)
 
     # Draw dots in a grid pattern, only within circle bounds
@@ -349,10 +327,8 @@ def _draw_stripes_in_slice(
     radius: float,
     start_angle: float,
     end_angle: float,
-    base_color: tuple[int, int, int],
 ):
     """Draw diagonal stripes within a pie slice - looks like spliced top/bottom."""
-    # Use black for stripes
     stripe_color = (0, 0, 0)
 
     # Draw diagonal stripes clipped to the pie slice
@@ -395,7 +371,6 @@ def _draw_dots_in_slice(
     radius: float,
     start_angle: float,
     end_angle: float,
-    base_color: tuple[int, int, int],
 ):
     """Draw dots within a pie slice - looks like spliced top/bottom."""
     # Use black for dots
@@ -424,20 +399,15 @@ def draw_tool(canvas: pygame.Surface, tool, tile_size: float):
     pos = tool.position
     size = tool.size
 
-    # Draw tool background
     rect = pygame.Rect(int(pos[0] - size[0] / 2), int(pos[1] - size[1] / 2), int(size[0]), int(size[1]))
 
-    # Color based on state
     color = tool.color
     if hasattr(tool, "state"):
         if tool.state == ToolState.PROCESSING or tool.state == CauldronState.STIRRING:
-            # Pulse effect - make it brighter
             color = tuple(min(255, c + 40) for c in color)
         elif tool.state == ToolState.DONE or tool.state == CauldronState.DONE:
-            # Flash green when done
             color = (100, 255, 100)
         elif tool.state == CauldronState.READY_TO_STIR:
-            # Ready to stir - slight glow
             color = tuple(min(255, c + 20) for c in color)
 
     pygame.draw.rect(canvas, color, rect)
@@ -447,7 +417,6 @@ def draw_tool(canvas: pygame.Surface, tool, tile_size: float):
     if isinstance(tool, Cauldron):
         _draw_cauldron_contents(canvas, tool, tile_size)
 
-    # Draw tool name
     font = pygame.font.SysFont("Arial", 10)
     text = font.render(tool.get_display_name(), True, (255, 255, 255))
     text_rect = text.get_rect(center=(int(pos[0]), int(pos[1])))
@@ -472,9 +441,7 @@ def _draw_cauldron_contents(canvas: pygame.Surface, cauldron, tile_size: float):
     for i, essence_state in enumerate(cauldron.essence_slots):
         if essence_state is not None:
             slot_pos = slot_positions[i]
-            # Check if this is a combined essence (multiple types)
             if essence_state.is_combined and len(essence_state.essence_types) > 1:
-                # Draw as pie chart like in main game
                 num_types = len(essence_state.essence_types)
                 angle_per_type = 360 / num_types
 
@@ -497,15 +464,14 @@ def _draw_cauldron_contents(canvas: pygame.Surface, cauldron, tile_size: float):
                     # Draw patterns for this slice if needed
                     if essence_state.enchanted_per_essence[j]:
                         _draw_stripes_in_slice(
-                            canvas, (int(slot_pos[0]), int(slot_pos[1])), essence_radius, start_angle, end_angle, color
+                            canvas, (int(slot_pos[0]), int(slot_pos[1])), essence_radius, start_angle, end_angle
                         )
 
                     if essence_state.refined_per_essence[j]:
                         _draw_dots_in_slice(
-                            canvas, (int(slot_pos[0]), int(slot_pos[1])), essence_radius, start_angle, end_angle, color
+                            canvas, (int(slot_pos[0]), int(slot_pos[1])), essence_radius, start_angle, end_angle
                         )
 
-                # No outline for combined essences
             else:
                 # Single essence - draw as simple circle
                 color = ESSENCE_TYPES[essence_state.essence_types[0]][1]
@@ -513,12 +479,9 @@ def _draw_cauldron_contents(canvas: pygame.Surface, cauldron, tile_size: float):
 
                 # Draw patterns if enchanted/refined
                 if essence_state.enchanted_per_essence[0]:
-                    _draw_stripes(canvas, (int(slot_pos[0]), int(slot_pos[1])), essence_radius, color)
+                    _draw_stripes(canvas, (int(slot_pos[0]), int(slot_pos[1])), essence_radius)
                 if essence_state.refined_per_essence[0]:
-                    _draw_dots(canvas, (int(slot_pos[0]), int(slot_pos[1])), essence_radius, color)
-
-                # Outline for single essences
-                pygame.draw.circle(canvas, (50, 50, 50), (int(slot_pos[0]), int(slot_pos[1])), essence_radius, 1)
+                    _draw_dots(canvas, (int(slot_pos[0]), int(slot_pos[1])), essence_radius)
 
     # Draw stir progress bar if stirring
     if cauldron.state == CauldronState.STIRRING and cauldron.stir_time > 0:
@@ -540,19 +503,25 @@ def _draw_cauldron_contents(canvas: pygame.Surface, cauldron, tile_size: float):
 def draw_player(canvas: pygame.Surface, player: Player):
     """Draw the player character."""
     pos = player.body.position
-    radius = player.radius
+    half_size = player.size / 2
 
-    screen_pos = (int(pos.x), int(pos.y))
-    screen_radius = int(radius)
+    # Get square vertices
+    vertices = [
+        (int(pos.x - half_size), int(pos.y - half_size)),
+        (int(pos.x + half_size), int(pos.y - half_size)),
+        (int(pos.x + half_size), int(pos.y + half_size)),
+        (int(pos.x - half_size), int(pos.y + half_size)),
+    ]
 
-    # Draw player circle
-    pygame.draw.circle(canvas, player.color, screen_pos, screen_radius)
-    pygame.draw.circle(canvas, (30, 30, 30), screen_pos, screen_radius, 3)
+    # Draw player square
+    pygame.draw.polygon(canvas, player.color, vertices)
+    pygame.draw.polygon(canvas, (30, 30, 30), vertices, 3)
 
     # Draw direction indicator
     vel = player.body.velocity
     if vel.length > 0.1:
-        direction = vel.normalized() * radius * 0.8
+        screen_pos = (int(pos.x), int(pos.y))
+        direction = vel.normalized() * half_size * 0.8
         end_pos = (int(pos.x + direction.x), int(pos.y + direction.y))
         pygame.draw.line(canvas, (255, 255, 255), screen_pos, end_pos, 3)
 
@@ -626,8 +595,6 @@ def draw_ui(
     req_y = map_height - 60
     req_x = 20
 
-    font_small = pygame.font.SysFont("Arial", 12)
-
     for i, req in enumerate(requirements):
         # Draw requirement box
         box_size = 40
@@ -638,25 +605,18 @@ def draw_ui(
         pygame.draw.rect(canvas, bg_color, (box_x, req_y, box_size, box_size))
         pygame.draw.rect(canvas, (50, 50, 50), (box_x, req_y, box_size, box_size), 2)
 
-        # Draw simplified essence representation
         essence_types = req["base_essences"]
         if len(essence_types) == 1:
             color = ESSENCE_TYPES[essence_types[0]][1]
             center = (box_x + box_size // 2, req_y + box_size // 2)
             pygame.draw.circle(canvas, color, center, box_size // 3)
         else:
-            # Multiple essences - draw as segments
             n_parts = len(essence_types)
             segment_width = box_size // n_parts
             for j, etype in enumerate(essence_types):
                 color = ESSENCE_TYPES[etype][1]
                 seg_rect = pygame.Rect(box_x + j * segment_width, req_y, segment_width, box_size)
                 pygame.draw.rect(canvas, color, seg_rect)
-
-        # Checkmark if completed
-        if req.get("completed", False):
-            check_text = font_small.render("✓", True, (255, 255, 255))
-            canvas.blit(check_text, (box_x + 5, req_y + 5))
 
 
 # ============================================================================
@@ -761,9 +721,9 @@ def create_default_layout(
         space, (tools_data["delivery_window"]["x"], tools_data["delivery_window"]["y"]), tile_size
     )
 
-    # Create player from layout data
+    # Get player position from layout data (player creation happens in env)
     player_data = layout_data["player"]
-    player = Player(space, (player_data["x"], player_data["y"]), tile_size)
+    player_position = (player_data["x"], player_data["y"])
 
     return {
         "dispensers": dispensers,
@@ -773,5 +733,5 @@ def create_default_layout(
         "bottler": bottler,
         "trash_can": trash_can,
         "delivery_window": delivery_window,
-        "player": player,
+        "player_position": player_position,
     }

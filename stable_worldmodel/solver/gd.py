@@ -146,7 +146,8 @@ class GDSolver(torch.nn.Module):
 
         # get the best actions to return
         top_idx = torch.argsort(costs, dim=1)[:, 0]
-        top_actions = self.init[:, top_idx].squeeze(1)
+        batch_indices = torch.arange(self.init.size(0))
+        top_actions = self.init[batch_indices, top_idx]
         outputs["actions"] = top_actions.detach().cpu()
 
         return outputs

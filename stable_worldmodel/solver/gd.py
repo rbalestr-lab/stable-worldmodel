@@ -120,8 +120,7 @@ class GDSolver(torch.nn.Module):
                     v = np.repeat(v[:, None, ...], self.num_samples, axis=1)
                 expanded_infos[k] = v
 
-            actions = self.init.detach().requires_grad_(True)
-            costs = self.model.get_cost(expanded_infos, actions)
+            costs = self.model.get_cost(expanded_infos, self.init)
 
             assert isinstance(costs, torch.Tensor), f"Got {type(costs)} cost, expect torch.Tensor"
             assert costs.ndim == 2 and costs.shape[0] == self.n_envs and costs.shape[1] == self.num_samples, (

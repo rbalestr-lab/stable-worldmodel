@@ -109,6 +109,10 @@ class Essence:
         self.body = pymunk.Body(mass, moment)
         self.body.position = position
 
+        # Add significant velocity damping so essences slow down quickly
+        # 0.3 means essence loses 70% of velocity per second
+        self.body.velocity_func = self._apply_drag
+
         self.shape = pymunk.Circle(self.body, self.radius)
         self.shape.friction = friction
         self.shape.elasticity = elasticity
@@ -118,6 +122,15 @@ class Essence:
         self.shape.essence_obj = self
 
         space.add(self.body, self.shape)
+
+    def _apply_drag(self, body, gravity, damping, dt):
+        """Apply custom drag to essence for faster slowdown."""
+        # Apply space damping
+        pymunk.Body.update_velocity(body, gravity, damping, dt)
+        # Apply strong additional drag so essences come to rest quickly
+        # drag_coefficient of 3.0 means essence loses most velocity in about 1 second
+        drag_coefficient = 3.0  # Higher = more drag
+        body.velocity = body.velocity * (1.0 - drag_coefficient * dt)
 
     def remove_from_world(self):
         """Remove this essence from the physics simulation."""
@@ -226,7 +239,9 @@ class Player:
 
     def apply_action(self, action: np.ndarray):
         """
-        Apply velocity-based action to the player.
+        Apply force-based action to the player.
+
+        Uses forces instead of direct velocity setting to respect physics collisions.
 
         Args:
             action: [vx, vy] normalized to [-1, 1]
@@ -234,9 +249,23 @@ class Player:
         # Clamp action
         action = np.clip(action, -1.0, 1.0)
 
-        # Convert to velocity
-        velocity = action * self.max_velocity
-        self.body.velocity = (float(velocity[0]), float(velocity[1]))
+        # Calculate target velocity
+        target_velocity = action * self.max_velocity
+
+        # Get current velocity
+        current_velocity = self.body.velocity
+
+        # Calculate velocity difference
+        velocity_diff = (target_velocity[0] - current_velocity.x, target_velocity[1] - current_velocity.y)
+
+        # Apply force proportional to velocity difference
+        # Using a scaling factor to make it responsive but not overwhelming
+        # This allows pymunk's collision resolution to work properly
+        force_scale = self.body.mass * 50.0  # Tuning parameter (lower = weaker forces, better collision)
+        force = (force_scale * velocity_diff[0], force_scale * velocity_diff[1])
+
+        # Apply the force at the center of mass
+        self.body.apply_force_at_local_point(force, (0, 0))
 
 
 # ============================================================================
@@ -497,6 +526,11 @@ class Cauldron(Tool):
         color = (47, 79, 79)  # Dark Slate Gray
         super().__init__(space, position, size, tile_size, color, is_sensor=False)
 
+        # Override collision type for cauldron-specific handlers
+        from .game_logic import PhysicsConfig
+
+        self.shape.collision_type = PhysicsConfig.LAYER_CAULDRON
+
         self.state = CauldronState.EMPTY
         self.timer = 0
         self.stir_time = 60  # steps - player must stir for this long
@@ -706,7 +740,7 @@ class TrashCan(Tool):
     def __init__(self, space: pymunk.Space, position: tuple[float, float], tile_size: float = 32.0):
         size = (0.8 * tile_size, 0.8 * tile_size)
         color = (105, 105, 105)  # Dim Gray
-        super().__init__(space, position, size, tile_size, color, is_sensor=True)
+        super().__init__(space, position, size, tile_size, color, is_sensor=False)
 
     def accept_essence(self, essence: Essence) -> bool:
         """Accept and immediately destroy an essence."""
@@ -730,6 +764,8 @@ class Dispenser:
     """
 
     def __init__(self, space: pymunk.Space, position: tuple[float, float], essence_type: int, tile_size: float = 32.0):
+        from .game_logic import PhysicsConfig
+
         self.space = space
         self.position = position
         self.essence_type = essence_type
@@ -737,13 +773,15 @@ class Dispenser:
         self.cooldown = 0
         self.cooldown_duration = 30  # steps
 
-        # Create sensor shape for collision detection
+        # Create solid shape for collision (player cannot pass through)
         self.body = pymunk.Body(body_type=pymunk.Body.STATIC)
         self.body.position = position
         size = (0.8 * tile_size, 0.8 * tile_size)
         self.shape = pymunk.Poly.create_box(self.body, size)
-        self.shape.sensor = True  # Sensors for triggering dispense
-        self.shape.collision_type = 3  # LAYER_TOOL
+        self.shape.sensor = False  # Solid, so player bounces off
+        self.shape.collision_type = PhysicsConfig.LAYER_DISPENSER
+        self.shape.friction = 0.5
+        self.shape.elasticity = 0.0
 
         # Store reference
         self.shape.dispenser_obj = self
@@ -798,7 +836,7 @@ class DeliveryWindow(Tool):
     def __init__(self, space: pymunk.Space, position: tuple[float, float], tile_size: float = 32.0):
         size = (1.5 * tile_size, 1.0 * tile_size)
         color = (60, 179, 113)  # Medium Sea Green
-        super().__init__(space, position, size, tile_size, color, is_sensor=True)
+        super().__init__(space, position, size, tile_size, color, is_sensor=False)
 
         self.state = DeliveryState.WAITING
         self.timer = 0

@@ -45,11 +45,13 @@ class PhysicsConfig:
     LAYER_ESSENCE = 2
     LAYER_TOOL = 3
     LAYER_WALL = 4
+    LAYER_DISPENSER = 5
+    LAYER_CAULDRON = 6
 
     # Physics constants
     GRAVITY = (0, 0)
-    DAMPING = 0.95  # Objects slow down naturally (higher = less damping)
-    ITERATIONS = 10
+    DAMPING = 0.8  # Objects slow down naturally (higher = less damping, 0.8 = 20% velocity loss per second)
+    ITERATIONS = 20  # Higher iterations = better collision resolution
     TIMESTEP = 1 / 60  # 60 Hz
 
 
@@ -57,6 +59,7 @@ def setup_physics_space() -> pymunk.Space:
     """Create and configure a pymunk physics space."""
     space = pymunk.Space()
     space.gravity = PhysicsConfig.GRAVITY
+    space.damping = PhysicsConfig.DAMPING
     space.iterations = PhysicsConfig.ITERATIONS
     return space
 
@@ -97,7 +100,7 @@ def add_walls(space: pymunk.Space, map_width: float, map_height: float, wall_thi
 
 
 class CollisionHandler:
-    """Manages collision detection and response between game objects."""
+    """Manages collision detection and response between game objects using pymunk's collision handler system."""
 
     def __init__(self, env):
         """
@@ -107,99 +110,163 @@ class CollisionHandler:
             env: Reference to the PotionLabEnv
         """
         self.env = env
-        self.processed_collisions = set()  # Track processed collisions this frame
         self.player_stirring_cauldron = False  # Track if player is currently stirring
+        self.essence_tool_collisions = set()  # Track active essence-tool collisions
+
+    def setup_handlers(self, space: pymunk.Space):
+        """
+        Set up pymunk collision handlers for game interactions.
+
+        Args:
+            space: The pymunk physics space
+        """
+        # Player-Dispenser collisions (trigger essence dispensing)
+        space.on_collision(
+            collision_type_a=PhysicsConfig.LAYER_PLAYER,
+            collision_type_b=PhysicsConfig.LAYER_DISPENSER,
+            begin=self._on_player_dispenser_begin,
+        )
+
+        # Player-Cauldron collisions (for stirring)
+        space.on_collision(
+            collision_type_a=PhysicsConfig.LAYER_PLAYER,
+            collision_type_b=PhysicsConfig.LAYER_CAULDRON,
+            begin=self._on_player_cauldron_begin,
+            separate=self._on_player_cauldron_separate,
+        )
+
+        # Essence-Tool collisions (for processing)
+        space.on_collision(
+            collision_type_a=PhysicsConfig.LAYER_ESSENCE,
+            collision_type_b=PhysicsConfig.LAYER_TOOL,
+            begin=self._on_essence_tool_begin,
+        )
+
+        # Essence-Cauldron collisions (cauldron has special collision type)
+        space.on_collision(
+            collision_type_a=PhysicsConfig.LAYER_ESSENCE,
+            collision_type_b=PhysicsConfig.LAYER_CAULDRON,
+            begin=self._on_essence_cauldron_begin,
+        )
 
     def update(self):
-        """Check for collisions manually each frame."""
-        self.processed_collisions.clear()
+        """Update collision state each frame."""
+        # Handle ongoing cauldron stirring
+        if self.player_stirring_cauldron:
+            cauldron = self.env.tools.get("cauldron")
+            if cauldron:
+                cauldron.stir()
 
-        self._check_player_dispenser_collisions()
+    def _on_player_dispenser_begin(self, arbiter, space, data):
+        """Called when player collides with a dispenser."""
+        # Get the dispenser from the collision
+        for shape in arbiter.shapes:
+            if hasattr(shape, "dispenser_obj"):
+                dispenser = shape.dispenser_obj
+                essence_state = dispenser.dispense()
 
-        self._check_player_cauldron_collisions()
+                if essence_state is not None:
+                    # Spawn essence at dispenser location
+                    position = dispenser.position
+                    # Offset slightly so player can push it away
+                    offset = Vec2d(0, dispenser.tile_size * 1.25)
+                    spawn_pos = (position[0] + offset.x, position[1] + offset.y)
 
-        self._check_essence_tool_collisions()
+                    # Get essence physics properties from variation space
+                    mass = self.env.variation_space["essence"]["mass"].value
+                    friction = self.env.variation_space["essence"]["friction"].value
+                    elasticity = self.env.variation_space["essence"]["elasticity"].value
 
-    def _check_player_dispenser_collisions(self):
-        """Check if player is touching any dispensers."""
-        player = self.env.player
+                    essence = Essence(
+                        self.env.space, spawn_pos, essence_state, self.env.tile_size, mass, friction, elasticity
+                    )
+                    self.env.essences.append(essence)
+                break
 
-        for dispenser in self.env.dispensers:
-            # Check if player shape overlaps with dispenser shape
-            if self._shapes_overlap(player.shape, dispenser.shape):
-                collision_key = ("player", id(dispenser))
-                if collision_key not in self.processed_collisions:
-                    self.processed_collisions.add(collision_key)
-
-                    essence_state = dispenser.dispense()
-                    if essence_state is not None:
-                        # Spawn essence at dispenser location
-                        position = dispenser.position
-                        # Offset slightly so player can push it away
-                        offset = Vec2d(0, dispenser.tile_size * 0.5)
-                        spawn_pos = (position[0] + offset.x, position[1] + offset.y)
-
-                        # Get essence physics properties from variation space
-                        mass = self.env.variation_space["essence"]["mass"].value
-                        friction = self.env.variation_space["essence"]["friction"].value
-                        elasticity = self.env.variation_space["essence"]["elasticity"].value
-
-                        essence = Essence(
-                            self.env.space, spawn_pos, essence_state, self.env.tile_size, mass, friction, elasticity
-                        )
-                        self.env.essences.append(essence)
-
-    def _check_player_cauldron_collisions(self):
-        """Check if player is touching the cauldron to stir it."""
-        player = self.env.player
+    def _on_player_cauldron_begin(self, arbiter, space, data):
+        """Called when player starts colliding with cauldron."""
         cauldron = self.env.tools.get("cauldron")
+        if cauldron:
+            cauldron.start_stirring()
+            self.player_stirring_cauldron = True
 
+    def _on_player_cauldron_separate(self, arbiter, space, data):
+        """Called when player stops colliding with cauldron."""
+        cauldron = self.env.tools.get("cauldron")
+        if cauldron:
+            cauldron.stop_stirring()
+            self.player_stirring_cauldron = False
+
+    def _on_essence_tool_begin(self, arbiter, space, data):
+        """Called when essence collides with a tool."""
+        # Find essence and tool from collision
+        essence_obj = None
+        tool_obj = None
+        tool_name = None
+
+        for shape in arbiter.shapes:
+            if hasattr(shape, "essence_obj"):
+                essence_obj = shape.essence_obj
+            elif hasattr(shape, "tool_obj"):
+                tool_obj = shape.tool_obj
+                # Find the tool name
+                for name, tool in self.env.tools.items():
+                    if tool is tool_obj:
+                        tool_name = name
+                        break
+
+        if essence_obj is None or tool_obj is None:
+            return
+
+        # Create collision key to ensure we only process once
+        collision_key = (id(essence_obj), id(tool_obj))
+        if collision_key in self.essence_tool_collisions:
+            return
+
+        self.essence_tool_collisions.add(collision_key)
+
+        # Handle delivery window specially
+        if tool_name == "delivery_window":
+            if hasattr(tool_obj, "validate_delivery"):
+                accepted = tool_obj.validate_delivery(essence_obj)
+                if accepted and essence_obj in self.env.essences:
+                    self.env.essences.remove(essence_obj)
+        # Try to accept the essence for other tools
+        elif hasattr(tool_obj, "accept_essence"):
+            accepted = tool_obj.accept_essence(essence_obj)
+            if accepted and essence_obj in self.env.essences:
+                self.env.essences.remove(essence_obj)
+
+    def _on_essence_cauldron_begin(self, arbiter, space, data):
+        """Called when essence collides with the cauldron."""
+        # Find essence from collision
+        essence_obj = None
+
+        for shape in arbiter.shapes:
+            if hasattr(shape, "essence_obj"):
+                essence_obj = shape.essence_obj
+                break
+
+        if essence_obj is None:
+            return
+
+        # Get cauldron
+        cauldron = self.env.tools.get("cauldron")
         if cauldron is None:
             return
 
-        # Check if player shape overlaps with cauldron shape
-        if self._shapes_overlap(player.shape, cauldron.shape):
-            if not self.player_stirring_cauldron:
-                cauldron.start_stirring()
-                self.player_stirring_cauldron = True
-            else:
-                cauldron.stir()
-        else:
-            if self.player_stirring_cauldron:
-                cauldron.stop_stirring()
-                self.player_stirring_cauldron = False
+        # Create collision key to ensure we only process once
+        collision_key = (id(essence_obj), id(cauldron))
+        if collision_key in self.essence_tool_collisions:
+            return
 
-    def _check_essence_tool_collisions(self):
-        """Check if any essences are touching tools."""
-        for essence in self.env.essences[:]:
-            for tool_name, tool in self.env.tools.items():
-                if self._shapes_overlap(essence.shape, tool.shape):
-                    collision_key = (id(essence), id(tool))
-                    if collision_key not in self.processed_collisions:
-                        self.processed_collisions.add(collision_key)
+        self.essence_tool_collisions.add(collision_key)
 
-                        # Handle delivery window specially
-                        if tool_name == "delivery_window":
-                            if hasattr(tool, "validate_delivery"):
-                                # Returns True if accepted, False if rejected
-                                accepted = tool.validate_delivery(essence)
-                                # Remove from list if accepted
-                                if accepted and essence in self.env.essences:
-                                    self.env.essences.remove(essence)
-                                    break  # Essence was consumed, move to next essence
-                        # Try to accept the essence for other tools
-                        elif hasattr(tool, "accept_essence"):
-                            accepted = tool.accept_essence(essence)
-                            if accepted and essence in self.env.essences:
-                                self.env.essences.remove(essence)
-                                break  # Essence was consumed, move to next essence
-
-    def _shapes_overlap(self, shape1, shape2):
-        """Check if two shapes overlap using bounding boxes."""
-        bb1 = shape1.bb
-        bb2 = shape2.bb
-
-        return not (bb1.right < bb2.left or bb1.left > bb2.right or bb1.top < bb2.bottom or bb1.bottom > bb2.top)
+        # Try to add essence to cauldron
+        if hasattr(cauldron, "accept_essence"):
+            accepted = cauldron.accept_essence(essence_obj)
+            if accepted and essence_obj in self.env.essences:
+                self.env.essences.remove(essence_obj)
 
 
 # ============================================================================

@@ -50,9 +50,9 @@ class PhysicsConfig:
 
     # Physics constants
     GRAVITY = (0, 0)
-    DAMPING = 0.8  # Objects slow down naturally (higher = less damping, 0.8 = 20% velocity loss per second)
-    ITERATIONS = 20  # Higher iterations = better collision resolution
-    TIMESTEP = 1 / 60  # 60 Hz
+    DAMPING = 0.8
+    ITERATIONS = 20
+    TIMESTEP = 1 / 60
 
 
 def setup_physics_space() -> pymunk.Space:
@@ -110,8 +110,8 @@ class CollisionHandler:
             env: Reference to the PotionLabEnv
         """
         self.env = env
-        self.player_stirring_cauldron = False  # Track if player is currently stirring
-        self.essence_tool_collisions = set()  # Track active essence-tool collisions
+        self.player_stirring_cauldron = False
+        self.essence_tool_collisions = set()
 
     def setup_handlers(self, space: pymunk.Space):
         """
@@ -120,14 +120,14 @@ class CollisionHandler:
         Args:
             space: The pymunk physics space
         """
-        # Player-Dispenser collisions (trigger essence dispensing)
+        # Player-Dispenser collisions
         space.on_collision(
             collision_type_a=PhysicsConfig.LAYER_PLAYER,
             collision_type_b=PhysicsConfig.LAYER_DISPENSER,
             begin=self._on_player_dispenser_begin,
         )
 
-        # Player-Cauldron collisions (for stirring)
+        # Player-Cauldron collisions
         space.on_collision(
             collision_type_a=PhysicsConfig.LAYER_PLAYER,
             collision_type_b=PhysicsConfig.LAYER_CAULDRON,
@@ -135,14 +135,14 @@ class CollisionHandler:
             separate=self._on_player_cauldron_separate,
         )
 
-        # Essence-Tool collisions (for processing)
+        # Essence-Tool collisions
         space.on_collision(
             collision_type_a=PhysicsConfig.LAYER_ESSENCE,
             collision_type_b=PhysicsConfig.LAYER_TOOL,
             begin=self._on_essence_tool_begin,
         )
 
-        # Essence-Cauldron collisions (cauldron has special collision type)
+        # Essence-Cauldron collisions
         space.on_collision(
             collision_type_a=PhysicsConfig.LAYER_ESSENCE,
             collision_type_b=PhysicsConfig.LAYER_CAULDRON,
@@ -239,7 +239,6 @@ class CollisionHandler:
 
     def _on_essence_cauldron_begin(self, arbiter, space, data):
         """Called when essence collides with the cauldron."""
-        # Find essence from collision
         essence_obj = None
 
         for shape in arbiter.shapes:
@@ -255,14 +254,12 @@ class CollisionHandler:
         if cauldron is None:
             return
 
-        # Create collision key to ensure we only process once
         collision_key = (id(essence_obj), id(cauldron))
         if collision_key in self.essence_tool_collisions:
             return
 
         self.essence_tool_collisions.add(collision_key)
 
-        # Try to add essence to cauldron
         if hasattr(cauldron, "accept_essence"):
             accepted = cauldron.accept_essence(essence_obj)
             if accepted and essence_obj in self.env.essences:
@@ -493,8 +490,8 @@ def draw_tool(canvas: pygame.Surface, tool, tile_size: float):
 def _draw_cauldron_contents(canvas: pygame.Surface, cauldron, tile_size: float):
     """Draw essences in the cauldron's 4 slots and stir progress."""
     pos = cauldron.position
-    slot_offset = tile_size * 0.6  # Increased to accommodate larger essences
-    essence_radius = int(tile_size * 0.35)  # Same size as floor essences
+    slot_offset = tile_size * 0.6
+    essence_radius = int(tile_size * 0.35)
 
     # Positions for 4 slots: top, right, bottom, left
     slot_positions = [
@@ -540,11 +537,9 @@ def _draw_cauldron_contents(canvas: pygame.Surface, cauldron, tile_size: float):
                         )
 
             else:
-                # Single essence - draw as simple circle
                 color = ESSENCE_TYPES[essence_state.essence_types[0]][1]
                 pygame.draw.circle(canvas, color, (int(slot_pos[0]), int(slot_pos[1])), essence_radius)
 
-                # Draw patterns if enchanted/refined
                 if essence_state.enchanted_per_essence[0]:
                     _draw_stripes(canvas, (int(slot_pos[0]), int(slot_pos[1])), essence_radius)
                 if essence_state.refined_per_essence[0]:

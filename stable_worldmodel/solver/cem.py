@@ -20,6 +20,7 @@ class CEMSolver:
         n_steps,
         topk,
         device="cpu",
+        seed: int = 3072,
     ):
         self.model = model
         self.var_scale = var_scale
@@ -27,6 +28,7 @@ class CEMSolver:
         self.n_steps = n_steps
         self.topk = topk
         self.device = device
+        self.torch_gen = torch.Generator(device=device).manual_seed(seed)
 
     def configure(self, *, action_space, n_envs: int, config) -> None:
         self._action_space = action_space
@@ -111,7 +113,9 @@ class CEMSolver:
                     expanded_infos[k] = v_traj
 
                 # sample action sequences candidation from normal distrib
-                candidates = torch.randn(self.num_samples, self.horizon, self.action_dim, device=self.device)
+                candidates = torch.randn(
+                    self.num_samples, self.horizon, self.action_dim, generator=self.torch_gen, device=self.device
+                )
 
                 # scale and shift
                 candidates = candidates * var[traj] + mean[traj]

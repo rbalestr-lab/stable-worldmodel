@@ -255,8 +255,14 @@ if __name__ == "__main__":
 
     world.set_policy(policy)
     # sample 50 episodes idx
+
+    # fix random seed
+    np.random.seed(42)
     episode_idx = np.random.choice(10000, size=10, replace=False).tolist()
     start_steps = np.random.randint(0, 60, size=10).tolist()
+
+    print("Evaluating episodes: ", episode_idx)
+    print("Starting steps: ", start_steps)
 
     results = world.evaluate_from_dataset(
         "pusht_expert_train",

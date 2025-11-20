@@ -44,8 +44,7 @@ class DINOWM(torch.nn.Module):
         proprio_key=None,
         action_key=None,
     ):
-        assert target not in info, f"{target} key already in info_dict"
-
+        # assert target not in info, f"{target} key already in info_dict"
         # == pixels embeddings
         pixels = info[pixels_key].float()  # (B, T, 3, H, W)
         # pixels = pixels.unsqueeze(1) if pixels.ndim == 4 else pixels
@@ -129,15 +128,44 @@ class DINOWM(torch.nn.Module):
         # == proprio embedding
         if proprio_dim > 0:
             proprio_emb = embedding[..., pixel_dim : pixel_dim + proprio_dim]
+            split_embed["proprio_embed"] = proprio_emb[:, :, :, 0]  # all patches are the same
+
+        if action_dim > 0:
+            action_emb = embedding[..., -action_dim:]
+            split_embed["action_embed"] = action_emb[:, :, :, 0]  # all patches are the same
+        return split_embed
+
+    def split_embedding_old(self, embedding, action_dim, proprio_dim):
+        split_embed = {}
+        pixel_dim = embedding.shape[-1] - action_dim - proprio_dim
+
+        # == pixels embedding
+        split_embed["pixels_embed"] = embedding[..., :pixel_dim]
+
+        # == proprio embedding
+        if proprio_dim > 0:
+            proprio_emb = embedding[..., pixel_dim : pixel_dim + proprio_dim]
             split_embed["proprio_embed"] = proprio_emb[:, :, 0]  # all patches are the same
 
         if action_dim > 0:
             action_emb = embedding[..., -action_dim:]
             split_embed["action_embed"] = action_emb[:, :, 0]  # all patches are the same
-
         return split_embed
 
     def replace_action_in_embedding(self, embedding, act):
+        """Replace the action embeddings in the latent state z with the provided actions."""
+        n_patches = embedding.shape[3]
+        B, N = act.shape[:2]
+        act_flat = rearrange(act, "b n ... -> (b n) ...")
+        z_act = self.action_encoder(act_flat)  # (B, T, A_emb)
+        action_dim = z_act.shape[-1]
+        act_tiled = repeat(z_act.unsqueeze(2), "(b n) t 1 a -> b n t p a", b=B, n=N, p=n_patches)
+        # z (B, T, P, d) with d = dim + proprio_emb_dim + action_emb_dim
+        # replace the last 'action_emb_dim' dims of z with the action embeddings
+        embedding[..., -action_dim:] = act_tiled
+        return embedding
+
+    def replace_action_in_embedding_old(self, embedding, act):
         """Replace the action embeddings in the latent state z with the provided actions."""
         n_patches = embedding.shape[2]
         z_act = self.action_encoder(act)  # (B, T, A_emb)
@@ -161,20 +189,20 @@ class DINOWM(torch.nn.Module):
         """
 
         assert "pixels" in info, "pixels not in info_dict"
-        n_obs = info["pixels"].shape[1]
-
+        n_obs = info["pixels"].shape[2]
         # == add action to info dict
-        act_0 = action_sequence[:, :n_obs]
+        act_0 = action_sequence[:, :, :n_obs]
         info["action"] = act_0
 
         proprio_key = "proprio" if "proprio" in info else None
 
-        # move to device and prepare goal_info_dict
+        # prepare init_info_dict
         init_info_dict = {}
         for k, v in info.items():
             if torch.is_tensor(v):
                 # goal is the same across samples so we will only embed it once
-                init_info_dict[k] = info[k][0].unsqueeze(0)  # (B, 1, ...)
+                init_info_dict[k] = info[k][:, 0]  # (B, 1, ...)
+
         init_info_dict = self.encode(
             init_info_dict,
             pixels_key="pixels",
@@ -185,47 +213,53 @@ class DINOWM(torch.nn.Module):
         # repeat copy for each action candidate
         info["embed"] = (
             init_info_dict["embed"]
-            .expand(action_sequence.shape[0], *([-1] * (init_info_dict["embed"].ndim - 1)))
+            .unsqueeze(1)
+            .expand(-1, action_sequence.shape[1], *([-1] * (init_info_dict["embed"].ndim - 1)))
             .clone()
         )
         # actually coompute the embedding of action for each candidate
-        info["embed"] = self.replace_action_in_embedding(info["embed"], action_sequence[:, :n_obs])
+        info["embed"] = self.replace_action_in_embedding(info["embed"], action_sequence[:, :, :n_obs])
         info["pixels_embed"] = (
             init_info_dict["pixels_embed"]
-            .expand(action_sequence.shape[0], *([-1] * (init_info_dict["pixels_embed"].ndim - 1)))
-            .clone()
+            .unsqueeze(1)
+            .expand(-1, action_sequence.shape[1], *([-1] * (init_info_dict["pixels_embed"].ndim - 1)))
         )
         action_dim = init_info_dict["action_embed"].shape[-1]
-        info["action_embed"] = info["embed"][:, :n_obs, 0, -action_dim:]
+        info["action_embed"] = info["embed"][:, :, :n_obs, 0, -action_dim:]
         if proprio_key is not None:
             info["proprio_embed"] = (
                 init_info_dict["proprio_embed"]
-                .expand(action_sequence.shape[0], *([-1] * (init_info_dict["proprio_embed"].ndim - 1)))
-                .clone()
+                .unsqueeze(1)
+                .expand(-1, action_sequence.shape[1], *([-1] * (init_info_dict["proprio_embed"].ndim - 1)))
             )
         # number of step to predict
-        act_pred = action_sequence[:, n_obs:]
-        n_steps = act_pred.shape[1]
+        act_pred = action_sequence[:, :, n_obs:]
+        n_steps = act_pred.shape[2]
 
         # == initial embedding
         z = info["embed"]
+        B, N = z.shape[:2]
 
         for t in range(n_steps):
             # predict the next state
-            pred_embed = self.predict(z[:, -self.history_size :])  # (B, hist_size, P, D)
-            new_embed = pred_embed[:, -1:, ...]  # (B, 1, P, D)
+            z_flat = rearrange(z, "b n ... -> (b n) ...")  # Fixed rearrange pattern
+            pred_embed = self.predict(z_flat[:, -self.history_size :])  # (B, hist_size, P, D)
+            pred_embed = rearrange(pred_embed, "(b n) t p d -> b n t p d", b=B, n=N)
+            new_embed = pred_embed[:, :, -1:, ...]  # (B, N, 1, P, D)
 
             # add corresponding action to new embedding
-            new_action = act_pred[:, t : t + 1, :]  # (B, action_dim)
+            new_action = act_pred[:, :, t : t + 1, :]  # (B, N, action_dim)
             new_embed = self.replace_action_in_embedding(new_embed, new_action)
 
             # append new embedding to the sequence
-            z = torch.cat([z, new_embed], dim=1)  # (B, n+t, P, D)
+            z = torch.cat([z, new_embed], dim=2)  # (B, n+t, P, D)
 
         # predict the last state (n+t+1)
-        pred_embed = self.predict(z[:, -self.history_size :])  # (B, hist_size, P, D)
-        new_embed = pred_embed[:, -1:, ...]
-        z = torch.cat([z, new_embed], dim=1)  # (B, n+t+1, P, D)
+        z_flat = rearrange(z, "b n ... -> (b n) ...")  # Fixed rearrange pattern
+        pred_embed = self.predict(z_flat[:, -self.history_size :])  # (B, hist_size, P, D)
+        pred_embed = rearrange(pred_embed, "(b n) t p d -> b n t p d", b=B, n=N)
+        new_embed = pred_embed[:, :, -1:, ...]  # (B, 1, P, D)
+        z = torch.cat([z, new_embed], dim=2)  # (B, n+t+1, P, D)
 
         # == update info dict with predicted embeddings
         info["predicted_embedding"] = z
@@ -236,6 +270,30 @@ class DINOWM(torch.nn.Module):
         info.update({f"predicted_{k}": v for k, v in splitted_embed.items()})
 
         return info
+
+    def rollout_old(self, info, action_sequence):
+        """Rollout the world model given an initial observation and a sequence of actions.
+
+        Params:
+        obs_start: n current observations (B, n, C, H, W)
+        actions: current and predicted actions (B, n+t, action_dim)
+
+        Returns:
+        z_obs: dict with latent observations (B, n+t+1, n_patches, D)
+        z: predicted latent states (B, n+t+1, n_patches, D)
+        """
+
+        assert "pixels" in info, "pixels not in info_dict"
+        n_obs = info["pixels"].shape[1]
+
+        # == add action to info dict
+        act_0 = action_sequence[:, :n_obs]
+        info["action"] = act_0
+
+        proprio_key = "proprio" if "proprio" in info else None
+
+        print("info['pixels'].shape:", info["pixels"].shape)
+        print("info['action'].shape:", info["action"].shape)
         info = self.encode(
             info,
             pixels_key="pixels",
@@ -258,7 +316,7 @@ class DINOWM(torch.nn.Module):
 
             # add corresponding action to new embedding
             new_action = act_pred[:, t : t + 1, :]  # (B, action_dim)
-            new_embed = self.replace_action_in_embedding(new_embed, new_action)
+            new_embed = self.replace_action_in_embedding_old(new_embed, new_action)
 
             # append new embedding to the sequence
             z = torch.cat([z, new_embed], dim=1)  # (B, n+t, P, D)
@@ -273,7 +331,7 @@ class DINOWM(torch.nn.Module):
         # get the dimension of each part of the embedding
         action_dim = 0 if "action_embed" not in info else info["action_embed"].shape[-1]
         proprio_dim = 0 if "proprio_embed" not in info else info["proprio_embed"].shape[-1]
-        splitted_embed = self.split_embedding(z, action_dim, proprio_dim)
+        splitted_embed = self.split_embedding_old(z, action_dim, proprio_dim)
         info.update({f"predicted_{k}": v for k, v in splitted_embed.items()})
 
         return info
@@ -281,6 +339,69 @@ class DINOWM(torch.nn.Module):
     def get_cost(self, info_dict: dict, action_candidates: torch.Tensor):
         assert "action" in info_dict, "action key must be in info_dict"
         assert "pixels" in info_dict, "pixels key must be in info_dict"
+
+        # == get the goal embedding
+        proprio_key = "goal_proprio" if "goal_proprio" in info_dict else None
+
+        # move to device and prepare goal_info_dict
+        goal_info_dict = {}
+        for k, v in info_dict.items():
+            if torch.is_tensor(v):
+                info_dict[k] = v.to(next(self.parameters()).device)
+                # goal is the same across samples so we will only embed it once
+                goal_info_dict[k] = info_dict[k][:, 0]  # (B, ...)
+
+        goal_info_dict = self.encode(
+            goal_info_dict,
+            target="goal_embed",
+            pixels_key="goal",
+            proprio_key=proprio_key,
+            action_key=None,
+        )
+        info_dict["goal_embed"] = (
+            goal_info_dict["goal_embed"]
+            .unsqueeze(1)
+            .expand(-1, action_candidates.shape[1], *([-1] * (goal_info_dict["goal_embed"].ndim - 1)))
+        )
+        info_dict["pixels_goal_embed"] = (
+            goal_info_dict["pixels_goal_embed"]
+            .unsqueeze(1)
+            .expand(-1, action_candidates.shape[1], *([-1] * (goal_info_dict["pixels_goal_embed"].ndim - 1)))
+        )
+        if proprio_key is not None:
+            info_dict["proprio_goal_embed"] = (
+                goal_info_dict["proprio_goal_embed"]
+                .unsqueeze(1)
+                .expand(-1, action_candidates.shape[1], *([-1] * (goal_info_dict["proprio_goal_embed"].ndim - 1)))
+            )
+
+        # == run world model
+        info_dict = self.rollout(info_dict, action_candidates)
+
+        # == get the pixels cost
+        pixels_preds = info_dict["predicted_pixels_embed"]  # (B, N, T, P, d)
+        pixels_goal = info_dict["pixels_goal_embed"]
+        pixels_cost = F.mse_loss(pixels_preds[:, :, -1:], pixels_goal, reduction="none").mean(
+            dim=tuple(range(2, pixels_preds.ndim))
+        )
+
+        cost = pixels_cost
+
+        if proprio_key is not None:
+            # == get the proprio cost
+            proprio_preds = info_dict["predicted_proprio_embed"]
+            proprio_goal = info_dict["proprio_goal_embed"]
+            proprio_cost = F.mse_loss(proprio_preds[:, :, -1:], proprio_goal, reduction="none").mean(
+                dim=tuple(range(2, proprio_preds.ndim))
+            )
+            cost = cost + proprio_cost
+
+        return cost
+
+    def get_cost_old(self, info_dict: dict, action_candidates: torch.Tensor):
+        assert "action" in info_dict, "action key must be in info_dict"
+        assert "pixels" in info_dict, "pixels key must be in info_dict"
+        print("action_candidates.shape:", action_candidates.shape)
         # move to device and unsqueeze time
         action_copy = action_candidates[0].clone()
         info_dict_copy = info_dict.copy()
@@ -291,33 +412,16 @@ class DINOWM(torch.nn.Module):
         # == get the goal embedding
         proprio_key = "goal_proprio" if "goal_proprio" in info_dict else None
 
-        # move to device and prepare goal_info_dict
-        goal_info_dict = {}
-        for k, v in info_dict.items():
-            if torch.is_tensor(v):
-                # goal is the same across samples so we will only embed it once
-                goal_info_dict[k] = info_dict_copy[k][0].unsqueeze(0)  # (B, 1, ...)
-
-        goal_info_dict = self.encode(
-            goal_info_dict,
+        info_dict_copy = self.encode(
+            info_dict_copy,
             target="goal_embed",
             pixels_key="goal",
             proprio_key=proprio_key,
             action_key=None,
         )
-        info_dict_copy["goal_embed"] = goal_info_dict["goal_embed"].expand(
-            action_candidates.shape[1], *([-1] * (goal_info_dict["goal_embed"].ndim - 1))
-        )
-        info_dict_copy["pixels_goal_embed"] = goal_info_dict["pixels_goal_embed"].expand(
-            action_candidates.shape[1], *([-1] * (goal_info_dict["pixels_goal_embed"].ndim - 1))
-        )
-        if proprio_key is not None:
-            info_dict_copy["proprio_goal_embed"] = goal_info_dict["proprio_goal_embed"].expand(
-                action_candidates.shape[1], *([-1] * (goal_info_dict["proprio_goal_embed"].ndim - 1))
-            )
 
         # == run world model
-        info_dict_copy = self.rollout(info_dict_copy, action_copy)
+        info_dict_copy = self.rollout_old(info_dict_copy, action_copy)
 
         # == get the pixels cost
         pixels_preds = info_dict_copy["predicted_pixels_embed"]  # (B, T, P, d)
@@ -341,20 +445,55 @@ class DINOWM(torch.nn.Module):
         cost = cost.unsqueeze(0)
         return cost
 
-        # move to device and unsqueeze time
+    def get_cost_new(self, info_dict: dict, action_candidates: torch.Tensor):
+        assert "action" in info_dict, "action key must be in info_dict"
+        assert "pixels" in info_dict, "pixels key must be in info_dict"
+        assert action_candidates.shape[0] == info_dict["pixels"].shape[0], (
+            "Batch size of action_candidates must match that of info_dict"
+        )
+        assert action_candidates.shape[1] == info_dict["pixels"].shape[1], (
+            "Number of action candidates must match that of info_dict"
+        )
+
+        # move to device and prepare goal_info_dict
+        goal_info_dict = {}
         for k, v in info_dict.items():
             if torch.is_tensor(v):
-                info_dict[k] = v.to(self.device)
+                info_dict[k] = v.to(next(self.parameters()).device)
+                # goal is the same across samples so we will only embed it once
+                goal_info_dict[k] = info_dict[k][:, 0]  # (B, 1, ...)
 
         # == get the goal embedding
-        proprio_key = "goal_proprio" if "goal_proprio" in info_dict else None
-        info_dict = self.encode(
-            info_dict,
-            target="goal_embed",
-            pixels_key="goal",
-            proprio_key=proprio_key,
-            action_key=None,
-        )
+        proprio_key = "goal_proprio" if "goal_proprio" in goal_info_dict else None
+        if (
+            self._goal_cached_info is not None
+            and torch.equal(self._goal_cached_info["id"], info_dict["id"][:, 0])
+            and torch.equal(self._goal_cached_info["step_idx"], info_dict["step_idx"][:, 0])
+        ):
+            goal_info_dict = self._goal_cached_info
+        else:
+            goal_info_dict = self.encode(
+                goal_info_dict,
+                target="goal_embed",
+                pixels_key="goal",
+                proprio_key=proprio_key,
+                action_key=None,
+            )
+            self._goal_cached_info = {k: v.detach() if torch.is_tensor(v) else v for k, v in goal_info_dict.items()}
+            self._goal_cached_info["id"] = info_dict["id"][:, 0]
+            self._goal_cached_info["step_idx"] = info_dict["step_idx"][:, 0]
+        # repeat the goal for each action candidate
+        info_dict["pixels_goal_embed"] = (
+            goal_info_dict["pixels_goal_embed"]
+            .unsqueeze(1)
+            .expand(-1, action_candidates.shape[1], *([-1] * (goal_info_dict["pixels_goal_embed"].ndim - 1)))
+        )  # (B, N, ...)
+        if proprio_key is not None:
+            info_dict["proprio_goal_embed"] = (
+                goal_info_dict["proprio_goal_embed"]
+                .unsqueeze(1)
+                .expand(-1, action_candidates.shape[1], *([-1] * (goal_info_dict["proprio_goal_embed"].ndim - 1)))
+            )  # (B, N, ...)
 
         # == run world model
         info_dict = self.rollout(info_dict, action_candidates)
@@ -362,8 +501,8 @@ class DINOWM(torch.nn.Module):
         # == get the pixels cost
         pixels_preds = info_dict["predicted_pixels_embed"]  # (B, T, P, d)
         pixels_goal = info_dict["pixels_goal_embed"]
-        pixels_cost = F.mse_loss(pixels_preds[:, -1:], pixels_goal, reduction="none").mean(
-            dim=tuple(range(1, pixels_preds.ndim))
+        pixels_cost = F.mse_loss(pixels_preds[:, :, -1:], pixels_goal, reduction="none").mean(
+            dim=tuple(range(2, pixels_preds.ndim))
         )
 
         cost = pixels_cost
@@ -372,9 +511,8 @@ class DINOWM(torch.nn.Module):
             # == get the proprio cost
             proprio_preds = info_dict["predicted_proprio_embed"]
             proprio_goal = info_dict["proprio_goal_embed"]
-
-            proprio_cost = F.mse_loss(proprio_preds[:, -1:], proprio_goal, reduction="none").mean(
-                dim=tuple(range(1, proprio_preds.ndim))
+            proprio_cost = F.mse_loss(proprio_preds[:, :, -1:], proprio_goal, reduction="none").mean(
+                dim=tuple(range(2, proprio_preds.ndim))
             )
             cost = cost + proprio_cost
 

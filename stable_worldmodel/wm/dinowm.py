@@ -168,6 +168,74 @@ class DINOWM(torch.nn.Module):
         info["action"] = act_0
 
         proprio_key = "proprio" if "proprio" in info else None
+
+        # move to device and prepare goal_info_dict
+        init_info_dict = {}
+        for k, v in info.items():
+            if torch.is_tensor(v):
+                # goal is the same across samples so we will only embed it once
+                init_info_dict[k] = info[k][0].unsqueeze(0)  # (B, 1, ...)
+        init_info_dict = self.encode(
+            init_info_dict,
+            pixels_key="pixels",
+            target="embed",
+            proprio_key=proprio_key,
+            action_key="action",
+        )
+        # repeat copy for each action candidate
+        info["embed"] = (
+            init_info_dict["embed"]
+            .expand(action_sequence.shape[0], *([-1] * (init_info_dict["embed"].ndim - 1)))
+            .clone()
+        )
+        # actually coompute the embedding of action for each candidate
+        info["embed"] = self.replace_action_in_embedding(info["embed"], action_sequence[:, :n_obs])
+        info["pixels_embed"] = (
+            init_info_dict["pixels_embed"]
+            .expand(action_sequence.shape[0], *([-1] * (init_info_dict["pixels_embed"].ndim - 1)))
+            .clone()
+        )
+        action_dim = init_info_dict["action_embed"].shape[-1]
+        info["action_embed"] = info["embed"][:, :n_obs, 0, -action_dim:]
+        if proprio_key is not None:
+            info["proprio_embed"] = (
+                init_info_dict["proprio_embed"]
+                .expand(action_sequence.shape[0], *([-1] * (init_info_dict["proprio_embed"].ndim - 1)))
+                .clone()
+            )
+        # number of step to predict
+        act_pred = action_sequence[:, n_obs:]
+        n_steps = act_pred.shape[1]
+
+        # == initial embedding
+        z = info["embed"]
+
+        for t in range(n_steps):
+            # predict the next state
+            pred_embed = self.predict(z[:, -self.history_size :])  # (B, hist_size, P, D)
+            new_embed = pred_embed[:, -1:, ...]  # (B, 1, P, D)
+
+            # add corresponding action to new embedding
+            new_action = act_pred[:, t : t + 1, :]  # (B, action_dim)
+            new_embed = self.replace_action_in_embedding(new_embed, new_action)
+
+            # append new embedding to the sequence
+            z = torch.cat([z, new_embed], dim=1)  # (B, n+t, P, D)
+
+        # predict the last state (n+t+1)
+        pred_embed = self.predict(z[:, -self.history_size :])  # (B, hist_size, P, D)
+        new_embed = pred_embed[:, -1:, ...]
+        z = torch.cat([z, new_embed], dim=1)  # (B, n+t+1, P, D)
+
+        # == update info dict with predicted embeddings
+        info["predicted_embedding"] = z
+        # get the dimension of each part of the embedding
+        action_dim = 0 if "action_embed" not in info else info["action_embed"].shape[-1]
+        proprio_dim = 0 if "proprio_embed" not in info else info["proprio_embed"].shape[-1]
+        splitted_embed = self.split_embedding(z, action_dim, proprio_dim)
+        info.update({f"predicted_{k}": v for k, v in splitted_embed.items()})
+
+        return info
         info = self.encode(
             info,
             pixels_key="pixels",
@@ -213,6 +281,65 @@ class DINOWM(torch.nn.Module):
     def get_cost(self, info_dict: dict, action_candidates: torch.Tensor):
         assert "action" in info_dict, "action key must be in info_dict"
         assert "pixels" in info_dict, "pixels key must be in info_dict"
+        # move to device and unsqueeze time
+        action_copy = action_candidates[0].clone()
+        info_dict_copy = info_dict.copy()
+        for k, v in info_dict.items():
+            if torch.is_tensor(v):
+                info_dict_copy[k] = v[0].to(next(self.parameters()).device)
+
+        # == get the goal embedding
+        proprio_key = "goal_proprio" if "goal_proprio" in info_dict else None
+
+        # move to device and prepare goal_info_dict
+        goal_info_dict = {}
+        for k, v in info_dict.items():
+            if torch.is_tensor(v):
+                # goal is the same across samples so we will only embed it once
+                goal_info_dict[k] = info_dict_copy[k][0].unsqueeze(0)  # (B, 1, ...)
+
+        goal_info_dict = self.encode(
+            goal_info_dict,
+            target="goal_embed",
+            pixels_key="goal",
+            proprio_key=proprio_key,
+            action_key=None,
+        )
+        info_dict_copy["goal_embed"] = goal_info_dict["goal_embed"].expand(
+            action_candidates.shape[1], *([-1] * (goal_info_dict["goal_embed"].ndim - 1))
+        )
+        info_dict_copy["pixels_goal_embed"] = goal_info_dict["pixels_goal_embed"].expand(
+            action_candidates.shape[1], *([-1] * (goal_info_dict["pixels_goal_embed"].ndim - 1))
+        )
+        if proprio_key is not None:
+            info_dict_copy["proprio_goal_embed"] = goal_info_dict["proprio_goal_embed"].expand(
+                action_candidates.shape[1], *([-1] * (goal_info_dict["proprio_goal_embed"].ndim - 1))
+            )
+
+        # == run world model
+        info_dict_copy = self.rollout(info_dict_copy, action_copy)
+
+        # == get the pixels cost
+        pixels_preds = info_dict_copy["predicted_pixels_embed"]  # (B, T, P, d)
+        pixels_goal = info_dict_copy["pixels_goal_embed"]
+        pixels_cost = F.mse_loss(pixels_preds[:, -1:], pixels_goal, reduction="none").mean(
+            dim=tuple(range(1, pixels_preds.ndim))
+        )
+
+        cost = pixels_cost
+
+        if proprio_key is not None:
+            # == get the proprio cost
+            proprio_preds = info_dict_copy["predicted_proprio_embed"]
+            proprio_goal = info_dict_copy["proprio_goal_embed"]
+
+            proprio_cost = F.mse_loss(proprio_preds[:, -1:], proprio_goal, reduction="none").mean(
+                dim=tuple(range(1, proprio_preds.ndim))
+            )
+            cost = cost + proprio_cost
+
+        cost = cost.unsqueeze(0)
+        return cost
 
         # move to device and unsqueeze time
         for k, v in info_dict.items():

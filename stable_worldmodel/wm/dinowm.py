@@ -202,10 +202,6 @@ class DINOWM(torch.nn.Module):
             and torch.equal(self._init_cached_info["id"], info["id"][:, 0])
             and torch.equal(self._init_cached_info["step_idx"], info["step_idx"][:, 0])
         ):
-            # init_info_dict = {
-            #     k: v.detach().clone().contiguous() if torch.is_tensor(v) else v
-            #     for k, v in self._init_cached_info.items()
-            # }
             init_info_dict = self._init_cached_info
         else:
             # prepare init_info_dict
@@ -223,30 +219,34 @@ class DINOWM(torch.nn.Module):
                 action_key="action",
             )
             init_info_dict = {k: v.detach() if torch.is_tensor(v) else v for k, v in init_info_dict.items()}
-            self._init_cached_info = init_info_dict
-        # repeat copy for each action candidate
-        info["embed"] = (
-            init_info_dict["embed"]
-            .unsqueeze(1)
-            .expand(-1, action_sequence.shape[1], *([-1] * (init_info_dict["embed"].ndim - 1)))
-            .clone()
-        )
-        info["pixels_embed"] = (
-            init_info_dict["pixels_embed"]
-            .unsqueeze(1)
-            .expand(-1, action_sequence.shape[1], *([-1] * (init_info_dict["pixels_embed"].ndim - 1)))
-        )
-        if proprio_key is not None:
-            info["proprio_embed"] = (
-                init_info_dict["proprio_embed"]
+            # repeat copy for each action candidate
+            init_info_dict["embed"] = (
+                init_info_dict["embed"]
                 .unsqueeze(1)
-                .expand(-1, action_sequence.shape[1], *([-1] * (init_info_dict["proprio_embed"].ndim - 1)))
+                .expand(-1, action_sequence.shape[1], *([-1] * (init_info_dict["embed"].ndim - 1)))
+                .clone()
             )
+            info["embed"] = init_info_dict["embed"]
+            init_info_dict["pixels_embed"] = (
+                init_info_dict["pixels_embed"]
+                .unsqueeze(1)
+                .expand(-1, action_sequence.shape[1], *([-1] * (init_info_dict["pixels_embed"].ndim - 1)))
+            )
+            info["pixels_embed"] = init_info_dict["pixels_embed"]
+            if proprio_key is not None:
+                init_info_dict["proprio_embed"] = (
+                    init_info_dict["proprio_embed"]
+                    .unsqueeze(1)
+                    .expand(-1, action_sequence.shape[1], *([-1] * (init_info_dict["proprio_embed"].ndim - 1)))
+                )
+                info["proprio_embed"] = init_info_dict["proprio_embed"]
+            self._init_cached_info = init_info_dict
+
         # actually compute the embedding of action for each candidate
         info["embed"] = self.replace_action_in_embedding(info["embed"], action_sequence[:, :, :n_obs])
         action_dim = init_info_dict["action_embed"].shape[-1]
         info["action_embed"] = info["embed"][:, :, :n_obs, 0, -action_dim:]
-        # number of step to predict
+        # number of steps to predict
         act_pred = action_sequence[:, :, n_obs:]
         n_steps = act_pred.shape[2]
 
@@ -254,28 +254,32 @@ class DINOWM(torch.nn.Module):
         z = info["embed"]
         B, N = z.shape[:2]
 
-        z_flat = rearrange(z, "b n ... -> (b n) ...")  # Fixed rearrange pattern
+        # we flatten B and N to process all candidates in a single batch in the predictor
+        z_flat = rearrange(z, "b n ... -> (b n) ...")
         z_flat = z_flat.contiguous()
         act_pred_flat = rearrange(act_pred, "b n ... -> (b n) ...")
 
+        # Allocate memory for predicted embeddings and we flatten B and N to process all candidates in a single batch in the predictor
+        pred_embed = torch.empty(B * N, n_obs + n_steps + 1, *z_flat.shape[2:], device=z_flat.device)
+        pred_embed[:, :n_obs] = z_flat
+
         for t in range(n_steps):
             # predict the next state
-            pred_embed = self.predict(z_flat[:, -self.history_size :])  # (B*N, hist_size, P, D)
-            new_embed = pred_embed[:, -1:, ...]  # (B*N, 1, P, D)
+            pred_embed[:, n_obs + t] = self.predict(pred_embed[:, max(0, n_obs + t - self.history_size) : n_obs + t])[
+                :, -1
+            ]  # (B*N, hist_size, P, D)
+            new_embed = pred_embed[:, n_obs + t : n_obs + t + 1]  # (B*N, 1, P, D)
 
             # add corresponding action to new embedding
             new_action = act_pred_flat[None, :, t : t + 1, :]  # (1, B*N, 1, action_dim)
             new_embed = self.replace_action_in_embedding(new_embed.unsqueeze(0), new_action)[0]
 
             # append new embedding to the sequence
-            z_flat = torch.cat([z_flat, new_embed], dim=1)  # (B*N, n+t, P, D)
-            z_flat = z_flat.contiguous()
+            pred_embed[:, n_obs + t] = new_embed[:, 0, :, :]
 
         # predict the last state (n+t+1)
-        pred_embed = self.predict(z_flat[:, -self.history_size :])  # (B, hist_size, P, D)
-        new_embed = pred_embed[:, -1:, ...]  # (B, N, 1, P, D)
-        z_flat = torch.cat([z_flat, new_embed], dim=1)  # (B*N, n+t+1, P, D)
-        z = rearrange(z_flat, "(b n) ... -> b n ...", b=B, n=N)
+        pred_embed[:, -1] = self.predict(pred_embed[:, -(self.history_size + 1) : -1])[:, -1]  # (B, hist_size, P, D)
+        z = rearrange(pred_embed, "(b n) ... -> b n ...", b=B, n=N)
         # == update info dict with predicted embeddings
         info["predicted_embedding"] = z
         # get the dimension of each part of the embedding
@@ -283,8 +287,6 @@ class DINOWM(torch.nn.Module):
         proprio_dim = 0 if "proprio_embed" not in info else info["proprio_embed"].shape[-1]
         splitted_embed = self.split_embedding(z, action_dim, proprio_dim)
         info.update({f"predicted_{k}": v for k, v in splitted_embed.items()})
-
-        # should we really keep all the z or just the last n_hist ones?
 
         return info
 

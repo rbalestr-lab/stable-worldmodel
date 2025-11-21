@@ -1,3 +1,6 @@
+import numpy as np
+
+
 if __name__ == "__main__":
     import datasets
     import stable_pretraining as spt
@@ -13,12 +16,12 @@ if __name__ == "__main__":
 
     world = swm.World(
         "swm/PushT-v1",
-        num_envs=5,
+        num_envs=10,
         image_shape=(224, 224),
         max_episode_steps=50,
         render_mode="rgb_array",
-        history_size=3,
-        frame_skip=5,
+        history_size=1,
+        frame_skip=1,
     )
 
     #########################
@@ -61,7 +64,7 @@ if __name__ == "__main__":
     ##  Evaluate  ##
     ################
 
-    model = swm.policy.AutoCostModel("pyro_test_epoch_40").to("cuda")
+    model = swm.policy.AutoCostModel("pyro_test_epoch_90").to("cuda")
     model = model.eval()
     model.requires_grad_(False)
     config = swm.PlanConfig(horizon=5, receding_horizon=5, action_block=5)
@@ -70,11 +73,21 @@ if __name__ == "__main__":
 
     world.set_policy(policy)
 
-    # results = world.evaluate(episodes=20, seed=42, dump_every=10)
+    world.set_policy(policy)
+    # sample 50 episodes idx
+
+    # fix random seed
+    np.random.seed(42)
+    episode_idx = np.random.choice(10000, size=10, replace=False).tolist()
+    start_steps = np.random.randint(0, 60, size=10).tolist()
+
+    print("Evaluating episodes: ", episode_idx)
+    print("Starting steps: ", start_steps)
+
     results = world.evaluate_from_dataset(
-        "pusht_expert_val",
-        start_steps=[25, 40, 5, 15, 30],
-        episodes_idx=[3, 7, 11, 1, 5],
+        "pusht_expert_train",
+        start_steps=start_steps,
+        episodes_idx=episode_idx,
         goal_offset_steps=25,
         eval_budget=25,
         callables={"_set_state": "state", "_set_goal_state": "goal_state"},

@@ -108,7 +108,12 @@ class CEMSolver:
                 candidates = candidates.unsqueeze(0)  # add traj dim
 
                 # evaluate the candidates
+                expanded_infos_copied = {k: v.clone() for k, v in expanded_infos.items()}
+                candidates_copied = candidates.clone()
+                cost_old = self.model.get_cost_old(expanded_infos_copied, candidates_copied)  # warm up CUDA kernel
                 cost = self.model.get_cost(expanded_infos, candidates)[0]
+                print(f" max cost diff: {(cost - cost_old).abs().max().item():.6f}")
+                input("press enter to continue...")
                 assert isinstance(cost, torch.Tensor), f"Expected cost to be a torch.Tensor, got {type(cost)}"
                 assert cost.ndim == 1 and cost.shape[0] == self.num_samples, (
                     f"Expected cost to be of shape (num_samples), got {cost.shape}"

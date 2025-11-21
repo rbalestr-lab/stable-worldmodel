@@ -110,8 +110,10 @@ class CEMSolver:
                 candidates[0] = mean[traj]
                 candidates = candidates.unsqueeze(0)  # add traj dim
 
+                current_info = expanded_infos.copy()
+
                 # evaluate the candidates
-                cost = self.model.get_cost(expanded_infos, candidates)[0]
+                cost = self.model.get_cost(current_info, candidates)[0]
                 assert isinstance(cost, torch.Tensor), f"Expected cost to be a torch.Tensor, got {type(cost)}"
                 assert cost.ndim == 1 and cost.shape[0] == self.num_samples, (
                     f"Expected cost to be of shape (num_samples), got {cost.shape}"

@@ -194,8 +194,6 @@ class DINOWM(torch.nn.Module):
         act_0 = action_sequence[:, :, :n_obs]
         info["action"] = act_0
 
-        proprio_key = "proprio" if "proprio" in info else None
-
         # check if we have already computed the initial embedding for this state
         if (
             hasattr(self, "_init_cached_info")
@@ -211,6 +209,7 @@ class DINOWM(torch.nn.Module):
                     # goal is the same across samples so we will only embed it once
                     init_info_dict[k] = info[k][:, 0]  # (B, 1, ...)
 
+            proprio_key = "proprio" if "proprio" in info else None
             init_info_dict = self.encode(
                 init_info_dict,
                 pixels_key="pixels",

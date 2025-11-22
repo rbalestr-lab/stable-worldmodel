@@ -7,7 +7,7 @@ from torch import distributed as dist
 from torch import nn
 
 
-class PYRO(torch.nn.Module):
+class SSLWM(torch.nn.Module):
     def __init__(
         self,
         encoder,
@@ -16,7 +16,6 @@ class PYRO(torch.nn.Module):
         decoder=None,
         history_size=3,
         num_pred=1,
-        device="cpu",
     ):
         super().__init__()
 
@@ -26,12 +25,6 @@ class PYRO(torch.nn.Module):
         self.decoder = decoder
         self.history_size = history_size
         self.num_pred = num_pred
-        self.device = device
-
-        # decoder_scale = 16  # from vqvae
-        # num_side_patches = 224 // decoder_scale
-        # self.encoder_image_size = num_side_patches * 14
-        # self.encoder_transform = transforms.Compose([transforms.Resize(self.encoder_image_size)])
 
     def encode(
         self,
@@ -46,11 +39,8 @@ class PYRO(torch.nn.Module):
 
         # == pixels embeddings
         pixels = info[pixels_key].float()  # (B, T, 3, H, W)
-        pixels = pixels.unsqueeze(1) if pixels.ndim == 4 else pixels
-
         B = pixels.shape[0]
         pixels = rearrange(pixels, "b t ... -> (b t) ...")
-        # pixels = self.encoder_transform(pixels)
         pixels_embed = self.backbone(pixels)
 
         if hasattr(pixels_embed, "last_hidden_state"):
@@ -223,7 +213,7 @@ class PYRO(torch.nn.Module):
         # move to device and unsqueeze time
         for k, v in info_dict.items():
             if torch.is_tensor(v):
-                info_dict[k] = v.to(self.device)
+                info_dict[k] = v.to(next(self.parameters()).device)
 
         # == non action embeddings keys
         emb_keys = [k for k in self.extra_encoders.keys() if k != "action"]
@@ -301,7 +291,6 @@ class CausalPredictor(nn.Module):
 
     def forward(self, x):  # x: (b, window_size * H/patch_size * W/patch_size, 384)
         b, n, _ = x.shape
-        print(x.shape)
         x = x + self.pos_embedding[:, :n]
         x = self.dropout(x)
         x = self.transformer(x)

@@ -7,7 +7,7 @@ from torch import distributed as dist
 from torch import nn
 
 
-class SSLWM(torch.nn.Module):
+class PYRO(torch.nn.Module):
     def __init__(
         self,
         encoder,

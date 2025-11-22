@@ -250,6 +250,7 @@ if __name__ == "__main__":
     model.proprio_encoder.load_state_dict(ckpt["proprio_encoder"])
 
     model = model.to("cuda")
+    model = model.eval()
 
     print(ckpt.keys())
 

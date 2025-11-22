@@ -19,7 +19,7 @@ trainer:
   precision: 16-mixed
 
 batch_size: 32
-num_workers: 8
+num_workers: 16
 train_split: 0.9
 seed: 42
 
@@ -35,8 +35,8 @@ pyro:
   history_size: 3
   num_preds: 1
   encoding: # key: target dim
-    action: 10
     proprio: 10
+    action: 10
 
 predictor:
   depth: 6

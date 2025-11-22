@@ -258,12 +258,14 @@ def get_world_model(cfg):
         # Compute pixel reconstruction loss
         pixels_dim = batch["pixels_embed"].shape[-1]
         pixels_loss = F.mse_loss(pred_embedding[..., :pixels_dim], target_embedding[..., :pixels_dim].detach())
-        loss = pixels_loss
         batch["pixels_loss"] = pixels_loss
 
         start = pixels_dim
+        action_dim_range = [0, 0]
         for key in self.model.extra_encoders.keys():
+            emb_dim = batch[f"{key}_embed"].shape[-1]
             if key == "action":
+                action_dim_range = [start, start + emb_dim]
                 continue  # skip action encoding loss
 
             emb_dim = batch[f"{key}_embed"].shape[-1]
@@ -275,12 +277,21 @@ def get_world_model(cfg):
                     pred_embedding[..., start : start + emb_dim],
                     target_embedding[..., start : start + emb_dim].detach(),
                 )
-                loss = loss + extra_loss
+                # loss = loss + extra_loss
                 batch[f"{key}_loss"] = extra_loss
 
             start += emb_dim
 
-        batch["loss"] = loss
+        # Total loss
+        actionless_pred = torch.cat(
+            [pred_embedding[..., : action_dim_range[0]], pred_embedding[..., action_dim_range[1] :]], dim=-1
+        )
+
+        actionless_target = torch.cat(
+            [target_embedding[..., : action_dim_range[0]], target_embedding[..., action_dim_range[1] :]], dim=-1
+        )
+
+        batch["loss"] = F.mse_loss(actionless_pred, actionless_target.detach())
 
         # Log all losses
         prefix = "train/" if self.training else "val/"
@@ -315,12 +326,9 @@ def get_world_model(cfg):
     world_model = swm.wm.PYRO(
         encoder=spt.backbone.EvalOnly(encoder),
         predictor=predictor,
-        # action_encoder=action_encoder,
-        # proprio_encoder=proprio_encoder,
         extra_encoders=extra_encoders,
         history_size=cfg.pyro.history_size,
         num_pred=cfg.pyro.num_preds,
-        device="cuda",
     )
 
     # Wrap in stable_spt Module with separate optimizers for each component
@@ -379,7 +387,7 @@ class ModelObjectCallBack(Callback):
                 logging.info(f"Saved world model object to {output_path}")
             # Additionally, save at final epoch
             if (trainer.current_epoch + 1) == trainer.max_epochs:
-                final_path = self.dirpath / f"{self.filename}.ckpt"
+                final_path = self.dirpath / f"{self.filename}_object.ckpt"
                 torch.save(pl_module, final_path)
                 logging.info(f"Saved final world model object to {final_path}")
 
@@ -396,8 +404,11 @@ def run(cfg):
     world_model = get_world_model(cfg)
 
     cache_dir = swm.data.get_cache_dir()
-    dump_object_callback = ModelObjectCallBack(dirpath=cache_dir, filename=cfg.output_model_name, epoch_interval=10)
-    # checkpoint_callback = ModelCheckpoint(dirpath=cache_dir, filename=f"{cfg.output_model_name}_weights")
+    dump_object_callback = ModelObjectCallBack(
+        dirpath=cache_dir,
+        filename=cfg.output_model_name,
+        epoch_interval=10,
+    )
 
     trainer = pl.Trainer(
         **cfg.trainer,

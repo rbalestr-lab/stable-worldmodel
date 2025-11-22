@@ -61,7 +61,7 @@ if __name__ == "__main__":
     ##  Evaluate  ##
     ################
 
-    model = swm.policy.AutoCostModel("dinowm_reprod_epoch_10").to("cuda")
+    model = swm.policy.AutoCostModel("dinowm_reprod_epoch_20").to("cuda")
     model = model.eval()
     model.requires_grad_(False)
 
@@ -73,7 +73,7 @@ if __name__ == "__main__":
     # sample 50 episodes idx
 
     # fix random seed
-    np.random.seed(52)  # 42
+    np.random.seed(42)  # 52
     episode_idx = np.random.choice(10000, size=10, replace=False).tolist()
     start_steps = np.random.randint(0, 60, size=10).tolist()
 

@@ -58,11 +58,7 @@ def get_data(cfg):
 
     # Apply transforms to all steps
     transform = spt.data.transforms.Compose(
-        *[
-            get_img_pipeline(f"{col}.{i}", f"{col}.{i}", img_size)
-            for col in ["pixels", "goal"]
-            for i in range(cfg.n_steps)
-        ],
+        *[get_img_pipeline(f"{col}.{i}", f"{col}.{i}", img_size) for col in ["pixels"] for i in range(cfg.n_steps)],
         spt.data.transforms.WrapTorchTransform(
             norm_action_transform,
             source="action",
@@ -88,6 +84,7 @@ def get_data(cfg):
         num_workers=cfg.num_workers,
         drop_last=True,
         persistent_workers=True,
+        prefetch_factor=2,
         pin_memory=True,
         shuffle=True,
         generator=rnd_gen,
@@ -131,7 +128,6 @@ def get_world_model(cfg):
         # Compute pixel reconstruction loss
         pixels_dim = batch["pixels_embed"].shape[-1]
         pixels_loss = F.mse_loss(pred_embedding[..., :pixels_dim], target_embedding[..., :pixels_dim].detach())
-        loss = pixels_loss
         batch["pixels_loss"] = pixels_loss
 
         # Add proprioception loss if available
@@ -141,10 +137,12 @@ def get_world_model(cfg):
                 pred_embedding[..., pixels_dim : pixels_dim + proprio_dim],
                 target_embedding[..., pixels_dim : pixels_dim + proprio_dim].detach(),
             )
-            loss = loss + proprio_loss
             batch["proprio_loss"] = proprio_loss
 
-        batch["loss"] = loss
+        batch["loss"] = F.mse_loss(
+            pred_embedding[..., : pixels_dim + proprio_dim],
+            target_embedding[..., : pixels_dim + proprio_dim].detach(),
+        )
 
         # Log all losses
         prefix = "train/" if self.training else "val/"

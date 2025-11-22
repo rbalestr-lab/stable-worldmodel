@@ -217,7 +217,7 @@ class DINOWM(torch.nn.Module):
         # move to device and unsqueeze time
         for k, v in info_dict.items():
             if torch.is_tensor(v):
-                info_dict[k] = v.to(self.device)
+                info_dict[k] = v.to(next(self.parameters()).device)
 
         # == get the goal embedding
         proprio_key = "goal_proprio" if "goal_proprio" in info_dict else None

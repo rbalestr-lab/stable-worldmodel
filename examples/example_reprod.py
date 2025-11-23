@@ -61,7 +61,7 @@ if __name__ == "__main__":
     ##  Evaluate  ##
     ################
 
-    model = swm.policy.AutoCostModel("dinowm_reprod_epoch_20").to("cuda")
+    model = swm.policy.AutoCostModel("dinowm_reprod_epoch_40").to("cuda")
     model = model.eval()
     model.requires_grad_(False)
 

@@ -1,6 +1,3 @@
-import numpy as np
-
-
 if __name__ == "__main__":
     import datasets
     import stable_pretraining as spt
@@ -18,10 +15,8 @@ if __name__ == "__main__":
         "swm/PushT-v1",
         num_envs=10,
         image_shape=(224, 224),
-        max_episode_steps=50,
+        max_episode_steps=200,
         render_mode="rgb_array",
-        history_size=1,
-        frame_skip=1,
     )
 
     #########################
@@ -45,6 +40,8 @@ if __name__ == "__main__":
         "goal": img_transform(),
     }
 
+    import numpy as np
+
     dataset_path = swm.data.get_cache_dir() / "pusht_expert_train"
     dataset = datasets.load_from_disk(dataset_path).with_format("numpy")
 
@@ -64,20 +61,19 @@ if __name__ == "__main__":
     ##  Evaluate  ##
     ################
 
-    model = swm.policy.AutoCostModel("pyro_test_epoch_90").to("cuda")
+    model = swm.policy.AutoCostModel("pyro_test_epoch_10").to("cuda")
     model = model.eval()
     model.requires_grad_(False)
+
     config = swm.PlanConfig(horizon=5, receding_horizon=5, action_block=5)
     solver = swm.solver.CEMSolver(model, num_samples=300, var_scale=1.0, n_steps=30, topk=30, device="cuda")
     policy = swm.policy.WorldModelPolicy(solver=solver, config=config, process=process, transform=transform)
 
     world.set_policy(policy)
-
-    world.set_policy(policy)
     # sample 50 episodes idx
 
     # fix random seed
-    np.random.seed(42)
+    np.random.seed(42)  # 52
     episode_idx = np.random.choice(10000, size=10, replace=False).tolist()
     start_steps = np.random.randint(0, 60, size=10).tolist()
 

@@ -16,7 +16,7 @@ class PYRO(torch.nn.Module):
         decoder=None,
         history_size=3,
         num_pred=1,
-        device="cpu",
+        interpolate_pos_encoding=True,
     ):
         super().__init__()
 
@@ -26,38 +26,35 @@ class PYRO(torch.nn.Module):
         self.decoder = decoder
         self.history_size = history_size
         self.num_pred = num_pred
-        self.device = device
 
-        # decoder_scale = 16  # from vqvae
-        # num_side_patches = 224 // decoder_scale
-        # self.encoder_image_size = num_side_patches * 14
-        # self.encoder_transform = transforms.Compose([transforms.Resize(self.encoder_image_size)])
+        self.interpolate_pos_encoding = interpolate_pos_encoding
 
     def encode(
         self,
         info,
         pixels_key="pixels",
         emb_keys=None,
+        prefix=None,
         target="embed",
     ):
         assert target not in info, f"{target} key already in info_dict"
 
         emb_keys = emb_keys or self.extra_encoders.keys()
+        prefix = prefix or ""
 
         # == pixels embeddings
         pixels = info[pixels_key].float()  # (B, T, 3, H, W)
-        pixels = pixels.unsqueeze(1) if pixels.ndim == 4 else pixels
-
         B = pixels.shape[0]
         pixels = rearrange(pixels, "b t ... -> (b t) ...")
-        # pixels = self.encoder_transform(pixels)
-        pixels_embed = self.backbone(pixels)
+
+        kwargs = {"interpolate_pos_encoding": True} if self.interpolate_pos_encoding else {}
+        pixels_embed = self.backbone(pixels, **kwargs)
 
         if hasattr(pixels_embed, "last_hidden_state"):
             pixels_embed = pixels_embed.last_hidden_state
             pixels_embed = pixels_embed[:, 1:, :]  # drop cls token
         else:
-            pixels_embed = pixels_embed.unsqueeze(1)  # (B*T, 1, emb_dim)
+            pixels_embed = pixels_embed.logits.unsqueeze(1)  # (B*T, 1, emb_dim)
 
         pixels_embed = rearrange(pixels_embed.detach(), "(b t) p d -> b t p d", b=B)
 
@@ -68,7 +65,7 @@ class PYRO(torch.nn.Module):
 
         for key in emb_keys:
             extr_enc = self.extra_encoders[key]
-            extra_input = info[key].float()  # (B, T, dim)
+            extra_input = info[f"{prefix}{key}"].float()  # (B, T, dim)
             extra_embed = extr_enc(extra_input)  # (B, T, dim) -> (B, T, emb_dim)
             info[f"{key}_{target}"] = extra_embed
 
@@ -136,12 +133,14 @@ class PYRO(torch.nn.Module):
         act_tiled = repeat(z_act.unsqueeze(2), "b t 1 a -> b t p a", p=n_patches)
         # z (B, T, P, d) with d = dim + extra_dims
         # determine where action starts in the embedding
-        start = 0
+        extra_dim = sum(encoder.emb_dim for encoder in self.extra_encoders.values())
+        pixel_dim = embedding.shape[-1] - extra_dim
+
+        start = pixel_dim
         for key, encoder in self.extra_encoders.items():
             if key == "action":
                 break
-            start += encoder.embedding_dim
-
+            start += encoder.emb_dim
         embedding[..., start : start + action_dim] = act_tiled
 
         return embedding
@@ -208,7 +207,6 @@ class PYRO(torch.nn.Module):
         for key in self.extra_encoders:
             if f"{key}_embed" not in info:
                 raise ValueError(f"{key}_embed not in info dict")
-
             extra_dims.append(info[f"{key}_embed"].shape[-1])
 
         splitted_embed = self.split_embedding(z, extra_dims)
@@ -223,16 +221,16 @@ class PYRO(torch.nn.Module):
         # move to device and unsqueeze time
         for k, v in info_dict.items():
             if torch.is_tensor(v):
-                info_dict[k] = v.to(self.device)
+                info_dict[k] = v.to(next(self.parameters()).device)
 
         # == non action embeddings keys
         emb_keys = [k for k in self.extra_encoders.keys() if k != "action"]
-
         # == get the goal embedding
         info_dict = self.encode(
             info_dict,
             target="goal_embed",
             pixels_key="goal",
+            prefix="goal_",
             emb_keys=emb_keys,
         )
 
@@ -301,7 +299,6 @@ class CausalPredictor(nn.Module):
 
     def forward(self, x):  # x: (b, window_size * H/patch_size * W/patch_size, 384)
         b, n, _ = x.shape
-        print(x.shape)
         x = x + self.pos_embedding[:, :n]
         x = self.dropout(x)
         x = self.transformer(x)

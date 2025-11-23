@@ -35,7 +35,7 @@ wandb:
 
 dataset_name: pusht_expert_train
 # cache_dir: null #${oc.env:SLURM_TMPDIR, null}
-output_model_name: dinowm
+output_model_name: dinowm_reprod
 
 trainer:
   max_epochs: 100
@@ -45,7 +45,7 @@ trainer:
   precision: 16-mixed
 
 batch_size: 32
-num_workers: 8
+num_workers: 16
 train_split: 0.9
 seed: 42
 

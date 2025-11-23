@@ -109,18 +109,16 @@ def get_encoder(cfg):
             "model_class": AutoModelForImageClassification,
             "embedding_attr": lambda model: model.config.hidden_sizes[-1],
             "post_init": lambda model: setattr(model.classifier, "1", torch.nn.Identity()),
-        },
-        "clip": {
-            "prefix": "timm/vit_base_patch32_clip_",
-            "embedding_attr": lambda model: model.config.num_features,
+            "interpolate_pos_encoding": False,
         },
         "vit": {"prefix": "google/vit-"},
         "dino": {"prefix": "facebook/dino-"},
         "dinov2": {"prefix": "facebook/dinov2-"},
         "dinov3": {"prefix": "facebook/dinov3-"},  # TODO handle resnet base in dinov3
         "mae": {"prefix": "facebook/vit-mae-"},
-        "ijepa": {"prefix": "facebook/ijepa-"},
+        "ijepa": {"prefix": "facebook/ijepa"},
         "vjepa2": {"prefix": "facebook/vjepa2-vit"},
+        "siglip2": {"prefix": "google/siglip2-"},
     }
 
     # Find matching encoder
@@ -138,6 +136,10 @@ def get_encoder(cfg):
     # Load model
     backbone = config.get("model_class", AutoModel).from_pretrained(cfg.backbone)
 
+    # CLIP style model
+    if hasattr(backbone, "vision_model"):
+        backbone = backbone.vision_model
+
     # Post-initialization if needed (e.g., ResNet)
     if "post_init" in config:
         config["post_init"](backbone)
@@ -149,7 +151,9 @@ def get_encoder(cfg):
     is_cnn = encoder_type == "resnet"
     num_patches = 1 if is_cnn else (cfg.image_size // cfg.patch_size) ** 2
 
-    return backbone, embedding_dim, num_patches
+    interp_pos_enc = config.get("interpolate_pos_encoding", True)
+
+    return backbone, embedding_dim, num_patches, interp_pos_enc
 
 
 DINO_PATCH_SIZE = 14  # DINO encoder uses 14x14 patches
@@ -300,12 +304,15 @@ def get_world_model(cfg):
 
         return batch
 
-    encoder, embedding_dim, num_patches = get_encoder(cfg)
+    encoder, embedding_dim, num_patches, interp_pos_enc = get_encoder(cfg)
     embedding_dim += sum(emb_dim for emb_dim in cfg.pyro.get("encoding", {}).values())  # add all extra dims
 
     logging.info(f"Patches: {num_patches}, Embedding dim: {embedding_dim}")
 
     # Build causal predictor (transformer that predicts next latent states)
+
+    print(">>>> DIM PREDICTOR:", embedding_dim)
+
     predictor = swm.wm.dinowm.CausalPredictor(
         num_patches=num_patches,
         num_frames=cfg.pyro.history_size,
@@ -329,6 +336,7 @@ def get_world_model(cfg):
         extra_encoders=extra_encoders,
         history_size=cfg.pyro.history_size,
         num_pred=cfg.pyro.num_preds,
+        interpolate_pos_encoding=interp_pos_enc,
     )
 
     # Wrap in stable_spt Module with separate optimizers for each component

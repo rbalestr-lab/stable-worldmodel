@@ -9,7 +9,7 @@ wandb:
 
 dataset_name: pusht_expert_train
 cache_dir: null #${oc.env:SLURM_TMPDIR, null}
-output_model_name: pyro_test
+output_model_name: pyro_train
 
 trainer:
   max_epochs: 100

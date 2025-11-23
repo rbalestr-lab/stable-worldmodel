@@ -84,5 +84,5 @@ python experiments/wm_training/run.py backbone=facebook/vit-mae-base output_mode
 python experiments/wm_training/run.py backbone=facebook/ijepa_vith14_22k output_model_name=ijepa_vith14_22k
 
 # CLIP
-python experiments/wm_training/run.py backbone=timm/vit_base_patch32_clip_224.metaclip_400m output_model_name=metaclip_vit_base
+python experiments/wm_training/run.py backbone=google/siglip2-base-patch16-224 output_model_name=siglip2_base16_224
 ```

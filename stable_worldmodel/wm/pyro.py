@@ -16,6 +16,7 @@ class PYRO(torch.nn.Module):
         decoder=None,
         history_size=3,
         num_pred=1,
+        interpolate_pos_encoding=True,
     ):
         super().__init__()
 
@@ -25,6 +26,8 @@ class PYRO(torch.nn.Module):
         self.decoder = decoder
         self.history_size = history_size
         self.num_pred = num_pred
+
+        self.interpolate_pos_encoding = interpolate_pos_encoding
 
     def encode(
         self,
@@ -43,13 +46,15 @@ class PYRO(torch.nn.Module):
         pixels = info[pixels_key].float()  # (B, T, 3, H, W)
         B = pixels.shape[0]
         pixels = rearrange(pixels, "b t ... -> (b t) ...")
-        pixels_embed = self.backbone(pixels)
+
+        kwargs = {"interpolate_pos_encoding": True} if self.interpolate_pos_encoding else {}
+        pixels_embed = self.backbone(pixels, **kwargs)
 
         if hasattr(pixels_embed, "last_hidden_state"):
             pixels_embed = pixels_embed.last_hidden_state
             pixels_embed = pixels_embed[:, 1:, :]  # drop cls token
         else:
-            pixels_embed = pixels_embed.unsqueeze(1)  # (B*T, 1, emb_dim)
+            pixels_embed = pixels_embed.logits.unsqueeze(1)  # (B*T, 1, emb_dim)
 
         pixels_embed = rearrange(pixels_embed.detach(), "(b t) p d -> b t p d", b=B)
 

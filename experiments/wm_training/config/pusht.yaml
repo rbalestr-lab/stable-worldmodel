@@ -1,5 +1,6 @@
 defaults:
   - launcher: local
+  - backbones: dinov2_small
   - _self_
 
 wandb:
@@ -9,7 +10,7 @@ wandb:
 
 dataset_name: pusht_expert_train
 cache_dir: null #${oc.env:SLURM_TMPDIR, null}
-output_model_name: pyro_train
+#output_model_name: pyro_train
 
 trainer:
   max_epochs: 100
@@ -26,7 +27,7 @@ seed: 42
 image_size: 224
 patch_size: 16
 
-backbone: facebook/dinov2-small
+#backbone: facebook/dinov2-small
 
 n_steps: ${eval:'${pyro.num_preds} + ${pyro.history_size}'}
 frameskip: 5

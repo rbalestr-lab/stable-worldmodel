@@ -14,8 +14,8 @@ class GDSolver(torch.nn.Module):
         model: Costable,
         n_steps: int,
         batch_size: int | None = None,
-        action_noise=0.0,
-        num_samples=1,
+        action_noise: float = 0.0,
+        num_samples: int = 1,
         device="cpu",
         seed: int = 1234,
     ):

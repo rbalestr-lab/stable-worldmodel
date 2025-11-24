@@ -375,36 +375,7 @@ task selection, variation settings). Defaults to None.</p></li>
 <dl class="py method">
 <dt class="sig sig-object py" id="stable_worldmodel.world.World.evaluate_from_dataset">
 <span class="sig-name descname"><span class="pre">evaluate_from_dataset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dataset_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">episodes_idx</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start_steps</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">goal_offset_steps</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">eval_budget</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cache_dir</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">callables</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/stable_worldmodel/world/#World.evaluate_from_dataset"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.world.World.evaluate_from_dataset" title="Link to this definition" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#stable_worldmodel.world.World.evaluate_from_dataset'"><svg height="1em" viewbox="0 0 24 24" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"></path></svg></a></dt>
-<dd><p>Evaluate the current policy similarly to <cite>evaluate</cite> but on goals sampled from a dataset.
-Note: it only supports datasets generated from stable-worldmodel.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>dataset_name</strong> (<em>str</em>) – Name of the dataset to load (must exist in cache_dir).</p></li>
-<li><p><strong>episodes_idx</strong> (<em>int</em><em> or </em><em>list</em><em> of </em><em>int</em>) – Index or list of indices of the episodes to evaluate from the dataset.</p></li>
-<li><p><strong>start_steps</strong> (<em>int</em><em> or </em><em>list</em><em> of </em><em>int</em>) – Step index or list of step indices to  from which to start the evaluation in each episode.</p></li>
-<li><p><strong>goal_offset_steps</strong> (<em>int</em>) – Number of steps ahead of start_steps to sample the goal from the dataset.</p></li>
-<li><p><strong>eval_budget</strong> (<em>int</em>) – Number of steps to actually run in the environment.</p></li>
-<li><p><strong>cache_dir</strong> (<em>str</em><em> or </em><em>Path</em><em>, </em><em>optional</em>) – Root directory where dataset is stored.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p><dl class="simple">
-<dt>Dictionary containing evaluation results:</dt><dd><ul class="simple">
-<li><p>’success_rate’ (float): Percentage of successful episodes (0-100)</p></li>
-<li><p>’episode_successes’ (ndarray): Boolean array of episode outcomes</p></li>
-<li><p>’seeds’ (ndarray): Random seeds used for each episode</p></li>
-<li><p>Additional keys from eval_keys if specified (ndarray)</p></li>
-</ul>
-</dd>
-</dl>
-</p>
-</dd>
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>dict</p>
-</dd>
-</dl>
-</dd></dl>
+<dd></dd></dl>
 <dl class="py property">
 <dt class="sig sig-object py" id="stable_worldmodel.world.World.num_envs">
 <em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">num_envs</span></span><a class="headerlink" href="#stable_worldmodel.world.World.num_envs" title="Link to this definition" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#stable_worldmodel.world.World.num_envs'"><svg height="1em" viewbox="0 0 24 24" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"></path></svg></a></dt>

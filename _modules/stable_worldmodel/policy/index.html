@@ -460,23 +460,24 @@
 </span><span id="line-195">    <span class="n">path</span> <span class="o">=</span> <span class="n">cache_dir</span> <span class="o">/</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">model_name</span><span class="si">}</span><span class="s2">_object.ckpt&quot;</span>
 </span><span id="line-196">    <span class="k">assert</span> <span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(),</span> <span class="sa">f</span><span class="s2">&quot;World model named </span><span class="si">{</span><span class="n">model_name</span><span class="si">}</span><span class="s2"> not found. Should launch pretraining first.&quot;</span>
 </span><span id="line-197">
-</span><span id="line-198">    <span class="nb">print</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
-</span><span id="line-199">    <span class="n">spt_module</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">weights_only</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
-</span><span id="line-200">
-</span><span id="line-201">    <span class="k">def</span><span class="w"> </span><span class="nf">scan_module</span><span class="p">(</span><span class="n">module</span><span class="p">):</span>
-</span><span id="line-202">        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">module</span><span class="p">,</span> <span class="s2">&quot;get_cost&quot;</span><span class="p">):</span>
-</span><span id="line-203">            <span class="k">return</span> <span class="n">module</span>
-</span><span id="line-204">        <span class="k">for</span> <span class="n">child</span> <span class="ow">in</span> <span class="n">module</span><span class="o">.</span><span class="n">children</span><span class="p">():</span>
-</span><span id="line-205">            <span class="n">result</span> <span class="o">=</span> <span class="n">scan_module</span><span class="p">(</span><span class="n">child</span><span class="p">)</span>
-</span><span id="line-206">            <span class="k">if</span> <span class="n">result</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-</span><span id="line-207">                <span class="k">return</span> <span class="n">result</span>
-</span><span id="line-208">        <span class="k">return</span> <span class="kc">None</span>
-</span><span id="line-209">
-</span><span id="line-210">    <span class="n">result</span> <span class="o">=</span> <span class="n">scan_module</span><span class="p">(</span><span class="n">spt_module</span><span class="p">)</span>
-</span><span id="line-211">    <span class="k">if</span> <span class="n">result</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-</span><span id="line-212">        <span class="k">return</span> <span class="n">result</span>
-</span><span id="line-213">
-</span><span id="line-214">    <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;No cost model found in the loaded world model.&quot;</span><span class="p">)</span></div>
+</span><span id="line-198">    <span class="n">spt_module</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">weights_only</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+</span><span id="line-199">
+</span><span id="line-200">    <span class="k">def</span><span class="w"> </span><span class="nf">scan_module</span><span class="p">(</span><span class="n">module</span><span class="p">):</span>
+</span><span id="line-201">        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">module</span><span class="p">,</span> <span class="s2">&quot;get_cost&quot;</span><span class="p">):</span>
+</span><span id="line-202">            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">module</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
+</span><span id="line-203">                <span class="n">module</span> <span class="o">=</span> <span class="n">module</span><span class="o">.</span><span class="n">eval</span><span class="p">()</span>
+</span><span id="line-204">            <span class="k">return</span> <span class="n">module</span>
+</span><span id="line-205">        <span class="k">for</span> <span class="n">child</span> <span class="ow">in</span> <span class="n">module</span><span class="o">.</span><span class="n">children</span><span class="p">():</span>
+</span><span id="line-206">            <span class="n">result</span> <span class="o">=</span> <span class="n">scan_module</span><span class="p">(</span><span class="n">child</span><span class="p">)</span>
+</span><span id="line-207">            <span class="k">if</span> <span class="n">result</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+</span><span id="line-208">                <span class="k">return</span> <span class="n">result</span>
+</span><span id="line-209">        <span class="k">return</span> <span class="kc">None</span>
+</span><span id="line-210">
+</span><span id="line-211">    <span class="n">result</span> <span class="o">=</span> <span class="n">scan_module</span><span class="p">(</span><span class="n">spt_module</span><span class="p">)</span>
+</span><span id="line-212">    <span class="k">if</span> <span class="n">result</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+</span><span id="line-213">        <span class="k">return</span> <span class="n">result</span>
+</span><span id="line-214">
+</span><span id="line-215">    <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;No cost model found in the loaded world model.&quot;</span><span class="p">)</span></div>
 
 </span></code></pre></div>
     </div></div>

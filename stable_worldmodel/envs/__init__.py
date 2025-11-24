@@ -40,3 +40,5 @@ register(
     id="swm/OGBCube-v0",
     entry_point="stable_worldmodel.envs.ogbench_cube:CubeEnv",
 )
+
+# TODO: register Robocasa

@@ -25,6 +25,7 @@ import stable_pretraining as spt
 import torch
 from datasets import load_from_disk
 from rich import print
+from torchcodec import VideoDecoder
 
 import stable_worldmodel as swm
 
@@ -54,6 +55,7 @@ class StepsDataset(spt.data.HFDataset):
         num_steps=2,
         frameskip=1,
         cache_dir=None,
+        from_videos=False,
         **kwargs,
     ):
         """Initialize the StepsDataset.
@@ -64,6 +66,7 @@ class StepsDataset(spt.data.HFDataset):
             num_steps (int, optional): Number of consecutive steps per sample. Defaults to 2.
             frameskip (int, optional): Number of steps between sampled frames. Defaults to 1.
             cache_dir (str, optional): Cache directory path. Defaults to None (uses default).
+            from_videos (bool, optional): Whether images are stored as video files. Defaults to False.
             **kwargs: Additional keyword arguments passed to parent class.
 
         Raises:
@@ -99,7 +102,8 @@ class StepsDataset(spt.data.HFDataset):
         # map from sample to their episode
         self.idx_to_ep = np.searchsorted(self.cum_slices, torch.arange(len(self)), side="right") - 1
 
-        self.img_cols = self.infer_img_path_columns()
+        self.from_videos = from_videos
+        self.img_cols = self.infer_img_path_columns(from_videos=self.from_videos)
 
     def get_episode_slice(self, episode_idx, episode_indices):
         """Get dataset indices for a specific episode.
@@ -152,11 +156,23 @@ class StepsDataset(spt.data.HFDataset):
             if k == "action":
                 continue
 
-            v = v[:: self.frameskip]
-            steps[k] = v
+            if self.from_videos:
+                if k not in self.img_cols:
+                    v = v[:: self.frameskip]
+                    steps[k] = v
+                else:
+                    # for images, we load via VideoDecoder
+                    video_path = v[0]  # all paths are the same for the episode
+                    decoder = VideoDecoder(self.data_dir / video_path, seek_mode="exact")  # TODO test other seekmode
+                    steps[k] = decoder[start : stop : self.frameskip]
+                    steps[k] = steps[k].float() / 255.0  # normalize to [0, 1]
+                    steps[k] = list(torch.unbind(steps[k]))  # transform are applied to frames separately
+            else:
+                v = v[:: self.frameskip]
+                steps[k] = v
 
-            if k in self.img_cols:
-                steps[k] = [PIL.Image.open(self.data_dir / img_path) for img_path in v]
+                if k in self.img_cols:
+                    steps[k] = [PIL.Image.open(self.data_dir / img_path) for img_path in v]
 
         if self.transform:
             steps = self.transform(steps)
@@ -170,7 +186,7 @@ class StepsDataset(spt.data.HFDataset):
 
         return steps
 
-    def infer_img_path_columns(self):
+    def infer_img_path_columns(self, from_videos=False):
         """Infer which dataset columns contain image file paths.
 
         Checks the first dataset element to identify string columns with
@@ -179,7 +195,7 @@ class StepsDataset(spt.data.HFDataset):
         Returns:
             set: Set of column names containing image file paths.
         """
-        IMG_EXTENSIONS = (".jpeg", ".png", ".jpg")
+        IMG_EXTENSIONS = "mp4" if from_videos else (".jpeg", ".png", ".jpg")
 
         img_cols = set()
         first_elem = self.dataset[0]

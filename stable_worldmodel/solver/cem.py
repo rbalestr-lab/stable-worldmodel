@@ -79,7 +79,7 @@ class CEMSolver:
         return mean, var
 
     @torch.inference_mode()
-    def solve(self, info_dict, init_action=None):
+    def solve(self, info_dict, init_action=None) -> dict:
         start_time = time.time()
         outputs = {
             "costs": [],

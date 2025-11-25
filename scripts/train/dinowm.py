@@ -161,7 +161,7 @@ def get_world_model(cfg):
     logging.info(f"Patches: {num_patches}, Embedding dim: {embedding_dim}")
 
     # Build causal predictor (transformer that predicts next latent states)
-    predictor = swm.wm.dinowm.CausalPredictor(
+    predictor = swm.wm.predictor.FastPredictor(
         num_patches=num_patches,
         num_frames=cfg.dinowm.history_size,
         dim=embedding_dim,
@@ -170,8 +170,8 @@ def get_world_model(cfg):
 
     # Build action and proprioception encoders
     effective_act_dim = cfg.frameskip * cfg.dinowm.action_dim
-    action_encoder = swm.wm.dinowm.Embedder(in_chans=effective_act_dim, emb_dim=cfg.dinowm.action_embed_dim)
-    proprio_encoder = swm.wm.dinowm.Embedder(in_chans=cfg.dinowm.proprio_dim, emb_dim=cfg.dinowm.proprio_embed_dim)
+    action_encoder = swm.wm.module.Embedder(in_chans=effective_act_dim, emb_dim=cfg.dinowm.action_embed_dim)
+    proprio_encoder = swm.wm.module.Embedder(in_chans=cfg.dinowm.proprio_dim, emb_dim=cfg.dinowm.proprio_embed_dim)
 
     logging.info(f"Action dim: {effective_act_dim}, Proprio dim: {cfg.dinowm.proprio_dim}")
 

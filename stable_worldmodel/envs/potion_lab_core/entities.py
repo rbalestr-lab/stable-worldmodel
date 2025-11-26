@@ -14,7 +14,7 @@ from enum import Enum
 import numpy as np
 import pymunk
 
-from .game_logic import PhysicsConfig
+from .constants import ESSENCE_TYPES, PhysicsConfig
 
 
 # ============================================================================
@@ -61,19 +61,6 @@ class EssenceState:
     def apply_refinement_to_all(self):
         """Apply refinement to all essence components."""
         self.refined_per_essence = [True] * len(self.essence_types)
-
-
-# Essence type definitions (ID -> (Name, Color))
-ESSENCE_TYPES = {
-    1: ("Fire", (231, 76, 60)),  # Red
-    2: ("Water", (52, 152, 219)),  # Blue
-    3: ("Earth", (46, 204, 113)),  # Green
-    4: ("Air", (241, 196, 15)),  # Yellow
-    5: ("Light", (236, 240, 241)),  # White
-    6: ("Shadow", (52, 73, 94)),  # Dark Gray
-    7: ("Arcane", (155, 89, 182)),  # Purple
-    8: ("Nature", (22, 160, 133)),  # Teal
-}
 
 
 # ============================================================================

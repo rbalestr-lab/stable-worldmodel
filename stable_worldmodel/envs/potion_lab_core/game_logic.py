@@ -16,8 +16,8 @@ import pygame
 import pymunk
 from pymunk.vec2d import Vec2d
 
+from .constants import ESSENCE_TYPES, PhysicsConfig
 from .entities import (
-    ESSENCE_TYPES,
     Bottler,
     Cauldron,
     CauldronState,
@@ -30,29 +30,6 @@ from .entities import (
     ToolState,
     TrashCan,
 )
-
-
-# ============================================================================
-# Physics Configuration
-# ============================================================================
-
-
-class PhysicsConfig:
-    """Configuration for the physics simulation."""
-
-    # Collision layers
-    LAYER_PLAYER = 1
-    LAYER_ESSENCE = 2
-    LAYER_TOOL = 3
-    LAYER_WALL = 4
-    LAYER_DISPENSER = 5
-    LAYER_CAULDRON = 6
-
-    # Physics constants
-    GRAVITY = (0, 0)
-    DAMPING = 0.8
-    ITERATIONS = 20
-    TIMESTEP = 1 / 60
 
 
 def setup_physics_space() -> pymunk.Space:

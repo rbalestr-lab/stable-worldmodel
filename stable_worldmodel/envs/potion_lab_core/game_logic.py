@@ -49,6 +49,7 @@ def _load_asset(asset_name: str) -> pygame.Surface | None:
         "Bottler": "bottler.png",
         "DeliveryWindow": "delivery_window.png",
         "Dispenser": "essence_dispenser.png",
+        "Player": "wizard.png",
     }
 
     filename = asset_map.get(asset_name)
@@ -647,29 +648,54 @@ def _draw_cauldron_contents(canvas: pygame.Surface, cauldron, tile_size: float):
 
 
 def draw_player(canvas: pygame.Surface, player: Player):
-    """Draw the player character."""
+    """Draw the player character using wizard asset."""
     pos = player.body.position
-    half_size = player.size / 2
+    player_size = player.size  # This is the full size of the player's hitbox
 
-    # Get square vertices
-    vertices = [
-        (int(pos.x - half_size), int(pos.y - half_size)),
-        (int(pos.x + half_size), int(pos.y - half_size)),
-        (int(pos.x + half_size), int(pos.y + half_size)),
-        (int(pos.x - half_size), int(pos.y + half_size)),
-    ]
+    # Load the wizard asset
+    wizard_image = _load_asset("Player")
 
-    # Draw player square
-    pygame.draw.polygon(canvas, player.color, vertices)
-    pygame.draw.polygon(canvas, (30, 30, 30), vertices, 3)
+    if wizard_image is not None:
+        # Scale the image to fit within the player's hitbox while maintaining aspect ratio
+        img_width, img_height = wizard_image.get_size()
+        scale_x = player_size / img_width
+        scale_y = player_size / img_height
+        scale = min(scale_x, scale_y)  # Maintain aspect ratio
 
-    # Draw direction indicator
+        scaled_width = int(img_width * scale)
+        scaled_height = int(img_height * scale)
+
+        # Scale the image
+        scaled_image = pygame.transform.smoothscale(wizard_image, (scaled_width, scaled_height))
+
+        # Position the image centered on the player position
+        img_rect = scaled_image.get_rect(center=(int(pos.x), int(pos.y)))
+
+        # Draw the scaled wizard image
+        canvas.blit(scaled_image, img_rect)
+
+    else:
+        # Fallback to original square drawing if asset not found
+        half_size = player_size / 2
+        vertices = [
+            (int(pos.x - half_size), int(pos.y - half_size)),
+            (int(pos.x + half_size), int(pos.y - half_size)),
+            (int(pos.x + half_size), int(pos.y + half_size)),
+            (int(pos.x - half_size), int(pos.y + half_size)),
+        ]
+
+        # Draw player square
+        pygame.draw.polygon(canvas, player.color, vertices)
+        pygame.draw.polygon(canvas, (30, 30, 30), vertices, 3)
+
+    # Draw direction indicator (on top of the wizard image)
     vel = player.body.velocity
     if vel.length > 0.1:
         screen_pos = (int(pos.x), int(pos.y))
-        direction = vel.normalized() * half_size * 0.8
+        direction = vel.normalized() * (player_size / 2) * 0.8
         end_pos = (int(pos.x + direction.x), int(pos.y + direction.y))
-        pygame.draw.line(canvas, (255, 255, 255), screen_pos, end_pos, 3)
+        # Draw semi-transparent white line (50% alpha) using aaline
+        pygame.draw.aaline(canvas, (255, 255, 255, 128), screen_pos, end_pos, 3)
 
 
 def _apply_essence_tint(image: pygame.Surface, tint_color: tuple[int, int, int]) -> pygame.Surface:

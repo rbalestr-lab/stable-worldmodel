@@ -39,7 +39,6 @@ from .potion_lab_core.game_logic import render_essence
 DEFAULT_VARIATIONS = (
     "player.start_position",
     "player.color",
-    "player.size",
     "player.mass",
     "player.friction",
     "player.elasticity",
@@ -147,8 +146,8 @@ class PotionLab(gym.Env):
                         "color": swm.spaces.RGBBox(init_value=np.array(pygame.Color("RoyalBlue")[:3], dtype=np.uint8)),
                         "size": swm.spaces.Box(
                             low=8.0,
-                            high=16.0,
-                            init_value=12.0,
+                            high=32.0,
+                            init_value=24.0,
                             shape=(),
                             dtype=np.float32,
                         ),

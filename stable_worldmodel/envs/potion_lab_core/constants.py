@@ -41,8 +41,4 @@ ESSENCE_TYPES = {
     2: ("Water", (52, 152, 219)),  # Blue
     3: ("Earth", (46, 204, 113)),  # Green
     4: ("Air", (241, 196, 15)),  # Yellow
-    5: ("Light", (236, 240, 241)),  # White
-    6: ("Shadow", (52, 73, 94)),  # Dark Gray
-    7: ("Arcane", (155, 89, 182)),  # Purple
-    8: ("Nature", (22, 160, 133)),  # Teal
 }

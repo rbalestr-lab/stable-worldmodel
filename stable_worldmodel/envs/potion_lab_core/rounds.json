@@ -15,6 +15,32 @@
     },
     {
       "time_limit": 3600,
+      "background_color": [100, 0, 0],
+      "required_items": [
+        {
+          "base_essences": [1],
+          "enchanted": [true],
+          "refined": [false],
+          "bottled": false
+        }
+      ],
+      "description": "1: Raw Fire Essence"
+    },
+    {
+      "time_limit": 3600,
+      "background_color": [100, 0, 0],
+      "required_items": [
+        {
+          "base_essences": [1, 2],
+          "enchanted": [false, true],
+          "refined": [true, true],
+          "bottled": true
+        }
+      ],
+      "description": "1: Raw Fire Essence"
+    },
+    {
+      "time_limit": 3600,
       "required_items": [
         {
           "base_essences": [1],

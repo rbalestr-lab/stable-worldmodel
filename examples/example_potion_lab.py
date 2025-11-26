@@ -54,28 +54,8 @@ if __name__ == "__main__":
         game_mouse_x = np.clip(mouse_x, 0, env.map_width)
         game_mouse_y = np.clip(mouse_y - ui_top_height, 0, env.map_height)
 
-        # Calculate direction vector from player to mouse
-        dx = game_mouse_x - player_pos[0]
-        dy = game_mouse_y - player_pos[1]
-
-        # Calculate distance and normalize to [-1, 1] range
-        distance = np.sqrt(dx**2 + dy**2)
-
-        # Only move if mouse is far enough from player (dead zone)
-        dead_zone = 5.0  # pixels
-        if distance > dead_zone:
-            # Normalize direction vector
-            vx = dx / distance
-            vy = dy / distance
-
-            vx = np.clip(vx, -1.0, 1.0)
-            vy = np.clip(vy, -1.0, 1.0)
-        else:
-            # Stop moving if mouse is too close
-            vx = 0.0
-            vy = 0.0
-
-        action = np.array([vx, vy], dtype=np.float32)
+        # Action is simply the cursor position in game coordinates
+        action = np.array([game_mouse_x, game_mouse_y], dtype=np.float32)
 
         # Step the environment
         obs, reward, terminated, truncated, info = env.step(action)

@@ -27,6 +27,7 @@ from .game_logic import (
     draw_player,
     draw_tool,
     draw_ui,
+    render_essence,
     setup_physics_space,
 )
 
@@ -54,4 +55,5 @@ __all__ = [
     "draw_player",
     "draw_dispenser",
     "draw_ui",
+    "render_essence",
 ]

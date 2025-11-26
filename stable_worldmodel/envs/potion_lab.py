@@ -20,7 +20,6 @@ import stable_worldmodel as swm
 
 # Import core game components
 from .potion_lab_core import (
-    ESSENCE_TYPES,
     CollisionHandler,
     Essence,
     PhysicsConfig,
@@ -34,12 +33,7 @@ from .potion_lab_core import (
     draw_tool,
     setup_physics_space,
 )
-from .potion_lab_core.game_logic import (
-    _draw_dots,
-    _draw_dots_in_slice,
-    _draw_stripes,
-    _draw_stripes_in_slice,
-)
+from .potion_lab_core.game_logic import render_essence
 
 
 DEFAULT_VARIATIONS = (
@@ -50,10 +44,10 @@ DEFAULT_VARIATIONS = (
     "player.friction",
     "player.elasticity",
     "player.speed",
+    "player.force",
     "essence.mass",
     "essence.friction",
     "essence.elasticity",
-    "background.color",
 )
 
 
@@ -125,15 +119,22 @@ class PotionLab(gym.Env):
         self.map_height_tiles = 16
         self.tile_size = self.map_width / self.map_width_tiles  # 32.0 if window_size=512
 
-        self.action_space = spaces.Box(low=-1.0, high=1.0, shape=(2,), dtype=np.float32)
+        # Action space: cursor position (x, y) in world coordinates
+        self.action_space = spaces.Box(low=0.0, high=float(self.window_size), shape=(2,), dtype=np.float32)
 
+        # Proprio vector structure (75 floats total):
+        # [0-1]   player x, y
+        # [2-3]   player vx, vy
+        # [4]     time_remaining_normalized (0-1)
+        # [5-74]  requirements (5 slots × 14 floats each)
+        #         Per requirement: [essence_types(4), enchanted(4), refined(4), bottled(1), completed(1)]
         self.observation_space = spaces.Dict(
             {
                 "image": spaces.Box(low=0, high=255, shape=(resolution, resolution, 3), dtype=np.uint8),
                 "proprio": spaces.Box(
-                    low=0,
-                    high=self.window_size,
-                    shape=(4,),  # player x, y, vx, vy
+                    low=-np.inf,
+                    high=np.inf,
+                    shape=(75,),
                     dtype=np.float32,
                 ),
             }
@@ -176,6 +177,13 @@ class PotionLab(gym.Env):
                             low=100.0,
                             high=300.0,
                             init_value=200.0,
+                            shape=(),
+                            dtype=np.float32,
+                        ),
+                        "force": swm.spaces.Box(
+                            low=10.0,
+                            high=100.0,
+                            init_value=50.0,
                             shape=(),
                             dtype=np.float32,
                         ),
@@ -226,7 +234,7 @@ class PotionLab(gym.Env):
                 ),
                 "background": swm.spaces.Dict(
                     {
-                        "color": swm.spaces.RGBBox(init_value=np.array([40, 40, 45], dtype=np.uint8)),
+                        "color": swm.spaces.RGBBox(init_value=np.array([100, 0, 0], dtype=np.uint8)),
                     }
                 ),
             },
@@ -246,6 +254,10 @@ class PotionLab(gym.Env):
         self.dispensers = []
         self.collision_handler = None
         self.round_manager = None
+
+        # Unlocked items tracking
+        self.unlocked_dispensers = set()  # Set of essence_types that are unlocked
+        self.unlocked_tools = set()  # Set of tool names that are unlocked
 
         # Timing
         self.step_count = 0
@@ -285,6 +297,10 @@ class PotionLab(gym.Env):
         if round_config is None:
             raise RuntimeError("No rounds configured!")
 
+        # Update unlocked items for this round
+        self._update_unlocked_items(round_config)
+        self._update_enabled_items()
+
         requirements = round_config["required_items"].copy()
         for req in requirements:
             req["completed"] = False
@@ -292,6 +308,9 @@ class PotionLab(gym.Env):
 
         self.round_time_remaining = round_config["time_limit"]
         self.step_count = 0
+
+        # Set background color for this round if specified
+        self._set_round_background_color(round_config)
 
         observation = self._get_obs()
         info = self._get_info()
@@ -321,6 +340,7 @@ class PotionLab(gym.Env):
             friction=self.variation_space["player"]["friction"].value,
             elasticity=self.variation_space["player"]["elasticity"].value,
             max_velocity=self.variation_space["player"]["speed"].value,
+            force_scale=self.variation_space["player"]["force"].value,
             color=tuple(self.variation_space["player"]["color"].value.tolist()),
         )
 
@@ -334,6 +354,13 @@ class PotionLab(gym.Env):
         }
         self.dispensers = layout["dispensers"]
 
+        # Initially disable all tools and dispensers (they start removed from physics space)
+        # They will be enabled later when rounds require them
+        for tool in self.tools.values():
+            tool.disable()  # Remove from physics space
+        for dispenser in self.dispensers:
+            dispenser.disable()  # Remove from physics space
+
         self.collision_handler = CollisionHandler(self)
         self.collision_handler.setup_handlers(self.space)
 
@@ -344,7 +371,7 @@ class PotionLab(gym.Env):
         Execute one step in the environment.
 
         Args:
-            action: [vx, vy] velocity commands in [-1, 1]
+            action: [x, y] cursor position in world coordinates [0, window_size]
 
         Returns:
             observation, reward, terminated, truncated, info
@@ -399,6 +426,10 @@ class PotionLab(gym.Env):
         if round_config is None:
             return
 
+        # Update unlocked items for the new round
+        self._update_unlocked_items(round_config)
+        self._update_enabled_items()
+
         for essence in self.essences[:]:
             essence.remove_from_world()
         self.essences.clear()
@@ -415,6 +446,75 @@ class PotionLab(gym.Env):
         self.tools["delivery_window"].set_requirements(requirements)
 
         self.round_time_remaining = round_config["time_limit"]
+
+        # Set background color for this round if specified
+        self._set_round_background_color(round_config)
+
+    def _set_round_background_color(self, round_config: dict):
+        """Set background color for the current round if specified in round config."""
+        if "background_color" in round_config:
+            bg_color = np.array(round_config["background_color"], dtype=np.uint8)
+            self.variation_space["background"]["color"]._value = bg_color
+
+    def _get_round_requirements(self, round_config: dict) -> tuple[set[int], set[str]]:
+        """
+        Analyze a round's requirements to determine needed dispensers and tools.
+
+        Returns:
+            tuple: (essence_types_needed, tools_needed)
+        """
+        essence_types_needed = set()
+        tools_needed = set()
+
+        for req in round_config.get("required_items", []):
+            # Check essence types needed
+            base_essences = req.get("base_essences", [])
+            essence_types_needed.update(base_essences)
+
+            # Check tools needed based on processing requirements
+            enchanted = req.get("enchanted", [False] * len(base_essences))
+            refined = req.get("refined", [False] * len(base_essences))
+            bottled = req.get("bottled", False)
+
+            if any(enchanted):
+                tools_needed.add("enchanter")
+            if any(refined):
+                tools_needed.add("refiner")
+            if bottled:
+                tools_needed.add("bottler")
+            # Cauldron is needed for mixing/combining essences (when multiple essence types in one item)
+            if len(base_essences) > 1:
+                tools_needed.add("cauldron")
+
+        return essence_types_needed, tools_needed
+
+    def _update_enabled_items(self):
+        """Update the enabled/disabled state of tools and dispensers based on unlocked items."""
+        # Update dispensers
+        for dispenser in self.dispensers:
+            if dispenser.essence_type in self.unlocked_dispensers:
+                dispenser.enable()
+            else:
+                dispenser.disable()
+
+        # Update tools (delivery window is always enabled)
+        for tool_name, tool in self.tools.items():
+            if tool_name == "delivery_window":
+                tool.enable()  # Always enabled
+            elif tool_name in self.unlocked_tools:
+                tool.enable()
+            else:
+                tool.disable()
+
+    def _update_unlocked_items(self, round_config: dict):
+        """Update the set of unlocked dispensers and tools based on round requirements."""
+        essence_types_needed, tools_needed = self._get_round_requirements(round_config)
+
+        # Unlock new dispensers
+        self.unlocked_dispensers.update(essence_types_needed)
+
+        # Unlock new tools
+        self.unlocked_tools.update(tools_needed)
 
     def _check_tool_ejections(self):
         """Check if any tools are ready to eject processed essences."""
@@ -453,14 +553,67 @@ class PotionLab(gym.Env):
                 essence = Essence(self.space, pos, essence_state, self.tile_size, mass, friction, elasticity)
                 self.essences.append(essence)
 
+    def _encode_requirements(self) -> np.ndarray:
+        """
+        Encode requirements into a fixed-size vector.
+
+        Structure (5 slots x 14 floats):
+        Per slot:
+        [0-3]   essence_types (4 floats)
+        [4-7]   enchanted (4 floats)
+        [8-11]  refined (4 floats)
+        [12]    bottled (1 float)
+        [13]    completed (1 float)
+        """
+        encoded = np.zeros(5 * 14, dtype=np.float32)
+        requirements = self.tools["delivery_window"].required_items
+
+        for i, req in enumerate(requirements[:5]):  # Max 5 requirements
+            base_idx = i * 14
+
+            # Essence types (up to 4)
+            types = req.get("base_essences", [])
+            for j, t in enumerate(types[:4]):
+                encoded[base_idx + j] = float(t)
+
+            # Enchanted status
+            enchanted = req.get("enchanted", [])
+            for j, e in enumerate(enchanted[:4]):
+                encoded[base_idx + 4 + j] = 1.0 if e else 0.0
+
+            # Refined status
+            refined = req.get("refined", [])
+            for j, r in enumerate(refined[:4]):
+                encoded[base_idx + 8 + j] = 1.0 if r else 0.0
+
+            # Bottled status
+            encoded[base_idx + 12] = 1.0 if req.get("bottled", False) else 0.0
+
+            # Completed status
+            encoded[base_idx + 13] = 1.0 if req.get("completed", False) else 0.0
+
+        return encoded
+
     def _get_obs(self) -> dict[str, np.ndarray]:
         """Get the current observation."""
         img = self.render()
 
-        # Proprioception vector
+        # Proprioception vector construction
+
+        # 1. Player State (4 floats)
         player_pos = np.array([self.player.body.position.x, self.player.body.position.y], dtype=np.float32)
         player_vel = np.array([self.player.body.velocity.x, self.player.body.velocity.y], dtype=np.float32)
-        proprio = np.concatenate([player_pos, player_vel])
+
+        # 2. Time Remaining (1 float)
+        round_config = self.round_manager.get_current_round()
+        time_limit = round_config["time_limit"] if round_config else 1.0
+        time_norm = np.array([self.round_time_remaining / max(1.0, time_limit)], dtype=np.float32)
+
+        # 3. Requirements (80 floats)
+        req_encoded = self._encode_requirements()
+
+        # Combine all parts (85 floats total)
+        proprio = np.concatenate([player_pos, player_vel, time_norm, req_encoded])
 
         return {"image": img, "proprio": proprio}
 
@@ -507,14 +660,17 @@ class PotionLab(gym.Env):
         game_surface = pygame.Surface((int(self.map_width), int(self.map_height)))
         game_surface.fill(bg_color)
 
+        # Only draw unlocked tools (excluding delivery_window which is always shown)
         for tool_name, tool in self.tools.items():
-            if tool_name != "delivery_window":
+            if tool_name != "delivery_window" and tool_name in self.unlocked_tools:
                 draw_tool(game_surface, tool, self.tile_size)
 
         draw_tool(game_surface, self.tools["delivery_window"], self.tile_size)
 
+        # Only draw unlocked dispensers
         for dispenser in self.dispensers:
-            draw_dispenser(game_surface, dispenser)
+            if dispenser.essence_type in self.unlocked_dispensers:
+                draw_dispenser(game_surface, dispenser)
 
         for essence in self.essences:
             draw_essence(game_surface, essence, self.tile_size)
@@ -545,6 +701,7 @@ class PotionLab(gym.Env):
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     self.close()
+            return None
 
         img = np.transpose(np.array(pygame.surfarray.pixels3d(self.canvas)), axes=(1, 0, 2))
 
@@ -604,85 +761,17 @@ class PotionLab(gym.Env):
 
             center = (box_x + box_size // 2, start_y + box_size // 2)
 
-            # Draw bottle
-            if is_bottled:
-                bottle_rect = pygame.Rect(
-                    center[0] - essence_radius * 1.2,
-                    center[1] - essence_radius * 1.5,
-                    essence_radius * 2.4,
-                    essence_radius * 3,
-                )
-                pygame.draw.rect(self.canvas, (200, 200, 200), bottle_rect, 2)
-
-                neck_rect = pygame.Rect(
-                    center[0] - essence_radius * 0.4,
-                    center[1] - essence_radius * 1.8,
-                    essence_radius * 0.8,
-                    essence_radius * 0.5,
-                )
-                pygame.draw.rect(self.canvas, (200, 200, 200), neck_rect, 2)
-
-            # Draw essence
-            if len(essence_types) == 1:
-                color = ESSENCE_TYPES[essence_types[0]][1]
-                pygame.draw.circle(self.canvas, color, center, essence_radius)
-
-                # Draw patterns if enchanted/refined
-                if enchanted[0]:
-                    _draw_stripes(self.canvas, center, essence_radius)
-                if refined[0]:
-                    _draw_dots(self.canvas, center, essence_radius)
-
-            else:
-                n_parts = len(essence_types)
-                angle_per_part = 360 / n_parts
-
-                for j, etype in enumerate(essence_types):
-                    color = ESSENCE_TYPES[etype][1]
-                    start_angle = j * angle_per_part  # Same as floor - no rotation
-                    end_angle = (j + 1) * angle_per_part
-
-                    # Draw pie slice
-                    points = [center]
-                    for angle in range(int(start_angle), int(end_angle) + 1, 5):
-                        rad = np.deg2rad(angle)  # Same as floor - no -90 offset
-                        x = center[0] + essence_radius * np.cos(rad)
-                        y = center[1] + essence_radius * np.sin(rad)
-                        points.append((int(x), int(y)))
-                    points.append(center)
-                    pygame.draw.polygon(self.canvas, color, points)
-
-                    # Draw patterns for this slice
-                    if enchanted[j]:
-                        _draw_stripes_in_slice(self.canvas, center, essence_radius, start_angle, end_angle)
-                    if refined[j]:
-                        _draw_dots_in_slice(self.canvas, center, essence_radius, start_angle, end_angle)
-
-    def _handle_keyboard_input(self):
-        """Handle keyboard input for human control mode."""
-        keys = pygame.key.get_pressed()
-
-        # WASD or Arrow keys for movement
-        # Using standard screen coordinates: +X right, +Y down
-        vx = 0.0
-        vy = 0.0
-
-        if keys[pygame.K_LEFT] or keys[pygame.K_a]:
-            vx -= 1.0
-        if keys[pygame.K_RIGHT] or keys[pygame.K_d]:
-            vx += 1.0
-        if keys[pygame.K_UP] or keys[pygame.K_w]:
-            vy -= 1.0  # Negative Y to move up (toward y=0)
-        if keys[pygame.K_DOWN] or keys[pygame.K_s]:
-            vy += 1.0  # Positive Y to move down (toward y=map_height)
-
-        # Normalize diagonal movement
-        magnitude = np.sqrt(vx**2 + vy**2)
-        if magnitude > 1.0:
-            vx /= magnitude
-            vy /= magnitude
-
-        self.human_action = np.array([vx, vy], dtype=np.float32)
+            # Draw essence using unified render function
+            render_essence(
+                self.canvas,
+                center,
+                essence_radius,
+                essence_types,
+                enchanted,
+                refined,
+                is_bottled,
+                variations=None,  # Pass variations if needed
+            )
 
     def close(self):
         """Clean up resources."""

@@ -2,6 +2,7 @@
   "rounds": [
     {
       "time_limit": 3600,
+      "background_color": [100, 0, 0],
       "required_items": [
         {
           "base_essences": [1],
@@ -10,7 +11,56 @@
           "bottled": false
         }
       ],
-      "description": "Deliver raw Fire Essence"
+      "description": "1: Raw Fire Essence"
+    },
+    {
+      "time_limit": 3600,
+      "required_items": [
+        {
+          "base_essences": [1],
+          "enchanted": [false],
+          "refined": [false],
+          "bottled": false
+        },
+        {
+          "base_essences": [1],
+          "enchanted": [false],
+          "refined": [false],
+          "bottled": false
+        }
+      ],
+      "description": "2: Two raw Fire Essences"
+    },
+    {
+      "time_limit": 3600,
+      "background_color": [0, 100, 0],
+      "required_items": [
+        {
+          "base_essences": [2],
+          "enchanted": [false],
+          "refined": [false],
+          "bottled": false
+        }
+      ],
+      "description": "3: Two raw Water Essences"
+    },
+    {
+      "time_limit": 3600,
+      "required_items": [
+        {
+          "base_essences": [2],
+          "enchanted": [false],
+          "refined": [false],
+          "bottled": false
+        },
+        {
+          "base_essences": [2],
+          "enchanted": [false],
+          "refined": [false],
+          "bottled": false
+        }
+      ],
+      "description": "4: Two raw Water Essences"
     },
     {
       "time_limit": 3600,
@@ -28,67 +78,44 @@
           "bottled": false
         }
       ],
-      "description": "Deliver raw Fire Essence and raw Water Essence"
+      "description": "5: Raw Fire and Water Essences"
+    },
+    {
+      "time_limit": 3600,
+      "background_color": [100, 100, 0],
+      "required_items": [
+        {
+          "base_essences": [3],
+          "enchanted": [false],
+          "refined": [false],
+          "bottled": false
+        }
+      ],
+      "description": "6: Raw Earth Essences"
     },
     {
       "time_limit": 3600,
       "required_items": [
         {
           "base_essences": [1],
-          "enchanted": [true],
+          "enchanted": [false],
           "refined": [false],
           "bottled": false
-        }
-      ],
-      "description": "Deliver enchanted Fire Essence"
-    },
-    {
-      "time_limit": 3600,
-      "required_items": [
+        },
         {
           "base_essences": [2],
           "enchanted": [false],
-          "refined": [true],
+          "refined": [false],
+          "bottled": false
+        },
+        {
+          "base_essences": [3],
+          "enchanted": [false],
+          "refined": [false],
           "bottled": false
         }
       ],
-      "description": "Deliver refined Water Essence"
-    },
-    {
-      "time_limit": 3600,
-      "required_items": [
-        {
-          "base_essences": [1],
-          "enchanted": [false],
-          "refined": [false],
-          "bottled": true
-        }
-      ],
-      "description": "Deliver bottled Fire Essence"
-    },
-    {
-      "time_limit": 5400,
-      "required_items": [
-        {
-          "base_essences": [1, 2],
-          "enchanted": [false, false],
-          "refined": [false, false],
-          "bottled": true
-        }
-      ],
-      "description": "Deliver bottled Fire+Water combination"
-    },
-    {
-      "time_limit": 5400,
-      "required_items": [
-        {
-          "base_essences": [1, 2],
-          "enchanted": [true, false],
-          "refined": [false, false],
-          "bottled": true
-        }
-      ],
-      "description": "Deliver bottled Fire(enchanted)+Water(plain)"
+      "description": "7: Raw Fire, Water, and Earth Essences"
     }
   ]
 }

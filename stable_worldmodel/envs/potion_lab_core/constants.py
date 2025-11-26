@@ -22,6 +22,7 @@ class PhysicsConfig:
     LAYER_WALL = 4
     LAYER_DISPENSER = 5
     LAYER_CAULDRON = 6
+    LAYER_DISABLED = 99  # For locked/unavailable items
 
     # Physics constants
     GRAVITY = (0, 0)

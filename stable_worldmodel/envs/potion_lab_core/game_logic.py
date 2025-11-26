@@ -140,6 +140,10 @@ class CollisionHandler:
         for shape in arbiter.shapes:
             if hasattr(shape, "dispenser_obj"):
                 dispenser = shape.dispenser_obj
+                # Only allow interaction if dispenser is unlocked
+                if dispenser.essence_type not in self.env.unlocked_dispensers:
+                    return False  # Prevent collision
+
                 essence_state = dispenser.dispense()
 
                 if essence_state is not None:
@@ -159,9 +163,14 @@ class CollisionHandler:
                     )
                     self.env.essences.append(essence)
                 break
+        return True
 
     def _on_player_cauldron_begin(self, arbiter, space, data):
         """Called when player starts colliding with cauldron."""
+        # Only allow interaction if cauldron is unlocked
+        if "cauldron" not in self.env.unlocked_tools:
+            return False  # Prevent collision
+
         cauldron = self.env.tools.get("cauldron")
         if cauldron:
             cauldron.start_stirring()
@@ -169,6 +178,10 @@ class CollisionHandler:
 
     def _on_player_cauldron_separate(self, arbiter, space, data):
         """Called when player stops colliding with cauldron."""
+        # Only allow interaction if cauldron is unlocked
+        if "cauldron" not in self.env.unlocked_tools:
+            return False  # Prevent collision
+
         cauldron = self.env.tools.get("cauldron")
         if cauldron:
             cauldron.stop_stirring()
@@ -195,6 +208,10 @@ class CollisionHandler:
         if essence_obj is None or tool_obj is None:
             return
 
+        # Only allow interaction if tool is unlocked (delivery window is always unlocked)
+        if tool_name != "delivery_window" and tool_name not in self.env.unlocked_tools:
+            return False  # Prevent collision
+
         # Create collision key to ensure we only process once
         collision_key = (id(essence_obj), id(tool_obj))
         if collision_key in self.essence_tool_collisions:
@@ -216,6 +233,10 @@ class CollisionHandler:
 
     def _on_essence_cauldron_begin(self, arbiter, space, data):
         """Called when essence collides with the cauldron."""
+        # Only allow interaction if cauldron is unlocked
+        if "cauldron" not in self.env.unlocked_tools:
+            return False  # Prevent collision
+
         essence_obj = None
 
         for shape in arbiter.shapes:
@@ -248,24 +269,33 @@ class CollisionHandler:
 # ============================================================================
 
 
-def draw_essence(canvas: pygame.Surface, essence: Essence, tile_size: float):
+def render_essence(
+    canvas: pygame.Surface,
+    center: tuple[int, int],
+    radius: float,
+    essence_types: list[int],
+    enchanted: list[bool],
+    refined: list[bool],
+    is_bottled: bool = False,
+    variations: dict | None = None,
+):
     """
-    Draw an essence with its visual patterns.
+    Unified function to render an essence (or combined essence) at a specific location.
 
-    Visual patterns:
-    - Base color: Solid fill
-    - Enchanted: Diagonal stripes
-    - Refined: Dotted pattern
-    - Bottled: Bottle outline
+    Args:
+        canvas: Pygame surface to draw on
+        center: (x, y) center position
+        radius: Radius of the essence
+        essence_types: List of essence type IDs
+        enchanted: List of booleans indicating if each essence part is enchanted
+        refined: List of booleans indicating if each essence part is refined
+        is_bottled: Whether the essence is in a bottle
+        variations: Optional dictionary of visual variations (unused for now, but ready for future)
     """
-    state = essence.state
-    pos = essence.body.position
-    radius = essence.radius
-
-    screen_pos = (int(pos.x), int(pos.y))
+    screen_pos = (int(center[0]), int(center[1]))
     screen_radius = int(radius)
 
-    if state.is_bottled:
+    if is_bottled:
         bottle_rect = pygame.Rect(
             screen_pos[0] - screen_radius * 1.2,
             screen_pos[1] - screen_radius * 1.5,
@@ -282,11 +312,11 @@ def draw_essence(canvas: pygame.Surface, essence: Essence, tile_size: float):
         )
         pygame.draw.rect(canvas, (200, 200, 200), neck_rect, 2)
 
-    if state.is_combined:
-        n_parts = len(state.essence_types)
+    if len(essence_types) > 1:
+        n_parts = len(essence_types)
         angle_per_part = 360 / n_parts
 
-        for i, essence_type in enumerate(state.essence_types):
+        for i, essence_type in enumerate(essence_types):
             color = ESSENCE_TYPES[essence_type][1]
 
             # Draw pie slice
@@ -302,25 +332,41 @@ def draw_essence(canvas: pygame.Surface, essence: Essence, tile_size: float):
                 points.append((int(x), int(y)))
             points.append(screen_pos)
 
-            pygame.draw.polygon(canvas, color, points)
+            if len(points) > 2:
+                pygame.draw.polygon(canvas, color, points)
 
             # Draw patterns for this slice if needed
-            if state.enchanted_per_essence[i]:
+            if enchanted[i]:
                 _draw_stripes_in_slice(canvas, screen_pos, radius, start_angle, end_angle)
 
-            if state.refined_per_essence[i]:
+            if refined[i]:
                 _draw_dots_in_slice(canvas, screen_pos, radius, start_angle, end_angle)
 
-    else:
-        color = ESSENCE_TYPES[state.essence_types[0]][1]
+    elif len(essence_types) == 1:
+        color = ESSENCE_TYPES[essence_types[0]][1]
         pygame.draw.circle(canvas, color, screen_pos, screen_radius)
 
         # Draw patterns
-        if state.enchanted_per_essence[0]:
+        if enchanted[0]:
             _draw_stripes(canvas, screen_pos, screen_radius)
 
-        if state.refined_per_essence[0]:
+        if refined[0]:
             _draw_dots(canvas, screen_pos, screen_radius)
+
+
+def draw_essence(canvas: pygame.Surface, essence: Essence, tile_size: float):
+    """
+    Draw an essence with its visual patterns using the unified render function.
+    """
+    render_essence(
+        canvas,
+        (int(essence.body.position.x), int(essence.body.position.y)),
+        essence.radius,
+        essence.state.essence_types,
+        essence.state.enchanted_per_essence,
+        essence.state.refined_per_essence,
+        essence.state.is_bottled,
+    )
 
 
 def _draw_stripes(canvas: pygame.Surface, pos: tuple[int, int], radius: int):
@@ -482,45 +528,15 @@ def _draw_cauldron_contents(canvas: pygame.Surface, cauldron, tile_size: float):
     for i, essence_state in enumerate(cauldron.essence_slots):
         if essence_state is not None:
             slot_pos = slot_positions[i]
-            if essence_state.is_combined and len(essence_state.essence_types) > 1:
-                num_types = len(essence_state.essence_types)
-                angle_per_type = 360 / num_types
-
-                for j, essence_type in enumerate(essence_state.essence_types):
-                    color = ESSENCE_TYPES[essence_type][1]
-                    start_angle = j * angle_per_type  # Same orientation as ground essences
-                    end_angle = (j + 1) * angle_per_type
-
-                    # Draw pie slice
-                    points = [(int(slot_pos[0]), int(slot_pos[1]))]
-                    for angle in range(int(start_angle), int(end_angle) + 1, 5):
-                        rad = np.deg2rad(angle)
-                        x = slot_pos[0] + essence_radius * np.cos(rad)
-                        y = slot_pos[1] + essence_radius * np.sin(rad)
-                        points.append((int(x), int(y)))
-
-                    if len(points) > 2:
-                        pygame.draw.polygon(canvas, color, points)
-
-                    # Draw patterns for this slice if needed
-                    if essence_state.enchanted_per_essence[j]:
-                        _draw_stripes_in_slice(
-                            canvas, (int(slot_pos[0]), int(slot_pos[1])), essence_radius, start_angle, end_angle
-                        )
-
-                    if essence_state.refined_per_essence[j]:
-                        _draw_dots_in_slice(
-                            canvas, (int(slot_pos[0]), int(slot_pos[1])), essence_radius, start_angle, end_angle
-                        )
-
-            else:
-                color = ESSENCE_TYPES[essence_state.essence_types[0]][1]
-                pygame.draw.circle(canvas, color, (int(slot_pos[0]), int(slot_pos[1])), essence_radius)
-
-                if essence_state.enchanted_per_essence[0]:
-                    _draw_stripes(canvas, (int(slot_pos[0]), int(slot_pos[1])), essence_radius)
-                if essence_state.refined_per_essence[0]:
-                    _draw_dots(canvas, (int(slot_pos[0]), int(slot_pos[1])), essence_radius)
+            render_essence(
+                canvas,
+                slot_pos,
+                essence_radius,
+                essence_state.essence_types,
+                essence_state.enchanted_per_essence,
+                essence_state.refined_per_essence,
+                is_bottled=False,
+            )
 
     # Draw stir progress bar if stirring
     if cauldron.state == CauldronState.STIRRING and cauldron.stir_time > 0:

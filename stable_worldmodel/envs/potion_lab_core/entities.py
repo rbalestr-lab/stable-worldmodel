@@ -189,6 +189,7 @@ class Player:
         friction: float = 0.3,
         elasticity: float = 0.0,
         max_velocity: float = 96.0,
+        force_scale: float = 50.0,
         color: tuple[int, int, int] = (65, 105, 225),
     ):
         self.space = space
@@ -196,6 +197,7 @@ class Player:
         self.color = color
         self.size = size
         self.max_velocity = max_velocity
+        self.force_scale = force_scale
 
         # Physics properties
         moment = float("inf")  # No rotation
@@ -220,21 +222,39 @@ class Player:
 
     def apply_action(self, action: np.ndarray):
         """
-        Apply force-based action to the player.
+        Apply force to move player toward cursor position.
 
-        Uses forces instead of direct velocity setting to respect physics collisions.
+        Uses forces to respect physics collisions.
 
         Args:
-            action: [vx, vy] normalized to [-1, 1]
+            action: [x, y] cursor position in world coordinates
         """
-        action = np.clip(action, -1.0, 1.0)
+        # Calculate direction from player to cursor
+        cursor_pos = np.array(action, dtype=np.float32)
+        player_pos = np.array([self.body.position.x, self.body.position.y], dtype=np.float32)
 
-        target_velocity = action * self.max_velocity
+        direction = cursor_pos - player_pos
+        distance = np.linalg.norm(direction)
+
+        if distance > 0:
+            # Normalize direction
+            direction = direction / distance
+
+            # Calculate target velocity proportional to distance for smooth deceleration
+            # Use exponential decay for smoother approach to target
+            speed_factor = min(1.0, distance / 20.0)  # Scale speed based on distance, max at distance=20
+            target_velocity = direction * self.max_velocity * speed_factor
+        else:
+            target_velocity = np.array([0.0, 0.0])
+
         current_velocity = self.body.velocity
         velocity_diff = (target_velocity[0] - current_velocity.x, target_velocity[1] - current_velocity.y)
 
-        force_scale = self.body.mass * 50.0
-        force = (force_scale * velocity_diff[0], force_scale * velocity_diff[1])
+        # Apply force based on velocity difference and force_scale
+        force = (
+            self.body.mass * self.force_scale * velocity_diff[0],
+            self.body.mass * self.force_scale * velocity_diff[1],
+        )
 
         self.body.apply_force_at_local_point(force, (0, 0))
 
@@ -321,6 +341,16 @@ class Tool:
             self.state = type(self.state)(0)  # Reset to first enum value
         if hasattr(self, "timer"):
             self.timer = 0
+
+    def enable(self):
+        """Enable this tool by adding it to the physics space."""
+        if self.body not in self.space.bodies:
+            self.space.add(self.body, self.shape)
+
+    def disable(self):
+        """Disable this tool by removing it from the physics space."""
+        if self.body in self.space.bodies:
+            self.space.remove(self.body, self.shape)
 
 
 # ============================================================================
@@ -767,6 +797,16 @@ class Dispenser:
         self.cooldown = self.cooldown_duration
 
         return essence_state
+
+    def enable(self):
+        """Enable this dispenser by adding it to the physics space."""
+        if self.body not in self.space.bodies:
+            self.space.add(self.body, self.shape)
+
+    def disable(self):
+        """Disable this dispenser by removing it from the physics space."""
+        if self.body in self.space.bodies:
+            self.space.remove(self.body, self.shape)
 
 
 # ============================================================================

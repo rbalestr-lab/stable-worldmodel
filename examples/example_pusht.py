@@ -72,7 +72,7 @@ if __name__ == "__main__":
 
     import numpy as np
 
-    dataset_path = swm.data.get_cache_dir() / "pusht_expert_train"
+    dataset_path = swm.data.utils.get_cache_dir() / "pusht_expert_train"
     dataset = datasets.load_from_disk(dataset_path).with_format("numpy")
 
     action_process = preprocessing.StandardScaler()
@@ -129,7 +129,7 @@ if __name__ == "__main__":
             return emb
 
     model.backbone = DinoV2Encoder("dinov2_vits14", feature_key="x_norm_patchtokens").to("cuda")
-    ckpt = torch.load(swm.data.get_cache_dir() / "dinowm_pusht_weights.ckpt")
+    ckpt = torch.load(swm.data.utils.get_cache_dir() / "dinowm_pusht_weights.ckpt")
 
     model.predictor.load_state_dict(ckpt["predictor"], strict=False)
     model.action_encoder.load_state_dict(ckpt["action_encoder"])

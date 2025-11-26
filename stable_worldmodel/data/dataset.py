@@ -10,7 +10,7 @@ from stable_worldmodel.data.utils import get_cache_dir
 
 
 class Dataset:
-    def __init__(self, name, frameskip=1, num_steps=-1, decode_columns=None, cache_dir=None):
+    def __init__(self, name, frameskip=1, num_steps=1, decode_columns=None, cache_dir=None):
         self.data_dir = Path(cache_dir or get_cache_dir(), name)
         self.dataset = load_from_disk(self.data_dir)
         self.frameskip = frameskip
@@ -47,8 +47,66 @@ class Dataset:
     def __len__(self):
         return int(self.episode_starts[-1]) if not self.complete_traj else len(self.episodes)
 
+    def decode(self, col_data, indices):
+        raise NotImplementedError("Dataset.decode must be implemented in subclass")
+
     def load_chunk(self, episode, start, end):
-        raise NotImplementedError
+        if type(episode) is int:
+            episode = [episode]
+
+        if type(start) is int:
+            start = [start] * len(episode)
+
+        if type(end) is int:
+            end = [end] * len(episode)
+
+        if not (self.frameskip == 1 and self.num_steps == 1):
+            raise NotImplementedError("Dataset.load_chunk need only be have frameskip=1 and num_steps=1")
+
+        chunks = []
+
+        for ep, s, en in zip(episode, start, end):
+            episode_indices = self.episode_indices[ep]
+
+            if ep > len(self.episodes) or ep < 0:
+                raise ValueError(f"Episode {ep} index out of range [0, {len(self.episodes)})")
+
+            if en > len(episode_indices) or s < 0 or en <= s:
+                raise ValueError(f"Invalid start/end indices for episode {ep}: [{s}, {en})")
+
+            episode_mask = self.dataset["episode_idx"][:] == ep
+            steps_mask = self.dataset["step_idx"][:]
+            steps_mask = (steps_mask >= s) & (steps_mask < en)
+
+            indices = np.flatnonzero(episode_mask & steps_mask)
+            steps = self.dataset[indices]
+
+            for col, data in steps.items():
+                if col == "action":
+                    continue
+
+                data = data[:: self.frameskip]
+                steps[col] = data
+
+                if col in self.decode_columns:
+                    steps[col] = self.decode(steps[col], start=s, end=en)
+
+            if self.transform:
+                steps = self.transform(steps)
+
+            # stack frames
+            for col in self.decode_columns:
+                if col not in steps:
+                    continue
+                steps[col] = torch.stack(steps[col])
+
+            # reshape action
+            act_shape = en - s
+            steps["action"] = steps["action"].reshape(act_shape, -1)
+
+            chunks.append(steps)
+
+        return chunks
 
 
 class FrameDataset(Dataset):
@@ -56,8 +114,8 @@ class FrameDataset(Dataset):
         super().__init__(name, *args, **kwargs)
         self.decode_columns = self.decode_columns or self.determine_img_columns(self.dataset[0])
 
-    def load_chunk(self, episode, start, end):
-        return None
+    def decode(self, col_data, start=0, end=-1):
+        return [decode_image(self.data_dir / img_path) for img_path in col_data]
 
     def __getitem__(self, index):
         episode = self.idx_to_episode[index]
@@ -78,7 +136,7 @@ class FrameDataset(Dataset):
             steps[col] = data
 
             if col in self.decode_columns:
-                steps[col] = [decode_image(self.data_dir / img_path) for img_path in data]
+                steps[col] = self.decode(steps[col])
 
         if self.transform:
             steps = self.transform(steps)
@@ -107,8 +165,9 @@ class VideoDataset(Dataset):
         self.device = device
         self.decode_columns = self.decode_columns or self.determine_video_columns(self.dataset[0])
 
-    def load_chunk(self, episode, start, end):
-        return None
+    def decode(self, col_data, start=0, end=-1):
+        video = VideoDecoder(self.data_dir / col_data[0], device=self.device)
+        return list(video[start : end : self.frameskip])
 
     def __getitem__(self, index):
         episode = self.idx_to_episode[index]
@@ -121,8 +180,6 @@ class VideoDataset(Dataset):
         step_slice = episode_indices[start:stop]
         steps = self.dataset[step_slice]
 
-        decoders = {}
-
         for col, data in steps.items():
             if col == "action":
                 continue
@@ -131,11 +188,7 @@ class VideoDataset(Dataset):
             steps[col] = data
 
             if col in self.decode_columns:
-                if col not in decoders:
-                    decoders[col] = VideoDecoder(self.data_dir / data[0], device=self.device)
-
-                decoder = decoders[col]
-                steps[col] = list(decoder[start : stop : self.frameskip])
+                steps[col] = self.decode(steps[col], start=start, end=stop)
 
         if self.transform:
             steps = self.transform(steps)
@@ -156,3 +209,6 @@ class VideoDataset(Dataset):
         # TODO: support other video formats
         video_columns = {k for k in sample.keys() if isinstance(sample[k], str) and k.endswith(".mp4")}
         return video_columns
+
+
+# TODO check framedataset and videodataset give the same results

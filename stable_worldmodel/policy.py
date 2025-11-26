@@ -191,7 +191,7 @@ class WorldModelPolicy(BasePolicy):
 
 
 def AutoCostModel(model_name, cache_dir=None):
-    cache_dir = Path(cache_dir or swm.data.get_cache_dir())
+    cache_dir = Path(cache_dir or swm.data.utils.get_cache_dir())
     path = cache_dir / f"{model_name}_object.ckpt"
     assert path.exists(), f"World model named {model_name} not found. Should launch pretraining first."
 

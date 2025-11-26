@@ -1,10 +1,9 @@
 from . import utils
-from .dataset import FrameDataset, StepsDataset, VideoDataset
+from .dataset import FrameDataset, VideoDataset
 
 
 __all__ = [
     "utils",
     "FrameDataset",
     "VideoDataset",
-    "StepsDataset",
 ]

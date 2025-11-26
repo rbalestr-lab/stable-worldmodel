@@ -70,7 +70,7 @@ from PIL import Image
 from rich import print
 
 import stable_worldmodel as swm
-from stable_worldmodel.data import is_image
+from stable_worldmodel.data.utils import is_image
 
 from .wrappers import MegaWrapper, VariationWrapper
 

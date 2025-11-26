@@ -12,7 +12,7 @@ from stable_worldmodel.data.utils import get_cache_dir
 class Dataset:
     def __init__(self, name, frameskip=1, num_step=-1, decode_columns=None, cache_dir=None):
         self.data_dir = Path(cache_dir or get_cache_dir(), name)
-        self.dataset = load_from_disk(self.data_dir, cache_dir=cache_dir)
+        self.dataset = load_from_disk(self.data_dir)
         self.frameskip = frameskip
         self.num_step = num_step
         self.dataset.set_format("torch")
@@ -154,3 +154,12 @@ class VideoDataset(Dataset):
         # TODO: support other video formats
         video_columns = {k for k in sample.keys() if isinstance(sample[k], str) and k.endswith(".mp4")}
         return video_columns
+
+
+if __name__ == "__main__":
+    ds = FrameDataset(
+        "pusht_expert_train",
+        frameskip=5,
+        num_step=4,
+        decode_columns=["pixels", "goal"],
+    )

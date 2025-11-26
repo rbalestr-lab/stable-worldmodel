@@ -10,13 +10,13 @@ from stable_worldmodel.data.utils import get_cache_dir
 
 
 class Dataset:
-    def __init__(self, name, frameskip=1, num_step=-1, decode_columns=None, cache_dir=None):
+    def __init__(self, name, frameskip=1, num_steps=-1, decode_columns=None, cache_dir=None):
         self.data_dir = Path(cache_dir or get_cache_dir(), name)
         self.dataset = load_from_disk(self.data_dir)
         self.frameskip = frameskip
-        self.num_step = num_step
+        self.num_steps = num_steps
         self.dataset.set_format("torch")
-        self.complete_traj = num_step < 0
+        self.complete_traj = num_steps < 0
 
         self.transform = None  # TODO
 
@@ -33,7 +33,7 @@ class Dataset:
         self.episodes = np.unique(episode_col)
         self.episode_indices = {ep: np.flatnonzero(episode_col == ep) for ep in self.episodes}
 
-        self.clip_len = max(frameskip * num_step, 1) if not self.complete_traj else 0
+        self.clip_len = max(frameskip * num_steps, 1) if not self.complete_traj else 0
 
         if any(len(self.episode_indices[ep]) < self.clip_len for ep in self.episodes):
             raise ValueError(f"All episodes must have at least {self.clip_len} steps")
@@ -90,7 +90,8 @@ class FrameDataset(Dataset):
             steps[col] = torch.stack(steps[col])
 
         # reshape action
-        steps["action"] = steps["action"].reshape(self.num_steps, -1)
+        act_shape = self.num_steps if not self.complete_traj else len(self.episode_indices[episode])
+        steps["action"] = steps["action"].reshape(act_shape, -1)
 
         return steps
 
@@ -146,7 +147,8 @@ class VideoDataset(Dataset):
             steps[col] = torch.stack(steps[col])
 
         # reshape action
-        steps["action"] = steps["action"].reshape(self.num_steps, -1)
+        act_shape = self.num_steps if not self.complete_traj else len(self.episode_indices[episode])
+        steps["action"] = steps["action"].reshape(act_shape, -1)
 
         return steps
 
@@ -154,12 +156,3 @@ class VideoDataset(Dataset):
         # TODO: support other video formats
         video_columns = {k for k in sample.keys() if isinstance(sample[k], str) and k.endswith(".mp4")}
         return video_columns
-
-
-if __name__ == "__main__":
-    ds = FrameDataset(
-        "pusht_expert_train",
-        frameskip=5,
-        num_step=4,
-        decode_columns=["pixels", "goal"],
-    )

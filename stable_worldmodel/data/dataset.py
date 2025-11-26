@@ -110,16 +110,45 @@ class VideoDataset(Dataset):
         return None
 
     def __getitem__(self, index):
-        episode = ...
-        start = ...
-        end = ...
+        episode = self.idx_to_episode[index]
+        episode_indices = self.episode_indices[episode]
+        offset = index - self.episode_starts[episode]
 
+        # determine clip bounds
+        start = offset if not self.complete_traj else 0
+        stop = start + self.clip_len if not self.complete_traj else len(self.episode_indices[episode])
+        step_slice = episode_indices[start:stop]
+        steps = self.dataset[step_slice]
+
+        decoders = {}
+
+        for col, data in steps.items():
+            if col == "action":
+                continue
+
+            data = data[:: self.frameskip]
+            steps[col] = data
+
+            if col in self.decode_columns:
+                if col not in decoders:
+                    decoders[col] = VideoDecoder(self.data_dir / data[0], device=self.device)
+
+                decoder = decoders[col]
+                steps[col] = list(decoder[start : stop : self.frameskip])
+
+        if self.transform:
+            steps = self.transform(steps)
+
+        # stack frames
         for col in self.decode_columns:
-            video_path = self.data_dir / f"videos/{episode:05d}_{col}.mp4"
-            decoder = VideoDecoder(video_path, device=self.device)
-            decoder[start : end : self.frameskip]
+            if col not in steps:
+                continue
+            steps[col] = torch.stack(steps[col])
 
-        return None
+        # reshape action
+        steps["action"] = steps["action"].reshape(self.num_steps, -1)
+
+        return steps
 
     def determine_video_columns(self, sample):
         # TODO: support other video formats

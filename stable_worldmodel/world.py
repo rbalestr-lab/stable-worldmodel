@@ -444,7 +444,7 @@ class World:
         [o.close() for o in out]
         print(f"Video saved to {video_path}")
 
-    def record_dataset(self, dataset_name, episodes=10, seed=None, cache_dir=None, options=None):
+    def record_dataset(self, dataset_name, episodes=10, seed=None, cache_dir=None, as_videos=False, options=None):
         """Collect episodes with the current policy and save as a HuggingFace Dataset.
 
         Executes the attached policy to collect demonstration or rollout data,
@@ -469,7 +469,8 @@ class World:
             seed (int, optional): Base random seed for reproducibility. Each episode
                 gets an incremental offset. Defaults to None (non-deterministic).
             cache_dir (str or Path, optional): Root directory for dataset storage.
-                If None, uses swm.data.utils.get_cache_dir(). Defaults to None.
+                If None, uses swm.data.get_cache_dir(). Defaults to None.
+            as_videos (bool, optional): If True, saves episodes as MP4 videos.
             options (dict, optional): Reset options for environments. Use
                 {'variation': ['all']} for full domain randomization. Defaults to None.
 
@@ -518,7 +519,7 @@ class World:
         if self._history_size > 1:
             raise NotImplementedError("Dataset recording with frame history > 1 is not supported.")
 
-        cache_dir = cache_dir or swm.data.utils.get_cache_dir()
+        cache_dir = cache_dir or swm.data.get_cache_dir()
         dataset_path = Path(cache_dir, dataset_name)
         dataset_path.mkdir(parents=True, exist_ok=True)
 
@@ -531,7 +532,13 @@ class World:
         self.reset(seed, options)  # <- incr global seed by num_envs
         root_seed = seed + self.num_envs if seed is not None else None
 
-        records = {key: list(value) for key, value in self.infos.items() if key[0] != "_"}
+        records = {}
+        for key, value in self.infos.items():
+            if key[0] == "_":
+                continue
+
+            value = value.squeeze(1) if isinstance(value, np.ndarray) else value
+            records[key] = list(value)
 
         records["episode_idx"] = list(episode_idx)
         records["policy"] = [self.policy.type] * self.num_envs
@@ -562,26 +569,29 @@ class World:
                 if key[0] == "_":
                     continue
 
+                data = self.infos[key]
+                data = data.squeeze(1) if isinstance(data, np.ndarray) else data
+
                 # shift actions
                 if key == "action":
-                    n_action = len(self.infos[key])
+                    n_action = len(data)
                     last_episode = records["episode_idx"][-n_action:]
                     action_mask = (last_episode == episode_idx)[:, None]
 
                     # override last actions of continuing episodes
                     records[key][-n_action:] = np.where(
                         action_mask,
-                        self.infos[key],
+                        data,
                         np.nan,
                     )
 
                     # add new dummy action
-                    action_shape = np.shape(self.infos[key][0])
+                    action_shape = np.shape(data[0])
                     action_dtype = self.single_action_space.dtype
                     dummy_block = [np.full(action_shape, np.nan, dtype=action_dtype) for _ in range(self.num_envs)]
                     records[key].extend(dummy_block)
                 else:
-                    records[key].extend(list(self.infos[key]))
+                    records[key].extend(list(data))
 
             records["episode_idx"].extend(list(episode_idx))
             records["policy"].extend([self.policy.type] * self.num_envs)
@@ -610,24 +620,57 @@ class World:
         # save all jpeg images
         image_cols = {col for col in records if is_image(records[col][0])}
 
-        # pre-create all directories
-        for ep_idx in set(records["episode_idx"]):
-            img_folder = dataset_path / "img" / f"{ep_idx}"
-            img_folder.mkdir(parents=True, exist_ok=True)
+        # # pre-create all directories
+        # for ep_idx in set(records["episode_idx"]):
+        #     img_folder = dataset_path / "img" / f"{ep_idx}"
+        #     img_folder.mkdir(parents=True, exist_ok=True)
 
-        # dump all data
-        for i in range(len(records["episode_idx"])):
-            ep_idx = records["episode_idx"][i]
-            step_idx = records["step_idx"][i]
+        # TODO: should check if already some data has been saved
+        episode_idx = np.unique(records["episode_idx"])
+
+        for ep in episode_idx:
+            ep_mask = records["episode_idx"] == ep
+            step_mask = np.flatnonzero(ep_mask)
 
             for img_col in image_cols:
-                img = records[img_col][i]
-                img_folder = dataset_path / "img" / f"{ep_idx}"
-                img_path = img_folder / f"{step_idx}_{img_col.replace('.', '_')}.jpeg"
-                iio.imwrite(img_path, img)
+                col_name = img_col.replace(".", "_")
+                imgs = np.stack([records[img_col][i] for i in step_mask], axis=0)
 
-                # replace image in records with relative path
-                records[img_col][i] = str(img_path.relative_to(dataset_path))
+                # Prepare output path
+                if as_videos:
+                    output_dir = dataset_path / "videos"
+                    output_dir.mkdir(parents=True, exist_ok=True)
+                    file_path = output_dir / f"{ep}_{col_name}.mp4"
+                    iio.imwrite(file_path, imgs)
+                    paths = [str(file_path.relative_to(dataset_path))] * len(step_mask)
+                else:
+                    output_dir = dataset_path / "img" / f"{ep}"
+                    output_dir.mkdir(parents=True, exist_ok=True)
+                    paths = []
+                    for idx, img in enumerate(imgs):
+                        file_path = output_dir / f"{idx}_{col_name}.jpeg"
+                        iio.imwrite(file_path, img)
+                        paths.append(str(file_path.relative_to(dataset_path)))
+
+                # Update records
+                for i, path in zip(step_mask, paths):
+                    records[img_col][i] = path
+
+        # dump all images
+        # for i in range(len(records["episode_idx"])):
+        #     ep_idx = records["episode_idx"][i]
+        #     step_idx = records["step_idx"][i]
+
+        #     writer = i
+
+        #     for img_col in image_cols:
+        #         img = records[img_col][i]
+        #         img_folder = dataset_path / "img" / f"{ep_idx}"
+        #         img_path = img_folder / f"{step_idx}_{img_col.replace('.', '_')}.jpeg"
+        #         iio.imwrite(img_path, img)
+
+        #         # replace image in records with relative path
+        #         records[img_col][i] = str(img_path.relative_to(dataset_path))
 
         def determine_features(records):
             features = {

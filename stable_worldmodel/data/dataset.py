@@ -9,6 +9,10 @@ from torchvision.io import decode_image
 from stable_worldmodel.data.utils import get_cache_dir
 
 
+# TODO support automatic detection of shard folder
+# also save a tmp file when creating dataset for preemption issues.
+
+
 class Dataset:
     def __init__(self, name, frameskip=1, num_steps=1, decode_columns=None, transform=None, cache_dir=None):
         self.data_dir = Path(cache_dir or get_cache_dir(), name)

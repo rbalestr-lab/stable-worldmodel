@@ -209,6 +209,3 @@ class VideoDataset(Dataset):
         # TODO: support other video formats
         video_columns = {k for k in sample.keys() if isinstance(sample[k], str) and k.endswith(".mp4")}
         return video_columns
-
-
-# TODO check framedataset and videodataset give the same results

@@ -12,6 +12,8 @@ from stable_worldmodel.data.utils import get_cache_dir
 # TODO support automatic detection of shard folder
 # also save a tmp file when creating dataset for preemption issues.
 
+# TODO support loading mp4 clip from dataset
+
 
 class Dataset:
     def __init__(self, name, frameskip=1, num_steps=1, decode_columns=None, transform=None, cache_dir=None):

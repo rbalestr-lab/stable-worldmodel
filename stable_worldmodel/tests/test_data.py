@@ -10,8 +10,8 @@ import pytest
 import torch
 from datasets import Dataset
 
-from stable_worldmodel.data import (
-    StepsDataset,
+from stable_worldmodel.data import FrameDataset
+from stable_worldmodel.data.utils import (
     dataset_info,
     delete_dataset,
     delete_model,
@@ -261,7 +261,7 @@ def test_delete_dataset_success(monkeypatch):
         mock_dataset.cleanup_cache_files = MagicMock()
 
         with patch.dict(os.environ, {"STABLEWM_HOME": tmpdir}):
-            with patch("stable_worldmodel.data.load_from_disk", return_value=mock_dataset):
+            with patch("stable_worldmodel.data.utils.load_from_disk", return_value=mock_dataset):
                 delete_dataset("test_dataset")
 
                 # Verify dataset was cleaned up
@@ -274,7 +274,7 @@ def test_delete_dataset_not_exists():
     """Test delete_dataset prints error when dataset doesn't exist."""
     with tempfile.TemporaryDirectory() as tmpdir:
         with patch.dict(os.environ, {"STABLEWM_HOME": tmpdir}):
-            with patch("stable_worldmodel.data.print") as mock_print:
+            with patch("stable_worldmodel.data.utils.print") as mock_print:
                 delete_dataset("nonexistent_dataset")
                 # Should print error message
                 assert any("Error" in str(call) for call in mock_print.call_args_list)
@@ -292,8 +292,8 @@ def test_delete_dataset_error_handling(monkeypatch):
         mock_dataset.cleanup_cache_files = MagicMock(side_effect=Exception("Test error"))
 
         with patch.dict(os.environ, {"STABLEWM_HOME": tmpdir}):
-            with patch("stable_worldmodel.data.load_from_disk", return_value=mock_dataset):
-                with patch("stable_worldmodel.data.print") as mock_print:
+            with patch("stable_worldmodel.data.utils.load_from_disk", return_value=mock_dataset):
+                with patch("stable_worldmodel.data.utils.print") as mock_print:
                     delete_dataset("test_dataset")
                     # Should print error message
                     assert any("Error" in str(call) for call in mock_print.call_args_list)
@@ -312,7 +312,7 @@ def test_delete_model_success():
         (Path(tmpdir) / "model1_object.ckpt").touch()
 
         with patch.dict(os.environ, {"STABLEWM_HOME": tmpdir}):
-            with patch("stable_worldmodel.data.print") as mock_print:
+            with patch("stable_worldmodel.data.utils.print") as mock_print:
                 delete_model("model1")
 
                 # Verify files were deleted
@@ -344,7 +344,7 @@ def test_delete_model_error_handling():
 
         with patch.dict(os.environ, {"STABLEWM_HOME": tmpdir}):
             with patch("os.remove", side_effect=Exception("Permission denied")):
-                with patch("stable_worldmodel.data.print") as mock_print:
+                with patch("stable_worldmodel.data.utils.print") as mock_print:
                     delete_model("model1")
                     # Should print error message
                     assert any("Error" in str(call) for call in mock_print.call_args_list)
@@ -354,7 +354,7 @@ def test_delete_model_no_files():
     """Test delete_model when no matching files exist."""
     with tempfile.TemporaryDirectory() as tmpdir:
         with patch.dict(os.environ, {"STABLEWM_HOME": tmpdir}):
-            with patch("stable_worldmodel.data.print") as mock_print:
+            with patch("stable_worldmodel.data.utils.print") as mock_print:
                 delete_model("nonexistent_model")
                 # No files deleted, so print shouldn't be called
                 mock_print.assert_not_called()
@@ -465,7 +465,7 @@ def test_world_info_invalid_world():
         world_info("nonexistent_world")
 
 
-@patch("stable_worldmodel.data.swm.World")
+@patch("stable_worldmodel.data.utils.swm.World")
 @patch("stable_worldmodel.envs.WORLDS", {"test_world"})
 def test_world_info_success(mock_world_class):
     """Test world_info returns correct information."""
@@ -489,7 +489,7 @@ def test_world_info_success(mock_world_class):
     assert info["variation"]["has_variation"] is False
 
 
-@patch("stable_worldmodel.data.swm.World")
+@patch("stable_worldmodel.data.utils.swm.World")
 @patch("stable_worldmodel.envs.WORLDS", {"test_world"})
 def test_world_info_with_variation(mock_world_class):
     """Test world_info with variation space."""
@@ -514,7 +514,7 @@ def test_world_info_with_variation(mock_world_class):
     assert info["variation"]["names"] == ["color", "size"]
 
 
-@patch("stable_worldmodel.data.swm.World")
+@patch("stable_worldmodel.data.utils.swm.World")
 @patch("stable_worldmodel.envs.WORLDS", {"test_world"})
 def test_world_info_closes_world(mock_world_class):
     """Test world_info properly closes the world."""
@@ -533,7 +533,7 @@ def test_world_info_closes_world(mock_world_class):
     mock_world.close.assert_called_once()
 
 
-@patch("stable_worldmodel.data.swm.World")
+@patch("stable_worldmodel.data.utils.swm.World")
 @patch("stable_worldmodel.envs.WORLDS", {"test_world"})
 def test_world_info_closes_world_on_error(mock_world_class):
     """Test world_info closes world even if error occurs."""
@@ -553,7 +553,7 @@ def test_world_info_closes_world_on_error(mock_world_class):
     mock_world.close.assert_called_once()
 
 
-@patch("stable_worldmodel.data.swm.World")
+@patch("stable_worldmodel.data.utils.swm.World")
 @patch("stable_worldmodel.envs.WORLDS", {"test_world"})
 def test_world_info_caching(mock_world_class):
     """Test world_info uses caching for repeated calls."""
@@ -578,7 +578,7 @@ def test_world_info_caching(mock_world_class):
     assert info1 == info2
 
 
-@patch("stable_worldmodel.data.swm.World")
+@patch("stable_worldmodel.data.utils.swm.World")
 @patch("stable_worldmodel.envs.WORLDS", {"test_world"})
 def test_world_info_with_dict_space(mock_world_class):
     """Test world_info with Dict observation space."""
@@ -609,7 +609,7 @@ def test_world_info_with_dict_space(mock_world_class):
     assert "vector" in info["observation_space"]
 
 
-@patch("stable_worldmodel.data.swm.World")
+@patch("stable_worldmodel.data.utils.swm.World")
 @patch("stable_worldmodel.envs.WORLDS", {"test_world"})
 def test_world_info_with_tuple_space(mock_world_class):
     """Test world_info with Tuple action space."""
@@ -640,12 +640,12 @@ def test_world_info_with_tuple_space(mock_world_class):
 
 
 ###########################
-## StepsDataset tests    ##
+## FrameDataset tests    ##
 ###########################
 
 
 def test_steps_dataset_initialization():
-    """Test StepsDataset initialization."""
+    """Test FrameDataset initialization."""
     with tempfile.TemporaryDirectory() as tmpdir:
         dataset_path = Path(tmpdir) / "test_dataset"
         dataset_path.mkdir()
@@ -661,7 +661,7 @@ def test_steps_dataset_initialization():
         dataset.save_to_disk(str(dataset_path))
 
         with patch.dict(os.environ, {"STABLEWM_HOME": tmpdir}):
-            steps_dataset = StepsDataset("test_dataset", num_steps=2, frameskip=1)
+            steps_dataset = FrameDataset("test_dataset", num_steps=2, frameskip=1)
 
             assert steps_dataset.num_steps == 2
             assert steps_dataset.frameskip == 1
@@ -669,7 +669,7 @@ def test_steps_dataset_initialization():
 
 
 def test_steps_dataset_missing_required_columns():
-    """Test StepsDataset raises error for missing required columns."""
+    """Test FrameDataset raises error for missing required columns."""
     with tempfile.TemporaryDirectory() as tmpdir:
         dataset_path = Path(tmpdir) / "test_dataset"
         dataset_path.mkdir()
@@ -684,11 +684,11 @@ def test_steps_dataset_missing_required_columns():
 
         with patch.dict(os.environ, {"STABLEWM_HOME": tmpdir}):
             with pytest.raises(AssertionError, match="episode_idx"):
-                StepsDataset("test_dataset", num_steps=2)
+                FrameDataset("test_dataset", num_steps=2)
 
 
 def test_steps_dataset_episode_too_short():
-    """Test StepsDataset raises error when episode is too short."""
+    """Test FrameDataset raises error when episode is too short."""
     with tempfile.TemporaryDirectory() as tmpdir:
         dataset_path = Path(tmpdir) / "test_dataset"
         dataset_path.mkdir()
@@ -703,12 +703,12 @@ def test_steps_dataset_episode_too_short():
         dataset.save_to_disk(str(dataset_path))
 
         with patch.dict(os.environ, {"STABLEWM_HOME": tmpdir}):
-            with pytest.raises(ValueError, match="too short"):
-                StepsDataset("test_dataset", num_steps=2, frameskip=1)
+            with pytest.raises(ValueError, match="at least"):
+                FrameDataset("test_dataset", num_steps=2, frameskip=1)
 
 
 def test_steps_dataset_length():
-    """Test StepsDataset __len__ returns correct length."""
+    """Test FrameDataset __len__ returns correct length."""
     with tempfile.TemporaryDirectory() as tmpdir:
         dataset_path = Path(tmpdir) / "test_dataset"
         dataset_path.mkdir()
@@ -724,12 +724,12 @@ def test_steps_dataset_length():
 
         with patch.dict(os.environ, {"STABLEWM_HOME": tmpdir}):
             # num_steps=2, so we can have 4 possible slices (0-1, 1-2, 2-3, 3-4)
-            steps_dataset = StepsDataset("test_dataset", num_steps=2, frameskip=1)
+            steps_dataset = FrameDataset("test_dataset", num_steps=2, frameskip=1)
             assert len(steps_dataset) == 4
 
 
 def test_steps_dataset_getitem():
-    """Test StepsDataset __getitem__ returns correct data."""
+    """Test FrameDataset __getitem__ returns correct data."""
     with tempfile.TemporaryDirectory() as tmpdir:
         dataset_path = Path(tmpdir) / "test_dataset"
         dataset_path.mkdir()
@@ -759,7 +759,7 @@ def test_steps_dataset_getitem():
             return batch
 
         with patch.dict(os.environ, {"STABLEWM_HOME": tmpdir}):
-            steps_dataset = StepsDataset("test_dataset", num_steps=2, frameskip=1, transform=image_to_tensor)
+            steps_dataset = FrameDataset("test_dataset", num_steps=2, frameskip=1, transform=image_to_tensor)
 
             # Get first slice (steps 0-1)
             sample = steps_dataset[0]
@@ -771,7 +771,7 @@ def test_steps_dataset_getitem():
 
 
 def test_steps_dataset_frameskip():
-    """Test StepsDataset with frameskip."""
+    """Test FrameDataset with frameskip."""
     with tempfile.TemporaryDirectory() as tmpdir:
         dataset_path = Path(tmpdir) / "test_dataset"
         dataset_path.mkdir()
@@ -779,39 +779,32 @@ def test_steps_dataset_frameskip():
         # Create image files
         for i in range(10):
             img = PIL.Image.new("RGB", (32, 32), color=(i * 20, i * 20, i * 20))
-            img.save(dataset_path / f"img_{i}.png")
+            img.save(dataset_path / f"img_{i}.jpeg")
 
         # Episode with 10 steps
+        # Column name must end with .jpeg for determine_img_columns to detect it
         mock_data = {
             "episode_idx": [0] * 10,
             "step_idx": list(range(10)),
             "action": [np.array([float(i)]) for i in range(10)],
-            "pixels": [f"img_{i}.png" for i in range(10)],
+            "pixels.jpeg": [f"img_{i}.jpeg" for i in range(10)],
         }
         dataset = Dataset.from_dict(mock_data)
         dataset.save_to_disk(str(dataset_path))
 
-        # Define a transform that converts PIL images to tensors
-        def image_to_tensor(batch):
-            for key in ["pixels"]:
-                if key in batch and isinstance(batch[key][0], PIL.Image.Image):
-                    batch[key] = [
-                        torch.from_numpy(np.array(img)).permute(2, 0, 1).float() / 255.0 for img in batch[key]
-                    ]
-            return batch
-
         with patch.dict(os.environ, {"STABLEWM_HOME": tmpdir}):
             # num_steps=2, frameskip=2 means we need 4 steps total (0, 2 for observations)
-            steps_dataset = StepsDataset("test_dataset", num_steps=2, frameskip=2, transform=image_to_tensor)
+            steps_dataset = FrameDataset("test_dataset", num_steps=2, frameskip=2)
 
             sample = steps_dataset[0]
 
             # Should have 2 frames (with frameskip=2)
-            assert sample["pixels"].shape[0] == 2
+            # pixels.jpeg is a torch.Tensor after stacking
+            assert sample["pixels.jpeg"].shape[0] == 2
 
 
 def test_steps_dataset_multiple_episodes():
-    """Test StepsDataset with multiple episodes."""
+    """Test FrameDataset with multiple episodes."""
     with tempfile.TemporaryDirectory() as tmpdir:
         dataset_path = Path(tmpdir) / "test_dataset"
         dataset_path.mkdir()
@@ -832,44 +825,47 @@ def test_steps_dataset_multiple_episodes():
         dataset.save_to_disk(str(dataset_path))
 
         with patch.dict(os.environ, {"STABLEWM_HOME": tmpdir}):
-            steps_dataset = StepsDataset("test_dataset", num_steps=2, frameskip=1)
+            steps_dataset = FrameDataset("test_dataset", num_steps=2, frameskip=1)
 
             # Each episode has 4 steps, so 3 valid slices per episode = 6 total
             assert len(steps_dataset) == 6
 
 
 def test_steps_dataset_infer_img_path_columns():
-    """Test StepsDataset infer_img_path_columns."""
+    """Test FrameDataset infer_img_path_columns."""
     with tempfile.TemporaryDirectory() as tmpdir:
         dataset_path = Path(tmpdir) / "test_dataset"
         dataset_path.mkdir()
 
         # Create image files
         img = PIL.Image.new("RGB", (32, 32))
-        img.save(dataset_path / "img_0.png")
-        img.save(dataset_path / "goal_0.jpg")
+        img.save(dataset_path / "img_0.jpeg")
+        img.save(dataset_path / "goal_0.jpeg")
 
+        # The code's determine_img_columns checks if column NAME ends with .jpeg
+        # So we need column names like "pixels.jpeg" for auto-detection
         mock_data = {
             "episode_idx": [0, 0, 0],
             "step_idx": [0, 1, 2],
             "action": [np.array([0.0]) for _ in range(3)],
-            "pixels": ["img_0.png", "img_0.png", "img_0.png"],
-            "goal": ["goal_0.jpg", "goal_0.jpg", "goal_0.jpg"],
+            "pixels.jpeg": ["img_0.jpeg", "img_0.jpeg", "img_0.jpeg"],
+            "goal.jpeg": ["goal_0.jpeg", "goal_0.jpeg", "goal_0.jpeg"],
             "other_data": [1, 2, 3],
         }
         dataset = Dataset.from_dict(mock_data)
         dataset.save_to_disk(str(dataset_path))
 
         with patch.dict(os.environ, {"STABLEWM_HOME": tmpdir}):
-            steps_dataset = StepsDataset("test_dataset", num_steps=2, frameskip=1)
+            steps_dataset = FrameDataset("test_dataset", num_steps=2, frameskip=1)
 
-            assert "pixels" in steps_dataset.img_cols
-            assert "goal" in steps_dataset.img_cols
-            assert "other_data" not in steps_dataset.img_cols
+            # decode_columns is the attribute that holds detected image columns
+            assert "pixels.jpeg" in steps_dataset.decode_columns
+            assert "goal.jpeg" in steps_dataset.decode_columns
+            assert "other_data" not in steps_dataset.decode_columns
 
 
 def test_steps_dataset_with_transform():
-    """Test StepsDataset with transform function."""
+    """Test FrameDataset with transform function."""
     with tempfile.TemporaryDirectory() as tmpdir:
         dataset_path = Path(tmpdir) / "test_dataset"
         dataset_path.mkdir()
@@ -900,7 +896,7 @@ def test_steps_dataset_with_transform():
             return batch
 
         with patch.dict(os.environ, {"STABLEWM_HOME": tmpdir}):
-            steps_dataset = StepsDataset("test_dataset", num_steps=2, frameskip=1, transform=mock_transform)
+            steps_dataset = FrameDataset("test_dataset", num_steps=2, frameskip=1, transform=mock_transform)
 
             sample = steps_dataset[0]
             assert "transformed" in sample
@@ -908,7 +904,7 @@ def test_steps_dataset_with_transform():
 
 
 def test_steps_dataset_custom_cache_dir():
-    """Test StepsDataset with custom cache_dir."""
+    """Test FrameDataset with custom cache_dir."""
     with tempfile.TemporaryDirectory() as tmpdir:
         custom_cache = Path(tmpdir) / "custom_cache"
         dataset_path = custom_cache / "test_dataset"
@@ -922,13 +918,13 @@ def test_steps_dataset_custom_cache_dir():
         dataset = Dataset.from_dict(mock_data)
         dataset.save_to_disk(str(dataset_path))
 
-        steps_dataset = StepsDataset("test_dataset", num_steps=2, frameskip=1, cache_dir=str(custom_cache))
+        steps_dataset = FrameDataset("test_dataset", num_steps=2, frameskip=1, cache_dir=str(custom_cache))
 
         assert steps_dataset.data_dir == dataset_path
 
 
 def test_steps_dataset_action_reshape():
-    """Test StepsDataset correctly reshapes actions."""
+    """Test FrameDataset correctly reshapes actions."""
     with tempfile.TemporaryDirectory() as tmpdir:
         dataset_path = Path(tmpdir) / "test_dataset"
         dataset_path.mkdir()
@@ -945,7 +941,7 @@ def test_steps_dataset_action_reshape():
         dataset.save_to_disk(str(dataset_path))
 
         with patch.dict(os.environ, {"STABLEWM_HOME": tmpdir}):
-            steps_dataset = StepsDataset("test_dataset", num_steps=2, frameskip=1)
+            steps_dataset = FrameDataset("test_dataset", num_steps=2, frameskip=1)
 
             sample = steps_dataset[0]
 

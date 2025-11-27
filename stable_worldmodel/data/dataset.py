@@ -10,15 +10,14 @@ from stable_worldmodel.data.utils import get_cache_dir
 
 
 class Dataset:
-    def __init__(self, name, frameskip=1, num_steps=1, decode_columns=None, cache_dir=None):
+    def __init__(self, name, frameskip=1, num_steps=1, decode_columns=None, transform=None, cache_dir=None):
         self.data_dir = Path(cache_dir or get_cache_dir(), name)
         self.dataset = load_from_disk(self.data_dir)
         self.frameskip = frameskip
         self.num_steps = num_steps
         self.dataset.set_format("torch")
         self.complete_traj = num_steps < 0
-
-        self.transform = None  # TODO
+        self.transform = transform
 
         if type(decode_columns) is str:
             decode_columns = [decode_columns]

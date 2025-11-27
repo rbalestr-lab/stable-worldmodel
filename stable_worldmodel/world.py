@@ -64,12 +64,14 @@ import gymnasium as gym
 import imageio
 import imageio.v3 as iio
 import numpy as np
+import torch
 from datasets import Dataset, Features, Value, load_from_disk
 from loguru import logger as logging
 from PIL import Image
 from rich import print
 
 import stable_worldmodel as swm
+from stable_worldmodel.data.dataset import Dataset as SWMDataset
 from stable_worldmodel.data.utils import is_image
 
 from .wrappers import MegaWrapper, VariationWrapper
@@ -964,14 +966,171 @@ class World:
 
         return results
 
+    # def evaluate_from_dataset(
+    #     self,
+    #     dataset_name: str,
+    #     episodes_idx: int | list[int],
+    #     start_steps: int | list[int],
+    #     goal_offset_steps: int,
+    #     eval_budget: int,
+    #     cache_dir: str | None = None,
+    #     callables: dict | None = None,
+    # ):
+    #     assert (
+    #         self.envs.envs[0].spec.max_episode_steps is None
+    #         or self.envs.envs[0].spec.max_episode_steps >= goal_offset_steps
+    #     ), "env max_episode_steps must be greater than eval_budget"
+
+    #     if isinstance(episodes_idx, int):
+    #         episodes_idx = [episodes_idx]
+
+    #     if isinstance(start_steps, int):
+    #         start_steps = [start_steps]
+
+    #     episodes_idx = np.array(episodes_idx)
+    #     start_steps = np.array(start_steps)
+    #     end_steps_idx = start_steps + goal_offset_steps
+
+    #     if not (len(episodes_idx) == len(start_steps)):
+    #         raise ValueError("episodes_idx and start_steps must have the same length")
+
+    #     if len(episodes_idx) != self.num_envs:
+    #         raise ValueError("Number of episodes to evaluate must match number of envs")
+
+    #     dataset_path = Path(cache_dir or swm.data.utils.get_cache_dir()) / dataset_name
+    #     dataset = load_from_disk(dataset_path).with_format("numpy")
+    #     columns = set(dataset.column_names)
+
+    #     assert "episode_idx" in columns, "'episode_idx' column not found in dataset"
+    #     assert "step_idx" in columns, "'step_idx' column not found in dataset"
+
+    #     episodes_col = dataset["episode_idx"][:]
+    #     dataset_steps_idx = []
+    #     for i, ep in enumerate(episodes_idx):
+    #         ep_indices_in_dataset = np.nonzero(episodes_col == ep)[0]
+    #         episode_len = len(ep_indices_in_dataset)
+    #         ep_indices_in_dataset.sort()  # ensure sorted order
+    #         replay_slice = ep_indices_in_dataset[start_steps[i] : end_steps_idx[i]]
+    #         dataset_steps_idx.append(replay_slice)
+
+    #         if episode_len < start_steps[i]:
+    #             raise ValueError(f"Episode {ep} is too short for the requested start step {start_steps[i]}")
+
+    #         if episode_len < end_steps_idx[i]:
+    #             raise ValueError(f"Episode {ep} is too short for the requested end step {end_steps_idx[i]}")
+
+    #         # check episode length
+    #         if len(replay_slice) != goal_offset_steps:
+    #             raise ValueError(f"Episode {ep} has length {len(replay_slice)}, should be {goal_offset_steps}")
+    #     dataset_steps_idx = np.array(dataset_steps_idx)
+
+    #     _init_step = dataset[dataset_steps_idx[:, 0]]
+    #     _goal_step = dataset[dataset_steps_idx[:, -1]]
+
+    #     init_step = {}
+    #     for key, value in _init_step.items():
+    #         if key == "pixels":
+    #             init_step["pixels"] = np.stack(
+    #                 [np.array(Image.open(dataset_path / path).convert("RGB"), dtype=np.uint8) for path in value]
+    #             )
+    #             continue
+    #         init_step[key] = value
+
+    #     goal_step = {}
+    #     for key, value in _goal_step.items():
+    #         if key == "pixels":
+    #             goal_step["goal"] = np.stack(
+    #                 [np.array(Image.open(dataset_path / path).convert("RGB"), dtype=np.uint8) for path in value]
+    #             )
+    #             continue
+
+    #         key = f"goal_{key}" if not key.startswith("goal") else key
+    #         goal_step[key] = value
+
+    #     # get dataset info
+    #     seeds = init_step.get("seed")
+    #     # get dataset variation
+    #     vkey = "variation."
+    #     variations = [col.removeprefix(vkey) for col in columns if col.startswith(vkey)]
+    #     options = {"variations": variations or None}
+
+    #     init_step.update(deepcopy(goal_step))
+    #     self.reset(seed=seeds, options=options)  # set seeds for all envs
+
+    #     # apply callable list (e.g used for set initial position if not access to seed)
+    #     callables = callables or {}
+    #     for i, env in enumerate(self.envs.unwrapped.envs):
+    #         env = env.unwrapped
+    #         for method_name, col_name in callables.items():
+    #             if not hasattr(env, method_name):
+    #                 logging.warning(f"Env {env} has no method {method_name}, skipping callable")
+    #                 continue
+
+    #             if col_name not in init_step:
+    #                 logging.warning(f"Column {col_name} not found in dataset, skipping callable for env {env}")
+    #                 continue
+
+    #             method = getattr(env, method_name)
+    #             data = deepcopy(init_step[col_name][i])
+    #             method(data)
+
+    #     for i, env in enumerate(self.envs.unwrapped.envs):
+    #         env = env.unwrapped
+    #         assert np.allclose(init_step["state"][i], env._get_obs()), "State info does not match at reset"
+    #         assert np.array_equal(init_step["goal_state"][i], goal_step["goal_state"][i]), (
+    #             "Goal state info does not match at reset"
+    #         )
+
+    #     results = {
+    #         "success_rate": 0,
+    #         "episode_successes": np.zeros(len(episodes_idx)),
+    #         "seeds": seeds,
+    #     }
+
+    #     # broadcast info dict from dataset to match envs infos shape
+    #     goal_step = {
+    #         k: (np.broadcast_to(v[:, None, ...], self.infos[k].shape) if k in self.infos else v)
+    #         for k, v in goal_step.items()
+    #     }
+
+    #     # TODO get the data from the previous step in the dataset for history
+    #     init_step = {
+    #         k: (np.broadcast_to(v[:, None, ...], self.infos[k].shape) if k in self.infos else v)
+    #         for k, v in init_step.items()
+    #     }
+
+    #     # update the reset with our new init and goal infos
+    #     self.infos.update(deepcopy(init_step))
+    #     self.infos.update(deepcopy(goal_step))
+
+    #     assert np.allclose(self.infos["goal"], goal_step["goal"]), "Goal info does not match"
+
+    #     # TODO assert goal and start state are identical as in the rollout
+    #     # run normal evaluation for eval_budget and TODO: record video
+    #     for _ in range(eval_budget):
+    #         self.infos.update(deepcopy(goal_step))
+    #         self.step()
+    #         results["episode_successes"] = np.logical_or(results["episode_successes"], self.terminateds)
+    #         # for auto-reset
+    #         self.envs.unwrapped._autoreset_envs = np.zeros((self.num_envs,))
+
+    #     n_episodes = len(episodes_idx)
+
+    #     # compute success rate
+    #     results["success_rate"] = float(np.sum(results["episode_successes"])) / n_episodes * 100.0
+
+    #     if results["seeds"] is not None:
+    #         assert np.unique(results["seeds"]).shape[0] == n_episodes, "Some episode seeds are identical!"
+
+    #     return results
+
     def evaluate_from_dataset(
         self,
-        dataset_name: str,
+        dataset: SWMDataset,
         episodes_idx: int | list[int],
         start_steps: int | list[int],
         goal_offset_steps: int,
         eval_budget: int,
-        cache_dir: str | None = None,
         callables: dict | None = None,
     ):
         assert (
@@ -979,15 +1138,9 @@ class World:
             or self.envs.envs[0].spec.max_episode_steps >= goal_offset_steps
         ), "env max_episode_steps must be greater than eval_budget"
 
-        if isinstance(episodes_idx, int):
-            episodes_idx = [episodes_idx]
-
-        if isinstance(start_steps, int):
-            start_steps = [start_steps]
-
         episodes_idx = np.array(episodes_idx)
         start_steps = np.array(start_steps)
-        end_steps_idx = start_steps + goal_offset_steps
+        end_steps = start_steps + goal_offset_steps
 
         if not (len(episodes_idx) == len(start_steps)):
             raise ValueError("episodes_idx and start_steps must have the same length")
@@ -995,55 +1148,33 @@ class World:
         if len(episodes_idx) != self.num_envs:
             raise ValueError("Number of episodes to evaluate must match number of envs")
 
-        dataset_path = Path(cache_dir or swm.data.utils.get_cache_dir()) / dataset_name
-        dataset = load_from_disk(dataset_path).with_format("numpy")
-        columns = set(dataset.column_names)
+        data = dataset.load_chunk(episodes_idx, start_steps, end_steps)
+        columns = dataset.dataset.column_names
 
-        assert "episode_idx" in columns, "'episode_idx' column not found in dataset"
-        assert "step_idx" in columns, "'step_idx' column not found in dataset"
+        # keep relevant part of the chunk
+        init_step_per_env = {c: [] for c in columns}
+        goal_step_per_env = {c: [] for c in columns}
 
-        episodes_col = dataset["episode_idx"][:]
-        dataset_steps_idx = []
-        for i, ep in enumerate(episodes_idx):
-            ep_indices_in_dataset = np.nonzero(episodes_col == ep)[0]
-            episode_len = len(ep_indices_in_dataset)
-            ep_indices_in_dataset.sort()  # ensure sorted order
-            replay_slice = ep_indices_in_dataset[start_steps[i] : end_steps_idx[i]]
-            dataset_steps_idx.append(replay_slice)
+        for i, ep in enumerate(data):
+            for col in columns:
+                if col.startswith("goal"):
+                    continue
 
-            if episode_len < start_steps[i]:
-                raise ValueError(f"Episode {ep} is too short for the requested start step {start_steps[i]}")
+                init_data = ep[col][0]
+                goal_data = ep[col][-1]
 
-            if episode_len < end_steps_idx[i]:
-                raise ValueError(f"Episode {ep} is too short for the requested end step {end_steps_idx[i]}")
+                init_data = init_data.numpy() if isinstance(init_data, torch.Tensor) else init_data
+                goal_data = goal_data.numpy() if isinstance(goal_data, torch.Tensor) else goal_data
 
-            # check episode length
-            if len(replay_slice) != goal_offset_steps:
-                raise ValueError(f"Episode {ep} has length {len(replay_slice)}, should be {goal_offset_steps}")
-        dataset_steps_idx = np.array(dataset_steps_idx)
+                init_step_per_env[col].append(init_data)
+                goal_step_per_env[col].append(goal_data)
 
-        _init_step = dataset[dataset_steps_idx[:, 0]]
-        _goal_step = dataset[dataset_steps_idx[:, -1]]
-
-        init_step = {}
-        for key, value in _init_step.items():
-            if key == "pixels":
-                init_step["pixels"] = np.stack(
-                    [np.array(Image.open(dataset_path / path).convert("RGB"), dtype=np.uint8) for path in value]
-                )
-                continue
-            init_step[key] = value
+        init_step = {k: np.stack(v) for k, v in deepcopy(init_step_per_env).items()}
 
         goal_step = {}
-        for key, value in _goal_step.items():
-            if key == "pixels":
-                goal_step["goal"] = np.stack(
-                    [np.array(Image.open(dataset_path / path).convert("RGB"), dtype=np.uint8) for path in value]
-                )
-                continue
-
-            key = f"goal_{key}" if not key.startswith("goal") else key
-            goal_step[key] = value
+        for key, value in goal_step_per_env.items():
+            key = "goal" if key == "pixels" else f"goal_{key}"
+            goal_step[key] = np.stack(value)
 
         # get dataset info
         seeds = init_step.get("seed")

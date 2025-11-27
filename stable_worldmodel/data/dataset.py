@@ -21,7 +21,7 @@ class Dataset:
 
         if type(decode_columns) is str:
             decode_columns = [decode_columns]
-        self.decode_columns = decode_columns or []
+        self.decode_columns = decode_columns
 
         assert "episode_idx" in self.dataset.column_names, "Dataset must have 'episode_idx' column"
         assert "step_idx" in self.dataset.column_names, "Dataset must have 'step_idx' column"
@@ -114,7 +114,7 @@ class FrameDataset(Dataset):
         self.decode_columns = self.decode_columns or self.determine_img_columns(self.dataset[0])
 
     def decode(self, col_data, start=0, end=-1):
-        return [decode_image(self.data_dir / img_path) for img_path in col_data]
+        return [decode_image(self.data_dir / img_path).permute(1, 2, 0) for img_path in col_data]
 
     def __getitem__(self, index):
         episode = self.idx_to_episode[index]
@@ -154,7 +154,7 @@ class FrameDataset(Dataset):
 
     def determine_img_columns(self, sample):
         # TODO: support other image formats
-        img_columns = {k for k in sample.keys() if isinstance(sample[k], str) and k.endswith(".jpeg")}
+        img_columns = {k for k in sample.keys() if isinstance(sample[k], str) and sample[k].endswith(".jpeg")}
         return img_columns
 
 
@@ -206,5 +206,5 @@ class VideoDataset(Dataset):
 
     def determine_video_columns(self, sample):
         # TODO: support other video formats
-        video_columns = {k for k in sample.keys() if isinstance(sample[k], str) and k.endswith(".mp4")}
+        video_columns = {k for k in sample.keys() if isinstance(sample[k], str) and sample[k].endswith(".mp4")}
         return video_columns

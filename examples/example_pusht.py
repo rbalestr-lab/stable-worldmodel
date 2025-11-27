@@ -151,8 +151,9 @@ if __name__ == "__main__":
     print("Evaluating episodes: ", episode_idx)
     print("Starting steps: ", start_steps)
 
+    dataset = swm.data.FrameDataset("pusht_expert_train")
     results = world.evaluate_from_dataset(
-        "pusht_expert_train",
+        dataset,
         start_steps=start_steps,
         episodes_idx=episode_idx,
         goal_offset_steps=25,

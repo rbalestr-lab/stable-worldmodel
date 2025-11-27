@@ -70,9 +70,8 @@ from loguru import logger as logging
 from PIL import Image
 from rich import print
 
-import stable_worldmodel as swm
 from stable_worldmodel.data.dataset import Dataset as SWMDataset
-from stable_worldmodel.data.utils import is_image
+from stable_worldmodel.data.utils import get_cache_dir, is_image
 
 from .wrappers import MegaWrapper, VariationWrapper
 
@@ -444,7 +443,7 @@ class World:
         [o.close() for o in out]
         print(f"Video saved to {video_path}")
 
-    def record_dataset(self, dataset_name, episodes=10, seed=None, cache_dir=None, as_videos=False, options=None):
+    def record_dataset(self, dataset_name, episodes=10, seed=None, cache_dir=None, mode="frame", options=None):
         """Collect episodes with the current policy and save as a HuggingFace Dataset.
 
         Executes the attached policy to collect demonstration or rollout data,
@@ -469,8 +468,9 @@ class World:
             seed (int, optional): Base random seed for reproducibility. Each episode
                 gets an incremental offset. Defaults to None (non-deterministic).
             cache_dir (str or Path, optional): Root directory for dataset storage.
-                If None, uses swm.data.get_cache_dir(). Defaults to None.
-            as_videos (bool, optional): If True, saves episodes as MP4 videos.
+                If None, uses get_cache_dir(). Defaults to None.
+            mode (str, optional): Type of dataset to record. 'frame' for save as images,
+                'video' for save as videos. Defaults to 'frame'.
             options (dict, optional): Reset options for environments. Use
                 {'variation': ['all']} for full domain randomization. Defaults to None.
 
@@ -519,7 +519,7 @@ class World:
         if self._history_size > 1:
             raise NotImplementedError("Dataset recording with frame history > 1 is not supported.")
 
-        cache_dir = cache_dir or swm.data.get_cache_dir()
+        cache_dir = cache_dir or get_cache_dir()
         dataset_path = Path(cache_dir, dataset_name)
         dataset_path.mkdir(parents=True, exist_ok=True)
 
@@ -637,13 +637,13 @@ class World:
                 imgs = np.stack([records[img_col][i] for i in step_mask], axis=0)
 
                 # Prepare output path
-                if as_videos:
+                if mode == "video":
                     output_dir = dataset_path / "videos"
                     output_dir.mkdir(parents=True, exist_ok=True)
                     file_path = output_dir / f"{ep}_{col_name}.mp4"
                     iio.imwrite(file_path, imgs)
                     paths = [str(file_path.relative_to(dataset_path))] * len(step_mask)
-                else:
+                elif mode == "frame":
                     output_dir = dataset_path / "img" / f"{ep}"
                     output_dir.mkdir(parents=True, exist_ok=True)
                     paths = []
@@ -651,6 +651,8 @@ class World:
                         file_path = output_dir / f"{idx}_{col_name}.jpeg"
                         iio.imwrite(file_path, img)
                         paths.append(str(file_path.relative_to(dataset_path)))
+                else:
+                    raise ValueError(f"Unknown mode {mode} for saving dataset images/videos.")
 
                 # Update records
                 for i, path in zip(step_mask, paths):
@@ -759,7 +761,7 @@ class World:
             num_proc (int, optional): Number of processes for parallel dataset filtering.
                 Higher values speed up loading for large datasets. Defaults to 4.
             cache_dir (str or Path, optional): Root directory where dataset is stored.
-                If None, uses swm.data.utils.get_cache_dir(). Defaults to None.
+                If None, uses get_cache_dir(). Defaults to None.
 
         Raises:
             AssertionError: If dataset doesn't exist in cache_dir, or if episode
@@ -790,9 +792,9 @@ class World:
                     max_steps=100
                 )
         """
-        cache_dir = cache_dir or swm.data.utils.get_cache_dir()
+        cache_dir = cache_dir or get_cache_dir()
         dataset_path = Path(cache_dir, dataset_name)
-        assert dataset_path.is_dir(), f"Dataset {dataset_name} not found in cache dir {swm.data.utils.get_cache_dir()}"
+        assert dataset_path.is_dir(), f"Dataset {dataset_name} not found in cache dir {get_cache_dir()}"
 
         episode_idx = [episode_idx] if isinstance(episode_idx, int) else episode_idx
         viewname = [viewname] if isinstance(viewname, str) else viewname

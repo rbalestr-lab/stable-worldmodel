@@ -1,24 +1,78 @@
+import logging
+import os
 from pathlib import Path
 
 import numpy as np
 import torch
-from datasets import load_from_disk
+from datasets import concatenate_datasets, load_from_disk
 from torchcodec.decoders import VideoDecoder
 from torchvision.io import decode_image
 
 from stable_worldmodel.data.utils import get_cache_dir
 
 
+# TODO use mode="frame" or "video" when recording dataset
 # TODO support automatic detection of shard folder
 # also save a tmp file when creating dataset for preemption issues.
 
 # TODO support loading mp4 clip from dataset
 
 
+def find_shard_dirs(root: str, target_dir: str = "img") -> list[str]:
+    """Find all subdirectories named `target_dir` within `root`."""
+    result = []
+    for current_path, dirs, files in os.walk(root):
+        if target_dir in dirs:
+            result.append(current_path)
+            dirs.remove(target_dir)  # stop recursion
+    return result
+
+
+def build_dataset_from_shards(shard_dirs):
+    """Merge multiple datasets and re-index episode indices."""
+    merged_datasets = []
+    current_episode_idx = 0
+    for shard in shard_dirs:
+        dataset = load_from_disk(shard)
+
+        # re-index episode idx
+        episode_col = np.array(dataset["episode_idx"][:])
+        new_episode_col = episode_col + current_episode_idx
+        dataset = dataset.remove_columns("episode_idx")
+        dataset = dataset.add_column("episode_idx", new_episode_col)
+
+        # add shard path in dir
+        dataset = dataset.add_column("data_dir", [shard] * len(dataset))
+        current_episode_idx += episode_col.max() + 1
+        merged_datasets.append(dataset)
+
+    return concatenate_datasets(merged_datasets)
+
+
 class Dataset:
-    def __init__(self, name, frameskip=1, num_steps=1, decode_columns=None, transform=None, cache_dir=None):
-        self.data_dir = Path(cache_dir or get_cache_dir(), name)
-        self.dataset = load_from_disk(self.data_dir)
+    def __init__(
+        self,
+        name,
+        frameskip=1,
+        num_steps=1,
+        decode_columns=None,
+        transform=None,
+        obs_type="img",
+        cache_dir=None,
+    ):
+        # 1. detect is there are shard folders
+        # 2. for each shard folder, load dataset
+        # 3. concatenate datasets + re-index episodes
+        # 4. when loading video or images should add all the intermediate path from data_dir to the videos/img folder
+        # to go 4 just keep a mapping from episode_idx to "data_dir" + the shard folder
+
+        # load dataset from disk (handle shards if any)
+        data_dir = Path(cache_dir or get_cache_dir(), name)
+        self.shard_dirs = find_shard_dirs(data_dir, target_dir=obs_type)
+        self.dataset = build_dataset_from_shards(self.shard_dirs)
+
+        logging.info(f"🛢️🛢️🛢️ Loaded raw dataset '{name}' from {len(self.shard_dirs)} shards 🛢️🛢️🛢️")
+
         self.frameskip = frameskip
         self.num_steps = num_steps
         self.dataset.set_format("torch")
@@ -52,7 +106,7 @@ class Dataset:
     def __len__(self):
         return int(self.episode_starts[-1]) if not self.complete_traj else len(self.episodes)
 
-    def decode(self, col_data, indices):
+    def decode(self, data_dir, col_data, indices):
         raise NotImplementedError("Dataset.decode must be implemented in subclass")
 
     def load_chunk(self, episode, start, end):
@@ -94,7 +148,7 @@ class Dataset:
                 steps[col] = data
 
                 if col in self.decode_columns:
-                    steps[col] = self.decode(steps[col], start=s, end=en)
+                    steps[col] = self.decode(steps["data_dir"], steps[col], start=s, end=en)
 
             if self.transform:
                 steps = self.transform(steps)
@@ -116,11 +170,12 @@ class Dataset:
 
 class FrameDataset(Dataset):
     def __init__(self, name, *args, **kwargs):
-        super().__init__(name, *args, **kwargs)
+        super().__init__(name, *args, obs_type="img", **kwargs)
         self.decode_columns = self.decode_columns or self.determine_img_columns(self.dataset[0])
 
-    def decode(self, col_data, start=0, end=-1):
-        return [decode_image(self.data_dir / img_path).permute(1, 2, 0) for img_path in col_data]
+    def decode(self, data_dirs, col_data, start=0, end=-1):
+        pairs = zip(data_dirs, col_data)
+        return [decode_image(os.path.join(dir, img_path)).permute(1, 2, 0) for dir, img_path in pairs]
 
     def __getitem__(self, index):
         episode = self.idx_to_episode[index]
@@ -141,7 +196,7 @@ class FrameDataset(Dataset):
             steps[col] = data
 
             if col in self.decode_columns:
-                steps[col] = self.decode(steps[col])
+                steps[col] = self.decode(steps["data_dir"], steps[col])
 
         if self.transform:
             steps = self.transform(steps)
@@ -166,12 +221,13 @@ class FrameDataset(Dataset):
 
 class VideoDataset(Dataset):
     def __init__(self, name, *args, device="cpu", **kwargs):
-        super().__init__(name, *args, **kwargs)
+        super().__init__(name, *args, obs_type="videos", **kwargs)
         self.device = device
         self.decode_columns = self.decode_columns or self.determine_video_columns(self.dataset[0])
 
-    def decode(self, col_data, start=0, end=-1):
-        video = VideoDecoder(self.data_dir / col_data[0], device=self.device)
+    def decode(self, data_dirs, col_data, start=0, end=-1):
+        path = os.path.join(data_dirs[0], col_data[0])
+        video = VideoDecoder(path, device=self.device)
         return list(video[start : end : self.frameskip])
 
     def __getitem__(self, index):
@@ -193,7 +249,7 @@ class VideoDataset(Dataset):
             steps[col] = data
 
             if col in self.decode_columns:
-                steps[col] = self.decode(steps[col], start=start, end=stop)
+                steps[col] = self.decode(steps["data_dir"], steps[col], start=start, end=stop)
 
         if self.transform:
             steps = self.transform(steps)

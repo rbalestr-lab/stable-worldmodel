@@ -1,18 +1,15 @@
 from __future__ import annotations
 
-import stable_worldmodel as swm
-import gymnasium as gym
-import minigrid
-from minigrid.wrappers import RGBImgObsWrapper
+from collections.abc import Sequence
 
+import numpy as np
 from minigrid.core.grid import Grid
 from minigrid.core.mission import MissionSpace
 from minigrid.core.world_object import Goal
 from minigrid.minigrid_env import MiniGridEnv
 
+import stable_worldmodel as swm
 from stable_worldmodel import spaces
-import numpy as np
-from collections.abc import Sequence
 
 
 DEFAULT_VARIATIONS = (
@@ -24,15 +21,16 @@ DEFAULT_VARIATIONS = (
     "maze.p_vertical",
 )
 
+
 class SimpleNavigationEnv(MiniGridEnv):
-    """ Simple Navigation Environment
+    """Simple Navigation Environment
 
     The environment is a MiniGrid with a random maze. The agent is a point agent that can move in the maze. The goal is to reach the goal square.
     The agent can move in the maze by moving forward, turning left, or turning right.
     """
 
     def __init__(self, size=8, render_mode="rgb_array", *args, **kwargs):
-        """ Initialize the Simple Navigation Environment
+        """Initialize the Simple Navigation Environment
 
         Args:
             size: size of the maze (width and height)
@@ -41,8 +39,14 @@ class SimpleNavigationEnv(MiniGridEnv):
             **kwargs: additional keyword arguments to pass to the parent class
         """
 
-        super().__init__(grid_size=size, mission_space=MissionSpace(mission_func=self._gen_mission), render_mode=render_mode, *args, **kwargs)
-      
+        super().__init__(
+            grid_size=size,
+            mission_space=MissionSpace(mission_func=self._gen_mission),
+            render_mode=render_mode,
+            *args,
+            **kwargs,
+        )
+
         num_dirs = 4
         inner_width, inner_height = self.width - 2, self.height - 2
 
@@ -60,7 +64,7 @@ class SimpleNavigationEnv(MiniGridEnv):
                 ),
             }
         )
-        
+
         # turn left, turn right, move forward
         self.action_space = spaces.Discrete(3)
 
@@ -97,7 +101,7 @@ class SimpleNavigationEnv(MiniGridEnv):
                                     init_value=0,
                                 ),
                             },
-                        )   
+                        ),
                     },
                 ),
                 "maze": swm.spaces.Dict(
@@ -113,11 +117,11 @@ class SimpleNavigationEnv(MiniGridEnv):
                             high=1.0,
                             init_value=0.5,
                             dtype=np.float32,
-                        )
+                        ),
                     }
                 ),
             },
-            sampling_order=["maze","agent", "goal"],
+            sampling_order=["maze", "agent", "goal"],
         )
 
     def reset(self, seed=None, options=None):
@@ -192,7 +196,13 @@ class SimpleNavigationEnv(MiniGridEnv):
         self.grid = Grid(width, height)
         self.grid.wall_rect(0, 0, width, height)
 
-        wall_coords = ellers_maze(width, height, self._maze_seed, self.variation_space["maze"]["p_horizontal"].value, self.variation_space["maze"]["p_vertical"].value)
+        wall_coords = ellers_maze(
+            width,
+            height,
+            self._maze_seed,
+            self.variation_space["maze"]["p_horizontal"].value,
+            self.variation_space["maze"]["p_vertical"].value,
+        )
         for x, y in wall_coords:
             self.grid.wall_rect(x, y, 1, 1)
 
@@ -231,24 +241,20 @@ class SimpleNavigationEnv(MiniGridEnv):
         }
 
     def _get_obs(self):
-        obs = (
-            tuple(self.agent_pos)
-            + (self.agent_dir,)
-            + tuple(self.goal_pos)
-        )
+        obs = tuple(self.agent_pos) + (self.agent_dir,) + tuple(self.goal_pos)
         return np.array(obs, dtype=np.int64)
 
     def _set_state(self, state):
         if isinstance(state, np.ndarray):
             state = state.tolist()
-        
+
         agent_pos = state[:2]
         agent_dir = state[2]
         goal_pos = state[3:5]
 
         self.agent_pos = agent_pos
         self.agent_dir = agent_dir
-        
+
         # move goal to new position
         self.grid.set(self.goal_pos[0], self.goal_pos[1], None)
         self.put_obj(Goal(), goal_pos[0], goal_pos[1])
@@ -277,7 +283,7 @@ class SimpleNavigationEnv(MiniGridEnv):
 
 def ellers_maze(width, height, seed, p_horizontal=0.5, p_vertical=0.5):
     """Generate a maze using the Eller's algorithm.
-    
+
     Args:
         width: width of the maze
         height: height of the maze

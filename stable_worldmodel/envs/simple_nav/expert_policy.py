@@ -1,6 +1,9 @@
-from stable_worldmodel.policy import BasePolicy
 from collections import deque
+
 import numpy as np
+
+from stable_worldmodel.policy import BasePolicy
+
 
 class ExpertPolicy(BasePolicy):
     """Expert Policy for Gridworld Navigation."""
@@ -61,7 +64,7 @@ class ExpertPolicy(BasePolicy):
         directions = [(1, 0), (-1, 0), (0, 1), (0, -1)]
 
         queue = deque([start_pos])
-        visited = set([start_pos])
+        visited = {start_pos}
         parent = {start_pos: None}
 
         while queue:
@@ -137,7 +140,6 @@ class ExpertPolicy(BasePolicy):
                 actions.extend([TURN_LEFT, FORWARD])
             elif next_dir == (cur_dir + 2) % 4:
                 actions.extend([TURN_LEFT, TURN_LEFT, FORWARD])
-
 
             cur_pos = next_pos
             cur_dir = next_dir

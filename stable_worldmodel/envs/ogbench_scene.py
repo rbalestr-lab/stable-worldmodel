@@ -20,7 +20,7 @@ class SceneEnv(ManipSpaceEnv):
         `_cur_button_states`.
     """
 
-    def __init__(self, env_type, ob_type="pixels", permute_blocks=True, multiview=False, *args, **kwargs):
+    def __init__(self, env_type="scene", ob_type="pixels", permute_blocks=True, multiview=False, *args, **kwargs):
         """Initialize the Scene environment.
 
         Args:

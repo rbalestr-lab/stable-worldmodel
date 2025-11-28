@@ -1,0 +1,105 @@
+defaults:
+  - override hydra/launcher: submitit_local
+
+# code optimization
+compile: true
+cudagraphs: true
+
+# logging
+wandb_project: ""
+wandb_entity: ""
+wandb_silent: false
+wandb_name_suffix: ""
+enable_wandb: true
+save_video: false
+save_agent: false
+seed: random
+
+# environment
+task: visual-cube-single-noisy-v0
+dataset_dir: ~/.ogbench/data # ogbench default
+obs: rgb # [state, rgb]
+multiview: false
+done_signal: false
+gamma: 0.99 # default 0.99
+max_episode_steps: 1000
+
+env_kwargs:
+  cube:
+    mode: task
+    num_cubes: 0
+    visualize_info: false
+    terminate_at_goal: false
+    width: 64
+    height: 64
+
+  scene:
+    mode: task
+    num_cubes: 1
+    visualize_info: false
+    terminate_at_goal: false
+    pixel_transparent_arm: false
+    width: 64
+    height: 64
+
+# evaluation
+eval_checkpoint: path/to/file.pt
+eval_variant_name: ""
+eval_freq: 100_000
+num_eval_episodes: 20 # 20 default
+num_video_episodes: 1 # 1 default
+video_frame_skip: 3 # 3 default
+eval_task_ids: [1, 2, 3, 4, 5] # for ogbench tasks
+
+# training
+steps: 10_000_000 # 10_000_000 default
+batch_size: 256 # [states: 1024, pixels: 256]
+lr: 0.0003 # 0.0003 default
+grad_clip_norm: 20
+# goal sampling
+# ogbench defaults: (0.2, 0.5, 0.3, true), (0.0, 1.0, 0.0, false)
+p_curgoal_value: 0.2
+p_trajgoal_value: 0.5
+p_randgoal_value: 0.3
+geom_sample_value: true
+p_curgoal_policy: 0.0
+p_trajgoal_policy: 1.0
+p_randgoal_policy: 0.0
+geom_sample_policy: false
+
+# agent
+agent: iql # [iql, ]
+train_from_checkpoint: false
+checkpoint: path/to/file.pt
+
+# architecture
+arch_mlp: # standard
+  h_dim: 512
+  conv_channels: [16, 32, 32]
+
+# agent
+iql:
+  tau: 0.005
+  alpha: 0.1 # tune per env [cube-noisy: 0.02, cube-play: 0.5?, visual-cube-noisy: 0.1, ]
+  expectile: 0.9
+  policy_type: deterministic # [deterministic, noisy, q_query]
+  pi_noise: 0.2
+  pi_noise_clip: 0.5
+
+# convenience
+work_dir: ???
+log_dir: ???
+eval_log_dir: ???
+task_title: ???
+exp_name: ???
+obs_shape: ???
+action_dim: ???
+action_high: ???
+action_low: ???
+data_episode_length: ???
+env_episode_length: ???
+
+# common agent params
+alpha: ???
+policy_type: ???
+pi_noise: ???

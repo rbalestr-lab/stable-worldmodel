@@ -644,21 +644,40 @@ def test_world_info_with_tuple_space(mock_world_class):
 ###########################
 
 
+def create_shard_dataset(tmpdir, dataset_name, mock_data, img_files=None):
+    """Helper to create a dataset with the new shard structure.
+
+    The new dataset structure expects:
+    - <cache_dir>/<dataset_name>/shard_0/img/ directory to exist
+    - Dataset saved to <cache_dir>/<dataset_name>/shard_0/
+    - Image files (if any) in the img/ subdirectory with paths like "img/file.jpeg"
+    """
+    shard_path = Path(tmpdir) / dataset_name / "shard_0"
+    img_path = shard_path / "img"
+    img_path.mkdir(parents=True)
+
+    # Create image files if provided
+    if img_files:
+        for filename, img in img_files.items():
+            img.save(img_path / filename)
+
+    dataset = Dataset.from_dict(mock_data)
+    dataset.save_to_disk(str(shard_path))
+
+    return shard_path
+
+
 def test_steps_dataset_initialization():
     """Test FrameDataset initialization."""
     with tempfile.TemporaryDirectory() as tmpdir:
-        dataset_path = Path(tmpdir) / "test_dataset"
-        dataset_path.mkdir()
-
-        # Create mock dataset
+        # Create mock dataset with new shard structure
         mock_data = {
             "episode_idx": [0, 0, 0, 1, 1, 1],
             "step_idx": [0, 1, 2, 0, 1, 2],
             "action": [np.array([0.0, 1.0]) for _ in range(6)],
-            "pixels": [f"img_{i}.png" for i in range(6)],
+            "pixels": [f"img/img_{i}.png" for i in range(6)],
         }
-        dataset = Dataset.from_dict(mock_data)
-        dataset.save_to_disk(str(dataset_path))
+        create_shard_dataset(tmpdir, "test_dataset", mock_data)
 
         with patch.dict(os.environ, {"STABLEWM_HOME": tmpdir}):
             steps_dataset = FrameDataset("test_dataset", num_steps=2, frameskip=1)
@@ -671,36 +690,29 @@ def test_steps_dataset_initialization():
 def test_steps_dataset_missing_required_columns():
     """Test FrameDataset raises error for missing required columns."""
     with tempfile.TemporaryDirectory() as tmpdir:
-        dataset_path = Path(tmpdir) / "test_dataset"
-        dataset_path.mkdir()
-
         # Missing 'episode_idx' column
         mock_data = {
             "step_idx": [0, 1, 2],
             "action": [np.array([0.0]) for _ in range(3)],
         }
-        dataset = Dataset.from_dict(mock_data)
-        dataset.save_to_disk(str(dataset_path))
+        create_shard_dataset(tmpdir, "test_dataset", mock_data)
 
         with patch.dict(os.environ, {"STABLEWM_HOME": tmpdir}):
-            with pytest.raises(AssertionError, match="episode_idx"):
+            # The error now comes from build_dataset_from_shards which accesses episode_idx
+            with pytest.raises((ValueError, KeyError), match="episode_idx"):
                 FrameDataset("test_dataset", num_steps=2)
 
 
 def test_steps_dataset_episode_too_short():
     """Test FrameDataset raises error when episode is too short."""
     with tempfile.TemporaryDirectory() as tmpdir:
-        dataset_path = Path(tmpdir) / "test_dataset"
-        dataset_path.mkdir()
-
         # Episode with only 1 step, but num_steps=2
         mock_data = {
             "episode_idx": [0],
             "step_idx": [0],
             "action": [np.array([0.0])],
         }
-        dataset = Dataset.from_dict(mock_data)
-        dataset.save_to_disk(str(dataset_path))
+        create_shard_dataset(tmpdir, "test_dataset", mock_data)
 
         with patch.dict(os.environ, {"STABLEWM_HOME": tmpdir}):
             with pytest.raises(ValueError, match="at least"):
@@ -710,17 +722,13 @@ def test_steps_dataset_episode_too_short():
 def test_steps_dataset_length():
     """Test FrameDataset __len__ returns correct length."""
     with tempfile.TemporaryDirectory() as tmpdir:
-        dataset_path = Path(tmpdir) / "test_dataset"
-        dataset_path.mkdir()
-
         # Episode with 5 steps
         mock_data = {
             "episode_idx": [0, 0, 0, 0, 0],
             "step_idx": [0, 1, 2, 3, 4],
             "action": [np.array([0.0]) for _ in range(5)],
         }
-        dataset = Dataset.from_dict(mock_data)
-        dataset.save_to_disk(str(dataset_path))
+        create_shard_dataset(tmpdir, "test_dataset", mock_data)
 
         with patch.dict(os.environ, {"STABLEWM_HOME": tmpdir}):
             # num_steps=2, so we can have 4 possible slices (0-1, 1-2, 2-3, 3-4)
@@ -731,27 +739,24 @@ def test_steps_dataset_length():
 def test_steps_dataset_getitem():
     """Test FrameDataset __getitem__ returns correct data."""
     with tempfile.TemporaryDirectory() as tmpdir:
-        dataset_path = Path(tmpdir) / "test_dataset"
-        dataset_path.mkdir()
-
-        # Create actual image files
+        # Create actual image files in the img subdirectory
+        img_files = {}
         for i in range(5):
             img = PIL.Image.new("RGB", (64, 64), color=(i * 50, i * 50, i * 50))
-            img.save(dataset_path / f"img_{i}.png")
+            img_files[f"img_{i}.jpeg"] = img
 
-        # Episode with 5 steps
+        # Episode with 5 steps - paths include img/ prefix
         mock_data = {
             "episode_idx": [0, 0, 0, 0, 0],
             "step_idx": [0, 1, 2, 3, 4],
             "action": [np.array([float(i), float(i)]) for i in range(5)],
-            "pixels": [f"img_{i}.png" for i in range(5)],
+            "pixels.jpeg": [f"img/img_{i}.jpeg" for i in range(5)],
         }
-        dataset = Dataset.from_dict(mock_data)
-        dataset.save_to_disk(str(dataset_path))
+        create_shard_dataset(tmpdir, "test_dataset", mock_data, img_files=img_files)
 
         # Define a transform that converts PIL images to tensors
         def image_to_tensor(batch):
-            for key in ["pixels"]:
+            for key in ["pixels.jpeg"]:
                 if key in batch and isinstance(batch[key][0], PIL.Image.Image):
                     batch[key] = [
                         torch.from_numpy(np.array(img)).permute(2, 0, 1).float() / 255.0 for img in batch[key]
@@ -765,7 +770,7 @@ def test_steps_dataset_getitem():
             sample = steps_dataset[0]
 
             assert "action" in sample
-            assert "pixels" in sample
+            assert "pixels.jpeg" in sample
             assert isinstance(sample["action"], torch.Tensor)
             assert sample["action"].shape == (2, 2)  # num_steps=2, action_dim=2
 
@@ -773,13 +778,11 @@ def test_steps_dataset_getitem():
 def test_steps_dataset_frameskip():
     """Test FrameDataset with frameskip."""
     with tempfile.TemporaryDirectory() as tmpdir:
-        dataset_path = Path(tmpdir) / "test_dataset"
-        dataset_path.mkdir()
-
         # Create image files
+        img_files = {}
         for i in range(10):
             img = PIL.Image.new("RGB", (32, 32), color=(i * 20, i * 20, i * 20))
-            img.save(dataset_path / f"img_{i}.jpeg")
+            img_files[f"img_{i}.jpeg"] = img
 
         # Episode with 10 steps
         # Column name must end with .jpeg for determine_img_columns to detect it
@@ -787,10 +790,9 @@ def test_steps_dataset_frameskip():
             "episode_idx": [0] * 10,
             "step_idx": list(range(10)),
             "action": [np.array([float(i)]) for i in range(10)],
-            "pixels.jpeg": [f"img_{i}.jpeg" for i in range(10)],
+            "pixels.jpeg": [f"img/img_{i}.jpeg" for i in range(10)],
         }
-        dataset = Dataset.from_dict(mock_data)
-        dataset.save_to_disk(str(dataset_path))
+        create_shard_dataset(tmpdir, "test_dataset", mock_data, img_files=img_files)
 
         with patch.dict(os.environ, {"STABLEWM_HOME": tmpdir}):
             # num_steps=2, frameskip=2 means we need 4 steps total (0, 2 for observations)
@@ -806,23 +808,20 @@ def test_steps_dataset_frameskip():
 def test_steps_dataset_multiple_episodes():
     """Test FrameDataset with multiple episodes."""
     with tempfile.TemporaryDirectory() as tmpdir:
-        dataset_path = Path(tmpdir) / "test_dataset"
-        dataset_path.mkdir()
-
         # Create image files
+        img_files = {}
         for i in range(8):
             img = PIL.Image.new("RGB", (32, 32))
-            img.save(dataset_path / f"img_{i}.png")
+            img_files[f"img_{i}.jpeg"] = img
 
         # Two episodes with 4 steps each
         mock_data = {
             "episode_idx": [0, 0, 0, 0, 1, 1, 1, 1],
             "step_idx": [0, 1, 2, 3, 0, 1, 2, 3],
             "action": [np.array([0.0]) for _ in range(8)],
-            "pixels": [f"img_{i}.png" for i in range(8)],
+            "pixels.jpeg": [f"img/img_{i}.jpeg" for i in range(8)],
         }
-        dataset = Dataset.from_dict(mock_data)
-        dataset.save_to_disk(str(dataset_path))
+        create_shard_dataset(tmpdir, "test_dataset", mock_data, img_files=img_files)
 
         with patch.dict(os.environ, {"STABLEWM_HOME": tmpdir}):
             steps_dataset = FrameDataset("test_dataset", num_steps=2, frameskip=1)
@@ -834,26 +833,24 @@ def test_steps_dataset_multiple_episodes():
 def test_steps_dataset_infer_img_path_columns():
     """Test FrameDataset infer_img_path_columns."""
     with tempfile.TemporaryDirectory() as tmpdir:
-        dataset_path = Path(tmpdir) / "test_dataset"
-        dataset_path.mkdir()
-
         # Create image files
         img = PIL.Image.new("RGB", (32, 32))
-        img.save(dataset_path / "img_0.jpeg")
-        img.save(dataset_path / "goal_0.jpeg")
+        img_files = {
+            "img_0.jpeg": img,
+            "goal_0.jpeg": img,
+        }
 
-        # The code's determine_img_columns checks if column NAME ends with .jpeg
-        # So we need column names like "pixels.jpeg" for auto-detection
+        # The code's determine_img_columns checks if column VALUE ends with .jpeg
+        # So we need paths that end with .jpeg for auto-detection
         mock_data = {
             "episode_idx": [0, 0, 0],
             "step_idx": [0, 1, 2],
             "action": [np.array([0.0]) for _ in range(3)],
-            "pixels.jpeg": ["img_0.jpeg", "img_0.jpeg", "img_0.jpeg"],
-            "goal.jpeg": ["goal_0.jpeg", "goal_0.jpeg", "goal_0.jpeg"],
+            "pixels.jpeg": ["img/img_0.jpeg", "img/img_0.jpeg", "img/img_0.jpeg"],
+            "goal.jpeg": ["img/goal_0.jpeg", "img/goal_0.jpeg", "img/goal_0.jpeg"],
             "other_data": [1, 2, 3],
         }
-        dataset = Dataset.from_dict(mock_data)
-        dataset.save_to_disk(str(dataset_path))
+        create_shard_dataset(tmpdir, "test_dataset", mock_data, img_files=img_files)
 
         with patch.dict(os.environ, {"STABLEWM_HOME": tmpdir}):
             steps_dataset = FrameDataset("test_dataset", num_steps=2, frameskip=1)
@@ -867,28 +864,25 @@ def test_steps_dataset_infer_img_path_columns():
 def test_steps_dataset_with_transform():
     """Test FrameDataset with transform function."""
     with tempfile.TemporaryDirectory() as tmpdir:
-        dataset_path = Path(tmpdir) / "test_dataset"
-        dataset_path.mkdir()
-
         # Create image files
+        img_files = {}
         for i in range(3):
             img = PIL.Image.new("RGB", (32, 32))
-            img.save(dataset_path / f"img_{i}.png")
+            img_files[f"img_{i}.jpeg"] = img
 
         mock_data = {
             "episode_idx": [0, 0, 0],
             "step_idx": [0, 1, 2],
             "action": [np.array([0.0]) for _ in range(3)],
-            "pixels": [f"img_{i}.png" for i in range(3)],
+            "pixels.jpeg": [f"img/img_{i}.jpeg" for i in range(3)],
         }
-        dataset = Dataset.from_dict(mock_data)
-        dataset.save_to_disk(str(dataset_path))
+        create_shard_dataset(tmpdir, "test_dataset", mock_data, img_files=img_files)
 
         # Define a simple transform
         def mock_transform(batch):
             batch["transformed"] = True
             # Also convert images to tensors to avoid stacking error
-            for key in ["pixels"]:
+            for key in ["pixels.jpeg"]:
                 if key in batch and isinstance(batch[key][0], PIL.Image.Image):
                     batch[key] = [
                         torch.from_numpy(np.array(img)).permute(2, 0, 1).float() / 255.0 for img in batch[key]
@@ -907,28 +901,24 @@ def test_steps_dataset_custom_cache_dir():
     """Test FrameDataset with custom cache_dir."""
     with tempfile.TemporaryDirectory() as tmpdir:
         custom_cache = Path(tmpdir) / "custom_cache"
-        dataset_path = custom_cache / "test_dataset"
-        dataset_path.mkdir(parents=True)
 
         mock_data = {
             "episode_idx": [0, 0, 0],
             "step_idx": [0, 1, 2],
             "action": [np.array([0.0]) for _ in range(3)],
         }
-        dataset = Dataset.from_dict(mock_data)
-        dataset.save_to_disk(str(dataset_path))
+        shard_path = create_shard_dataset(str(custom_cache), "test_dataset", mock_data)
 
         steps_dataset = FrameDataset("test_dataset", num_steps=2, frameskip=1, cache_dir=str(custom_cache))
 
-        assert steps_dataset.data_dir == dataset_path
+        # The shard_dirs should contain our shard
+        assert len(steps_dataset.shard_dirs) == 1
+        assert str(shard_path) in steps_dataset.shard_dirs[0]
 
 
 def test_steps_dataset_action_reshape():
     """Test FrameDataset correctly reshapes actions."""
     with tempfile.TemporaryDirectory() as tmpdir:
-        dataset_path = Path(tmpdir) / "test_dataset"
-        dataset_path.mkdir()
-
         # Actions with shape (2,) that span multiple steps
         # With num_steps=2 and frameskip=1, we need actions for both observation steps
         # The dataset stores actions at full resolution
@@ -937,8 +927,7 @@ def test_steps_dataset_action_reshape():
             "step_idx": [0, 1, 2],
             "action": [np.array([float(i), float(i) * 2]) for i in range(3)],
         }
-        dataset = Dataset.from_dict(mock_data)
-        dataset.save_to_disk(str(dataset_path))
+        create_shard_dataset(tmpdir, "test_dataset", mock_data)
 
         with patch.dict(os.environ, {"STABLEWM_HOME": tmpdir}):
             steps_dataset = FrameDataset("test_dataset", num_steps=2, frameskip=1)

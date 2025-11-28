@@ -11,13 +11,6 @@ from torchvision.io import decode_image
 from stable_worldmodel.data.utils import get_cache_dir
 
 
-# TODO use mode="frame" or "video" when recording dataset
-# TODO support automatic detection of shard folder
-# also save a tmp file when creating dataset for preemption issues.
-
-# TODO support loading mp4 clip from dataset
-
-
 def find_shard_dirs(root: str, target_dir: str = "img") -> list[str]:
     """Find all subdirectories named `target_dir` within `root`."""
     result = []

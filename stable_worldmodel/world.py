@@ -524,6 +524,10 @@ class World:
         dataset_path = Path(cache_dir, dataset_name)
         dataset_path.mkdir(parents=True, exist_ok=True)
 
+        if (dataset_path / "state.json").exists():
+            logging.warning(f"Dataset {dataset_name} already exists at {dataset_path}. Aborting recording.")
+            return
+
         recorded_episodes = 0
 
         self.terminateds = np.zeros(self.num_envs)

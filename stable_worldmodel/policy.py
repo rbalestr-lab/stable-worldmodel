@@ -150,7 +150,7 @@ class WorldModelPolicy(BasePolicy):
                 if shape is not None:
                     v = v.reshape(*shape[:2], *v.shape[1:])
 
-            if is_numpy and v.dtype != object:
+            if is_numpy and v.dtype.kind not in "USO":
                 v = torch.from_numpy(v)
 
             info_dict[k] = v

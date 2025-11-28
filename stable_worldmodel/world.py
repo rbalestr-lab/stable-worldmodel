@@ -65,12 +65,13 @@ import imageio
 import imageio.v3 as iio
 import numpy as np
 import torch
-from datasets import Dataset, Features, Value, load_from_disk
+from datasets import Dataset, Features, Value
 from loguru import logger as logging
 from PIL import Image
 from rich import print
 
 from stable_worldmodel.data.dataset import Dataset as SWMDataset
+from stable_worldmodel.data.dataset import VideoDataset
 from stable_worldmodel.data.utils import get_cache_dir, is_image
 
 from .wrappers import MegaWrapper, VariationWrapper
@@ -736,13 +737,12 @@ class World:
     def record_video_from_dataset(
         self,
         video_path,
-        dataset_name,
+        dataset,
         episode_idx,
         max_steps=500,
         fps=30,
         num_proc=4,
         viewname: str | list[str] = "pixels",
-        cache_dir=None,
     ):
         """Replay stored dataset episodes and export them as MP4 videos.
 
@@ -752,7 +752,7 @@ class World:
         Args:
             video_path (str or Path): Directory where videos will be saved. Videos are
                 named 'episode_{idx}.mp4'. Directory is created if it doesn't exist.
-            dataset_name (str): Name of the dataset to load (must exist in cache_dir).
+            dataset (Dataset): the dataset object to load episodes from.
             episode_idx (int or list of int): Episode index or list of episode indices
                 to render. Each episode is saved as a separate video file.
             max_steps (int, optional): Maximum number of steps to render per episode.
@@ -792,12 +792,26 @@ class World:
                     max_steps=100
                 )
         """
-        cache_dir = cache_dir or get_cache_dir()
-        dataset_path = Path(cache_dir, dataset_name)
-        assert dataset_path.is_dir(), f"Dataset {dataset_name} not found in cache dir {get_cache_dir()}"
-
         episode_idx = [episode_idx] if isinstance(episode_idx, int) else episode_idx
         viewname = [viewname] if isinstance(viewname, str) else viewname
+
+        if isinstance(dataset, VideoDataset):
+            for ep in episode_idx:
+                ep_indices = np.nonzero(np.array(dataset.dataset["episode_idx"]) == ep)[0]
+                data = dataset.dataset[ep_indices[0]]
+
+                frames = []
+                for view in viewname:
+                    video_file = Path(data["data_dir"], data[view])
+                    frames.append(iio.imread(video_file))
+
+                frames = np.vstack(frames)
+                output_dir = Path(video_path)
+                output_dir.mkdir(parents=True, exist_ok=True)
+                output_path = output_dir / f"episode_{ep}.mp4"
+                iio.imwrite(output_path, frames, fps=fps, codec="libx264")
+            print(f"Video saved to {video_path}")
+            return
 
         out = [
             imageio.get_writer(
@@ -809,16 +823,16 @@ class World:
             for i in episode_idx
         ]
 
-        dataset = load_from_disk(dataset_path).with_format("numpy")
-
         for i, o in zip(episode_idx, out):
-            episode = dataset.filter(lambda ex: ex["episode_idx"] == i, num_proc=num_proc)
+            episode = dataset.dataset.filter(lambda ex: ex["episode_idx"] == i, num_proc=num_proc)
             episode = episode.sort("step_idx")
             episode_len = len(episode)
 
-            assert len(set(episode["episode_len"])) == 1, (
-                "'episode_len' contains different values for the same episode"
-            )
+            all_lengths = episode["episode_len"][:].tolist()
+
+            print(set(all_lengths))
+
+            assert len(set(all_lengths)) == 1, "'episode_len' contains different values for the same episode"
             assert len(episode) == episode["episode_len"][0], (
                 f"Episode {i} has {len(episode)} steps, but 'episode_len' is {episode['episode_len'][0]}"
             )
@@ -826,12 +840,12 @@ class World:
             for step_idx in range(min(episode_len, max_steps)):
                 frame = []
                 for view in viewname:
-                    img_path = Path(dataset_path, episode[step_idx][view])
+                    img_path = Path(episode[step_idx]["data_dir"], episode[step_idx][view])
                     frame.append(np.array(Image.open(img_path).convert("RGB"), dtype=np.uint8))
                 frame = np.vstack(frame)  # should try hstack?
 
                 if "goal" in episode.column_names:
-                    goal_path = Path(dataset_path, episode[step_idx]["goal"])
+                    goal_path = Path(episode[step_idx]["data_dir"], episode[step_idx]["goal"])
                     goal = Image.open(goal_path)
                     goal = np.array(goal.convert("RGB"), dtype=np.uint8)
                     frame = np.vstack([frame, goal])

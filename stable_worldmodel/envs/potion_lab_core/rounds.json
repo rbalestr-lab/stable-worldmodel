@@ -1,0 +1,147 @@
+{
+  "rounds": [
+    {
+      "time_limit": 3600,
+      "background_color": [100, 0, 0],
+      "required_items": [
+        {
+          "base_essences": [1],
+          "enchanted": [false],
+          "refined": [false],
+          "bottled": false
+        }
+      ],
+      "description": "1: Raw Fire Essence"
+    },
+    {
+      "time_limit": 3600,
+      "background_color": [100, 0, 0],
+      "required_items": [
+        {
+          "base_essences": [1],
+          "enchanted": [true],
+          "refined": [false],
+          "bottled": false
+        }
+      ],
+      "description": "1: Raw Fire Essence"
+    },
+    {
+      "time_limit": 3600,
+      "background_color": [100, 0, 0],
+      "required_items": [
+        {
+          "base_essences": [1, 2],
+          "enchanted": [false, true],
+          "refined": [true, true],
+          "bottled": true
+        }
+      ],
+      "description": "1: Raw Fire Essence"
+    },
+    {
+      "time_limit": 3600,
+      "required_items": [
+        {
+          "base_essences": [1],
+          "enchanted": [false],
+          "refined": [false],
+          "bottled": false
+        },
+        {
+          "base_essences": [1],
+          "enchanted": [false],
+          "refined": [false],
+          "bottled": false
+        }
+      ],
+      "description": "2: Two raw Fire Essences"
+    },
+    {
+      "time_limit": 3600,
+      "background_color": [0, 100, 0],
+      "required_items": [
+        {
+          "base_essences": [2],
+          "enchanted": [false],
+          "refined": [false],
+          "bottled": false
+        }
+      ],
+      "description": "3: Two raw Water Essences"
+    },
+    {
+      "time_limit": 3600,
+      "required_items": [
+        {
+          "base_essences": [2],
+          "enchanted": [false],
+          "refined": [false],
+          "bottled": false
+        },
+        {
+          "base_essences": [2],
+          "enchanted": [false],
+          "refined": [false],
+          "bottled": false
+        }
+      ],
+      "description": "4: Two raw Water Essences"
+    },
+    {
+      "time_limit": 3600,
+      "required_items": [
+        {
+          "base_essences": [1],
+          "enchanted": [false],
+          "refined": [false],
+          "bottled": false
+        },
+        {
+          "base_essences": [2],
+          "enchanted": [false],
+          "refined": [false],
+          "bottled": false
+        }
+      ],
+      "description": "5: Raw Fire and Water Essences"
+    },
+    {
+      "time_limit": 3600,
+      "background_color": [100, 100, 0],
+      "required_items": [
+        {
+          "base_essences": [3],
+          "enchanted": [false],
+          "refined": [false],
+          "bottled": false
+        }
+      ],
+      "description": "6: Raw Earth Essences"
+    },
+    {
+      "time_limit": 3600,
+      "required_items": [
+        {
+          "base_essences": [1],
+          "enchanted": [false],
+          "refined": [false],
+          "bottled": false
+        },
+        {
+          "base_essences": [2],
+          "enchanted": [false],
+          "refined": [false],
+          "bottled": false
+        },
+        {
+          "base_essences": [3],
+          "enchanted": [false],
+          "refined": [false],
+          "bottled": false
+        }
+      ],
+      "description": "7: Raw Fire, Water, and Earth Essences"
+    }
+  ]
+}

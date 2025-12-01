@@ -54,3 +54,13 @@ register(
     id="swm/SimpleNavigation-v0",
     entry_point="stable_worldmodel.envs.simple_nav.env:SimpleNavigationEnv",
 )
+
+register(
+    id="swm/FinancialTrading-v0",
+    entry_point="stable_worldmodel.envs.financial_trading:FinancialBacktestEnv",
+)
+
+register(
+    id="swm/FinancialBacktest-v0",
+    entry_point="stable_worldmodel.envs.financial_trading:FinancialBacktestEnv",
+)

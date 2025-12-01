@@ -32,6 +32,8 @@ dependencies = [
     "pymunk",
     "shapely",
     "ogbench",
+    "torchcodec",
+    "minigrid"
 ]
 
 dynamic = ["version"]

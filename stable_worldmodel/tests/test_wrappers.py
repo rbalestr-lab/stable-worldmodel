@@ -1511,6 +1511,127 @@ def test_mega_wrapper_custom_image_shape(minimal_env):
     assert result_info["goal"].shape == (128, 256, 3)
 
 
+def test_mega_wrapper_with_financial_environment():
+    """Test MegaWrapper automatically detects and wraps financial environments."""
+    import numpy as np
+
+    # Create a mock financial environment
+    mock_env = MagicMock(spec=gym.Env)
+    mock_env.observation_space = gym.spaces.Box(low=0, high=1, shape=(10,))
+    mock_env.action_space = gym.spaces.Box(low=0, high=1, shape=(2,))
+
+    # Make it look like a financial environment
+    # Don't use MagicMock for unwrapped to avoid render_multiview being auto-created
+    class MockFinancialEnv:
+        def __init__(self):
+            self.__class__.__name__ = "FinancialTradingEnv"
+            self.observation_space = mock_env.observation_space
+            self.action_space = mock_env.action_space
+
+        def render(self):
+            return np.random.randint(0, 255, (64, 64, 3), dtype=np.uint8)
+
+    mock_unwrapped = MockFinancialEnv()
+    mock_env.unwrapped = mock_unwrapped
+
+    def render_func():
+        return np.random.randint(0, 255, (64, 64, 3), dtype=np.uint8)
+
+    obs = np.array([1.0] * 10)
+    info = {}
+    mock_env.reset.return_value = (obs, info)
+    mock_env.render = render_func
+    mock_env.action_space.sample = MagicMock(return_value=np.array([0.5, 0.5]))
+
+    # MegaWrapper should detect it's financial and apply FinancialWrapper
+    wrapped_env = wrappers.MegaWrapper(mock_env, separate_goal=True)
+    result_obs, result_info = wrapped_env.reset()
+
+    # Financial wrapper should have cleaned up pixels and goal
+    assert "pixels" not in result_info
+    assert "goal" not in result_info
+    assert "render_time" not in result_info
+    # But should have other info keys
+    assert "observation" in result_info
+    assert "reward" in result_info
+
+
+def test_mega_wrapper_with_backtest_environment():
+    """Test MegaWrapper detects Backtest environments as financial."""
+    import numpy as np
+
+    mock_env = MagicMock(spec=gym.Env)
+    mock_env.observation_space = gym.spaces.Box(low=0, high=1, shape=(10,))
+    mock_env.action_space = gym.spaces.Box(low=0, high=1, shape=(2,))
+
+    # Make it look like a backtest environment
+    class MockBacktestEnv:
+        def __init__(self):
+            self.__class__.__name__ = "BacktestEnv"
+            self.observation_space = mock_env.observation_space
+            self.action_space = mock_env.action_space
+
+        def render(self):
+            return np.random.randint(0, 255, (64, 64, 3), dtype=np.uint8)
+
+    mock_unwrapped = MockBacktestEnv()
+    mock_env.unwrapped = mock_unwrapped
+
+    def render_func():
+        return np.random.randint(0, 255, (64, 64, 3), dtype=np.uint8)
+
+    obs = np.array([1.0] * 10)
+    info = {}
+    mock_env.reset.return_value = (obs, info)
+    mock_env.render = render_func
+    mock_env.action_space.sample = MagicMock(return_value=np.array([0.5, 0.5]))
+
+    wrapped_env = wrappers.MegaWrapper(mock_env)
+    result_obs, result_info = wrapped_env.reset()
+
+    # Should behave like financial environment
+    assert "pixels" not in result_info
+    assert "goal" not in result_info
+
+
+def test_mega_wrapper_financial_with_none_image_shape():
+    """Test MegaWrapper with financial environment and None image_shape uses default."""
+    import numpy as np
+
+    mock_env = MagicMock(spec=gym.Env)
+    mock_env.observation_space = gym.spaces.Box(low=0, high=1, shape=(10,))
+    mock_env.action_space = gym.spaces.Box(low=0, high=1, shape=(2,))
+
+    class MockFinancialEnv:
+        def __init__(self):
+            self.__class__.__name__ = "FinancialTradingEnv"
+            self.observation_space = mock_env.observation_space
+            self.action_space = mock_env.action_space
+
+        def render(self):
+            return np.random.randint(0, 255, (64, 64, 3), dtype=np.uint8)
+
+    mock_unwrapped = MockFinancialEnv()
+    mock_env.unwrapped = mock_unwrapped
+
+    def render_func():
+        return np.random.randint(0, 255, (64, 64, 3), dtype=np.uint8)
+
+    obs = np.array([1.0] * 10)
+    info = {}
+    mock_env.reset.return_value = (obs, info)
+    mock_env.render = render_func
+    mock_env.action_space.sample = MagicMock(return_value=np.array([0.5, 0.5]))
+
+    # Pass None for image_shape to trigger default (84, 84) path
+    wrapped_env = wrappers.MegaWrapper(mock_env, image_shape=None)
+    result_obs, result_info = wrapped_env.reset()
+
+    # Should still work and clean up appropriately
+    assert "pixels" not in result_info
+    assert "observation" in result_info
+
+
 ###########################
 ## test VariationWrapper ##
 ###########################
@@ -1623,3 +1744,291 @@ def test_variation_wrapper_with_different_variation_spaces(mock_vector_env):
 
     # Should succeed with different mode
     assert wrapped_env.variation_space is not None
+
+
+################################
+## test FinancialWrapper       ##
+################################
+
+
+def test_financial_wrapper_clean_info_removes_pixels():
+    """Test that _clean_info removes 'pixels' key."""
+    mock_env = MagicMock(spec=gym.Env)
+    mock_env.observation_space = gym.spaces.Box(low=0, high=1, shape=(4,))
+    mock_env.action_space = gym.spaces.Box(low=0, high=1, shape=(2,))
+
+    wrapper = wrappers.FinancialWrapper(mock_env)
+
+    info = {
+        "pixels": "dummy_pixels",
+        "other_key": "value",
+        "another_key": 42,
+    }
+
+    cleaned = wrapper._clean_info(info)
+
+    assert "pixels" not in cleaned
+    assert "other_key" in cleaned
+    assert "another_key" in cleaned
+    assert cleaned["other_key"] == "value"
+    assert cleaned["another_key"] == 42
+
+
+def test_financial_wrapper_clean_info_removes_goal():
+    """Test that _clean_info removes 'goal' key."""
+    mock_env = MagicMock(spec=gym.Env)
+    mock_env.observation_space = gym.spaces.Box(low=0, high=1, shape=(4,))
+    mock_env.action_space = gym.spaces.Box(low=0, high=1, shape=(2,))
+
+    wrapper = wrappers.FinancialWrapper(mock_env)
+
+    info = {
+        "goal": "dummy_goal",
+        "other_key": "value",
+    }
+
+    cleaned = wrapper._clean_info(info)
+
+    assert "goal" not in cleaned
+    assert "other_key" in cleaned
+
+
+def test_financial_wrapper_clean_info_removes_render_time():
+    """Test that _clean_info removes 'render_time' key."""
+    mock_env = MagicMock(spec=gym.Env)
+    mock_env.observation_space = gym.spaces.Box(low=0, high=1, shape=(4,))
+    mock_env.action_space = gym.spaces.Box(low=0, high=1, shape=(2,))
+
+    wrapper = wrappers.FinancialWrapper(mock_env)
+
+    info = {
+        "render_time": 0.123,
+        "other_key": "value",
+    }
+
+    cleaned = wrapper._clean_info(info)
+
+    assert "render_time" not in cleaned
+    assert "other_key" in cleaned
+
+
+def test_financial_wrapper_clean_info_removes_pixels_dot_keys():
+    """Test that _clean_info removes keys starting with 'pixels.'."""
+    mock_env = MagicMock(spec=gym.Env)
+    mock_env.observation_space = gym.spaces.Box(low=0, high=1, shape=(4,))
+    mock_env.action_space = gym.spaces.Box(low=0, high=1, shape=(2,))
+
+    wrapper = wrappers.FinancialWrapper(mock_env)
+
+    info = {
+        "pixels.0": "camera_0",
+        "pixels.1": "camera_1",
+        "pixels.top": "top_view",
+        "other_key": "value",
+    }
+
+    cleaned = wrapper._clean_info(info)
+
+    assert "pixels.0" not in cleaned
+    assert "pixels.1" not in cleaned
+    assert "pixels.top" not in cleaned
+    assert "other_key" in cleaned
+
+
+def test_financial_wrapper_clean_info_preserves_other_keys():
+    """Test that _clean_info preserves all non-pixel/goal keys."""
+    mock_env = MagicMock(spec=gym.Env)
+    mock_env.observation_space = gym.spaces.Box(low=0, high=1, shape=(4,))
+    mock_env.action_space = gym.spaces.Box(low=0, high=1, shape=(2,))
+
+    wrapper = wrappers.FinancialWrapper(mock_env)
+
+    info = {
+        "pixels": "remove_me",
+        "goal": "remove_me_too",
+        "render_time": 0.5,
+        "pixels.0": "remove_this",
+        "observation": [1, 2, 3],
+        "reward": 10.5,
+        "terminated": False,
+        "truncated": False,
+        "action": [0.1, 0.2],
+        "step_idx": 5,
+    }
+
+    cleaned = wrapper._clean_info(info)
+
+    # Removed keys
+    assert "pixels" not in cleaned
+    assert "goal" not in cleaned
+    assert "render_time" not in cleaned
+    assert "pixels.0" not in cleaned
+
+    # Preserved keys
+    assert "observation" in cleaned
+    assert "reward" in cleaned
+    assert "terminated" in cleaned
+    assert "truncated" in cleaned
+    assert "action" in cleaned
+    assert "step_idx" in cleaned
+
+
+def test_financial_wrapper_render_with_observation_space_shape():
+    """Test render() creates dummy pixels using observation_space.shape."""
+    mock_env = MagicMock(spec=gym.Env)
+    mock_env.observation_space = gym.spaces.Box(low=0, high=1, shape=(32, 32, 3))
+    mock_env.action_space = gym.spaces.Box(low=0, high=1, shape=(2,))
+
+    wrapper = wrappers.FinancialWrapper(mock_env)
+
+    # First call should create dummy pixels
+    pixels = wrapper.render()
+
+    import numpy as np
+
+    assert isinstance(pixels, np.ndarray)
+    assert pixels.shape == (32, 32, 3)
+    assert pixels.dtype == np.uint8
+    assert np.all(pixels == 0)
+
+    # Second call should return cached pixels
+    pixels2 = wrapper.render()
+    assert pixels2 is pixels  # Same object
+
+
+def test_financial_wrapper_render_without_observation_space_shape():
+    """Test render() uses observation_space.shape when it exists (even if empty)."""
+    mock_env = MagicMock(spec=gym.Env)
+    # Create a mock observation_space with empty shape (like Discrete)
+    mock_env.observation_space = MagicMock()
+    mock_env.observation_space.shape = ()  # Empty tuple like Discrete space
+    mock_env.action_space = gym.spaces.Box(low=0, high=1, shape=(2,))
+
+    wrapper = wrappers.FinancialWrapper(mock_env)
+
+    pixels = wrapper.render()
+
+    import numpy as np
+
+    assert isinstance(pixels, np.ndarray)
+    assert pixels.shape == ()  # Uses the observation space's shape
+    assert pixels.dtype == np.uint8
+
+
+def test_financial_wrapper_render_no_shape_attribute():
+    """Test render() creates default dummy pixels when observation_space has no shape attribute."""
+    mock_env = MagicMock(spec=gym.Env)
+    # Create a mock observation_space without a shape attribute at all
+    mock_env.observation_space = MagicMock(spec=[])
+    mock_env.action_space = gym.spaces.Box(low=0, high=1, shape=(2,))
+
+    wrapper = wrappers.FinancialWrapper(mock_env)
+
+    pixels = wrapper.render()
+
+    import numpy as np
+
+    assert isinstance(pixels, np.ndarray)
+    assert pixels.shape == (64, 64, 3)  # Default shape
+    assert pixels.dtype == np.uint8
+    assert np.all(pixels == 0)
+
+
+def test_financial_wrapper_reset_cleans_info():
+    """Test that reset() calls _clean_info on the info dict."""
+    mock_env = MagicMock(spec=gym.Env)
+    mock_env.observation_space = gym.spaces.Box(low=0, high=1, shape=(4,))
+    mock_env.action_space = gym.spaces.Box(low=0, high=1, shape=(2,))
+
+    obs = {"observation": [1, 2, 3, 4]}
+    info = {
+        "pixels": "should_be_removed",
+        "goal": "should_be_removed",
+        "render_time": 0.5,
+        "pixels.0": "should_be_removed",
+        "other_key": "should_remain",
+    }
+    mock_env.reset.return_value = (obs, info)
+
+    wrapper = wrappers.FinancialWrapper(mock_env)
+    result_obs, result_info = wrapper.reset()
+
+    assert result_obs == obs
+    assert "pixels" not in result_info
+    assert "goal" not in result_info
+    assert "render_time" not in result_info
+    assert "pixels.0" not in result_info
+    assert "other_key" in result_info
+    assert result_info["other_key"] == "should_remain"
+
+
+def test_financial_wrapper_reset_with_args_kwargs():
+    """Test that reset() passes through args and kwargs."""
+    mock_env = MagicMock(spec=gym.Env)
+    mock_env.observation_space = gym.spaces.Box(low=0, high=1, shape=(4,))
+    mock_env.action_space = gym.spaces.Box(low=0, high=1, shape=(2,))
+
+    obs = {"observation": [1, 2, 3, 4]}
+    info = {"other_key": "value"}
+    mock_env.reset.return_value = (obs, info)
+
+    wrapper = wrappers.FinancialWrapper(mock_env)
+    result_obs, result_info = wrapper.reset(seed=42, options={"test": True})
+
+    mock_env.reset.assert_called_once_with(seed=42, options={"test": True})
+    assert result_obs == obs
+
+
+def test_financial_wrapper_step_cleans_info():
+    """Test that step() calls _clean_info on the info dict."""
+    mock_env = MagicMock(spec=gym.Env)
+    mock_env.observation_space = gym.spaces.Box(low=0, high=1, shape=(4,))
+    mock_env.action_space = gym.spaces.Box(low=0, high=1, shape=(2,))
+
+    obs = {"observation": [1, 2, 3, 4]}
+    reward = 1.5
+    terminated = False
+    truncated = False
+    info = {
+        "pixels": "should_be_removed",
+        "goal": "should_be_removed",
+        "render_time": 0.5,
+        "pixels.front": "should_be_removed",
+        "other_key": "should_remain",
+    }
+    mock_env.step.return_value = (obs, reward, terminated, truncated, info)
+
+    wrapper = wrappers.FinancialWrapper(mock_env)
+    action = [0.5, 0.5]
+    result_obs, result_reward, result_terminated, result_truncated, result_info = wrapper.step(action)
+
+    assert result_obs == obs
+    assert result_reward == reward
+    assert result_terminated == terminated
+    assert result_truncated == truncated
+    assert "pixels" not in result_info
+    assert "goal" not in result_info
+    assert "render_time" not in result_info
+    assert "pixels.front" not in result_info
+    assert "other_key" in result_info
+    assert result_info["other_key"] == "should_remain"
+
+
+def test_financial_wrapper_step_passes_action():
+    """Test that step() passes the action to the wrapped environment."""
+    mock_env = MagicMock(spec=gym.Env)
+    mock_env.observation_space = gym.spaces.Box(low=0, high=1, shape=(4,))
+    mock_env.action_space = gym.spaces.Box(low=0, high=1, shape=(2,))
+
+    obs = {"observation": [1, 2, 3, 4]}
+    reward = 1.5
+    terminated = False
+    truncated = False
+    info = {"other_key": "value"}
+    mock_env.step.return_value = (obs, reward, terminated, truncated, info)
+
+    wrapper = wrappers.FinancialWrapper(mock_env)
+    action = [0.7, 0.3]
+    wrapper.step(action)
+
+    mock_env.step.assert_called_once_with(action)

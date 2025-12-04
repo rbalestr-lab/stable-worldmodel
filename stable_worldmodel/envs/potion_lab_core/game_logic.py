@@ -250,24 +250,26 @@ class CollisionHandler:
         if tool_name != "delivery_window" and tool_name not in self.env.unlocked_tools:
             return False  # Prevent collision
 
-        # Create collision key to ensure we only process once
+        # Create collision key to ensure we only process once *when accepted*
         collision_key = (id(essence_obj), id(tool_obj))
         if collision_key in self.essence_tool_collisions:
             return
-
-        self.essence_tool_collisions.add(collision_key)
 
         # Handle delivery window specially
         if tool_name == "delivery_window":
             if hasattr(tool_obj, "validate_delivery"):
                 accepted = tool_obj.validate_delivery(essence_obj)
-                if accepted and essence_obj in self.env.essences:
-                    self.env.essences.remove(essence_obj)
+                if accepted:
+                    self.essence_tool_collisions.add(collision_key)
+                    if essence_obj in self.env.essences:
+                        self.env.essences.remove(essence_obj)
         # Try to accept the essence for other tools
         elif hasattr(tool_obj, "accept_essence"):
             accepted = tool_obj.accept_essence(essence_obj)
-            if accepted and essence_obj in self.env.essences:
-                self.env.essences.remove(essence_obj)
+            if accepted:
+                self.essence_tool_collisions.add(collision_key)
+                if essence_obj in self.env.essences:
+                    self.env.essences.remove(essence_obj)
 
     def _on_essence_cauldron_begin(self, arbiter, space, data):
         """Called when essence collides with the cauldron."""
@@ -294,12 +296,12 @@ class CollisionHandler:
         if collision_key in self.essence_tool_collisions:
             return
 
-        self.essence_tool_collisions.add(collision_key)
-
         if hasattr(cauldron, "accept_essence"):
             accepted = cauldron.accept_essence(essence_obj)
-            if accepted and essence_obj in self.env.essences:
-                self.env.essences.remove(essence_obj)
+            if accepted:
+                self.essence_tool_collisions.add(collision_key)
+                if essence_obj in self.env.essences:
+                    self.env.essences.remove(essence_obj)
 
 
 # ============================================================================

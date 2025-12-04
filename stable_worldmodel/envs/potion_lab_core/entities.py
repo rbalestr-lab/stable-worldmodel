@@ -606,6 +606,13 @@ class Cauldron(Tool):
         if len(combined_types) == 0:
             return
 
+        # Sort by essence type so combined essence order is deterministic
+        combined = list(zip(combined_types, combined_enchanted, combined_refined))
+        combined.sort(key=lambda x: x[0])
+        combined_types = [c[0] for c in combined]
+        combined_enchanted = [c[1] for c in combined]
+        combined_refined = [c[2] for c in combined]
+
         # Create combined essence state
         self.combined_essence = EssenceState(
             essence_types=combined_types,

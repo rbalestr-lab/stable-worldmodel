@@ -112,4 +112,5 @@ If you find this library useful in your research, please consider citing us:
     world/simple-pointmaze
     world/two_room
     world/voidrun
+    world/financial
     world/OGBench/index

@@ -15,4 +15,5 @@ Wrappers
    AddPixelsWrapper
    ResizeGoalWrapper
    MegaWrapper
+   FinancialWrapper
    VariationWrapper

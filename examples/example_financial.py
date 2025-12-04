@@ -1,4 +1,12 @@
-"""Example demonstrating financial trading environment with backtesting."""
+"""Example demonstrating financial trading environment with backtesting.
+
+NOTE: This example requires Alpaca API credentials to download financial data.
+You must set the following environment variables:
+    - ALPACA_API_KEY: Your Alpaca API key
+    - ALPACA_SECRET_KEY: Your Alpaca secret key
+
+You can set these in a .env file in the project root or export them in your shell.
+"""
 
 if __name__ == "__main__":
     import gymnasium as gym

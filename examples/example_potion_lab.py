@@ -8,7 +8,7 @@ if __name__ == "__main__":
     ##  World Creation  ##
     ######################
 
-    # Create the PotionLab environment directly
+    # Create the PotionLab environment directly (layout now fully driven by variation space)
     env = PotionLab(
         render_mode="human",
         resolution=512,

@@ -87,13 +87,16 @@ class Essence:
         mass: float = 0.5,
         friction: float = 0.5,
         elasticity: float = 0.0,
+        radius_scale: float = 0.35,
+        drag_coefficient: float = 3.0,
     ):
         self.space = space
         self.state = essence_state
         self.tile_size = tile_size
+        self.drag_coefficient = drag_coefficient
 
         # Physics properties
-        self.radius = 0.35 * tile_size
+        self.radius = radius_scale * tile_size
         moment = pymunk.moment_for_circle(mass, 0, self.radius)
         self.body = pymunk.Body(mass, moment)
         self.body.position = position
@@ -112,8 +115,7 @@ class Essence:
     def _apply_drag(self, body, gravity, damping, dt):
         """Apply custom drag to essence for faster slowdown."""
         pymunk.Body.update_velocity(body, gravity, damping, dt)
-        drag_coefficient = 3.0  # Higher = more drag
-        body.velocity = body.velocity * (1.0 - drag_coefficient * dt)
+        body.velocity = body.velocity * (1.0 - self.drag_coefficient * dt)
 
     def remove_from_world(self):
         """Remove this essence from the physics simulation."""
@@ -191,6 +193,7 @@ class Player:
         max_velocity: float = 96.0,
         force_scale: float = 50.0,
         color: tuple[int, int, int] = (65, 105, 225),
+        distance_slowdown_scale: float = 20.0,
     ):
         self.space = space
         self.tile_size = tile_size
@@ -198,6 +201,7 @@ class Player:
         self.size = size
         self.max_velocity = max_velocity
         self.force_scale = force_scale
+        self.distance_slowdown_scale = distance_slowdown_scale
 
         # Physics properties
         moment = float("inf")  # No rotation
@@ -241,8 +245,7 @@ class Player:
             direction = direction / distance
 
             # Calculate target velocity proportional to distance for smooth deceleration
-            # Use exponential decay for smoother approach to target
-            speed_factor = min(1.0, distance / 20.0)  # Scale speed based on distance, max at distance=20
+            speed_factor = min(1.0, distance / self.distance_slowdown_scale)
             target_velocity = direction * self.max_velocity * speed_factor
         else:
             target_velocity = np.array([0.0, 0.0])
@@ -364,15 +367,23 @@ class Enchanter(Tool):
     Processing time: 120 steps
     """
 
-    def __init__(self, space: pymunk.Space, position: tuple[float, float], tile_size: float = 32.0):
-        size = (1.2 * tile_size, 1.2 * tile_size)
-        color = (138, 43, 226)
+    def __init__(
+        self,
+        space: pymunk.Space,
+        position: tuple[float, float],
+        tile_size: float = 32.0,
+        size_multiplier: float = 1.2,
+        color: tuple[int, int, int] = (138, 43, 226),
+        processing_time: int = 120,
+        eject_delay: int = 6,
+    ):
+        size = (size_multiplier * tile_size, size_multiplier * tile_size)
         super().__init__(space, position, size, tile_size, color, is_sensor=False)
 
         self.state = ToolState.EMPTY
         self.timer = 0
-        self.processing_time = 120
-        self.eject_delay = 6
+        self.processing_time = processing_time
+        self.eject_delay = eject_delay
         self.current_essence: EssenceState | None = None
 
     def accept_essence(self, essence: Essence) -> bool:
@@ -441,15 +452,23 @@ class Refiner(Tool):
     Processing time: 150 steps
     """
 
-    def __init__(self, space: pymunk.Space, position: tuple[float, float], tile_size: float = 32.0):
-        size = (1.2 * tile_size, 1.2 * tile_size)
-        color = (184, 134, 11)
+    def __init__(
+        self,
+        space: pymunk.Space,
+        position: tuple[float, float],
+        tile_size: float = 32.0,
+        size_multiplier: float = 1.2,
+        color: tuple[int, int, int] = (184, 134, 11),
+        processing_time: int = 150,
+        eject_delay: int = 6,
+    ):
+        size = (size_multiplier * tile_size, size_multiplier * tile_size)
         super().__init__(space, position, size, tile_size, color, is_sensor=False)
 
         self.state = ToolState.EMPTY
         self.timer = 0
-        self.processing_time = 150
-        self.eject_delay = 6
+        self.processing_time = processing_time
+        self.eject_delay = eject_delay
         self.current_essence: EssenceState | None = None
 
     def accept_essence(self, essence: Essence) -> bool:
@@ -513,17 +532,25 @@ class Cauldron(Tool):
     Player must stir by colliding with it for the full mixing time.
     """
 
-    def __init__(self, space: pymunk.Space, position: tuple[float, float], tile_size: float = 32.0):
-        size = (1.5 * tile_size, 1.5 * tile_size)
-        color = (47, 79, 79)
+    def __init__(
+        self,
+        space: pymunk.Space,
+        position: tuple[float, float],
+        tile_size: float = 32.0,
+        size_multiplier: float = 1.5,
+        color: tuple[int, int, int] = (47, 79, 79),
+        stir_time: int = 60,
+        eject_delay: int = 6,
+    ):
+        size = (size_multiplier * tile_size, size_multiplier * tile_size)
         super().__init__(space, position, size, tile_size, color, is_sensor=False)
 
         self.shape.collision_type = PhysicsConfig.LAYER_CAULDRON
 
         self.state = CauldronState.EMPTY
         self.timer = 0
-        self.stir_time = 60
-        self.eject_delay = 6
+        self.stir_time = stir_time
+        self.eject_delay = eject_delay
         self.max_essences = 4
 
         self.essence_slots: list[EssenceState | None] = [None, None, None, None]
@@ -658,15 +685,23 @@ class Bottler(Tool):
     Bottling time: 90 steps
     """
 
-    def __init__(self, space: pymunk.Space, position: tuple[float, float], tile_size: float = 32.0):
-        size = (1.0 * tile_size, 1.0 * tile_size)
-        color = (176, 196, 222)
+    def __init__(
+        self,
+        space: pymunk.Space,
+        position: tuple[float, float],
+        tile_size: float = 32.0,
+        size_multiplier: float = 1.0,
+        color: tuple[int, int, int] = (176, 196, 222),
+        bottling_time: int = 90,
+        eject_delay: int = 6,
+    ):
+        size = (size_multiplier * tile_size, size_multiplier * tile_size)
         super().__init__(space, position, size, tile_size, color, is_sensor=False)
 
         self.state = ToolState.EMPTY
         self.timer = 0
-        self.bottling_time = 90
-        self.eject_delay = 6
+        self.bottling_time = bottling_time
+        self.eject_delay = eject_delay
         self.current_essence: EssenceState | None = None
 
     def accept_essence(self, essence: Essence) -> bool:
@@ -726,9 +761,15 @@ class TrashCan(Tool):
     Instant destruction (0 steps).
     """
 
-    def __init__(self, space: pymunk.Space, position: tuple[float, float], tile_size: float = 32.0):
-        size = (0.8 * tile_size, 0.8 * tile_size)
-        color = (105, 105, 105)
+    def __init__(
+        self,
+        space: pymunk.Space,
+        position: tuple[float, float],
+        tile_size: float = 32.0,
+        size_multiplier: float = 0.8,
+        color: tuple[int, int, int] = (105, 105, 105),
+    ):
+        size = (size_multiplier * tile_size, size_multiplier * tile_size)
         super().__init__(space, position, size, tile_size, color, is_sensor=False)
 
     def accept_essence(self, essence: Essence) -> bool:
@@ -752,17 +793,26 @@ class Dispenser:
     Cooldown: 30 steps between dispenses.
     """
 
-    def __init__(self, space: pymunk.Space, position: tuple[float, float], essence_type: int, tile_size: float = 32.0):
+    def __init__(
+        self,
+        space: pymunk.Space,
+        position: tuple[float, float],
+        essence_type: int,
+        tile_size: float = 32.0,
+        size_multiplier: float = 0.8,
+        cooldown_duration: int = 30,
+    ):
         self.space = space
         self.position = position
         self.essence_type = essence_type
         self.tile_size = tile_size
         self.cooldown = 0
-        self.cooldown_duration = 30
+        self.cooldown_duration = cooldown_duration
 
         self.body = pymunk.Body(body_type=pymunk.Body.STATIC)
         self.body.position = position
-        size = (0.8 * tile_size, 0.8 * tile_size)
+        size = (size_multiplier * tile_size, size_multiplier * tile_size)
+        self.size = size
         self.shape = pymunk.Poly.create_box(self.body, size)
         self.shape.sensor = False
         self.shape.collision_type = PhysicsConfig.LAYER_DISPENSER
@@ -826,14 +876,22 @@ class DeliveryWindow(Tool):
     Delivery Window: Validates delivered items against requirements.
     """
 
-    def __init__(self, space: pymunk.Space, position: tuple[float, float], tile_size: float = 32.0):
-        size = (1.5 * tile_size, 1.0 * tile_size)
-        color = (60, 179, 113)
+    def __init__(
+        self,
+        space: pymunk.Space,
+        position: tuple[float, float],
+        tile_size: float = 32.0,
+        width_multiplier: float = 1.5,
+        height_multiplier: float = 1.0,
+        color: tuple[int, int, int] = (60, 179, 113),
+        feedback_duration: int = 12,
+    ):
+        size = (width_multiplier * tile_size, height_multiplier * tile_size)
         super().__init__(space, position, size, tile_size, color, is_sensor=False)
 
         self.state = DeliveryState.WAITING
         self.timer = 0
-        self.feedback_duration = 12
+        self.feedback_duration = feedback_duration
 
         self.required_items: list[dict] = []
 

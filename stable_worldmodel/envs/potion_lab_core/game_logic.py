@@ -188,16 +188,26 @@ class CollisionHandler:
                     # Spawn essence at dispenser location
                     position = dispenser.position
                     # Offset slightly so player can push it away
-                    offset = Vec2d(0, dispenser.tile_size * 1.25)
+                    offset = Vec2d(0, dispenser.tile_size * self.env.dispenser_params["spawn_offset_multiplier"])
                     spawn_pos = (position[0] + offset.x, position[1] + offset.y)
 
                     # Get essence physics properties from variation space
                     mass = self.env.variation_space["essence"]["mass"].value
                     friction = self.env.variation_space["essence"]["friction"].value
                     elasticity = self.env.variation_space["essence"]["elasticity"].value
+                    radius_scale = self.env.essence_config["radius_scale"]
+                    drag_coefficient = self.env.essence_config["drag_coefficient"]
 
                     essence = Essence(
-                        self.env.space, spawn_pos, essence_state, self.env.tile_size, mass, friction, elasticity
+                        self.env.space,
+                        spawn_pos,
+                        essence_state,
+                        self.env.tile_size,
+                        mass,
+                        friction,
+                        elasticity,
+                        radius_scale=radius_scale,
+                        drag_coefficient=drag_coefficient,
                     )
                     self.env.essences.append(essence)
                 break
@@ -741,7 +751,7 @@ def _apply_essence_tint(image: pygame.Surface, tint_color: tuple[int, int, int])
 def draw_dispenser(canvas: pygame.Surface, dispenser: Dispenser):
     """Draw a dispenser using PNG asset with essence color tinting."""
     pos = dispenser.position
-    size = (dispenser.tile_size * 0.8, dispenser.tile_size * 0.8)
+    size = dispenser.size
 
     # Load the dispenser asset
     asset_image = _load_asset("Dispenser")
@@ -787,7 +797,7 @@ def draw_dispenser(canvas: pygame.Surface, dispenser: Dispenser):
         if dispenser.cooldown > 0:
             # Draw overlay
             alpha = int(255 * (dispenser.cooldown / dispenser.cooldown_duration))
-            overlay = pygame.Surface(size)
+            overlay = pygame.Surface((int(size[0]), int(size[1])))
             overlay.fill((0, 0, 0))
             overlay.set_alpha(alpha // 2)
             canvas.blit(overlay, rect.topleft)
@@ -926,50 +936,96 @@ class RoundManager:
 
 
 def create_default_layout(
-    space: pymunk.Space, map_width: float, map_height: float, tile_size: float, layout_file: str | None = None
+    space: pymunk.Space,
+    map_width: float,
+    map_height: float,
+    tile_size: float,
+    layout_config: dict,
+    tool_params: dict,
+    dispenser_params: dict,
 ) -> dict[str, any]:
     """
-    Create the laboratory layout from a JSON file.
+    Create the laboratory layout from supplied configuration (positions and tool parameters).
 
     Args:
         space: Pymunk physics space
         map_width: Width of the map in pixels (unused, kept for compatibility)
         map_height: Height of the map in pixels (unused, kept for compatibility)
         tile_size: Size of each tile in pixels
-        layout_file: Path to the layout JSON file. If None, loads default layout.json
+        layout_config: Dict with dispenser/tool/player positions and essence types
+        tool_params: Dict with per-tool size/colors/timings
+        dispenser_params: Dict with dispenser size/timing config
 
     Returns a dictionary containing all game objects.
     """
-    # Load layout from JSON file
-    if layout_file is None:
-        current_dir = os.path.dirname(os.path.abspath(__file__))
-        layout_file = os.path.join(current_dir, "layout.json")
-
-    with open(layout_file) as f:
-        layout_data = json.load(f)
-
-    # Create dispensers from layout data
+    # Create dispensers from layout config
     dispensers = []
-    for dispenser_data in layout_data["dispensers"]:
+    for dispenser_data in layout_config["dispensers"]:
         dispenser = Dispenser(
-            space, (dispenser_data["x"], dispenser_data["y"]), dispenser_data["essence_type"], tile_size
+            space,
+            tuple(dispenser_data["position"]),
+            dispenser_data["essence_type"],
+            tile_size,
+            size_multiplier=dispenser_params["size_multiplier"],
+            cooldown_duration=dispenser_params["cooldown_duration"],
         )
         dispensers.append(dispenser)
 
-    # Create tools from layout data
-    tools_data = layout_data["tools"]
-    enchanter = Enchanter(space, (tools_data["enchanter"]["x"], tools_data["enchanter"]["y"]), tile_size)
-    refiner = Refiner(space, (tools_data["refiner"]["x"], tools_data["refiner"]["y"]), tile_size)
-    cauldron = Cauldron(space, (tools_data["cauldron"]["x"], tools_data["cauldron"]["y"]), tile_size)
-    bottler = Bottler(space, (tools_data["bottler"]["x"], tools_data["bottler"]["y"]), tile_size)
-    trash_can = TrashCan(space, (tools_data["trash_can"]["x"], tools_data["trash_can"]["y"]), tile_size)
+    tools_data = layout_config["tools"]
+    enchanter = Enchanter(
+        space,
+        tuple(tools_data["enchanter"]),
+        tile_size,
+        size_multiplier=tool_params["enchanter"]["size_multiplier"],
+        color=tool_params["enchanter"]["color"],
+        processing_time=tool_params["enchanter"]["processing_time"],
+        eject_delay=tool_params["enchanter"]["eject_delay"],
+    )
+    refiner = Refiner(
+        space,
+        tuple(tools_data["refiner"]),
+        tile_size,
+        size_multiplier=tool_params["refiner"]["size_multiplier"],
+        color=tool_params["refiner"]["color"],
+        processing_time=tool_params["refiner"]["processing_time"],
+        eject_delay=tool_params["refiner"]["eject_delay"],
+    )
+    cauldron = Cauldron(
+        space,
+        tuple(tools_data["cauldron"]),
+        tile_size,
+        size_multiplier=tool_params["cauldron"]["size_multiplier"],
+        color=tool_params["cauldron"]["color"],
+        stir_time=tool_params["cauldron"]["stir_time"],
+        eject_delay=tool_params["cauldron"]["eject_delay"],
+    )
+    bottler = Bottler(
+        space,
+        tuple(tools_data["bottler"]),
+        tile_size,
+        size_multiplier=tool_params["bottler"]["size_multiplier"],
+        color=tool_params["bottler"]["color"],
+        bottling_time=tool_params["bottler"]["bottling_time"],
+        eject_delay=tool_params["bottler"]["eject_delay"],
+    )
+    trash_can = TrashCan(
+        space,
+        tuple(tools_data["trash_can"]),
+        tile_size,
+        size_multiplier=tool_params["trash_can"]["size_multiplier"],
+        color=tool_params["trash_can"]["color"],
+    )
     delivery_window = DeliveryWindow(
-        space, (tools_data["delivery_window"]["x"], tools_data["delivery_window"]["y"]), tile_size
+        space,
+        tuple(tools_data["delivery_window"]),
+        tile_size,
+        width_multiplier=tool_params["delivery_window"]["width_multiplier"],
+        height_multiplier=tool_params["delivery_window"]["height_multiplier"],
+        color=tool_params["delivery_window"]["color"],
+        feedback_duration=tool_params["delivery_window"]["feedback_duration"],
     )
 
-    # Get player position from layout data (player creation happens in env)
-    player_data = layout_data["player"]
-    player_position = (player_data["x"], player_data["y"])
+    player_position = tuple(layout_config["player"])
 
     return {
         "dispensers": dispensers,

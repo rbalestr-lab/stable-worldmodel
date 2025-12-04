@@ -5,7 +5,6 @@ This environment tests compositional generalization, catastrophic forgetting, an
 long-horizon planning through potion brewing mechanics.
 """
 
-import json
 import os
 from collections.abc import Sequence
 from typing import Any
@@ -42,8 +41,6 @@ DEFAULT_VARIATIONS = (
     "player.mass",
     "player.friction",
     "player.elasticity",
-    "player.speed",
-    "player.force",
     "essence.mass",
     "essence.friction",
     "essence.elasticity",
@@ -76,7 +73,6 @@ class PotionLab(gym.Env):
         render_mode: str | None = "rgb_array",
         resolution: int = 512,
         render_action: bool = False,
-        layout_path: str | None = None,
         rounds_path: str | None = None,
     ):
         """
@@ -86,7 +82,6 @@ class PotionLab(gym.Env):
             render_mode: "human" or "rgb_array"
             resolution: Render resolution (square image)
             render_action: Whether to render action indicators
-            layout_path: Path to layout JSON file (default: potion_lab_core/layout.json)
             rounds_path: Path to rounds JSON file (default: potion_lab_core/rounds.json)
         """
         super().__init__()
@@ -99,24 +94,43 @@ class PotionLab(gym.Env):
 
         # Config files (use defaults if not provided)
         current_dir = os.path.dirname(os.path.abspath(__file__))
-        self.layout_path = layout_path or os.path.join(current_dir, "potion_lab_core", "layout.json")
         self.rounds_path = rounds_path or os.path.join(current_dir, "potion_lab_core", "rounds.json")
 
-        # Load UI bar heights
-        with open(self.layout_path) as f:
-            layout_data = json.load(f)
+        # Layout defaults, overwritten by variation space
+        layout_data = {
+            "ui": {"top_height": 50, "bottom_height": 80},
+            "dispensers": [
+                {"essence_type": 1, "x": 181, "y": 48},
+                {"essence_type": 2, "x": 231, "y": 48},
+                {"essence_type": 3, "x": 281, "y": 48},
+                {"essence_type": 4, "x": 331, "y": 48},
+            ],
+            "tools": {
+                "enchanter": {"x": 100, "y": 148},
+                "refiner": {"x": 412, "y": 148},
+                "cauldron": {"x": 256, "y": 232},
+                "bottler": {"x": 100, "y": 300},
+                "trash_can": {"x": 400, "y": 300},
+                "delivery_window": {"x": 256, "y": 350},
+            },
+            "player": {"x": 256, "y": 300},
+        }
 
-        ui_config = layout_data.get("ui", {})
+        ui_config = layout_data["ui"]
+        layout_tools = layout_data["tools"]
+        layout_dispensers = layout_data["dispensers"]
+        layout_player = layout_data["player"]
+
+        # Initialize spatial parameters from defaults (will be re-applied on reset)
         self.ui_top_height = ui_config.get("top_height", 50)
         self.ui_bottom_height = ui_config.get("bottom_height", 80)
 
         # Lab fills remaining space between UI bars
-        self.map_width = self.window_size  # Full width: 512
-        self.map_height = self.window_size - self.ui_top_height - self.ui_bottom_height  # Remaining height
-
         self.map_width_tiles = 16
         self.map_height_tiles = 16
-        self.tile_size = self.map_width / self.map_width_tiles  # 32.0 if window_size=512
+        self.tile_size = self.window_size / self.map_width_tiles  # Updated on reset
+        self.map_width = self.window_size
+        self.map_height = self.window_size - self.ui_top_height - self.ui_bottom_height
 
         # Action space: cursor position (x, y) in world coordinates
         self.action_space = spaces.Box(low=0.0, high=float(self.window_size), shape=(2,), dtype=np.float32)
@@ -174,22 +188,24 @@ class PotionLab(gym.Env):
                         ),
                         "speed": swm.spaces.Box(
                             low=100.0,
-                            high=300.0,
+                            high=400.0,
                             init_value=200.0,
                             shape=(),
                             dtype=np.float32,
                         ),
                         "force": swm.spaces.Box(
                             low=10.0,
-                            high=100.0,
-                            init_value=50.0,
+                            high=140.0,
+                            init_value=70.0,
                             shape=(),
                             dtype=np.float32,
                         ),
                         "start_position": swm.spaces.Box(
                             low=50.0,
                             high=self.window_size - 50.0,
-                            init_value=np.array([384.0, 352.0], dtype=np.float32),
+                            init_value=np.array(
+                                [layout_player.get("x", 384.0), layout_player.get("y", 352.0)], dtype=np.float32
+                            ),
                             shape=(2,),
                             dtype=np.float32,
                         ),
@@ -236,9 +252,336 @@ class PotionLab(gym.Env):
                         "color": swm.spaces.RGBBox(init_value=np.array([100, 0, 0], dtype=np.uint8)),
                     }
                 ),
+                "render": swm.spaces.Dict(
+                    {
+                        "window_size": swm.spaces.Box(
+                            low=256.0,
+                            high=1024.0,
+                            init_value=float(self.window_size),
+                            shape=(),
+                            dtype=np.float32,
+                        ),
+                    }
+                ),
+                "grid": swm.spaces.Dict(
+                    {
+                        "map_width_tiles": swm.spaces.Box(
+                            low=8.0,
+                            high=64.0,
+                            init_value=float(self.map_width_tiles),
+                            shape=(),
+                            dtype=np.float32,
+                        ),
+                        "map_height_tiles": swm.spaces.Box(
+                            low=8.0,
+                            high=64.0,
+                            init_value=float(self.map_height_tiles),
+                            shape=(),
+                            dtype=np.float32,
+                        ),
+                    }
+                ),
+                "ui": swm.spaces.Dict(
+                    {
+                        "top_height": swm.spaces.Box(
+                            low=0.0,
+                            high=200.0,
+                            init_value=float(self.ui_top_height),
+                            shape=(),
+                            dtype=np.float32,
+                        ),
+                        "bottom_height": swm.spaces.Box(
+                            low=0.0,
+                            high=200.0,
+                            init_value=float(self.ui_bottom_height),
+                            shape=(),
+                            dtype=np.float32,
+                        ),
+                    }
+                ),
+                "layout": swm.spaces.Dict(
+                    {
+                        "player_position": swm.spaces.Box(
+                            low=0.0,
+                            high=float(self.window_size),
+                            init_value=np.array(
+                                [layout_player.get("x", 256.0), layout_player.get("y", 300.0)], dtype=np.float32
+                            ),
+                            shape=(2,),
+                            dtype=np.float32,
+                        ),
+                        "tools": swm.spaces.Dict(
+                            {
+                                "enchanter_position": swm.spaces.Box(
+                                    low=0.0,
+                                    high=float(self.window_size),
+                                    init_value=np.array(
+                                        [layout_tools["enchanter"]["x"], layout_tools["enchanter"]["y"]],
+                                        dtype=np.float32,
+                                    ),
+                                    shape=(2,),
+                                    dtype=np.float32,
+                                ),
+                                "refiner_position": swm.spaces.Box(
+                                    low=0.0,
+                                    high=float(self.window_size),
+                                    init_value=np.array(
+                                        [layout_tools["refiner"]["x"], layout_tools["refiner"]["y"]], dtype=np.float32
+                                    ),
+                                    shape=(2,),
+                                    dtype=np.float32,
+                                ),
+                                "cauldron_position": swm.spaces.Box(
+                                    low=0.0,
+                                    high=float(self.window_size),
+                                    init_value=np.array(
+                                        [layout_tools["cauldron"]["x"], layout_tools["cauldron"]["y"]],
+                                        dtype=np.float32,
+                                    ),
+                                    shape=(2,),
+                                    dtype=np.float32,
+                                ),
+                                "bottler_position": swm.spaces.Box(
+                                    low=0.0,
+                                    high=float(self.window_size),
+                                    init_value=np.array(
+                                        [layout_tools["bottler"]["x"], layout_tools["bottler"]["y"]], dtype=np.float32
+                                    ),
+                                    shape=(2,),
+                                    dtype=np.float32,
+                                ),
+                                "trash_can_position": swm.spaces.Box(
+                                    low=0.0,
+                                    high=float(self.window_size),
+                                    init_value=np.array(
+                                        [layout_tools["trash_can"]["x"], layout_tools["trash_can"]["y"]],
+                                        dtype=np.float32,
+                                    ),
+                                    shape=(2,),
+                                    dtype=np.float32,
+                                ),
+                                "delivery_window_position": swm.spaces.Box(
+                                    low=0.0,
+                                    high=float(self.window_size),
+                                    init_value=np.array(
+                                        [layout_tools["delivery_window"]["x"], layout_tools["delivery_window"]["y"]],
+                                        dtype=np.float32,
+                                    ),
+                                    shape=(2,),
+                                    dtype=np.float32,
+                                ),
+                            }
+                        ),
+                        "dispensers": swm.spaces.Dict(
+                            {
+                                "d1_position": swm.spaces.Box(
+                                    low=0.0,
+                                    high=float(self.window_size),
+                                    init_value=np.array(
+                                        [layout_dispensers[0]["x"], layout_dispensers[0]["y"]], dtype=np.float32
+                                    ),
+                                    shape=(2,),
+                                    dtype=np.float32,
+                                ),
+                                "d1_type": swm.spaces.Box(
+                                    low=1.0,
+                                    high=8.0,
+                                    init_value=float(layout_dispensers[0]["essence_type"]),
+                                    shape=(),
+                                    dtype=np.float32,
+                                ),
+                                "d2_position": swm.spaces.Box(
+                                    low=0.0,
+                                    high=float(self.window_size),
+                                    init_value=np.array(
+                                        [layout_dispensers[1]["x"], layout_dispensers[1]["y"]], dtype=np.float32
+                                    ),
+                                    shape=(2,),
+                                    dtype=np.float32,
+                                ),
+                                "d2_type": swm.spaces.Box(
+                                    low=1.0,
+                                    high=8.0,
+                                    init_value=float(layout_dispensers[1]["essence_type"]),
+                                    shape=(),
+                                    dtype=np.float32,
+                                ),
+                                "d3_position": swm.spaces.Box(
+                                    low=0.0,
+                                    high=float(self.window_size),
+                                    init_value=np.array(
+                                        [layout_dispensers[2]["x"], layout_dispensers[2]["y"]], dtype=np.float32
+                                    ),
+                                    shape=(2,),
+                                    dtype=np.float32,
+                                ),
+                                "d3_type": swm.spaces.Box(
+                                    low=1.0,
+                                    high=8.0,
+                                    init_value=float(layout_dispensers[2]["essence_type"]),
+                                    shape=(),
+                                    dtype=np.float32,
+                                ),
+                                "d4_position": swm.spaces.Box(
+                                    low=0.0,
+                                    high=float(self.window_size),
+                                    init_value=np.array(
+                                        [layout_dispensers[3]["x"], layout_dispensers[3]["y"]], dtype=np.float32
+                                    ),
+                                    shape=(2,),
+                                    dtype=np.float32,
+                                ),
+                                "d4_type": swm.spaces.Box(
+                                    low=1.0,
+                                    high=8.0,
+                                    init_value=float(layout_dispensers[3]["essence_type"]),
+                                    shape=(),
+                                    dtype=np.float32,
+                                ),
+                            }
+                        ),
+                    }
+                ),
+                "tools_config": swm.spaces.Dict(
+                    {
+                        "eject_offset_multiplier": swm.spaces.Box(
+                            low=0.0, high=4.0, init_value=1.5, shape=(), dtype=np.float32
+                        ),
+                        "enchanter": swm.spaces.Dict(
+                            {
+                                "size_multiplier": swm.spaces.Box(
+                                    low=0.5, high=3.0, init_value=1.2, shape=(), dtype=np.float32
+                                ),
+                                "color": swm.spaces.RGBBox(init_value=np.array([138, 43, 226], dtype=np.uint8)),
+                                "processing_time": swm.spaces.Box(
+                                    low=1.0, high=600.0, init_value=120.0, shape=(), dtype=np.float32
+                                ),
+                                "eject_delay": swm.spaces.Box(
+                                    low=0.0, high=120.0, init_value=6.0, shape=(), dtype=np.float32
+                                ),
+                            }
+                        ),
+                        "refiner": swm.spaces.Dict(
+                            {
+                                "size_multiplier": swm.spaces.Box(
+                                    low=0.5, high=3.0, init_value=1.2, shape=(), dtype=np.float32
+                                ),
+                                "color": swm.spaces.RGBBox(init_value=np.array([184, 134, 11], dtype=np.uint8)),
+                                "processing_time": swm.spaces.Box(
+                                    low=1.0, high=600.0, init_value=150.0, shape=(), dtype=np.float32
+                                ),
+                                "eject_delay": swm.spaces.Box(
+                                    low=0.0, high=120.0, init_value=6.0, shape=(), dtype=np.float32
+                                ),
+                            }
+                        ),
+                        "cauldron": swm.spaces.Dict(
+                            {
+                                "size_multiplier": swm.spaces.Box(
+                                    low=0.5, high=3.0, init_value=1.5, shape=(), dtype=np.float32
+                                ),
+                                "color": swm.spaces.RGBBox(init_value=np.array([47, 79, 79], dtype=np.uint8)),
+                                "stir_time": swm.spaces.Box(
+                                    low=1.0, high=600.0, init_value=60.0, shape=(), dtype=np.float32
+                                ),
+                                "eject_delay": swm.spaces.Box(
+                                    low=0.0, high=120.0, init_value=6.0, shape=(), dtype=np.float32
+                                ),
+                            }
+                        ),
+                        "bottler": swm.spaces.Dict(
+                            {
+                                "size_multiplier": swm.spaces.Box(
+                                    low=0.5, high=3.0, init_value=1.0, shape=(), dtype=np.float32
+                                ),
+                                "color": swm.spaces.RGBBox(init_value=np.array([176, 196, 222], dtype=np.uint8)),
+                                "bottling_time": swm.spaces.Box(
+                                    low=1.0, high=600.0, init_value=90.0, shape=(), dtype=np.float32
+                                ),
+                                "eject_delay": swm.spaces.Box(
+                                    low=0.0, high=120.0, init_value=6.0, shape=(), dtype=np.float32
+                                ),
+                            }
+                        ),
+                        "trash_can": swm.spaces.Dict(
+                            {
+                                "size_multiplier": swm.spaces.Box(
+                                    low=0.2, high=3.0, init_value=0.8, shape=(), dtype=np.float32
+                                ),
+                                "color": swm.spaces.RGBBox(init_value=np.array([105, 105, 105], dtype=np.uint8)),
+                            }
+                        ),
+                        "delivery_window": swm.spaces.Dict(
+                            {
+                                "width_multiplier": swm.spaces.Box(
+                                    low=0.5, high=3.0, init_value=1.5, shape=(), dtype=np.float32
+                                ),
+                                "height_multiplier": swm.spaces.Box(
+                                    low=0.5, high=3.0, init_value=1.0, shape=(), dtype=np.float32
+                                ),
+                                "color": swm.spaces.RGBBox(init_value=np.array([60, 179, 113], dtype=np.uint8)),
+                                "feedback_duration": swm.spaces.Box(
+                                    low=1.0, high=120.0, init_value=12.0, shape=(), dtype=np.float32
+                                ),
+                            }
+                        ),
+                    }
+                ),
+                "dispenser_config": swm.spaces.Dict(
+                    {
+                        "size_multiplier": swm.spaces.Box(
+                            low=0.2, high=3.0, init_value=0.8, shape=(), dtype=np.float32
+                        ),
+                        "cooldown_duration": swm.spaces.Box(
+                            low=1.0, high=300.0, init_value=30.0, shape=(), dtype=np.float32
+                        ),
+                        "spawn_offset_multiplier": swm.spaces.Box(
+                            low=0.0, high=4.0, init_value=1.25, shape=(), dtype=np.float32
+                        ),
+                    }
+                ),
+                "essence_config": swm.spaces.Dict(
+                    {
+                        "radius_scale": swm.spaces.Box(low=0.1, high=1.0, init_value=0.35, shape=(), dtype=np.float32),
+                        "drag_coefficient": swm.spaces.Box(
+                            low=0.0, high=10.0, init_value=3.0, shape=(), dtype=np.float32
+                        ),
+                    }
+                ),
+                "player_control": swm.spaces.Dict(
+                    {
+                        "distance_slowdown_scale": swm.spaces.Box(
+                            low=1.0, high=200.0, init_value=20.0, shape=(), dtype=np.float32
+                        ),
+                    }
+                ),
+                "environment": swm.spaces.Dict(
+                    {
+                        "wall_thickness": swm.spaces.Box(
+                            low=1.0, high=50.0, init_value=10.0, shape=(), dtype=np.float32
+                        ),
+                    }
+                ),
             },
-            sampling_order=["background", "physics", "essence", "player"],
+            sampling_order=[
+                "background",
+                "physics",
+                "essence",
+                "player",
+                "ui",
+                "layout",
+                "tools_config",
+                "dispenser_config",
+                "essence_config",
+                "player_control",
+                "environment",
+                "grid",
+                "render",
+            ],
         )
+
+        # Initialize derived config using default variation values
+        self._apply_variation_config()
 
         # Pygame and rendering
         self.window = None
@@ -288,6 +631,9 @@ class PotionLab(gym.Env):
 
         assert self.variation_space.check(debug=True), "Variation values must be within variation space!"
 
+        # Refresh derived configuration from sampled variations
+        self._apply_variation_config()
+
         self._setup()
 
         self.round_manager = RoundManager.load_from_file(self.rounds_path)
@@ -316,16 +662,152 @@ class PotionLab(gym.Env):
 
         return observation, info
 
+    def _apply_variation_config(self):
+        """Apply sampled variation values to derived configuration and cached params."""
+        self.window_size = float(self.variation_space["render"]["window_size"].value)
+        self.map_width_tiles = int(self.variation_space["grid"]["map_width_tiles"].value)
+        self.map_height_tiles = int(self.variation_space["grid"]["map_height_tiles"].value)
+
+        self.ui_top_height = float(self.variation_space["ui"]["top_height"].value)
+        self.ui_bottom_height = float(self.variation_space["ui"]["bottom_height"].value)
+
+        self.map_width = self.window_size
+        self.map_height = self.window_size - self.ui_top_height - self.ui_bottom_height
+        self.tile_size = self.map_width / max(1, self.map_width_tiles)
+
+        # Update action space to match current window size
+        self.action_space = spaces.Box(
+            low=0.0,
+            high=float(self.window_size),
+            shape=(2,),
+            dtype=np.float32,
+        )
+
+        # Layout configuration
+        layout_disp = self.variation_space["layout"]["dispensers"]
+        layout_tools = self.variation_space["layout"]["tools"]
+        self.layout_config = {
+            "dispensers": [
+                {
+                    "position": layout_disp["d1_position"].value.tolist(),
+                    "essence_type": int(layout_disp["d1_type"].value),
+                },
+                {
+                    "position": layout_disp["d2_position"].value.tolist(),
+                    "essence_type": int(layout_disp["d2_type"].value),
+                },
+                {
+                    "position": layout_disp["d3_position"].value.tolist(),
+                    "essence_type": int(layout_disp["d3_type"].value),
+                },
+                {
+                    "position": layout_disp["d4_position"].value.tolist(),
+                    "essence_type": int(layout_disp["d4_type"].value),
+                },
+            ],
+            "tools": {
+                "enchanter": layout_tools["enchanter_position"].value.tolist(),
+                "refiner": layout_tools["refiner_position"].value.tolist(),
+                "cauldron": layout_tools["cauldron_position"].value.tolist(),
+                "bottler": layout_tools["bottler_position"].value.tolist(),
+                "trash_can": layout_tools["trash_can_position"].value.tolist(),
+                "delivery_window": layout_tools["delivery_window_position"].value.tolist(),
+            },
+            "player": self.variation_space["layout"]["player_position"].value.tolist(),
+        }
+
+        def _to_color(arr):
+            return tuple(int(x) for x in arr.tolist())
+
+        tool_cfg = self.variation_space["tools_config"]
+        self.tool_params = {
+            "eject_offset_multiplier": float(tool_cfg["eject_offset_multiplier"].value),
+            "enchanter": {
+                "size_multiplier": float(tool_cfg["enchanter"]["size_multiplier"].value),
+                "color": _to_color(tool_cfg["enchanter"]["color"].value),
+                "processing_time": int(tool_cfg["enchanter"]["processing_time"].value),
+                "eject_delay": int(tool_cfg["enchanter"]["eject_delay"].value),
+            },
+            "refiner": {
+                "size_multiplier": float(tool_cfg["refiner"]["size_multiplier"].value),
+                "color": _to_color(tool_cfg["refiner"]["color"].value),
+                "processing_time": int(tool_cfg["refiner"]["processing_time"].value),
+                "eject_delay": int(tool_cfg["refiner"]["eject_delay"].value),
+            },
+            "cauldron": {
+                "size_multiplier": float(tool_cfg["cauldron"]["size_multiplier"].value),
+                "color": _to_color(tool_cfg["cauldron"]["color"].value),
+                "stir_time": int(tool_cfg["cauldron"]["stir_time"].value),
+                "eject_delay": int(tool_cfg["cauldron"]["eject_delay"].value),
+            },
+            "bottler": {
+                "size_multiplier": float(tool_cfg["bottler"]["size_multiplier"].value),
+                "color": _to_color(tool_cfg["bottler"]["color"].value),
+                "bottling_time": int(tool_cfg["bottler"]["bottling_time"].value),
+                "eject_delay": int(tool_cfg["bottler"]["eject_delay"].value),
+            },
+            "trash_can": {
+                "size_multiplier": float(tool_cfg["trash_can"]["size_multiplier"].value),
+                "color": _to_color(tool_cfg["trash_can"]["color"].value),
+            },
+            "delivery_window": {
+                "width_multiplier": float(tool_cfg["delivery_window"]["width_multiplier"].value),
+                "height_multiplier": float(tool_cfg["delivery_window"]["height_multiplier"].value),
+                "color": _to_color(tool_cfg["delivery_window"]["color"].value),
+                "feedback_duration": int(tool_cfg["delivery_window"]["feedback_duration"].value),
+            },
+        }
+
+        dispenser_cfg = self.variation_space["dispenser_config"]
+        self.dispenser_params = {
+            "size_multiplier": float(dispenser_cfg["size_multiplier"].value),
+            "cooldown_duration": int(dispenser_cfg["cooldown_duration"].value),
+            "spawn_offset_multiplier": float(dispenser_cfg["spawn_offset_multiplier"].value),
+        }
+
+        essence_cfg = self.variation_space["essence_config"]
+        self.essence_config = {
+            "radius_scale": float(essence_cfg["radius_scale"].value),
+            "drag_coefficient": float(essence_cfg["drag_coefficient"].value),
+        }
+
+        player_control_cfg = self.variation_space["player_control"]
+        self.player_control_config = {
+            "distance_slowdown_scale": float(player_control_cfg["distance_slowdown_scale"].value),
+        }
+
+        env_cfg = self.variation_space["environment"]
+        self.env_config = {"wall_thickness": float(env_cfg["wall_thickness"].value)}
+
+        # Clamp player start position to the playable map (accounts for UI space)
+        start_pos = self.variation_space["player"]["start_position"].value
+        clamped_start = np.array(
+            [
+                np.clip(start_pos[0], self.tile_size, self.map_width - self.tile_size),
+                np.clip(start_pos[1], self.tile_size, self.map_height - self.tile_size),
+            ],
+            dtype=np.float32,
+        )
+        self.variation_space["player"]["start_position"]._value = clamped_start
+
     def _setup(self):
         """Initialize physics space and game objects."""
         self.space = setup_physics_space()
 
         self.space.gravity = self.variation_space["physics"]["gravity"].value.tolist()
+        # Remove global damping so player speed/force are not muted by default 0.8 damping
+        self.space.damping = 1.0
 
-        add_walls(self.space, self.map_width, self.map_height)
+        add_walls(self.space, self.map_width, self.map_height, wall_thickness=self.env_config["wall_thickness"])
 
         layout = create_default_layout(
-            self.space, self.map_width, self.map_height, self.tile_size, layout_file=self.layout_path
+            self.space,
+            self.map_width,
+            self.map_height,
+            self.tile_size,
+            self.layout_config,
+            self.tool_params,
+            self.dispenser_params,
         )
 
         # Create player with physics properties from variation space
@@ -341,6 +823,7 @@ class PotionLab(gym.Env):
             max_velocity=self.variation_space["player"]["speed"].value,
             force_scale=self.variation_space["player"]["force"].value,
             color=tuple(self.variation_space["player"]["color"].value.tolist()),
+            distance_slowdown_scale=self.player_control_config["distance_slowdown_scale"],
         )
 
         self.tools = {
@@ -517,39 +1000,81 @@ class PotionLab(gym.Env):
 
     def _check_tool_ejections(self):
         """Check if any tools are ready to eject processed essences."""
-        eject_offset = self.tile_size * 1.5  # Increased from 0.8 to 1.5
+        eject_offset = self.tile_size * self.tool_params["eject_offset_multiplier"]
 
         # Get essence physics properties from variation space
         mass = self.variation_space["essence"]["mass"].value
         friction = self.variation_space["essence"]["friction"].value
         elasticity = self.variation_space["essence"]["elasticity"].value
+        radius_scale = self.essence_config["radius_scale"]
+        drag_coefficient = self.essence_config["drag_coefficient"]
 
         if hasattr(self.tools["enchanter"], "eject_essence"):
             essence_state = self.tools["enchanter"].eject_essence()
             if essence_state is not None:
                 pos = (self.tools["enchanter"].position[0] + eject_offset, self.tools["enchanter"].position[1])
-                essence = Essence(self.space, pos, essence_state, self.tile_size, mass, friction, elasticity)
+                essence = Essence(
+                    self.space,
+                    pos,
+                    essence_state,
+                    self.tile_size,
+                    mass,
+                    friction,
+                    elasticity,
+                    radius_scale=radius_scale,
+                    drag_coefficient=drag_coefficient,
+                )
                 self.essences.append(essence)
 
         if hasattr(self.tools["refiner"], "eject_essence"):
             essence_state = self.tools["refiner"].eject_essence()
             if essence_state is not None:
                 pos = (self.tools["refiner"].position[0] - eject_offset, self.tools["refiner"].position[1])
-                essence = Essence(self.space, pos, essence_state, self.tile_size, mass, friction, elasticity)
+                essence = Essence(
+                    self.space,
+                    pos,
+                    essence_state,
+                    self.tile_size,
+                    mass,
+                    friction,
+                    elasticity,
+                    radius_scale=radius_scale,
+                    drag_coefficient=drag_coefficient,
+                )
                 self.essences.append(essence)
 
         if hasattr(self.tools["cauldron"], "eject_essence"):
             essence_state = self.tools["cauldron"].eject_essence()
             if essence_state is not None:
                 pos = (self.tools["cauldron"].position[0], self.tools["cauldron"].position[1] + eject_offset)
-                essence = Essence(self.space, pos, essence_state, self.tile_size, mass, friction, elasticity)
+                essence = Essence(
+                    self.space,
+                    pos,
+                    essence_state,
+                    self.tile_size,
+                    mass,
+                    friction,
+                    elasticity,
+                    radius_scale=radius_scale,
+                    drag_coefficient=drag_coefficient,
+                )
                 self.essences.append(essence)
 
         if hasattr(self.tools["bottler"], "eject_essence"):
             essence_state = self.tools["bottler"].eject_essence()
             if essence_state is not None:
                 pos = (self.tools["bottler"].position[0], self.tools["bottler"].position[1] + eject_offset)
-                essence = Essence(self.space, pos, essence_state, self.tile_size, mass, friction, elasticity)
+                essence = Essence(
+                    self.space,
+                    pos,
+                    essence_state,
+                    self.tile_size,
+                    mass,
+                    friction,
+                    elasticity,
+                    radius_scale=radius_scale,
+                    drag_coefficient=drag_coefficient,
+                )
                 self.essences.append(essence)
 
     def _encode_requirements(self) -> np.ndarray:

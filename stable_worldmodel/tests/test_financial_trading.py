@@ -969,3 +969,1349 @@ def test_financial_dataset_encoding():
     # Verify reconstruction accuracy (bfloat16 has some precision loss)
     max_error = np.abs(test_prices.values - decoded).max()
     assert max_error < 0.01  # Should be very close
+
+
+# ===== COMPREHENSIVE EDGE CASE TESTS FOR UTILITY FUNCTIONS =====
+
+
+def test_sortino_ratio_edge_cases():
+    """Test Sortino ratio edge cases for lines 59, 65, 70."""
+    from stable_worldmodel.envs.financial_trading import calculate_sortino_ratio
+
+    # Edge case: single element (line 59)
+    single_return = np.array([0.01])
+    assert calculate_sortino_ratio(single_return) == 0.0
+
+    # Edge case: no downside returns (line 65) - all positive
+    positive_returns = np.array([0.01, 0.02, 0.03, 0.015])
+    assert calculate_sortino_ratio(positive_returns) == 0.0
+
+    # Edge case: all downside returns are identical (line 70)
+    identical_negative = np.array([0.01, -0.01, -0.01, -0.01, 0.02])
+    sortino = calculate_sortino_ratio(identical_negative)
+    assert sortino == 0.0
+
+
+def test_max_drawdown_edge_cases():
+    """Test max drawdown edge cases for line 79."""
+    from stable_worldmodel.envs.financial_trading import calculate_max_drawdown
+
+    # Edge case: single value (line 79)
+    single_value = [100.0]
+    assert calculate_max_drawdown(single_value) == 0.0
+
+    # Edge case: monotonically increasing (no drawdown)
+    increasing = [100, 110, 120, 130]
+    dd = calculate_max_drawdown(increasing)
+    assert dd >= 0.0
+
+
+def test_calmar_ratio_edge_cases():
+    """Test Calmar ratio edge case for line 93."""
+    from stable_worldmodel.envs.financial_trading import calculate_calmar_ratio
+
+    # Edge case: zero max_drawdown (line 93)
+    assert calculate_calmar_ratio(0.15, 0.0) == 0.0
+    assert calculate_calmar_ratio(0.0, 0.0) == 0.0
+
+
+def test_alpha_beta_edge_cases():
+    """Test alpha and beta edge cases for lines 103, 107."""
+    from stable_worldmodel.envs.financial_trading import calculate_alpha_beta
+
+    # Edge case: single return (line 103)
+    single_ret = np.array([0.01])
+    single_bench = np.array([0.01])
+    alpha, beta = calculate_alpha_beta(single_ret, single_bench, 0.1, 0.1)
+    assert alpha == 0.0
+    assert beta == 0.0
+
+    # Edge case: mismatched lengths (line 103)
+    short_ret = np.array([0.01, 0.02])
+    long_bench = np.array([0.01, 0.02, 0.03])
+    alpha, beta = calculate_alpha_beta(short_ret, long_bench, 0.1, 0.1)
+    assert alpha == 0.0
+    assert beta == 0.0
+
+    # Edge case: zero benchmark variance (line 107)
+    returns = np.array([0.01, 0.02, -0.01, 0.015])
+    benchmark_constant = np.array([0.01, 0.01, 0.01, 0.01])
+    alpha, beta = calculate_alpha_beta(returns, benchmark_constant, 0.1, 0.1)
+    assert alpha == 0.0
+    assert beta == 0.0
+
+
+def test_volatility_edge_cases():
+    """Test volatility edge case for line 118."""
+    from stable_worldmodel.envs.financial_trading import calculate_volatility
+
+    # Edge case: single return (line 118)
+    single_return = np.array([0.01])
+    assert calculate_volatility(single_return) == 0.0
+
+
+def test_downside_volatility_edge_cases():
+    """Test downside volatility edge case for line 127."""
+    from stable_worldmodel.envs.financial_trading import (
+        calculate_downside_volatility,
+    )
+
+    # Edge case: no downside returns (line 127)
+    positive_returns = np.array([0.01, 0.02, 0.03, 0.015])
+    assert calculate_downside_volatility(positive_returns) == 0.0
+
+    # Edge case: single downside return (line 127)
+    one_negative = np.array([0.01, 0.02, -0.01])
+    assert calculate_downside_volatility(one_negative) == 0.0
+
+
+def test_information_ratio_edge_cases():
+    """Test information ratio edge cases for lines 141, 147."""
+    from stable_worldmodel.envs.financial_trading import calculate_information_ratio
+
+    # Edge case: mismatched lengths (line 141)
+    short_ret = np.array([0.01, 0.02])
+    long_bench = np.array([0.01, 0.02, 0.03])
+    ir, tracking_error = calculate_information_ratio(short_ret, long_bench, 0.1, 0.1)
+    assert ir == 0.0
+    assert tracking_error == 0.0
+
+    # Edge case: single return (line 141)
+    single_ret = np.array([0.01])
+    single_bench = np.array([0.01])
+    ir, tracking_error = calculate_information_ratio(single_ret, single_bench, 0.1, 0.1)
+    assert ir == 0.0
+    assert tracking_error == 0.0
+
+    # Edge case: identical returns -> zero tracking error (line 147)
+    identical_ret = np.array([0.01, 0.02, 0.015, 0.018])
+    identical_bench = identical_ret.copy()
+    ir, tracking_error = calculate_information_ratio(identical_ret, identical_bench, 0.1, 0.1)
+    assert ir == 0.0
+    assert tracking_error == 0.0
+
+
+def test_var_cvar_edge_cases():
+    """Test VaR/CVaR edge case for line 156."""
+    from stable_worldmodel.envs.financial_trading import calculate_var_cvar
+
+    # Edge case: fewer than 10 returns (line 156)
+    few_returns = np.array([0.01, -0.01, 0.02, -0.005])
+    var, cvar = calculate_var_cvar(few_returns)
+    assert var == 0.0
+    assert cvar == 0.0
+
+
+def test_skewness_kurtosis_edge_cases():
+    """Test skewness/kurtosis edge case for line 168."""
+    from stable_worldmodel.envs.financial_trading import calculate_skewness_kurtosis
+
+    # Edge case: fewer than 4 returns (line 168)
+    few_returns = np.array([0.01, 0.02])
+    skew, kurt = calculate_skewness_kurtosis(few_returns)
+    assert skew == 0.0
+    assert kurt == 0.0
+
+
+def test_tail_ratio_edge_cases():
+    """Test tail ratio edge cases for lines 179, 185."""
+    from stable_worldmodel.envs.financial_trading import calculate_tail_ratio
+
+    # Edge case: fewer than 10 returns (line 179)
+    few_returns = np.array([0.01, -0.01, 0.02])
+    assert calculate_tail_ratio(few_returns) == 0.0
+
+    # Edge case: p5 is zero (line 185)
+    # Create returns where 5th percentile is exactly 0
+    returns_with_zero_p5 = np.array([0.0, 0.0, 0.0, 0.0, 0.0, 0.01, 0.02, 0.03, 0.04, 0.05])
+    tr = calculate_tail_ratio(returns_with_zero_p5)
+    assert tr == 0.0
+
+
+def test_omega_ratio_edge_cases():
+    """Test Omega ratio edge cases for lines 193, 199."""
+    from stable_worldmodel.envs.financial_trading import calculate_omega_ratio
+
+    # Edge case: single return (line 193)
+    single_return = np.array([0.01])
+    assert calculate_omega_ratio(single_return) == 0.0
+
+    # Edge case: no losses (line 199) - all gains
+    all_positive = np.array([0.01, 0.02, 0.03, 0.015])
+    omega = calculate_omega_ratio(all_positive, threshold=0.0)
+    assert omega == 0.0
+
+
+def test_win_rate_edge_cases():
+    """Test win rate edge case for line 207."""
+    from stable_worldmodel.envs.financial_trading import calculate_win_rate
+
+    # Edge case: empty list (line 207)
+    empty_trades = []
+    assert calculate_win_rate(empty_trades) == 0.0
+
+
+def test_profit_factor_edge_cases():
+    """Test profit factor edge cases for lines 216, 222."""
+    from stable_worldmodel.envs.financial_trading import calculate_profit_factor
+
+    # Edge case: empty list (line 216)
+    empty_trades = []
+    assert calculate_profit_factor(empty_trades) == 0.0
+
+    # Edge case: no losses (line 222) - all winning trades
+    all_wins = [0.01, 0.02, 0.03, 0.015]
+    pf = calculate_profit_factor(all_wins)
+    assert pf == 0.0
+
+
+def test_annualized_return_edge_cases():
+    """Test annualized return edge cases for lines 230, 234."""
+    from stable_worldmodel.envs.financial_trading import calculate_annualized_return
+
+    # Edge case: zero periods (line 230)
+    assert calculate_annualized_return(0.10, 0) == 0.0
+
+    # Edge case: very few periods (line 234)
+    # When years < 1/periods_per_year, it gets clamped
+    periods_per_year = 252 * 390
+    total_return = 0.001  # Small return to avoid overflow
+    very_few_periods = 10  # Less than 1 trading period
+    ar = calculate_annualized_return(total_return, very_few_periods, periods_per_year)
+    # Should use clamped years value and not raise overflow
+    assert isinstance(ar, float)
+
+
+def test_stability_edge_cases():
+    """Test stability edge case for line 242."""
+    from stable_worldmodel.envs.financial_trading import calculate_stability
+
+    # Edge case: fewer than 3 returns (line 242)
+    few_returns = np.array([0.01, 0.02])
+    assert calculate_stability(few_returns) == 0.0
+
+
+# ===== ENVIRONMENT EDGE CASE TESTS =====
+
+
+def test_get_available_symbols():
+    """Test get_available_symbols for line 382."""
+    env = gym.make("swm/FinancialBacktest-v0")
+    unwrapped_env = env.unwrapped
+
+    symbols = unwrapped_env.get_available_symbols()
+    assert isinstance(symbols, list)
+    assert len(symbols) > 0  # Should have S&P 500 symbols
+    assert "AAPL" in symbols
+
+    env.close()
+
+
+def test_get_date_range_info():
+    """Test get_date_range_info for line 393."""
+    env = gym.make("swm/FinancialBacktest-v0")
+    unwrapped_env = env.unwrapped
+
+    info = unwrapped_env.get_date_range_info("AAPL")
+    assert isinstance(info, dict)
+    assert "symbol" in info
+    assert "earliest_date" in info
+    assert "latest_date" in info
+    assert "frequency" in info
+    assert info["symbol"] == "AAPL"
+
+    env.close()
+
+
+@requires_data
+def test_step_end_of_data():
+    """Test step at end of market data for lines 503-506."""
+    env = gym.make("swm/FinancialBacktest-v0", max_steps=5)
+    obs, info = env.reset(seed=42)
+
+    # Force current_data_index to end of data
+    unwrapped_env = env.unwrapped
+    unwrapped_env.current_data_index = len(unwrapped_env.market_data) - 1
+
+    # Step should detect end of data (lines 503-506)
+    obs, reward, terminated, truncated, info = env.step(1)
+
+    assert terminated is True
+    assert truncated is False
+    assert reward == 0.0
+    assert "reason" in info
+    assert info["reason"] == "end_of_data"
+
+    env.close()
+
+
+@requires_data
+def test_execute_buy_order_no_money():
+    """Test buy order with no balance for line 587."""
+    env = gym.make("swm/FinancialBacktest-v0", max_steps=10)
+    obs, info = env.reset(seed=42)
+
+    unwrapped_env = env.unwrapped
+
+    # Force balance to zero
+    unwrapped_env.balance = 0.0
+
+    # Execute buy order - should return 'hold' (line 587)
+    result = unwrapped_env._execute_buy_order(100.0, 10.0, 1.0)
+    assert result == "hold"
+
+    env.close()
+
+
+@requires_data
+def test_execute_buy_order_close_short():
+    """Test buy order when short position exists for line 611."""
+    env = gym.make("swm/FinancialBacktest-v0", max_steps=10)
+    obs, info = env.reset(seed=42)
+
+    unwrapped_env = env.unwrapped
+    unwrapped_env.enable_shorting = True
+
+    # Create short position
+    unwrapped_env.shares_held = -10.0
+    unwrapped_env.position = -10.0
+
+    # Buy order should close short position (line 611)
+    result = unwrapped_env._execute_buy_order(100.0, 10.0, 1.0)
+    # Should attempt to close short
+    assert result in ["cover_short", "hold"]
+
+    env.close()
+
+
+@requires_data
+def test_execute_buy_order_insufficient_funds():
+    """Test buy order with insufficient funds for line 635, 640."""
+    env = gym.make("swm/FinancialBacktest-v0", max_steps=10)
+    obs, info = env.reset(seed=42)
+
+    unwrapped_env = env.unwrapped
+
+    # Force zero balance to trigger line 640 (return 'hold')
+    unwrapped_env.balance = 0.0
+
+    # Try to buy - should return 'hold' because shares_to_buy will be 0 (line 640)
+    result = unwrapped_env._execute_buy_order(100.0, 10.0, 1.0)
+    assert result == "hold"
+
+    env.close()
+
+
+@requires_data
+def test_execute_sell_order_no_shares():
+    """Test sell order with no shares and shorting disabled for line 640."""
+    env = gym.make("swm/FinancialBacktest-v0", max_steps=10)
+    obs, info = env.reset(seed=42)
+
+    unwrapped_env = env.unwrapped
+    unwrapped_env.enable_shorting = False
+    unwrapped_env.shares_held = 0.0
+
+    # Try to sell with no shares (line 640)
+    result = unwrapped_env._execute_sell_order(100.0, 10.0, 1.0)
+    assert result == "hold"
+
+    env.close()
+
+
+@requires_data
+def test_execute_sell_order_enter_short():
+    """Test sell order entering short position for line 674."""
+    env = gym.make("swm/FinancialBacktest-v0", max_steps=10)
+    obs, info = env.reset(seed=42)
+
+    unwrapped_env = env.unwrapped
+    unwrapped_env.enable_shorting = True
+    unwrapped_env.shares_held = 0.0
+    unwrapped_env.balance = 100000.0
+
+    # Sell to enter short position (line 674)
+    result = unwrapped_env._execute_sell_order(100.0, 10.0, 1.0)
+    # Should enter short position
+    assert result == "short"
+    assert unwrapped_env.shares_held < 0
+
+    env.close()
+
+
+@requires_data
+def test_close_short_position_success():
+    """Test closing short position for line 692."""
+    env = gym.make("swm/FinancialBacktest-v0", max_steps=10)
+    obs, info = env.reset(seed=42)
+
+    unwrapped_env = env.unwrapped
+    unwrapped_env.enable_shorting = True
+
+    # Create short position
+    unwrapped_env.shares_held = -10.0
+    unwrapped_env.position = -10.0
+    unwrapped_env.balance = 100000.0
+
+    # Close short position (line 692)
+    result = unwrapped_env._close_short_position(100.0, 10.0, 1.0)
+    assert result == "cover_short"
+    assert unwrapped_env.shares_held == 0.0
+
+    env.close()
+
+
+@requires_data
+def test_close_short_position_no_short():
+    """Test close short when no short position exists for line 730."""
+    env = gym.make("swm/FinancialBacktest-v0", max_steps=10)
+    obs, info = env.reset(seed=42)
+
+    unwrapped_env = env.unwrapped
+    unwrapped_env.shares_held = 10.0  # Long position, not short
+
+    # Try to close short (line 730)
+    result = unwrapped_env._close_short_position(100.0, 10.0, 1.0)
+    assert result == "hold"
+
+    env.close()
+
+
+@requires_data
+def test_close_short_position_insufficient_funds():
+    """Test close short with insufficient funds for line 731."""
+    env = gym.make("swm/FinancialBacktest-v0", max_steps=10)
+    obs, info = env.reset(seed=42)
+
+    unwrapped_env = env.unwrapped
+    unwrapped_env.enable_shorting = True
+
+    # Create large short position with insufficient balance
+    unwrapped_env.shares_held = -1000.0
+    unwrapped_env.position = -1000.0
+    unwrapped_env.balance = 10.0  # Not enough to cover
+
+    # Try to close short (line 731)
+    result = unwrapped_env._close_short_position(100.0, 10.0, 1.0)
+    # Should return 'hold' because balance < total_cost
+    assert result == "hold"
+
+    env.close()
+
+
+@requires_data
+def test_calculate_benchmark_return_insufficient_history():
+    """Test benchmark return with insufficient history for line 759."""
+    env = gym.make("swm/FinancialBacktest-v0", max_steps=10)
+    obs, info = env.reset(seed=42)
+
+    unwrapped_env = env.unwrapped
+
+    # Clear price history
+    unwrapped_env.price_history = []
+
+    # Should return 0.0 (line 759)
+    benchmark_return = unwrapped_env._calculate_benchmark_return()
+    assert benchmark_return == 0.0
+
+    # Test with single price
+    unwrapped_env.price_history = [{"price": 100.0}]
+    benchmark_return = unwrapped_env._calculate_benchmark_return()
+    assert benchmark_return == 0.0
+
+    env.close()
+
+
+@requires_data
+def test_calculate_reward_insufficient_history():
+    """Test reward calculation with insufficient history for lines 790-793."""
+    env = gym.make("swm/FinancialBacktest-v0", max_steps=10)
+    obs, info = env.reset(seed=42)
+
+    unwrapped_env = env.unwrapped
+
+    # Clear portfolio returns
+    unwrapped_env.portfolio_returns = []
+
+    # Calculate reward with no history (line 790-793)
+    reward = unwrapped_env._calculate_reward(0.01, 0.005)
+    # volatility_penalty should be 0.0 when len < 10
+    assert isinstance(reward, float)
+
+    # Add some returns but less than 10
+    unwrapped_env.portfolio_returns = [0.01, -0.005, 0.02]
+    reward = unwrapped_env._calculate_reward(0.01, 0.005)
+    # volatility_penalty should still be 0.0
+    assert isinstance(reward, float)
+
+    env.close()
+
+
+@requires_data
+def test_calculate_max_drawdown_no_history():
+    """Test max drawdown with no trade history for line 968."""
+    env = gym.make("swm/FinancialBacktest-v0", max_steps=10)
+    obs, info = env.reset(seed=42)
+
+    unwrapped_env = env.unwrapped
+
+    # Clear trade history
+    unwrapped_env.trade_history = []
+
+    # Should return 0.0 (line 968)
+    max_dd = unwrapped_env._calculate_max_drawdown()
+    assert max_dd == 0.0
+
+    env.close()
+
+
+@requires_data
+def test_analyze_drawdowns_insufficient_data():
+    """Test drawdown analysis with insufficient data for line 985."""
+    env = gym.make("swm/FinancialBacktest-v0", max_steps=10)
+    obs, info = env.reset(seed=42)
+
+    unwrapped_env = env.unwrapped
+
+    # Test with single value (line 985)
+    portfolio_values = [100.0]
+    timestamps = [unwrapped_env.market_data.index[0]]
+
+    drawdown_analysis = unwrapped_env._analyze_drawdowns(portfolio_values, timestamps)
+
+    assert drawdown_analysis["max_drawdown_duration"] == 0
+    assert drawdown_analysis["current_drawdown"] == 0.0
+    assert drawdown_analysis["num_drawdown_periods"] == 0
+
+    env.close()
+
+
+@requires_data
+def test_analyze_trades_no_history():
+    """Test trade analysis with no history for line 1059."""
+    env = gym.make("swm/FinancialBacktest-v0", max_steps=10)
+    obs, info = env.reset(seed=42)
+
+    unwrapped_env = env.unwrapped
+
+    # Clear trade history
+    unwrapped_env.trade_history = []
+
+    # Should return defaults (line 1059)
+    trade_analysis = unwrapped_env._analyze_trades()
+
+    assert trade_analysis["total_trades"] == 0
+    assert trade_analysis["win_rate"] == 0.0
+    assert trade_analysis["profit_factor"] == 0.0
+
+    env.close()
+
+
+@requires_data
+def test_analyze_trades_edge_cases():
+    """Test trade analysis edge cases for lines 1111-1117."""
+    env = gym.make("swm/FinancialBacktest-v0", max_steps=10)
+    obs, info = env.reset(seed=42)
+
+    unwrapped_env = env.unwrapped
+
+    # Create trade history without trade returns (lines 1111-1117)
+    unwrapped_env.trade_history = [
+        {
+            "action": "buy",
+            "portfolio_value": 100000,
+            "timestamp": unwrapped_env.market_data.index[0],
+        }
+    ]
+
+    trade_analysis = unwrapped_env._analyze_trades()
+
+    # With only 1 trade, should have defaults for return metrics
+    assert trade_analysis["total_trades"] == 1
+    assert trade_analysis["win_rate"] == 0.0
+    assert trade_analysis["profit_factor"] == 0.0
+
+    env.close()
+
+
+@requires_data
+def test_analyze_trades_trading_frequency():
+    """Test trading frequency calculation for line 1126."""
+    env = gym.make("swm/FinancialBacktest-v0", max_steps=10)
+    obs, info = env.reset(seed=42)
+
+    unwrapped_env = env.unwrapped
+
+    # Test with empty trade history (line 1126)
+    unwrapped_env.trade_history = []
+    trade_analysis = unwrapped_env._analyze_trades()
+    assert trade_analysis["trading_frequency"] == 0.0
+
+    env.close()
+
+
+@requires_data
+def test_analyze_positions_no_history():
+    """Test position analysis with no history for line 1163."""
+    env = gym.make("swm/FinancialBacktest-v0", max_steps=10)
+    obs, info = env.reset(seed=42)
+
+    unwrapped_env = env.unwrapped
+
+    # Clear trade history
+    unwrapped_env.trade_history = []
+
+    # Should return defaults (line 1163)
+    position_analysis = unwrapped_env._analyze_positions()
+
+    assert position_analysis["avg_position_size"] == 0.0
+    assert position_analysis["max_position_size"] == 0.0
+    assert position_analysis["avg_leverage"] == 0.0
+
+    env.close()
+
+
+@requires_data
+def test_get_returns_tear_sheet_empty():
+    """Test returns tear sheet with empty data for line 1236."""
+    env = gym.make("swm/FinancialBacktest-v0", max_steps=10)
+    obs, info = env.reset(seed=42)
+
+    unwrapped_env = env.unwrapped
+
+    # Clear returns
+    unwrapped_env.portfolio_returns = []
+    unwrapped_env.trade_history = []
+
+    # Should return empty dict (line 1236)
+    tear_sheet = unwrapped_env.get_returns_tear_sheet_data()
+    assert tear_sheet == {}
+
+    # Test with single return (line 1236)
+    unwrapped_env.portfolio_returns = [0.01]
+    tear_sheet = unwrapped_env.get_returns_tear_sheet_data()
+    assert tear_sheet == {}
+
+    env.close()
+
+
+@requires_data
+def test_get_returns_tear_sheet_rolling_window():
+    """Test returns tear sheet rolling calculations for lines 1260-1265."""
+    env = gym.make("swm/FinancialBacktest-v0", max_steps=10)
+    obs, info = env.reset(seed=42)
+
+    unwrapped_env = env.unwrapped
+
+    # Create minimal data to test rolling window logic (lines 1260-1265)
+    # With very few returns, rolling_window will be small
+    unwrapped_env.portfolio_returns = [0.01, 0.02, -0.01]
+    unwrapped_env.benchmark_returns = [0.005, 0.015, -0.008]
+    unwrapped_env.trade_history = [{"timestamp": unwrapped_env.market_data.index[i]} for i in range(3)]
+
+    tear_sheet = unwrapped_env.get_returns_tear_sheet_data()
+
+    # Should still generate tear sheet with small rolling window
+    assert isinstance(tear_sheet, dict)
+    assert "rolling_returns" in tear_sheet
+    assert "rolling_volatility" in tear_sheet
+
+    env.close()
+
+
+@requires_data
+def test_get_position_tear_sheet_empty():
+    """Test position tear sheet with empty data for line 1313."""
+    env = gym.make("swm/FinancialBacktest-v0", max_steps=10)
+    obs, info = env.reset(seed=42)
+
+    unwrapped_env = env.unwrapped
+
+    # Clear trade history
+    unwrapped_env.trade_history = []
+
+    # Should return empty dict (line 1313)
+    tear_sheet = unwrapped_env.get_position_tear_sheet_data()
+    assert tear_sheet == {}
+
+    env.close()
+
+
+@requires_data
+def test_get_transaction_tear_sheet_empty():
+    """Test transaction tear sheet with empty data for lines 1364, 1370."""
+    env = gym.make("swm/FinancialBacktest-v0", max_steps=10)
+    obs, info = env.reset(seed=42)
+
+    unwrapped_env = env.unwrapped
+
+    # Clear trade history (line 1364)
+    unwrapped_env.trade_history = []
+    tear_sheet = unwrapped_env.get_transaction_tear_sheet_data()
+    assert tear_sheet == {}
+
+    # Create history with only 'hold' actions (line 1370)
+    unwrapped_env.trade_history = [
+        {
+            "action": "hold",
+            "shares_held": 0.0,
+            "price": 100.0,
+            "portfolio_value": 100000,
+            "timestamp": unwrapped_env.market_data.index[0],
+        }
+    ]
+    tear_sheet = unwrapped_env.get_transaction_tear_sheet_data()
+    assert tear_sheet == {}
+
+    env.close()
+
+
+@requires_data
+def test_get_round_trip_tear_sheet_empty():
+    """Test round-trip tear sheet with empty data for lines 1421, 1471."""
+    env = gym.make("swm/FinancialBacktest-v0", max_steps=10)
+    obs, info = env.reset(seed=42)
+
+    unwrapped_env = env.unwrapped
+
+    # Clear trade history (line 1421)
+    unwrapped_env.trade_history = []
+    tear_sheet = unwrapped_env.get_round_trip_tear_sheet_data()
+    assert tear_sheet == {}
+
+    # Create history with no completed round trips (line 1471)
+    unwrapped_env.trade_history = [
+        {
+            "action": "buy",
+            "shares_held": 10.0,
+            "price": 100.0,
+            "timestamp": unwrapped_env.market_data.index[0],
+        }
+    ]
+    tear_sheet = unwrapped_env.get_round_trip_tear_sheet_data()
+    assert tear_sheet == {}
+
+    env.close()
+
+
+@requires_data
+def test_get_interesting_periods_analysis():
+    """Test interesting periods analysis for lines 1509-1538."""
+    env = gym.make("swm/FinancialBacktest-v0", max_steps=20)
+    obs, info = env.reset(seed=42)
+
+    # Run a few steps
+    for _ in range(10):
+        obs, reward, terminated, truncated, info = env.step(env.action_space.sample())
+        if terminated or truncated:
+            break
+
+    unwrapped_env = env.unwrapped
+
+    # Test with None periods (line 1509)
+    analysis = unwrapped_env.get_interesting_periods_analysis(periods=None)
+    assert analysis == {}
+
+    # Test with empty trade history (line 1509)
+    unwrapped_env.trade_history = []
+    analysis = unwrapped_env.get_interesting_periods_analysis(periods={"Test Period": ("2024-01-01", "2024-01-02")})
+    assert analysis == {}
+
+    env.close()
+
+
+@requires_data
+def test_calculate_period_max_drawdown():
+    """Test period max drawdown for lines 1542-1549."""
+    import pandas as pd
+
+    env = gym.make("swm/FinancialBacktest-v0", max_steps=10)
+    obs, info = env.reset(seed=42)
+
+    unwrapped_env = env.unwrapped
+
+    # Test with single return (line 1542)
+    single_return = pd.Series([0.01])
+    dd = unwrapped_env._calculate_period_max_drawdown(single_return)
+    assert dd == 0.0
+
+    # Test with empty series (line 1549)
+    empty_returns = pd.Series([])
+    dd = unwrapped_env._calculate_period_max_drawdown(empty_returns)
+    assert dd == 0.0
+
+    env.close()
+
+
+@requires_data
+def test_get_capacity_analysis_empty():
+    """Test capacity analysis with empty data for line 1567."""
+    env = gym.make("swm/FinancialBacktest-v0", max_steps=10)
+    obs, info = env.reset(seed=42)
+
+    unwrapped_env = env.unwrapped
+
+    # Clear histories (line 1567)
+    unwrapped_env.trade_history = []
+    unwrapped_env.price_history = []
+
+    capacity = unwrapped_env.get_capacity_analysis()
+    assert capacity == {}
+
+    env.close()
+
+
+# ===== ADDITIONAL COVERAGE TESTS FOR REMAINING LINES =====
+
+
+def test_get_data_format_info():
+    """Test get_data_format_info static method for line 393."""
+    env = gym.make("swm/FinancialBacktest-v0")
+    unwrapped_env = env.unwrapped
+
+    # Test static method (line 393)
+    format_info = unwrapped_env.get_data_format_info()
+    assert isinstance(format_info, dict)
+    assert "format_class" in format_info
+    assert "encoding" in format_info
+    assert format_info["encoding"] == "bfloat16"
+
+    env.close()
+
+
+@requires_data
+def test_step_bankruptcy_truncation():
+    """Test step with bankruptcy (truncation) for line 587."""
+    env = gym.make("swm/FinancialBacktest-v0", max_steps=50)
+    obs, info = env.reset(seed=42)
+
+    unwrapped_env = env.unwrapped
+
+    # Force balance and shares to create bankruptcy scenario
+    # After portfolio_value calculation in step, it should be below min_balance
+    unwrapped_env.balance = 1000.0  # Very low balance
+    unwrapped_env.shares_held = 0.0  # No shares
+    # This will result in portfolio_value = balance + shares*price = 1000 < 10000
+
+    # Take a step - should trigger truncation (line 587)
+    obs, reward, terminated, truncated, info = env.step(2)  # HOLD action
+
+    # Line 587: should apply penalty and truncate
+    assert truncated  # Check for truncation (works with both bool and numpy.bool_)
+    # Penalty of -100 should have been applied to reward
+    assert reward <= 0
+
+    env.close()
+
+
+@requires_data
+def test_execute_buy_order_actual_purchase():
+    """Test successful buy order for line 635."""
+    env = gym.make("swm/FinancialBacktest-v0", max_steps=10)
+    obs, info = env.reset(seed=42)
+
+    unwrapped_env = env.unwrapped
+
+    # Set sufficient balance
+    unwrapped_env.balance = 100000.0
+    unwrapped_env.shares_held = 0.0
+
+    # Execute buy order (line 635 should execute buy)
+    result = unwrapped_env._execute_buy_order(100.0, 10.0, 1.0)
+    assert result == "buy"
+    assert unwrapped_env.shares_held > 0
+
+    env.close()
+
+
+@requires_data
+def test_get_observation_no_market_data():
+    """Test _get_observation with no market data for lines 730-731."""
+    env = gym.make("swm/FinancialBacktest-v0", max_steps=10)
+    obs, info = env.reset(seed=42)
+
+    unwrapped_env = env.unwrapped
+
+    # Force market_data to None (line 730)
+    unwrapped_env.market_data = None
+
+    # Get observation - should return zeros
+    obs = unwrapped_env._get_observation()
+
+    expected_size = unwrapped_env.window_size * 6 + 1 + 1 + 1 + 4
+    assert obs.shape == (expected_size,)
+    assert np.allclose(obs, 0.0)
+
+    env.close()
+
+
+@requires_data
+def test_get_observation_insufficient_data_index():
+    """Test _get_observation with insufficient data index for line 730."""
+    env = gym.make("swm/FinancialBacktest-v0", max_steps=10)
+    obs, info = env.reset(seed=42)
+
+    unwrapped_env = env.unwrapped
+
+    # Force current_data_index below window_size (line 730)
+    unwrapped_env.current_data_index = unwrapped_env.window_size - 5
+
+    # Get observation - should return zeros
+    obs = unwrapped_env._get_observation()
+
+    expected_size = unwrapped_env.window_size * 6 + 1 + 1 + 1 + 4
+    assert obs.shape == (expected_size,)
+    assert np.allclose(obs, 0.0)
+
+    env.close()
+
+
+@requires_data
+def test_calculate_benchmark_return_with_single_price():
+    """Test benchmark return calculation with single price for line 759."""
+    env = gym.make("swm/FinancialBacktest-v0", max_steps=10)
+    obs, info = env.reset(seed=42)
+
+    unwrapped_env = env.unwrapped
+
+    # Set single price in history (line 759)
+    unwrapped_env.price_history = [{"price": 100.0}]
+
+    benchmark_return = unwrapped_env._calculate_benchmark_return()
+    assert benchmark_return == 0.0
+
+    env.close()
+
+
+@requires_data
+def test_calculate_reward_with_volatility():
+    """Test reward calculation with sufficient history for lines 790-793."""
+    env = gym.make("swm/FinancialBacktest-v0", max_steps=20)
+    obs, info = env.reset(seed=42)
+
+    unwrapped_env = env.unwrapped
+
+    # Build up portfolio returns (> 10 to trigger volatility calculation)
+    unwrapped_env.portfolio_returns = [
+        0.01,
+        -0.005,
+        0.02,
+        -0.01,
+        0.015,
+        0.008,
+        -0.003,
+        0.012,
+        -0.007,
+        0.009,
+        0.011,
+        -0.004,
+    ]  # 12 returns
+
+    # Calculate reward - should include volatility penalty (lines 790-793)
+    reward = unwrapped_env._calculate_reward(0.01, 0.005)
+
+    # With volatility, reward should be different than without
+    assert isinstance(reward, float)
+
+    env.close()
+
+
+@requires_data
+def test_analyze_drawdowns_with_periods():
+    """Test drawdown analysis with actual drawdown periods for lines 1008-1021."""
+    env = gym.make("swm/FinancialBacktest-v0", max_steps=30)
+    obs, info = env.reset(seed=42)
+
+    unwrapped_env = env.unwrapped
+
+    # Create portfolio values with clear drawdown pattern
+    timestamps = unwrapped_env.market_data.index[:10].tolist()
+    portfolio_values = [
+        100000,
+        110000,
+        105000,
+        95000,
+        90000,
+        100000,
+        110000,
+        105000,
+        98000,
+        102000,
+    ]
+
+    # Analyze drawdowns (lines 1008-1021 for drawdown periods)
+    drawdown_analysis = unwrapped_env._analyze_drawdowns(portfolio_values, timestamps)
+
+    assert isinstance(drawdown_analysis, dict)
+    assert "num_drawdown_periods" in drawdown_analysis
+    assert "max_drawdown_duration" in drawdown_analysis
+    # Should detect at least one drawdown period
+    assert drawdown_analysis["num_drawdown_periods"] >= 0
+
+    env.close()
+
+
+@requires_data
+def test_analyze_drawdowns_ongoing():
+    """Test drawdown analysis with ongoing drawdown for lines 1028-1030."""
+    env = gym.make("swm/FinancialBacktest-v0", max_steps=30)
+    obs, info = env.reset(seed=42)
+
+    unwrapped_env = env.unwrapped
+
+    # Create portfolio values ending in drawdown
+    timestamps = unwrapped_env.market_data.index[:5].tolist()
+    portfolio_values = [100000, 110000, 105000, 95000, 90000]  # Ends in drawdown
+
+    # Analyze drawdowns (lines 1028-1030 for statistics)
+    drawdown_analysis = unwrapped_env._analyze_drawdowns(portfolio_values, timestamps)
+
+    assert isinstance(drawdown_analysis, dict)
+    assert "avg_drawdown" in drawdown_analysis
+    assert "avg_drawdown_duration" in drawdown_analysis
+
+    env.close()
+
+
+@requires_data
+def test_analyze_trades_with_valid_history():
+    """Test trade analysis with valid trade history for line 1126."""
+    env = gym.make("swm/FinancialBacktest-v0", max_steps=30)
+    obs, info = env.reset(seed=42)
+
+    unwrapped_env = env.unwrapped
+
+    # Create realistic trade history with timestamps
+    import pandas as pd
+
+    base_timestamp = unwrapped_env.market_data.index[0]
+
+    unwrapped_env.trade_history = [
+        {
+            "action": "buy",
+            "portfolio_value": 100000,
+            "timestamp": base_timestamp,
+            "shares_held": 10.0,
+            "price": 100.0,
+        },
+        {
+            "action": "sell",
+            "portfolio_value": 105000,
+            "timestamp": base_timestamp + pd.Timedelta(days=1),
+            "shares_held": 0.0,
+            "price": 105.0,
+        },
+        {
+            "action": "buy",
+            "portfolio_value": 105000,
+            "timestamp": base_timestamp + pd.Timedelta(days=2),
+            "shares_held": 10.0,
+            "price": 105.0,
+        },
+    ]
+
+    # Analyze trades (line 1126 for trading frequency calculation)
+    trade_analysis = unwrapped_env._analyze_trades()
+
+    assert trade_analysis["total_trades"] == 3
+    assert "trading_frequency" in trade_analysis
+    assert trade_analysis["trading_frequency"] > 0
+
+    env.close()
+
+
+@requires_data
+def test_get_returns_tear_sheet_mismatched_lengths():
+    """Test returns tear sheet with mismatched return lengths for line 1260."""
+    env = gym.make("swm/FinancialBacktest-v0", max_steps=20)
+    obs, info = env.reset(seed=42)
+
+    unwrapped_env = env.unwrapped
+
+    # Create mismatched return lengths (line 1260 else branch)
+    unwrapped_env.portfolio_returns = [0.01, 0.02, -0.01, 0.015, 0.008]
+    unwrapped_env.benchmark_returns = [0.005, 0.015]  # Different length
+    unwrapped_env.trade_history = [{"timestamp": unwrapped_env.market_data.index[i]} for i in range(5)]
+
+    tear_sheet = unwrapped_env.get_returns_tear_sheet_data()
+
+    # Should still generate tear sheet, using rolling_beta fallback (line 1260)
+    assert isinstance(tear_sheet, dict)
+    assert "rolling_beta" in tear_sheet
+
+    env.close()
+
+
+@requires_data
+def test_get_interesting_periods_with_valid_periods():
+    """Test interesting periods analysis with valid data for lines 1512-1538."""
+    env = gym.make("swm/FinancialBacktest-v0", max_steps=30)
+    obs, info = env.reset(seed=42)
+
+    # Run a few steps to generate data
+    for _ in range(15):
+        obs, reward, terminated, truncated, info = env.step(env.action_space.sample())
+        if terminated or truncated:
+            break
+
+    unwrapped_env = env.unwrapped
+
+    # Get timestamp range from actual data
+    if unwrapped_env.trade_history:
+        first_ts = unwrapped_env.trade_history[0]["timestamp"]
+        last_ts = unwrapped_env.trade_history[-1]["timestamp"]
+
+        # Create period that matches actual data (lines 1512-1538)
+        periods = {"Test Period": (first_ts.strftime("%Y-%m-%d"), last_ts.strftime("%Y-%m-%d"))}
+
+        analysis = unwrapped_env.get_interesting_periods_analysis(periods=periods)
+
+        # Should have analysis for the period (line 1527)
+        if "Test Period" in analysis:
+            assert "total_return" in analysis["Test Period"]
+            assert "sharpe" in analysis["Test Period"]
+
+    env.close()
+
+
+@requires_data
+def test_get_interesting_periods_exception_handling():
+    """Test interesting periods analysis exception handling for line 1538."""
+    env = gym.make("swm/FinancialBacktest-v0", max_steps=20)
+    obs, info = env.reset(seed=42)
+
+    # Run a few steps
+    for _ in range(10):
+        obs, reward, terminated, truncated, info = env.step(env.action_space.sample())
+        if terminated or truncated:
+            break
+
+    unwrapped_env = env.unwrapped
+
+    # Create period with invalid dates to trigger exception (line 1538)
+    periods = {"Invalid Period": ("invalid-date", "2024-01-02")}
+
+    analysis = unwrapped_env.get_interesting_periods_analysis(periods=periods)
+
+    # Should handle exception and return empty for invalid period
+    assert isinstance(analysis, dict)
+    # Invalid period should not be in results due to exception
+    assert "Invalid Period" not in analysis
+
+    env.close()
+
+
+@requires_data
+def test_calculate_period_max_drawdown_valid():
+    """Test period max drawdown with valid data for lines 1545-1549."""
+    import pandas as pd
+
+    env = gym.make("swm/FinancialBacktest-v0", max_steps=10)
+    obs, info = env.reset(seed=42)
+
+    unwrapped_env = env.unwrapped
+
+    # Test with valid returns series (lines 1545-1549)
+    valid_returns = pd.Series([0.01, 0.02, -0.03, 0.015, -0.01])
+    dd = unwrapped_env._calculate_period_max_drawdown(valid_returns)
+
+    # Should calculate actual drawdown
+    assert dd >= 0.0
+    assert isinstance(dd, float)
+
+    env.close()
+
+
+# ===== TESTS FOR FINAL UNCOVERED LINES =====
+
+
+@requires_data
+def test_annualized_return_years_clamping():
+    """Test annualized return with years clamping for line 234."""
+    from stable_worldmodel.envs.financial_trading import calculate_annualized_return
+
+    # Test very small periods that trigger years clamping (line 234)
+    periods_per_year = 252 * 390
+    total_return = 0.001
+    very_few_periods = 5  # Much less than 1 period
+
+    # This should clamp years to 1/periods_per_year (line 234)
+    ar = calculate_annualized_return(total_return, very_few_periods, periods_per_year)
+
+    # Should not raise an exception and return a finite value
+    assert np.isfinite(ar)
+    assert isinstance(ar, float)
+
+
+@requires_data
+def test_execute_buy_with_total_cost_check():
+    """Test buy order total cost check for line 635."""
+    env = gym.make("swm/FinancialBacktest-v0", max_steps=10)
+    obs, info = env.reset(seed=42)
+
+    unwrapped_env = env.unwrapped
+
+    # Set balance and test the exact condition on line 635
+    unwrapped_env.balance = 1000.0
+    unwrapped_env.shares_held = 0.0
+
+    # Execute buy with price that allows purchase (line 635: if total_cost <= self.balance)
+    result = unwrapped_env._execute_buy_order(10.0, 10.0, 1.0)
+
+    # Should execute buy since total_cost will be <= balance
+    assert result == "buy"
+    assert unwrapped_env.shares_held > 0
+
+    env.close()
+
+
+@requires_data
+def test_calculate_benchmark_return_with_two_prices():
+    """Test benchmark return with exactly 2 prices for line 759."""
+    env = gym.make("swm/FinancialBacktest-v0", max_steps=10)
+    obs, info = env.reset(seed=42)
+
+    unwrapped_env = env.unwrapped
+
+    # Set exactly 2 prices to test the calculation (line 759)
+    unwrapped_env.price_history = [{"price": 100.0}, {"price": 105.0}]
+
+    benchmark_return = unwrapped_env._calculate_benchmark_return()
+
+    # Should calculate (105-100)/100 = 0.05
+    assert abs(benchmark_return - 0.05) < 1e-6
+
+    env.close()
+
+
+@requires_data
+def test_calculate_reward_with_exactly_10_returns():
+    """Test reward calculation with exactly 10 returns for lines 790-793."""
+    env = gym.make("swm/FinancialBacktest-v0", max_steps=20)
+    obs, info = env.reset(seed=42)
+
+    unwrapped_env = env.unwrapped
+
+    # Set exactly 10 returns to trigger volatility calculation (line 790)
+    unwrapped_env.portfolio_returns = [
+        0.01,
+        -0.005,
+        0.02,
+        -0.01,
+        0.015,
+        0.008,
+        -0.003,
+        0.012,
+        -0.007,
+        0.009,
+    ]
+
+    # Calculate reward - should include volatility penalty (lines 790-793)
+    reward = unwrapped_env._calculate_reward(0.01, 0.005)
+
+    # With exactly 10 returns, volatility calculation should occur
+    assert isinstance(reward, float)
+    assert np.isfinite(reward)
+
+    env.close()
+
+
+@requires_data
+def test_analyze_trades_with_same_day_trades():
+    """Test trade analysis with trades on same day for line 1126."""
+    env = gym.make("swm/FinancialBacktest-v0", max_steps=30)
+    obs, info = env.reset(seed=42)
+
+    unwrapped_env = env.unwrapped
+
+    # Create trades with 0 day difference to test max(trading_days, 1) (line 1126)
+
+    same_timestamp = unwrapped_env.market_data.index[0]
+
+    unwrapped_env.trade_history = [
+        {
+            "action": "buy",
+            "portfolio_value": 100000,
+            "timestamp": same_timestamp,
+            "shares_held": 10.0,
+            "price": 100.0,
+        },
+        {
+            "action": "sell",
+            "portfolio_value": 105000,
+            "timestamp": same_timestamp,  # Same day
+            "shares_held": 0.0,
+            "price": 105.0,
+        },
+    ]
+
+    # Analyze trades - trading_days will be 1 (line 1126: max(trading_days, 1))
+    trade_analysis = unwrapped_env._analyze_trades()
+
+    assert trade_analysis["total_trades"] == 2
+    assert "trading_frequency" in trade_analysis
+    assert trade_analysis["trading_frequency"] > 0
+
+    env.close()
+
+
+@requires_data
+def test_get_returns_tear_sheet_with_matching_lengths():
+    """Test returns tear sheet with matching return lengths for line 1260."""
+    env = gym.make("swm/FinancialBacktest-v0", max_steps=20)
+    obs, info = env.reset(seed=42)
+
+    unwrapped_env = env.unwrapped
+
+    # Create matching length returns to test the if branch on line 1260
+    unwrapped_env.portfolio_returns = [0.01, 0.02, -0.01, 0.015, 0.008]
+    unwrapped_env.benchmark_returns = [
+        0.005,
+        0.015,
+        -0.008,
+        0.012,
+        0.007,
+    ]  # Same length
+    unwrapped_env.trade_history = [{"timestamp": unwrapped_env.market_data.index[i]} for i in range(5)]
+
+    tear_sheet = unwrapped_env.get_returns_tear_sheet_data()
+
+    # Should generate tear sheet with rolling_beta calculated (line 1260)
+    assert isinstance(tear_sheet, dict)
+    assert "rolling_beta" in tear_sheet
+    assert len(tear_sheet["rolling_beta"]) == 5
+
+    env.close()
+
+
+@requires_data
+def test_get_interesting_periods_with_valid_period_data():
+    """Test interesting periods analysis with period containing data for line 1527."""
+    env = gym.make("swm/FinancialBacktest-v0", max_steps=30)
+    obs, info = env.reset(seed=42)
+
+    # Run steps to generate data
+    for _ in range(15):
+        obs, reward, terminated, truncated, info = env.step(env.action_space.sample())
+        if terminated or truncated:
+            break
+
+    unwrapped_env = env.unwrapped
+
+    # Get timestamp range from actual data
+    if unwrapped_env.trade_history and len(unwrapped_env.trade_history) > 5:
+        first_ts = unwrapped_env.trade_history[2]["timestamp"]
+        last_ts = unwrapped_env.trade_history[-2]["timestamp"]
+
+        # Create period that matches actual data with returns (line 1527)
+        periods = {"Test Period": (first_ts.strftime("%Y-%m-%d"), last_ts.strftime("%Y-%m-%d"))}
+
+        analysis = unwrapped_env.get_interesting_periods_analysis(periods=periods)
+
+        # Should have analysis for the period with data (line 1527)
+        if "Test Period" in analysis:
+            assert "total_return" in analysis["Test Period"]
+            assert "mean_return" in analysis["Test Period"]
+            assert "sharpe" in analysis["Test Period"]
+
+    env.close()

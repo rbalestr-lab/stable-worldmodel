@@ -509,8 +509,8 @@ def test_time_machine_reset_to_date():
 
 
 @requires_data
-def test_render_returns_none():
-    """Test that render returns None (financial data, not images)."""
+def test_render_returns_dummy_array():
+    """Test that render returns a dummy array for wrapper compatibility."""
     env = gym.make("swm/FinancialBacktest-v0", max_steps=10)
     obs, info = env.reset(seed=42)
 
@@ -521,9 +521,12 @@ def test_render_returns_none():
         if terminated or truncated:
             break
 
-    # Render should return None (no image rendering for financial data)
+    # Render returns a dummy array for AddPixelsWrapper compatibility
     output = env.render()
-    assert output is None
+    assert output is not None
+    assert isinstance(output, np.ndarray)
+    assert output.shape == (64, 64, 3)
+    assert output.dtype == np.uint8
 
     env.close()
 

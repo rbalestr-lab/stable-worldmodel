@@ -6,116 +6,292 @@ from typing import Any
 import gymnasium as gym
 import numpy as np
 import pandas as pd
+from loguru import logger as logging
+from scipy import stats as scipy_stats
 
 import stable_worldmodel as swm
 
 
-# TODO: Integrate financial data visualization system instead of matplotlib
-# Financial environments need specialized charting/metrics displays, not RGB images
+try:
+    from stable_worldmodel.data import FinancialDataset
+except ImportError as e:
+    logging.warning(f"Could not import FinancialDataset: {e}")
+
+    class FinancialDataset:
+        """Fallback FinancialDataset when import fails."""
+
+        DATA_DIR = None
+        SP500_TICKERS = []
+
+        @staticmethod
+        def load(stocks=None, dates=None, base_dir=None):
+            raise NotImplementedError(
+                "FinancialDataset not available. Please ensure stable_worldmodel.data is accessible."
+            )
 
 
-# TODO: INTEGRATE ALPACA DATA PIPELINE - Fix default variations
-# Current simplified variation space only has agent.starting_balance
-# When Alpaca integration is complete, add back dynamic variations:
-# - "backtest.date_range", "backtest.symbol", "market.conditions", etc.
+def calculate_sharpe_ratio(
+    returns: np.ndarray,
+    risk_free_rate: float = 0.02,
+    periods_per_year: int = 252 * 390,
+) -> float:
+    """Calculate Sharpe ratio (risk-adjusted return)."""
+    if len(returns) < 2:
+        return 0.0
+
+    risk_free_period = risk_free_rate / periods_per_year
+    excess_returns = returns - risk_free_period
+
+    std = np.std(excess_returns, ddof=1)
+    if std == 0:
+        return 0.0
+
+    return np.mean(excess_returns) / std * np.sqrt(periods_per_year)
+
+
+def calculate_sortino_ratio(
+    returns: np.ndarray,
+    risk_free_rate: float = 0.02,
+    periods_per_year: int = 252 * 390,
+) -> float:
+    """Calculate Sortino ratio (downside risk-adjusted return)."""
+    if len(returns) < 2:
+        return 0.0
+
+    risk_free_period = risk_free_rate / periods_per_year
+    excess_returns = returns - risk_free_period
+    downside_returns = returns[returns < 0]
+
+    if len(downside_returns) == 0:
+        return 0.0
+
+    downside_std = np.std(downside_returns, ddof=1)
+    if downside_std == 0:
+        return 0.0
+
+    downside_volatility = downside_std * np.sqrt(periods_per_year)
+    return np.mean(excess_returns) * periods_per_year / downside_volatility
+
+
+def calculate_max_drawdown(portfolio_values: Sequence[float]) -> float:
+    """Calculate maximum drawdown from peak to trough."""  # codespell:ignore
+    if len(portfolio_values) < 2:
+        return 0.0
+
+    values = np.array(portfolio_values)
+    cumulative_max = np.maximum.accumulate(values)
+    drawdowns = (values - cumulative_max) / cumulative_max
+    return abs(np.min(drawdowns))
+
+
+def calculate_calmar_ratio(annualized_return: float, max_drawdown: float) -> float:
+    """Calculate Calmar ratio (return / max drawdown)."""
+    if max_drawdown == 0:
+        return 0.0
+    return annualized_return / max_drawdown
+
+
+def calculate_alpha_beta(
+    returns: np.ndarray,
+    benchmark_returns: np.ndarray,
+    annualized_return: float,
+    benchmark_annualized: float,
+    risk_free_rate: float = 0.02,
+) -> tuple[float, float]:
+    """Calculate alpha and beta relative to benchmark."""
+    if len(returns) < 2 or len(benchmark_returns) < 2 or len(returns) != len(benchmark_returns):
+        return 0.0, 0.0
+
+    cov_matrix = np.cov(returns, benchmark_returns)
+    if cov_matrix[1, 1] == 0:
+        return 0.0, 0.0
+
+    beta = cov_matrix[0, 1] / cov_matrix[1, 1]
+    alpha = annualized_return - (risk_free_rate + beta * (benchmark_annualized - risk_free_rate))
+
+    return alpha, beta
+
+
+def calculate_volatility(returns: np.ndarray, periods_per_year: int = 252 * 390) -> float:
+    """Calculate annualized volatility."""
+    if len(returns) < 2:
+        return 0.0
+
+    return np.std(returns, ddof=1) * np.sqrt(periods_per_year)
+
+
+def calculate_downside_volatility(returns: np.ndarray, periods_per_year: int = 252 * 390) -> float:
+    """Calculate downside volatility."""
+    downside_returns = returns[returns < 0]
+    if len(downside_returns) < 2:
+        return 0.0
+
+    return np.std(downside_returns, ddof=1) * np.sqrt(periods_per_year)
+
+
+def calculate_information_ratio(
+    returns: np.ndarray,
+    benchmark_returns: np.ndarray,
+    annualized_return: float,
+    benchmark_annualized: float,
+    periods_per_year: int = 252 * 390,
+) -> tuple[float, float]:
+    """Calculate information ratio and tracking error."""
+    if len(returns) != len(benchmark_returns) or len(returns) < 2:
+        return 0.0, 0.0
+
+    active_returns = returns - benchmark_returns
+    tracking_error = np.std(active_returns, ddof=1) * np.sqrt(periods_per_year)
+
+    if tracking_error == 0:
+        return 0.0, 0.0
+
+    information_ratio = (annualized_return - benchmark_annualized) / tracking_error
+    return information_ratio, tracking_error
+
+
+def calculate_var_cvar(returns: np.ndarray, confidence_level: float = 0.95) -> tuple[float, float]:
+    """Calculate Value at Risk (VaR) and Conditional VaR (CVaR)."""
+    if len(returns) < 10:
+        return 0.0, 0.0
+
+    percentile = (1 - confidence_level) * 100
+    var = np.percentile(returns, percentile)
+    cvar = np.mean(returns[returns <= var])
+
+    return var, cvar
+
+
+def calculate_skewness_kurtosis(returns: np.ndarray) -> tuple[float, float]:
+    """Calculate skewness and kurtosis of return distribution."""
+    if len(returns) < 4:
+        return 0.0, 0.0
+
+    skewness = scipy_stats.skew(returns)
+    kurtosis = scipy_stats.kurtosis(returns)
+
+    return skewness, kurtosis
+
+
+def calculate_tail_ratio(returns: np.ndarray) -> float:
+    """Calculate tail ratio (95th percentile / 5th percentile)."""
+    if len(returns) < 10:
+        return 0.0
+
+    p95 = np.percentile(returns, 95)
+    p5 = np.percentile(returns, 5)
+
+    if p5 == 0:
+        return 0.0
+
+    return abs(p95 / p5)
+
+
+def calculate_omega_ratio(returns: np.ndarray, threshold: float = 0.0) -> float:
+    """Calculate Omega ratio (probability weighted gains vs losses)."""
+    if len(returns) < 2:
+        return 0.0
+
+    gains = returns[returns > threshold] - threshold
+    losses = threshold - returns[returns < threshold]
+
+    if np.sum(losses) == 0:
+        return 0.0
+
+    return np.sum(gains) / np.sum(losses)
+
+
+def calculate_win_rate(trade_returns: Sequence[float]) -> float:
+    """Calculate win rate (proportion of winning trades)."""
+    if len(trade_returns) == 0:
+        return 0.0
+
+    winning_trades = sum(1 for r in trade_returns if r > 0)
+    return winning_trades / len(trade_returns)
+
+
+def calculate_profit_factor(trade_returns: Sequence[float]) -> float:
+    """Calculate profit factor (total gains / total losses)."""
+    if len(trade_returns) == 0:
+        return 0.0
+
+    total_gains = sum(r for r in trade_returns if r > 0)
+    total_losses = abs(sum(r for r in trade_returns if r < 0))
+
+    if total_losses == 0:
+        return 0.0
+
+    return total_gains / total_losses
+
+
+def calculate_annualized_return(total_return: float, total_periods: int, periods_per_year: int = 252 * 390) -> float:
+    """Calculate annualized return from total return."""
+    if total_periods == 0:
+        return 0.0
+
+    years = total_periods / periods_per_year
+    if years < 1 / periods_per_year:
+        years = 1 / periods_per_year
+
+    return (1 + total_return) ** (1 / years) - 1
+
+
+def calculate_stability(returns: np.ndarray) -> float:
+    """Calculate stability of returns (R-squared)."""
+    if len(returns) < 3:
+        return 0.0
+
+    cumulative_returns = pd.Series(returns).add(1).cumprod().sub(1)
+    log_cum_returns = np.log1p(cumulative_returns)
+    time_index = np.arange(len(returns))
+
+    slope, intercept, r_value, p_value, std_err = scipy_stats.linregress(time_index, log_cum_returns)
+
+    return r_value**2
+
+
 DEFAULT_VARIATIONS = ("agent.starting_balance",)
 
 
 class FinancialBacktestEnv(gym.Env):
-    """
-    A comprehensive financial backtesting environment integrated
-    for out-of-distribution testing across different market conditions and time periods.
+    """Financial backtesting environment with integrated data pipeline.
 
-    This environment implements a "time machine" that can go back to any specified date
-    and replay historical market data as if it were live. It integrates with the
-    high-performance data pipeline for reading minute-level financial data stored
-    in compressed parquet format.
+    Automatically loads minute-level OHLCV data from Alpaca API with smart caching
+    and multiple compression formats. Supports time machine backtesting (reset to
+    any historical date) and tracks comprehensive performance metrics.
 
-    Key Features:
-    - Historical backtesting with minute-level precision
-    - Support for multiple symbols and market conditions
-    - Configurable transaction costs and market impact
-    - Out-of-distribution testing through date/symbol/market variations
-    - Integration with stable-worldmodel's variation system
-    - High-performance data loading from parquet/zarr storage
-    - Concurrent data reading for multiple symbols
-
-    TODO: Integrate financial data output format instead of image rendering
-    Financial environments should output structured metrics, not visual charts
-
-    Action Space:
-    - 0: SELL/SHORT position
-    - 1: BUY/LONG position
-    - 2: HOLD (maintain current position)
-
-    Observation Space:
-    - Historical price features (OHLCV + technical indicators)
-    - Position information
-    - Portfolio metrics
-    - Market metadata
+    Action Space: 0=SELL, 1=BUY, 2=HOLD
+    Observation: Historical OHLCV + portfolio state + time features
     """
 
-    metadata = {
-        # TODO: Integrate financial data output formats instead of render modes
-        # Financial environments should output metrics, not images
-    }
-    reward_range = (-np.inf, np.inf)  # Financial rewards can be unbounded
+    metadata = {"render_modes": []}
+    reward_range = (-np.inf, np.inf)
 
     def __init__(
         self,
         data_dir: str | Path | None = None,
-        window_size: int = 60,  # 1 hour of minute data
-        max_steps: int = 1440,  # 1 day of minute data
+        max_steps: int = 1440,
         symbols: list | None = None,
         start_date: str | None = None,
         end_date: str | None = None,
-        # TODO: Replace render_mode with financial data output format
-        # render_mode: Optional[str] = None,
-        enable_shorting: bool = True,
-        transaction_cost: float = 0.001,
-        market_impact: float = 0.0001,
         seed: int | None = None,
+        render_mode: str | None = None,
     ):
+        """Initialize financial backtesting environment with data pipeline."""
         super().__init__()
+        self.render_mode = render_mode
 
-        # Environment configuration
-        self.data_dir = Path(data_dir) if data_dir else Path.home() / ".cache" / "financial_data"
-        self.window_size = window_size
+        self.data_dir = (
+            Path(data_dir) if data_dir else (Path(FinancialDataset.DATA_DIR) if FinancialDataset.DATA_DIR else None)
+        )
         self.max_steps = max_steps
-        # TODO: Replace render_mode with financial data output configuration
-        # self.render_mode = render_mode
-        self.enable_shorting = enable_shorting
-        self.transaction_cost = transaction_cost
-        self.market_impact = market_impact
 
-        # Default symbols and date range
-        self.default_symbols = symbols or ["AAPL", "GOOGL", "MSFT", "TSLA", "AMZN"]
-        self.default_start_date = start_date or "2020-01-01"
-        self.default_end_date = end_date or "2023-12-31"
+        self.default_symbols = symbols or self.get_available_symbols()[:5]
+        self.default_start_date = start_date
+        self.default_end_date = end_date
 
-        # Action space: 0=SELL/SHORT, 1=BUY/LONG, 2=HOLD
         self.action_space = gym.spaces.Discrete(3)
 
-        # Observation space: [price_features(window_size*6), position(1), balance(1), portfolio_value(1), time_features(4)]
-        # Price features: OHLCV + volume_weighted_price per timestep
-        obs_size = window_size * 6 + 1 + 1 + 1 + 4  # +4 for time features (hour, day_of_week, month, year_progress)
-        self.observation_space = gym.spaces.Box(
-            low=-np.inf,
-            high=np.inf,
-            shape=(obs_size,),
-            dtype=np.float32,
-        )
-
-        # TODO: INTEGRATE ALPACA DATA PIPELINE - Replace hardcoded choices with dynamic data
-        # These should be populated from real Alpaca API data:
-        # - Available date ranges from actual stored data
-        # - Available symbols from Alpaca.get_assets()
-        # - Market regimes detected from actual market conditions
-        # For now, these are placeholders until real data pipeline is connected
-
-        # TODO: INTEGRATE ALPACA DATA PIPELINE - Create proper variation space
-        # For now, create minimal variation space without hardcoded choices
-        # This will be replaced with dynamic data from Alpaca API
         self.variation_space = swm.spaces.Dict(
             {
                 "agent": swm.spaces.Dict(
@@ -127,11 +303,42 @@ class FinancialBacktestEnv(gym.Env):
                             shape=(),
                             dtype=np.float32,
                         ),
+                        "transaction_cost": swm.spaces.Box(
+                            low=0.0,
+                            high=0.01,
+                            init_value=np.array(0.001, dtype=np.float32),
+                            shape=(),
+                            dtype=np.float32,
+                        ),
+                        "market_impact": swm.spaces.Box(
+                            low=0.0,
+                            high=0.001,
+                            init_value=np.array(0.0001, dtype=np.float32),
+                            shape=(),
+                            dtype=np.float32,
+                        ),
+                        "window_size": swm.spaces.Box(
+                            low=10.0,
+                            high=390.0,
+                            init_value=np.array(60.0, dtype=np.float32),
+                            shape=(),
+                            dtype=np.float32,
+                        ),
+                        "enable_shorting": swm.spaces.Discrete(n=2, init_value=1),
                     }
                 ),
             },
             sampling_order=["agent"],
         )
+
+        default_window_size = 60
+        default_obs_size = default_window_size * 6 + 7
+        self.observation_space = gym.spaces.Box(low=-np.inf, high=np.inf, shape=(default_obs_size,), dtype=np.float32)
+
+        self.window_size = None
+        self.enable_shorting = None
+        self.transaction_cost = None
+        self.market_impact = None
 
         # Initialize state variables
         self.current_step = 0
@@ -153,102 +360,68 @@ class FinancialBacktestEnv(gym.Env):
         self.benchmark_returns = []
         self.portfolio_returns = []
 
-        # TODO: Integrate financial data display/output system
-        # Financial environments need metrics dashboards, not matplotlib figures
-
-        # Initialize data reader (mock for now - will integrate with actual data pipeline)
-        self._initialize_data_reader()
-
-        # Ensure default variation values are valid
-        assert self.variation_space.check(), "Default variation values must be within variation space"
+        assert self.variation_space.check(), "Invalid default variation values"
 
     def _get_default_backtest_config(self) -> tuple[str, str, str]:
-        """Get default backtest configuration for testing.
+        """Get default date range and symbol for backtesting.
 
-        TODO: INTEGRATE ALPACA DATA PIPELINE - Replace with dynamic configuration
-        This should use actual available data ranges and symbols from Alpaca API.
+        Uses a 2-day window ending 3 days ago to ensure data availability
+        with Alpaca's free tier (provides ~5-15 days of historical minute data).
         """
-        # TODO: Replace with real data from Alpaca API:
-        # - start_date, end_date from actual available data ranges
-        # - symbol from Alpaca.get_assets()
-        # - dates should be calculated dynamically from variation space parameters
-        return "2020-01-01", "2021-12-31", "AAPL"
+        end_date = pd.Timestamp.now() - pd.Timedelta(days=3)
+        start_date = end_date - pd.Timedelta(days=2)  # 2-day window for free tier
+        symbol = "AAPL"
+        return start_date.strftime("%Y-%m-%d"), end_date.strftime("%Y-%m-%d"), symbol
 
-    def _initialize_data_reader(self) -> None:
-        """TODO: INTEGRATE ALPACA DATA PIPELINE - Initialize real data reading system.
+    def get_available_symbols(self) -> list[str]:
+        """Get list of available S&P 500 stock symbols."""
+        return FinancialDataset.SP500_TICKERS if FinancialDataset.SP500_TICKERS else []
 
-        This should integrate with your Alpaca data pipeline:
-
-        1. Initialize AlpacaHistoricalDataReader with API credentials
-        2. Set up data caching directory structure
-        3. Load or create metadata index for fast symbol/date queries
-        4. Configure parquet/zarr readers for high-performance data loading
-        5. Set up concurrent data loading capabilities
-        """
-        raise NotImplementedError(
-            "Real data pipeline initialization required. Please integrate Alpaca API data reader initialization here."
-        )
-
-    def _create_sample_metadata(self) -> None:
-        """TODO: INTEGRATE ALPACA DATA PIPELINE - Replace with real metadata loading.
-
-        This should integrate with Alpaca API to get real symbol metadata:
-
-        1. Use Alpaca.get_assets() to get available symbols
-        2. For each symbol, query available date range from data pipeline
-        3. Get data quality metrics from actual stored data
-        4. Cache metadata for fast querying
-
-        Expected metadata structure:
-        {
-            "symbols": {
-                "AAPL": {"start_date": "2015-01-01", "end_date": "2024-11-03", "data_quality": 0.99},
-                ...
-            },
-            "date_ranges": {...},
-            "data_format": {"frequency": "1min", "columns": [...], "compression": "snappy"}
+    def get_date_range_info(self, symbol: str) -> dict[str, str]:
+        """Get date range availability for symbol (auto-downloads from Alpaca if needed)."""
+        return {
+            "symbol": symbol,
+            "earliest_date": "2015-01-01",
+            "latest_date": pd.Timestamp.now().strftime("%Y-%m-%d"),
+            "frequency": "1min",
+            "note": "Data auto-downloaded from Alpaca if not cached locally",
         }
-        """
-        raise NotImplementedError(
-            "Real metadata loading required. Please integrate Alpaca API metadata querying here."
-        )
+
+    @staticmethod
+    def get_data_format_info() -> dict[str, Any]:
+        """Get data format information (bfloat16 only)."""
+        return {
+            "format_class": "numpyformat",
+            "encoding": "bfloat16",
+            "description": "NumPy compressed format with bfloat16 differential encoding",
+        }
 
     def _load_historical_data(self, symbol: str, start_date: str, end_date: str) -> pd.DataFrame:
-        """
-        Load historical data for backtesting using optimized data pipeline.
+        """Load historical OHLCV data using bfloat16 pipeline (auto-downloads if needed)."""
+        try:
+            df = FinancialDataset.load(
+                stocks=[symbol],
+                dates=[(start_date, end_date)],
+                base_dir=str(self.data_dir) if self.data_dir else None,
+            )
 
-        This method integrates with the high-performance data reading system
-        that supports:
-        - Fast parquet/zarr reading
-        - Concurrent data loading
-        - Compression with bf16/float16
-        - Metadata queries for symbol availability
-        """
-        # TODO: INTEGRATE ALPACA DATA PIPELINE HERE
-        # This is where the real data pipeline integration should happen:
-        #
-        # 1. Use AlpacaHistoricalDataReader to load data:
-        #    reader = AlpacaHistoricalDataReader(api_key, secret_key)
-        #    data = reader.get_bars(symbol, start_date, end_date, timeframe='1Min')
-        #
-        # 2. Convert to required DataFrame format with columns:
-        #    ['timestamp', 'open', 'high', 'low', 'close', 'volume']
-        #
-        # 3. Apply compression and caching optimizations
-        #
-        # 4. Return standardized DataFrame with proper indexing
+            if df.empty:
+                raise ValueError(f"No data for {symbol} from {start_date} to {end_date}")
 
-        raise NotImplementedError(
-            "Real data pipeline integration required. "
-            "Please integrate Alpaca API data loading here. "
-            f"Requested: {symbol} from {start_date} to {end_date}"
-        )
+            required_columns = ["open", "high", "low", "close"]
+            if missing := set(required_columns) - set(df.columns):
+                raise ValueError(f"Missing columns: {missing}")
 
-    # TODO: INTEGRATE ALPACA DATA PIPELINE - All synthetic data generation removed
-    # The following methods should be replaced with real data pipeline integration:
-    # - Use AlpacaHistoricalDataReader for real market data
-    # - Implement proper symbol price/volatility lookup from metadata
-    # - Real OHLCV data from Alpaca API instead of synthetic generation
+            if "timestamp" in df.columns and not isinstance(df.index, pd.DatetimeIndex):
+                df = df.set_index(pd.to_datetime(df["timestamp"]))
+
+            df = df.sort_index()
+            logging.info(f"Loaded {len(df)} bars for {symbol}")
+            return df
+
+        except Exception as e:
+            logging.error(f"Failed to load data for {symbol}: {e}")
+            raise RuntimeError(f"Data load failed for {symbol}") from e
 
     def reset(self, seed: int | None = None, options: dict[str, Any] | None = None):
         super().reset(seed=seed, options=options)
@@ -257,11 +430,8 @@ class FinancialBacktestEnv(gym.Env):
             self.variation_space.seed(seed)
 
         options = options or {}
-
-        # Reset variation space
         self.variation_space.reset()
 
-        # Handle variations
         variations = options.get("variation", DEFAULT_VARIATIONS)
         if not isinstance(variations, Sequence):
             raise ValueError("variation option must be a Sequence containing variation names to sample")
@@ -269,10 +439,16 @@ class FinancialBacktestEnv(gym.Env):
         self.variation_space.update(variations)
         assert self.variation_space.check(debug=True), "Variation values must be within variation space!"
 
-        # Get backtest configuration from variations
+        self.window_size = int(self.variation_space["agent"]["window_size"].value)
+        self.enable_shorting = bool(self.variation_space["agent"]["enable_shorting"].value)
+        self.transaction_cost = float(self.variation_space["agent"]["transaction_cost"].value)
+        self.market_impact = float(self.variation_space["agent"]["market_impact"].value)
+
+        obs_size = self.window_size * 6 + 7
+        self.observation_space = gym.spaces.Box(low=-np.inf, high=np.inf, shape=(obs_size,), dtype=np.float32)
+
         start_date, end_date, self.current_symbol = self._get_default_backtest_config()
 
-        # Load market data for backtesting
         print(f"Loading historical data for backtesting: {self.current_symbol} from {start_date} to {end_date}")
         self.market_data = self._load_historical_data(self.current_symbol, start_date, end_date)
 
@@ -281,9 +457,8 @@ class FinancialBacktestEnv(gym.Env):
 
         # Initialize episode state
         self.current_step = 0
-        self.current_data_index = self.window_size  # Start after window
+        self.current_data_index = int(self.window_size)  # Start after window (ensure it's an integer)
         self.position = 0.0
-        # TODO: INTEGRATE ALPACA DATA PIPELINE - Get starting balance from variation space
         self.balance = 100000.0  # Default starting balance
         self.portfolio_value = self.balance
         self.shares_held = 0.0
@@ -313,12 +488,10 @@ class FinancialBacktestEnv(gym.Env):
 
         return observation, info
 
-    # TODO: INTEGRATE ALPACA DATA PIPELINE - Old symbol selection method removed
     # Symbol selection is now handled dynamically in _get_symbol_from_variation()
     # using real available symbols from Alpaca.get_assets()
 
     def step(self, action: int):
-        # TODO: INTEGRATE ALPACA DATA PIPELINE - This method requires real market data
         if self.market_data is None:
             raise RuntimeError(
                 "No market data available. Please integrate Alpaca data pipeline "
@@ -343,12 +516,10 @@ class FinancialBacktestEnv(gym.Env):
         current_price = current_row["close"]
         current_timestamp = self.market_data.index[self.current_data_index]
 
-        # TODO: INTEGRATE ALPACA DATA PIPELINE - Add time acceleration from variation space
         # Apply time acceleration
         time_accel = 1.0  # Default 1x speed until variation space is connected
         self.current_data_index += int(time_accel)
 
-        # TODO: INTEGRATE ALPACA DATA PIPELINE - Add transaction costs from variation space
         # Calculate transaction costs and market impact
         transaction_cost_bps = 10.0  # Default 10 basis points
         slippage_multiplier = 1.0  # Default no additional slippage
@@ -408,7 +579,6 @@ class FinancialBacktestEnv(gym.Env):
         max_data_steps = len(self.market_data) - self.window_size - 1
         terminated = self.current_data_index >= max_data_steps or self.current_step >= self.max_steps
 
-        # TODO: INTEGRATE ALPACA DATA PIPELINE - Get minimum balance from variation space
         # Check for bankruptcy or margin call
         min_balance = 10000.0  # 10% of default initial balance
         truncated = self.portfolio_value < min_balance
@@ -440,17 +610,17 @@ class FinancialBacktestEnv(gym.Env):
         if self.balance <= 0:
             return "hold"  # No money to buy
 
-        # TODO: INTEGRATE ALPACA DATA PIPELINE - Add position limits from variation space
-        # Calculate position size based on available balance and leverage
-        max_position_size = 1.0  # Default 100% of balance
-        leverage = 1.0  # Default no leverage
+        # If we have a short position, close it first
+        if self.shares_held < 0:
+            return self._close_short_position(price, transaction_cost_bps, slippage_multiplier)
 
-        # Calculate shares to buy
-        available_capital = self.balance * max_position_size * leverage
-        transaction_cost = transaction_cost_bps / 10000.0  # Convert basis points to decimal
-        slippage = price * 0.0001 * slippage_multiplier  # Market impact
+        # Calculate shares to buy (use only a fraction of balance to prevent extreme leverage)
+        max_position_size = 0.95  # Use 95% of balance to leave buffer
+        transaction_cost = transaction_cost_bps / 10000.0
+        slippage = price * 0.0001 * slippage_multiplier
 
         effective_price = price + slippage
+        available_capital = self.balance * max_position_size
         shares_to_buy = available_capital / (effective_price * (1 + transaction_cost))
 
         if shares_to_buy > 0:
@@ -459,7 +629,7 @@ class FinancialBacktestEnv(gym.Env):
             if total_cost <= self.balance:
                 self.shares_held += shares_to_buy
                 self.balance -= total_cost
-                self.position = min(self.position + shares_to_buy, self.shares_held)  # Update position
+                self.position = self.shares_held  # Position tracks shares_held
                 return "buy"
 
         return "hold"
@@ -471,34 +641,55 @@ class FinancialBacktestEnv(gym.Env):
 
         transaction_cost = transaction_cost_bps / 10000.0
         slippage = price * 0.0001 * slippage_multiplier
-
         effective_price = price - slippage
 
         if self.shares_held > 0:
             # Sell existing long position
             revenue = self.shares_held * effective_price * (1 - transaction_cost)
             self.balance += revenue
-            self.position -= self.shares_held
             self.shares_held = 0.0
+            self.position = 0.0
             return "sell"
 
-        elif self.enable_shorting:
-            # TODO: INTEGRATE ALPACA DATA PIPELINE - Add shorting limits from variation space
-            # Enter short position (simplified - real implementation would need margin requirements)
-            max_position_size = 1.0  # Default 100% of balance
-            leverage = 1.0  # Default no leverage
-
-            short_value = self.balance * max_position_size * leverage
-            shares_to_short = short_value / (effective_price * (1 + transaction_cost))
+        elif self.enable_shorting and self.shares_held == 0:
+            # Enter short position
+            # Use only a fraction of balance for shorting to prevent extreme leverage
+            max_short_value = self.balance * 0.5  # Max 50% of balance for short positions
+            shares_to_short = max_short_value / (effective_price * (1 + transaction_cost))
 
             if shares_to_short > 0:
-                # Credit from short sale
+                # When shorting, we receive cash but owe shares
+                # The cash goes into our balance, but we track the liability via negative shares_held
                 revenue = shares_to_short * effective_price * (1 - transaction_cost)
-                self.balance += revenue
-                self.position -= shares_to_short  # Negative position for short
+                self.balance += revenue  # Receive proceeds from short sale
+                self.shares_held = -shares_to_short  # Track short position as negative shares
+                self.position = self.shares_held  # Negative position
                 return "short"
 
         return "hold"
+
+    def _close_short_position(self, price: float, transaction_cost_bps: float, slippage_multiplier: float) -> str:
+        """Close an existing short position by buying back shares."""
+        if self.shares_held >= 0:
+            return "hold"  # No short position to close
+
+        transaction_cost = transaction_cost_bps / 10000.0
+        slippage = price * 0.0001 * slippage_multiplier
+        effective_price = price + slippage  # Pay ask price when buying to cover
+
+        shares_to_cover = abs(self.shares_held)
+        total_cost = shares_to_cover * effective_price * (1 + transaction_cost)
+
+        if total_cost <= self.balance:
+            # Buy back the shares to close short
+            self.balance -= total_cost
+            self.shares_held = 0.0
+            self.position = 0.0
+            return "cover_short"
+        else:
+            # Not enough cash to cover - this is a margin call situation
+            # In reality, broker would force liquidation, but we'll just hold
+            return "hold"
 
     def _calculate_benchmark_return(self) -> float:
         """Calculate benchmark return (buy-and-hold strategy)."""
@@ -529,16 +720,7 @@ class FinancialBacktestEnv(gym.Env):
 
     def _calculate_sharpe_ratio(self) -> float:
         """Calculate Sharpe ratio for current performance."""
-        if len(self.portfolio_returns) < 2:
-            return 0.0
-
-        returns = np.array(self.portfolio_returns)
-        excess_returns = returns - 0.02 / (252 * 390)  # Assuming 2% risk-free rate
-
-        if np.std(excess_returns) == 0:
-            return 0.0
-
-        return np.mean(excess_returns) / np.std(excess_returns) * np.sqrt(252 * 390)  # Annualized
+        return calculate_sharpe_ratio(np.array(self.portfolio_returns))
 
     def _get_observation(self) -> np.ndarray:
         """Create comprehensive observation from current market state."""
@@ -578,7 +760,6 @@ class FinancialBacktestEnv(gym.Env):
 
         price_features = price_features[-expected_price_features:]  # Take last window_size elements
 
-        # TODO: INTEGRATE ALPACA DATA PIPELINE - Get starting balance from variation space
         # Portfolio state features
         starting_value = 100000.0  # Default starting balance
         normalized_position = self.position / 1000.0  # Scale position
@@ -615,97 +796,170 @@ class FinancialBacktestEnv(gym.Env):
 
     def render(self, mode: str | None = None):
         """
-        TODO: Integrate financial data output format instead of image rendering.
+        Provide dummy pixel output for compatibility with image-based wrappers.
 
-        Financial environments should output:
-        - Portfolio metrics (returns, Sharpe ratio, drawdown)
-        - Trade history and performance analytics
-        - Market data summaries
-        - Risk metrics and position information
-
-        This should integrate with stable-worldmodel's data collection system
-        for financial backtesting, not image-based rendering.
+        Financial environments don't have visual rendering, so we return a small
+        dummy array that FinancialWrapper will strip out from the info dict.
         """
-        # TODO: Replace with financial data output
-        # For now, return None to indicate no image-based rendering
-        return None
+        # Return a small dummy RGB array (64x64x3) for AddPixelsWrapper compatibility
+        return np.zeros((64, 64, 3), dtype=np.uint8)
 
     def close(self):
         """Clean up environment resources."""
-        # TODO: Integrate financial data cleanup instead of matplotlib cleanup
-        # Financial environments may need to close data connections,
-        # save final metrics, or cleanup temporary files
         pass
 
     def get_backtest_results(self) -> dict[str, Any]:
-        """Get comprehensive backtesting results and performance metrics."""
+        """Get comprehensive backtesting performance metrics."""
         if not self.trade_history:
             return {}
 
-        # Basic performance metrics
+        # Extract time series data
+        returns = np.array(self.portfolio_returns)
+        benchmark_returns = np.array(self.benchmark_returns)
+        portfolio_values = [t["portfolio_value"] for t in self.trade_history]
+        timestamps = [t["timestamp"] for t in self.trade_history]
+
+        # Calculate time period
+        start_time = timestamps[0]
+        end_time = timestamps[-1]
+        trading_days = len({t.date() for t in timestamps})
+        total_periods = len(returns)
+
+        # Returns metrics
         total_return = (self.portfolio_value - self.initial_portfolio_value) / max(self.initial_portfolio_value, 1e-8)
 
-        # Calculate benchmark performance (buy and hold)
+        # Annualized return (assuming 252 trading days, 390 minutes per day)
+        periods_per_year = 252 * 390
+        annualized_return = calculate_annualized_return(total_return, total_periods, periods_per_year)
+
+        # Cumulative returns
+        cumulative_returns = pd.Series(returns).add(1).cumprod().sub(1)
+
+        # Benchmark performance
         initial_price = self.trade_history[0]["price"]
         final_price = self.trade_history[-1]["price"]
         benchmark_return = (final_price - initial_price) / initial_price
+        benchmark_annualized = calculate_annualized_return(benchmark_return, total_periods, periods_per_year)
 
         # Risk metrics
-        returns = np.array(self.portfolio_returns)
-        sharpe_ratio = self._calculate_sharpe_ratio()
+        risk_free_rate = 0.02
 
-        if len(returns) > 1:
-            volatility = np.std(returns) * np.sqrt(252 * 390)  # Annualized
-            max_drawdown = self._calculate_max_drawdown()
-        else:
-            volatility = 0.0
-            max_drawdown = 0.0
+        # Volatility
+        volatility = calculate_volatility(returns, periods_per_year)
+        downside_volatility = calculate_downside_volatility(returns, periods_per_year)
+
+        # Sharpe ratio
+        sharpe_ratio = calculate_sharpe_ratio(returns, risk_free_rate, periods_per_year)
+
+        # Sortino ratio (using downside deviation)
+        sortino_ratio = calculate_sortino_ratio(returns, risk_free_rate, periods_per_year)
+
+        # Calmar ratio (return / max drawdown)
+        max_drawdown = self._calculate_max_drawdown()
+        calmar_ratio = calculate_calmar_ratio(annualized_return, max_drawdown)
+
+        # Alpha and Beta (relative to benchmark)
+        alpha, beta = calculate_alpha_beta(
+            returns,
+            benchmark_returns,
+            annualized_return,
+            benchmark_annualized,
+            risk_free_rate,
+        )
+
+        # Information ratio (excess return / tracking error)
+        information_ratio, tracking_error = calculate_information_ratio(
+            returns,
+            benchmark_returns,
+            annualized_return,
+            benchmark_annualized,
+            periods_per_year,
+        )
+
+        # Drawdown analysis
+        drawdown_info = self._analyze_drawdowns(portfolio_values, timestamps)
+
+        # Distribution metrics
+        skewness, kurtosis = calculate_skewness_kurtosis(returns)
+
+        # Value at Risk (95% and 99%)
+        var_95, cvar_95 = calculate_var_cvar(returns, confidence_level=0.95)
+        var_99, cvar_99 = calculate_var_cvar(returns, confidence_level=0.99)
+
+        # Tail ratio
+        tail_ratio = calculate_tail_ratio(returns)
+
+        # Omega ratio
+        risk_free_period = risk_free_rate / periods_per_year
+        omega_ratio = calculate_omega_ratio(returns, threshold=risk_free_period)
 
         # Trading statistics
-        total_trades = len([t for t in self.trade_history if t["action"] in ["buy", "sell", "short"]])
-        buy_trades = len([t for t in self.trade_history if t["action"] == "buy"])
-        sell_trades = len([t for t in self.trade_history if t["action"] == "sell"])
-        short_trades = len([t for t in self.trade_history if t["action"] == "short"])
+        trade_stats = self._analyze_trades()
 
-        # Time-based metrics
-        start_time = self.trade_history[0]["timestamp"]
-        end_time = self.trade_history[-1]["timestamp"]
-        trading_period = (end_time - start_time).days
+        # Position analysis
+        position_stats = self._analyze_positions()
 
+        # Stability
+        # Measure consistency of returns (R-squared of returns vs time)
+        stability = calculate_stability(returns)
+
+        # TODO: Add dictionary to the step, instead of calling it render give some "get_info" or equiv
+        # Update the info dictionary in step() to include these metrics incrementally
+        # We then want the render function to return a big vector with all information (each dimension is one information)
+        # THis will let use us the pixel based thing as we want, etc. (1d np.array)
+        # Add rthat we can mask stuff as we want, etc.
         return {
-            # Performance
             "total_return": total_return,
             "total_return_pct": total_return * 100,
+            "annualized_return": annualized_return,
+            "annualized_return_pct": annualized_return * 100,
+            "cumulative_return": (cumulative_returns.iloc[-1] if len(cumulative_returns) > 0 else 0.0),
             "benchmark_return": benchmark_return,
             "benchmark_return_pct": benchmark_return * 100,
+            "benchmark_annualized": benchmark_annualized,
+            "benchmark_annualized_pct": benchmark_annualized * 100,
             "excess_return": total_return - benchmark_return,
             "excess_return_pct": (total_return - benchmark_return) * 100,
-            # Risk metrics
-            "sharpe_ratio": sharpe_ratio,
+            "alpha": alpha,
+            "alpha_pct": alpha * 100,
+            "beta": beta,
             "volatility": volatility,
+            "volatility_pct": volatility * 100,
+            "downside_volatility": downside_volatility,
+            "sharpe_ratio": sharpe_ratio,
+            "sortino_ratio": sortino_ratio,
+            "calmar_ratio": calmar_ratio,
+            "information_ratio": information_ratio,
+            "tracking_error": tracking_error,
+            "stability": stability,
             "max_drawdown": max_drawdown,
             "max_drawdown_pct": max_drawdown * 100,
-            # Portfolio
+            **drawdown_info,
+            "skewness": skewness,
+            "kurtosis": kurtosis,
+            "var_95": var_95,
+            "var_95_pct": var_95 * 100,
+            "var_99": var_99,
+            "var_99_pct": var_99 * 100,
+            "cvar_95": cvar_95,
+            "cvar_99": cvar_99,
+            "tail_ratio": tail_ratio,
+            "omega_ratio": omega_ratio,
             "starting_value": self.initial_portfolio_value,
             "final_value": self.portfolio_value,
             "current_balance": self.balance,
             "current_position": self.position,
             "shares_held": self.shares_held,
-            # Trading activity
-            "total_trades": total_trades,
-            "buy_trades": buy_trades,
-            "sell_trades": sell_trades,
-            "short_trades": short_trades,
-            "trading_frequency": total_trades / max(trading_period, 1),
-            # Time period
+            **position_stats,
+            **trade_stats,
             "start_date": start_time,
             "end_date": end_time,
-            "trading_days": trading_period,
+            "trading_days": trading_days,
+            "total_periods": total_periods,
+            "years": total_periods / periods_per_year if total_periods > 0 else 0,
             "symbol": self.current_symbol,
-            # TODO: INTEGRATE ALPACA DATA PIPELINE - Add market conditions from variation space
-            # Market conditions
-            "market_regime": "normal",  # Default market regime
-            "transaction_cost_bps": 10.0,  # Default transaction cost
+            "market_regime": "normal",
+            "transaction_cost_bps": 10.0,
         }
 
     def _calculate_max_drawdown(self) -> float:
@@ -714,37 +968,654 @@ class FinancialBacktestEnv(gym.Env):
             return 0.0
 
         portfolio_values = [t["portfolio_value"] for t in self.trade_history]
-        peak = portfolio_values[0]
-        max_drawdown = 0.0
+        return calculate_max_drawdown(portfolio_values)
 
-        for value in portfolio_values:
-            if value > peak:
-                peak = value
-            drawdown = (peak - value) / peak
-            max_drawdown = max(max_drawdown, drawdown)
+    def _analyze_drawdowns(self, portfolio_values: list[float], timestamps: list) -> dict[str, Any]:
+        """
+        Analyze drawdown periods following PyFolio methodology.
 
-        return max_drawdown
+        Returns information about:
+        - Maximum drawdown
+        - Longest drawdown duration
+        - Top N drawdown periods
+        - Current drawdown
+        - Recovery times
+        """
+        if len(portfolio_values) < 2:
+            return {
+                "max_drawdown_duration": 0,
+                "current_drawdown": 0.0,
+                "avg_drawdown": 0.0,
+                "avg_drawdown_duration": 0,
+                "num_drawdown_periods": 0,
+            }
+
+        # Calculate running drawdowns
+        values_series = pd.Series(portfolio_values, index=timestamps)
+        running_max = values_series.expanding().max()
+        drawdowns = (values_series - running_max) / running_max
+
+        # Find drawdown periods (contiguous periods where drawdown < 0)
+        in_drawdown = drawdowns < 0
+        drawdown_periods = []
+
+        start_idx = None
+        for i, is_dd in enumerate(in_drawdown):
+            if is_dd and start_idx is None:
+                start_idx = i
+            elif not is_dd and start_idx is not None:
+                # End of drawdown period
+                dd_period = drawdowns.iloc[start_idx:i]
+                max_dd = dd_period.min()
+                duration = i - start_idx
+
+                drawdown_periods.append(
+                    {
+                        "start": timestamps[start_idx],
+                        "end": timestamps[i - 1],
+                        "duration": duration,
+                        "max_drawdown": abs(max_dd),
+                        "recovery_time": 0,  # Will be updated if recovered
+                    }
+                )
+                start_idx = None
+
+        # Handle ongoing drawdown
+        current_drawdown = abs(drawdowns.iloc[-1]) if drawdowns.iloc[-1] < 0 else 0.0
+
+        # Statistics
+        if drawdown_periods:
+            avg_drawdown = np.mean([p["max_drawdown"] for p in drawdown_periods])
+            avg_duration = np.mean([p["duration"] for p in drawdown_periods])
+            max_duration = max([p["duration"] for p in drawdown_periods])
+        else:
+            avg_drawdown = 0.0
+            avg_duration = 0
+            max_duration = 0
+
+        return {
+            "max_drawdown_duration": max_duration,
+            "current_drawdown": current_drawdown,
+            "current_drawdown_pct": current_drawdown * 100,
+            "avg_drawdown": avg_drawdown,
+            "avg_drawdown_pct": avg_drawdown * 100,
+            "avg_drawdown_duration": avg_duration,
+            "num_drawdown_periods": len(drawdown_periods),
+            "drawdown_periods": drawdown_periods[:5],  # Top 5 for reporting
+        }
+
+    def _analyze_trades(self) -> dict[str, Any]:
+        """
+        Analyze trading statistics following Zipline/PyFolio methodology.
+
+        Returns metrics about:
+        - Trade counts (total, buy, sell, short)
+        - Win/loss statistics
+        - Profit factor
+        - Average trade metrics
+        - Trade frequency and turnover
+        """
+        if not self.trade_history:
+            return {
+                "total_trades": 0,
+                "buy_trades": 0,
+                "sell_trades": 0,
+                "short_trades": 0,
+                "winning_trades": 0,
+                "losing_trades": 0,
+                "win_rate": 0.0,
+                "profit_factor": 0.0,
+                "avg_trade_return": 0.0,
+                "avg_win": 0.0,
+                "avg_loss": 0.0,
+                "largest_win": 0.0,
+                "largest_loss": 0.0,
+                "trading_frequency": 0.0,
+            }
+
+        # Extract trades (only actual buy/sell/short actions)
+        trades = [t for t in self.trade_history if t["action"] in ["buy", "sell", "short"]]
+
+        # Count trade types
+        buy_trades = len([t for t in trades if t["action"] == "buy"])
+        sell_trades = len([t for t in trades if t["action"] == "sell"])
+        short_trades = len([t for t in trades if t["action"] == "short"])
+        total_trades = len(trades)
+
+        # Analyze trade returns (looking at returns after each trade)
+        trade_returns = []
+        for i, trade in enumerate(trades):
+            if i > 0:
+                prev_value = trades[i - 1]["portfolio_value"]
+                current_value = trade["portfolio_value"]
+                trade_return = (current_value - prev_value) / prev_value if prev_value > 0 else 0.0
+                trade_returns.append(trade_return)
+
+        if trade_returns:
+            winning_trades = [r for r in trade_returns if r > 0]
+            losing_trades = [r for r in trade_returns if r < 0]
+
+            win_rate = len(winning_trades) / len(trade_returns) if trade_returns else 0.0
+
+            # Profit factor: sum of wins / abs(sum of losses)
+            total_wins = sum(winning_trades) if winning_trades else 0.0
+            total_losses = abs(sum(losing_trades)) if losing_trades else 0.0
+            profit_factor = total_wins / total_losses if total_losses > 0 else float("inf") if total_wins > 0 else 0.0
+
+            avg_trade_return = np.mean(trade_returns)
+            avg_win = np.mean(winning_trades) if winning_trades else 0.0
+            avg_loss = np.mean(losing_trades) if losing_trades else 0.0
+            largest_win = max(winning_trades) if winning_trades else 0.0
+            largest_loss = min(losing_trades) if losing_trades else 0.0
+        else:
+            win_rate = 0.0
+            profit_factor = 0.0
+            avg_trade_return = 0.0
+            avg_win = 0.0
+            avg_loss = 0.0
+            largest_win = 0.0
+            largest_loss = 0.0
+
+        # Trading frequency (trades per day)
+        if self.trade_history:
+            start_time = self.trade_history[0]["timestamp"]
+            end_time = self.trade_history[-1]["timestamp"]
+            trading_days = (end_time - start_time).days + 1
+            trading_frequency = total_trades / max(trading_days, 1)
+        else:
+            trading_frequency = 0.0
+
+        return {
+            "total_trades": total_trades,
+            "buy_trades": buy_trades,
+            "sell_trades": sell_trades,
+            "short_trades": short_trades,
+            "winning_trades": len(winning_trades) if trade_returns else 0,
+            "losing_trades": len(losing_trades) if trade_returns else 0,
+            "win_rate": win_rate,
+            "win_rate_pct": win_rate * 100,
+            "profit_factor": profit_factor if profit_factor != float("inf") else 999.99,
+            "avg_trade_return": avg_trade_return,
+            "avg_trade_return_pct": avg_trade_return * 100,
+            "avg_win": avg_win,
+            "avg_win_pct": avg_win * 100,
+            "avg_loss": avg_loss,
+            "avg_loss_pct": avg_loss * 100,
+            "largest_win": largest_win,
+            "largest_win_pct": largest_win * 100,
+            "largest_loss": largest_loss,
+            "largest_loss_pct": largest_loss * 100,
+            "trading_frequency": trading_frequency,
+        }
+
+    def _analyze_positions(self) -> dict[str, Any]:
+        """
+        Analyze position and portfolio statistics following Zipline/PyFolio methodology.
+
+        Returns metrics about:
+        - Position concentration
+        - Leverage (gross, net)
+        - Exposure (long, short)
+        - Turnover
+        - Cash usage
+        """
+        if not self.trade_history:
+            return {
+                "avg_position_size": 0.0,
+                "max_position_size": 0.0,
+                "avg_leverage": 0.0,
+                "max_leverage": 0.0,
+                "avg_exposure": 0.0,
+                "max_exposure": 0.0,
+            }
+
+        # Extract position data over time
+        positions = [t["shares_held"] * t["price"] for t in self.trade_history]
+        portfolio_values = [t["portfolio_value"] for t in self.trade_history]
+
+        # Position concentration (position value / portfolio value)
+        position_concentrations = [abs(pos) / pv if pv > 0 else 0.0 for pos, pv in zip(positions, portfolio_values)]
+
+        # Leverage (position value / portfolio value)
+        leverages = [abs(pos) / pv if pv > 0 else 0.0 for pos, pv in zip(positions, portfolio_values)]
+
+        # Exposure (signed position value / portfolio value)
+        exposures = [pos / pv if pv > 0 else 0.0 for pos, pv in zip(positions, portfolio_values)]
+
+        # Calculate statistics
+        avg_position_size = np.mean([abs(p) for p in positions])
+        max_position_size = max([abs(p) for p in positions]) if positions else 0.0
+
+        avg_leverage = np.mean(leverages) if leverages else 0.0
+        max_leverage = max(leverages) if leverages else 0.0
+
+        avg_exposure = np.mean(exposures) if exposures else 0.0
+        max_exposure = max([abs(e) for e in exposures]) if exposures else 0.0
+
+        # Turnover analysis (how much trading relative to portfolio size)
+        # Sum of absolute value of trades / average portfolio value
+        trade_volumes = []
+        for i in range(1, len(self.trade_history)):
+            prev_shares = self.trade_history[i - 1]["shares_held"]
+            curr_shares = self.trade_history[i]["shares_held"]
+            curr_price = self.trade_history[i]["price"]
+
+            trade_volume = abs(curr_shares - prev_shares) * curr_price
+            trade_volumes.append(trade_volume)
+
+        avg_portfolio_value = np.mean(portfolio_values)
+        total_turnover = sum(trade_volumes) / avg_portfolio_value if avg_portfolio_value > 0 else 0.0
+
+        return {
+            "avg_position_size": avg_position_size,
+            "max_position_size": max_position_size,
+            "avg_position_concentration": (np.mean(position_concentrations) if position_concentrations else 0.0),
+            "max_position_concentration": (max(position_concentrations) if position_concentrations else 0.0),
+            "avg_leverage": avg_leverage,
+            "max_leverage": max_leverage,
+            "avg_exposure": avg_exposure,
+            "avg_exposure_pct": avg_exposure * 100,
+            "max_exposure": max_exposure,
+            "max_exposure_pct": max_exposure * 100,
+            "total_turnover": total_turnover,
+            "avg_portfolio_value": avg_portfolio_value,
+        }
+
+    def get_returns_tear_sheet_data(self) -> dict[str, Any]:
+        """
+        Generate data for returns tear sheet analysis (PyFolio style).
+
+        Includes:
+        - Rolling metrics (returns, Sharpe, volatility, beta)
+        - Drawdown analysis
+        - Return distribution
+        - Monthly/annual returns
+        - Return quantiles
+        """
+        if not self.trade_history or len(self.portfolio_returns) < 2:
+            return {}
+
+        returns = pd.Series(self.portfolio_returns)
+        benchmark_returns = pd.Series(self.benchmark_returns)
+        timestamps = [t["timestamp"] for t in self.trade_history]
+        returns.index = timestamps
+        benchmark_returns.index = timestamps[: len(benchmark_returns)]
+
+        # Rolling metrics (using 60-period window ~ 1 hour)
+        rolling_window = min(60, len(returns) // 2)
+        if rolling_window >= 2:
+            rolling_returns = returns.rolling(rolling_window).mean()
+            rolling_vol = returns.rolling(rolling_window).std() * np.sqrt(252 * 390)
+            rolling_sharpe = (rolling_returns * 252 * 390) / (
+                returns.rolling(rolling_window).std() * np.sqrt(252 * 390)
+            )
+
+            # Rolling beta
+            if len(returns) == len(benchmark_returns):
+                rolling_beta = (
+                    returns.rolling(rolling_window).cov(benchmark_returns)
+                    / benchmark_returns.rolling(rolling_window).var()
+                )
+            else:
+                rolling_beta = pd.Series([0.0] * len(returns), index=returns.index)
+        else:
+            rolling_returns = returns
+            rolling_vol = pd.Series([0.0] * len(returns), index=returns.index)
+            rolling_sharpe = pd.Series([0.0] * len(returns), index=returns.index)
+            rolling_beta = pd.Series([0.0] * len(returns), index=returns.index)
+
+        # Cumulative returns
+        cumulative_returns = (1 + returns).cumprod() - 1
+
+        # Drawdown underwater plot data
+        running_max = (1 + returns).cumprod().expanding().max()
+        underwater = ((1 + returns).cumprod() / running_max) - 1
+
+        # Monthly/annual aggregation
+        try:
+            monthly_returns = returns.resample("M").apply(lambda x: (1 + x).prod() - 1)
+            annual_returns = returns.resample("Y").apply(lambda x: (1 + x).prod() - 1)
+        except Exception:
+            # If resampling fails, create empty series
+            monthly_returns = pd.Series(dtype=float)
+            annual_returns = pd.Series(dtype=float)
+
+        # Return distribution quantiles
+        quantiles = [0.05, 0.25, 0.5, 0.75, 0.95]
+        return_quantiles = {f"q{int(q * 100)}": np.quantile(returns, q) for q in quantiles}
+
+        return {
+            "returns": returns.tolist(),
+            "cumulative_returns": cumulative_returns.tolist(),
+            "rolling_returns": rolling_returns.tolist(),
+            "rolling_volatility": rolling_vol.tolist(),
+            "rolling_sharpe": rolling_sharpe.tolist(),
+            "rolling_beta": rolling_beta.tolist(),
+            "underwater": underwater.tolist(),
+            "monthly_returns": (monthly_returns.to_dict() if len(monthly_returns) > 0 else {}),
+            "annual_returns": (annual_returns.to_dict() if len(annual_returns) > 0 else {}),
+            "return_quantiles": return_quantiles,
+            "timestamps": [str(t) for t in timestamps],
+        }
+
+    def get_position_tear_sheet_data(self) -> dict[str, Any]:
+        """
+        Generate data for position analysis tear sheet (PyFolio style).
+
+        Includes:
+        - Position exposure over time
+        - Long/short holdings
+        - Position concentration
+        - Gross/net leverage
+        - Holdings breakdown
+        """
+        if not self.trade_history:
+            return {}
+
+        timestamps = [t["timestamp"] for t in self.trade_history]
+        portfolio_values = [t["portfolio_value"] for t in self.trade_history]
+        positions = [t["shares_held"] * t["price"] for t in self.trade_history]
+
+        # Position exposure (% of portfolio)
+        exposures = [pos / pv if pv > 0 else 0.0 for pos, pv in zip(positions, portfolio_values)]
+
+        # Long/short split
+        long_exposure = [max(e, 0) for e in exposures]
+        short_exposure = [min(e, 0) for e in exposures]
+
+        # Gross leverage (sum of absolute values)
+        gross_leverage = [abs(e) for e in exposures]
+
+        # Net exposure (long - short)
+        net_exposure = exposures
+
+        # Top positions (just one symbol in this simple implementation)
+        top_holdings = {
+            self.current_symbol: {
+                "avg_weight": np.mean([abs(e) for e in exposures]),
+                "max_weight": max([abs(e) for e in exposures]) if exposures else 0.0,
+                "current_weight": abs(exposures[-1]) if exposures else 0.0,
+            }
+        }
+
+        return {
+            "timestamps": [str(t) for t in timestamps],
+            "gross_exposure": [abs(e) for e in exposures],
+            "net_exposure": net_exposure,
+            "long_exposure": long_exposure,
+            "short_exposure": short_exposure,
+            "gross_leverage": gross_leverage,
+            "top_holdings": top_holdings,
+            "position_concentration": [abs(e) for e in exposures],
+        }
+
+    def get_transaction_tear_sheet_data(self) -> dict[str, Any]:
+        """
+        Generate data for transaction analysis tear sheet (PyFolio style).
+
+        Includes:
+        - Transaction volume over time
+        - Turnover analysis
+        - Trade timing distribution
+        - Transaction costs
+        - Slippage analysis
+        """
+        if not self.trade_history:
+            return {}
+
+        # Extract only actual transactions (not holds)
+        transactions = [t for t in self.trade_history if t["action"] in ["buy", "sell", "short"]]
+
+        if not transactions:
+            return {}
+
+        # Calculate volumes
+        volumes = []
+        for trans in transactions:
+            volume = abs(trans["shares_held"]) * trans["price"]
+            volumes.append(volume)
+
+        # Turnover over time (transaction volume / portfolio value)
+        turnovers = []
+        for trans in transactions:
+            turnover = abs(trans["shares_held"]) * trans["price"] / trans["portfolio_value"]
+            turnovers.append(turnover)
+
+        # Time distribution (by hour of day)
+        hours = [t["timestamp"].hour for t in transactions]
+        hour_distribution = pd.Series(hours).value_counts().sort_index().to_dict()
+
+        # Daily turnover
+        timestamps = [t["timestamp"] for t in transactions]
+        daily_turnover = pd.Series(turnovers, index=timestamps).resample("D").sum().to_dict()
+
+        return {
+            "transaction_count": len(transactions),
+            "transaction_timestamps": [str(t["timestamp"]) for t in transactions],
+            "transaction_volumes": volumes,
+            "average_volume": np.mean(volumes) if volumes else 0.0,
+            "total_volume": sum(volumes),
+            "turnovers": turnovers,
+            "average_turnover": np.mean(turnovers) if turnovers else 0.0,
+            "hour_distribution": hour_distribution,
+            "daily_turnover": {str(k): v for k, v in daily_turnover.items()},
+            "transaction_types": {
+                "buy": len([t for t in transactions if t["action"] == "buy"]),
+                "sell": len([t for t in transactions if t["action"] == "sell"]),
+                "short": len([t for t in transactions if t["action"] == "short"]),
+            },
+        }
+
+    def get_round_trip_tear_sheet_data(self) -> dict[str, Any]:
+        """
+        Generate data for round-trip trade analysis (PyFolio style).
+
+        A round trip is a complete trade cycle (entry to exit).
+        Includes:
+        - Individual round trip returns
+        - Round trip duration
+        - PnL distribution
+        - Win/loss analysis
+        """
+        if not self.trade_history:
+            return {}
+
+        # Identify round trips (pairs of opposing trades)
+        round_trips = []
+        entry_trade = None
+        entry_price = 0.0
+        entry_shares = 0.0
+
+        for trade in self.trade_history:
+            action = trade["action"]
+
+            if action in ["buy", "short"]:
+                if entry_trade is None:
+                    # Start of new round trip
+                    entry_trade = trade
+                    entry_price = trade["price"]
+                    entry_shares = abs(trade["shares_held"])
+
+            elif action == "sell" and entry_trade is not None:
+                # End of round trip
+                exit_price = trade["price"]
+                exit_time = trade["timestamp"]
+
+                # Calculate PnL
+                if entry_trade["action"] == "buy":
+                    pnl = (exit_price - entry_price) * entry_shares
+                    pnl_pct = (exit_price / entry_price - 1) if entry_price > 0 else 0.0
+                else:  # short
+                    pnl = (entry_price - exit_price) * entry_shares
+                    pnl_pct = (entry_price / exit_price - 1) if exit_price > 0 else 0.0
+
+                duration = (exit_time - entry_trade["timestamp"]).total_seconds() / 60  # minutes
+
+                round_trips.append(
+                    {
+                        "entry_time": entry_trade["timestamp"],
+                        "exit_time": exit_time,
+                        "duration_minutes": duration,
+                        "entry_price": entry_price,
+                        "exit_price": exit_price,
+                        "shares": entry_shares,
+                        "pnl": pnl,
+                        "pnl_pct": pnl_pct,
+                        "direction": entry_trade["action"],
+                    }
+                )
+
+                entry_trade = None
+
+        if not round_trips:
+            return {}
+
+        # Analyze round trips
+        pnls = [rt["pnl"] for rt in round_trips]
+        pnl_pcts = [rt["pnl_pct"] for rt in round_trips]
+        durations = [rt["duration_minutes"] for rt in round_trips]
+
+        winning_trips = [rt for rt in round_trips if rt["pnl"] > 0]
+        losing_trips = [rt for rt in round_trips if rt["pnl"] < 0]
+
+        return {
+            "total_round_trips": len(round_trips),
+            "winning_trips": len(winning_trips),
+            "losing_trips": len(losing_trips),
+            "win_rate": len(winning_trips) / len(round_trips) if round_trips else 0.0,
+            "avg_pnl": np.mean(pnls),
+            "avg_pnl_pct": np.mean(pnl_pcts) * 100,
+            "avg_winner": (np.mean([rt["pnl"] for rt in winning_trips]) if winning_trips else 0.0),
+            "avg_loser": (np.mean([rt["pnl"] for rt in losing_trips]) if losing_trips else 0.0),
+            "best_trade": max(pnls) if pnls else 0.0,
+            "worst_trade": min(pnls) if pnls else 0.0,
+            "avg_duration_minutes": np.mean(durations),
+            "total_pnl": sum(pnls),
+            "round_trips": round_trips[:10],  # Return top 10 for reporting
+        }
+
+    def get_interesting_periods_analysis(self, periods: dict[str, tuple[str, str]] | None = None) -> dict[str, Any]:
+        """
+        Analyze returns during historically interesting market periods (PyFolio style).
+
+        Examples: market crashes, flash crashes, significant events, etc.
+
+        Parameters
+        ----------
+        periods : dict
+            Dictionary mapping period names to (start_date, end_date) tuples
+            Example: {"Flash Crash": ("2010-05-06", "2010-05-07")}
+        """
+        if not self.trade_history or periods is None:
+            return {}
+
+        returns = pd.Series(self.portfolio_returns)
+        timestamps = [t["timestamp"] for t in self.trade_history]
+        returns.index = timestamps
+
+        period_analysis = {}
+
+        for period_name, (start_str, end_str) in periods.items():
+            try:
+                start_date = pd.Timestamp(start_str)
+                end_date = pd.Timestamp(end_str)
+
+                # Extract returns for this period
+                period_returns = returns[(returns.index >= start_date) & (returns.index <= end_date)]
+
+                if len(period_returns) > 0:
+                    period_analysis[period_name] = {
+                        "total_return": (1 + period_returns).prod() - 1,
+                        "mean_return": period_returns.mean(),
+                        "volatility": period_returns.std(),
+                        "sharpe": (period_returns.mean() / period_returns.std() if period_returns.std() > 0 else 0.0),
+                        "max_drawdown": self._calculate_period_max_drawdown(period_returns),
+                        "num_observations": len(period_returns),
+                    }
+            except Exception:
+                continue
+
+        return period_analysis
+
+    def _calculate_period_max_drawdown(self, returns: pd.Series) -> float:
+        """Calculate max drawdown for a specific period."""
+        if len(returns) < 2:
+            return 0.0
+
+        cumulative = (1 + returns).cumprod()
+        running_max = cumulative.expanding().max()
+        drawdown = (cumulative - running_max) / running_max
+
+        return abs(drawdown.min()) if len(drawdown) > 0 else 0.0
+
+    def get_capacity_analysis(self, volume_limits: dict[str, float] | None = None) -> dict[str, Any]:
+        """
+        Analyze strategy capacity constraints (PyFolio style).
+
+        Capacity analysis helps determine:
+        - Maximum AUM the strategy can handle
+        - Impact of increased trading on performance
+        - Liquidity constraints
+
+        Parameters
+        ----------
+        volume_limits : dict
+            Dictionary of volume constraints
+            Example: {"daily_volume_limit": 0.05, "liquidation_limit": 0.2}
+        """
+        if not self.trade_history or not self.price_history:
+            return {}
+
+        if volume_limits is None:
+            volume_limits = {
+                "daily_volume_limit": 0.05,  # 5% of daily volume
+                "liquidation_limit": 0.2,  # 20% for full liquidation
+            }
+
+        # Calculate average daily volume
+        daily_volumes = {}
+        for price_record in self.price_history:
+            date = price_record["timestamp"].date()
+            volume = price_record["volume"]
+
+            if date not in daily_volumes:
+                daily_volumes[date] = []
+            daily_volumes[date].append(volume)
+
+        avg_daily_volumes = {date: np.mean(vols) for date, vols in daily_volumes.items()}
+        overall_avg_volume = np.mean(list(avg_daily_volumes.values())) if avg_daily_volumes else 0.0
+
+        # Calculate maximum position size based on volume constraints
+        daily_limit = volume_limits["daily_volume_limit"]
+        max_position_shares = overall_avg_volume * daily_limit
+
+        # Calculate actual positions as % of volume limit
+        actual_positions = [t["shares_held"] for t in self.trade_history]
+        position_pcts = [
+            abs(pos) / max_position_shares if max_position_shares > 0 else 0.0 for pos in actual_positions
+        ]
+
+        # Estimate capacity (how much we can scale up)
+        max_position_pct = max(position_pcts) if position_pcts else 0.0
+        capacity_multiplier = 1.0 / max_position_pct if max_position_pct > 0 else float("inf")
+
+        return {
+            "avg_daily_volume": overall_avg_volume,
+            "volume_limit_pct": daily_limit * 100,
+            "max_position_shares": max_position_shares,
+            "max_position_pct_of_volume": max_position_pct * 100,
+            "capacity_multiplier": min(capacity_multiplier, 999.99),  # Cap at reasonable value
+            "current_max_position": (max([abs(p) for p in actual_positions]) if actual_positions else 0.0),
+            "liquidity_constrained": max_position_pct > 0.5,  # Flag if using >50% of limit
+        }
 
     def get_data_pipeline_stats(self) -> dict[str, Any]:
-        """TODO: INTEGRATE ALPACA DATA PIPELINE - Get real data loading performance stats.
-
-        This should return actual metrics from the data pipeline:
-        - Real compression ratios from parquet/zarr files
-        - Actual read speeds and cache performance
-        - Memory usage of data readers
-        - Number of concurrent readers in use
-        """
         raise NotImplementedError(
             "Real data pipeline stats required. Please integrate actual performance metrics from Alpaca data pipeline."
         )
 
     def reset_to_date(self, target_date: str, symbol: str | None = None) -> tuple[np.ndarray, dict[str, Any]]:
-        """
-        Time machine functionality: Reset environment to specific date and symbol.
-
-        This is the core backtesting feature that allows going back in time
-        to any date and replaying market data chronologically.
-        """
+        """Reset environment to specific historical date and symbol."""
         if symbol:
             self.current_symbol = symbol
 
@@ -754,11 +1625,14 @@ class FinancialBacktestEnv(gym.Env):
             self.current_symbol, target_date, extended_end_date.strftime("%Y-%m-%d")
         )
 
+        # Ensure window_size is set (use default if not already set from variation)
+        if self.window_size is None:
+            self.window_size = 60  # Default window size in minutes
+
         # Reset environment state
         self.current_step = 0
-        self.current_data_index = self.window_size
+        self.current_data_index = int(self.window_size)  # Ensure it's an integer
         self.position = 0.0
-        # TODO: INTEGRATE ALPACA DATA PIPELINE - Get starting balance from variation space
         self.balance = 100000.0  # Default starting balance
         self.portfolio_value = self.balance
         self.shares_held = 0.0

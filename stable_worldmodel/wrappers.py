@@ -352,9 +352,12 @@ class MegaWrapper(gym.Wrapper):
 
     Applies in sequence: AddPixelsWrapper → EverythingToInfoWrapper →
     EnsureInfoKeysWrapper → EnsureGoalInfoWrapper → ResizeGoalWrapper.
+    For financial environments, automatically applies FinancialWrapper to remove
+    pixel and goal operations.
 
     This provides a complete preprocessing pipeline with rendered pixels, unified
-    info dict, key validation, goal checking, and goal resizing.
+    info dict, key validation, goal checking, and goal resizing. Financial
+    environments are automatically detected and handled appropriately.
 
     Args:
         env: The Gymnasium environment to wrap.
@@ -364,21 +367,35 @@ class MegaWrapper(gym.Wrapper):
         required_keys: Additional regex patterns for keys that must be in info.
             Pattern ``^pixels(?:\\..*)?$`` is always added.
         separate_goal: If True, validates 'goal' is present in info. Defaults to True.
+            Automatically set to False for financial environments.
     """
 
     def __init__(
         self,
         env,
-        image_shape: tuple[int, int] = (84, 84),
+        image_shape: tuple[int, int] | None = (84, 84),
         pixels_transform: Callable | None = None,
         goal_transform: Callable | None = None,
         required_keys: Iterable | None = None,
         separate_goal: Iterable | None = True,
     ):
         super().__init__(env)
+
+        # Detect if this is a financial environment by checking the unwrapped env
+        unwrapped_env = env.unwrapped if hasattr(env, "unwrapped") else env
+        env_class_name = unwrapped_env.__class__.__name__
+        is_financial = "Financial" in env_class_name or "Backtest" in env_class_name
+
+        # Financial environments don't need goals
+        if is_financial:
+            separate_goal = False
+
         if required_keys is None:
             required_keys = []
         required_keys.append(r"^pixels(?:\..*)?$")
+        # Handle None image_shape by using default
+        if image_shape is None:
+            image_shape = (84, 84)
         # this adds `pixels` key to info with optional transform
         env = AddPixelsWrapper(env, image_shape, pixels_transform)
         # this removes the info output, everything is in observation!
@@ -387,7 +404,15 @@ class MegaWrapper(gym.Wrapper):
         env = EnsureInfoKeysWrapper(env, required_keys)
         # check goal is provided
         env = EnsureGoalInfoWrapper(env, check_reset=separate_goal, check_step=separate_goal)
-        self.env = ResizeGoalWrapper(env, image_shape, goal_transform)
+        # only add goal resizing if we expect goals
+        if separate_goal:
+            env = ResizeGoalWrapper(env, image_shape, goal_transform)
+
+        # For financial environments, apply FinancialWrapper to clean up pixels/goals
+        if is_financial:
+            env = FinancialWrapper(env)
+
+        self.env = env
 
     def reset(self, *args, **kwargs):
         return self.env.reset(*args, **kwargs)
@@ -409,22 +434,28 @@ class FinancialWrapper(gym.Wrapper):
 
     def __init__(self, env):
         super().__init__(env)
+        self._dummy_pixels = None
 
     def _clean_info(self, info):
         """Remove pixel-related keys and goal from info dict."""
         cleaned_info = {}
         for key, value in info.items():
-            # Skip pixel-related keys
-            if key == "pixels" or key.startswith("pixels."):
-                continue
-            # Skip goal key
-            if key == "goal":
-                continue
-            # Skip render_time
-            if key == "render_time":
+            if key in ("pixels", "goal", "render_time") or key.startswith("pixels."):
                 continue
             cleaned_info[key] = value
         return cleaned_info
+
+    def render(self):
+        """Provide dummy render output for wrappers that require it."""
+        if self._dummy_pixels is None:
+            if hasattr(self.env.observation_space, "shape"):
+                shape = self.env.observation_space.shape
+            else:
+                shape = (64, 64, 3)
+            import numpy as np
+
+            self._dummy_pixels = np.zeros(shape, dtype=np.uint8)
+        return self._dummy_pixels
 
     def reset(self, *args, **kwargs):
         obs, info = self.env.reset(*args, **kwargs)

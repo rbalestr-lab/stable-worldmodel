@@ -12,7 +12,7 @@ if __name__ == "__main__":
 
     print("Creating Financial Backtesting World...")
     world = swm.World(
-        "swm/FinancialBacktest-v0",
+        "swm/Financial-v0",
         num_envs=2,
         render_mode=None,
     )
@@ -67,7 +67,7 @@ if __name__ == "__main__":
     print("=" * 60)
 
     # Create a single environment to get detailed metrics
-    env = gym.make("swm/FinancialBacktest-v0")
+    env = gym.make("swm/Financial-v0")
     env.reset(seed=42)
 
     # Run a short episode

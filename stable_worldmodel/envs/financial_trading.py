@@ -253,7 +253,7 @@ def calculate_stability(returns: np.ndarray) -> float:
 DEFAULT_VARIATIONS = ("agent.starting_balance",)
 
 
-class FinancialBacktestEnv(gym.Env):
+class FinancialEnvironment(gym.Env):
     """Financial backtesting environment with integrated data pipeline.
 
     Automatically loads minute-level OHLCV data from Alpaca API with smart caching
@@ -1653,7 +1653,3 @@ class FinancialBacktestEnv(gym.Env):
         }
 
         return observation, info
-
-
-# Update the class name in the registration
-FinancialTradingEnv = FinancialBacktestEnv  # For backward compatibility

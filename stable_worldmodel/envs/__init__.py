@@ -42,11 +42,6 @@ register(
 )
 
 register(
-    id="swm/FinancialTrading-v0",
-    entry_point="stable_worldmodel.envs.financial_trading:FinancialBacktestEnv",
-)
-
-register(
-    id="swm/FinancialBacktest-v0",
-    entry_point="stable_worldmodel.envs.financial_trading:FinancialBacktestEnv",
+    id="swm/Financial-v0",
+    entry_point="stable_worldmodel.envs.financial_trading:FinancialEnvironment",
 )

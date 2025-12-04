@@ -27,14 +27,14 @@ requires_data = pytest.mark.skipif(
 
 def test_environment_creation():
     """Test that the environment can be created successfully."""
-    env = gym.make("swm/FinancialBacktest-v0")
+    env = gym.make("swm/Financial-v0")
     assert env is not None
     env.close()
 
 
 def test_action_space():
     """Test that action space is correctly defined."""
-    env = gym.make("swm/FinancialBacktest-v0")
+    env = gym.make("swm/Financial-v0")
     assert isinstance(env.action_space, gym.spaces.Discrete)
     assert env.action_space.n == 3  # BUY, SELL, HOLD
     env.close()
@@ -42,7 +42,7 @@ def test_action_space():
 
 def test_observation_space():
     """Test that observation space is correctly defined."""
-    env = gym.make("swm/FinancialBacktest-v0")
+    env = gym.make("swm/Financial-v0")
     assert isinstance(env.observation_space, gym.spaces.Box)
     # window_size*6 + position + balance + portfolio_value + time_features(4)
     # Default window_size is 60
@@ -54,7 +54,7 @@ def test_observation_space():
 @requires_data
 def test_reset():
     """Test environment reset functionality."""
-    env = gym.make("swm/FinancialBacktest-v0")
+    env = gym.make("swm/Financial-v0")
     obs, info = env.reset(seed=42)
 
     assert obs is not None
@@ -69,7 +69,7 @@ def test_reset():
 @requires_data
 def test_step():
     """Test environment step functionality."""
-    env = gym.make("swm/FinancialBacktest-v0", max_steps=10)
+    env = gym.make("swm/Financial-v0", max_steps=10)
     obs, info = env.reset(seed=42)
 
     # Test BUY action
@@ -92,7 +92,7 @@ def test_step():
 
 def test_variation_space_structure():
     """Test that variation space has complete structure with Alpaca integration."""
-    env = gym.make("swm/FinancialBacktest-v0")
+    env = gym.make("swm/Financial-v0")
     unwrapped_env = env.unwrapped
 
     assert hasattr(unwrapped_env, "variation_space")
@@ -112,7 +112,7 @@ def test_variation_space_structure():
 @requires_data
 def test_trading_logic():
     """Test basic trading logic (position management)."""
-    env = gym.make("swm/FinancialBacktest-v0", max_steps=20)
+    env = gym.make("swm/Financial-v0", max_steps=20)
     obs, info = env.reset(seed=42)
 
     initial_position = env.unwrapped.position
@@ -137,7 +137,7 @@ def test_trading_logic():
 @requires_data
 def test_backtest_results_basic_metrics():
     """Test basic return metrics calculation."""
-    env = gym.make("swm/FinancialBacktest-v0", max_steps=20)
+    env = gym.make("swm/Financial-v0", max_steps=20)
     obs, info = env.reset(seed=42)
 
     # Run a few steps to generate history
@@ -166,7 +166,7 @@ def test_backtest_results_basic_metrics():
 @requires_data
 def test_backtest_results_risk_metrics():
     """Test risk metrics calculation (Sharpe, Sortino, Calmar, volatility)."""
-    env = gym.make("swm/FinancialBacktest-v0", max_steps=30)
+    env = gym.make("swm/Financial-v0", max_steps=30)
     obs, info = env.reset(seed=42)
 
     # Generate sufficient trading history
@@ -200,7 +200,7 @@ def test_backtest_results_risk_metrics():
 @requires_data
 def test_backtest_results_drawdown_metrics():
     """Test drawdown analysis metrics."""
-    env = gym.make("swm/FinancialBacktest-v0", max_steps=30)
+    env = gym.make("swm/Financial-v0", max_steps=30)
     obs, info = env.reset(seed=42)
 
     for _ in range(20):
@@ -230,7 +230,7 @@ def test_backtest_results_drawdown_metrics():
 @requires_data
 def test_backtest_results_distribution_metrics():
     """Test return distribution metrics (skew, kurtosis, VaR, tail ratio)."""
-    env = gym.make("swm/FinancialBacktest-v0", max_steps=30)
+    env = gym.make("swm/Financial-v0", max_steps=30)
     obs, info = env.reset(seed=42)
 
     for _ in range(20):
@@ -261,7 +261,7 @@ def test_backtest_results_distribution_metrics():
 @requires_data
 def test_backtest_results_trading_stats():
     """Test trading statistics (trades, win rate, profit factor)."""
-    env = gym.make("swm/FinancialBacktest-v0", max_steps=30)
+    env = gym.make("swm/Financial-v0", max_steps=30)
     obs, info = env.reset(seed=42)
 
     # Execute varied trades
@@ -295,7 +295,7 @@ def test_backtest_results_trading_stats():
 @requires_data
 def test_backtest_results_position_stats():
     """Test position analysis statistics (leverage, exposure, turnover)."""
-    env = gym.make("swm/FinancialBacktest-v0", max_steps=30)
+    env = gym.make("swm/Financial-v0", max_steps=30)
     obs, info = env.reset(seed=42)
 
     for _ in range(20):
@@ -325,7 +325,7 @@ def test_backtest_results_position_stats():
 @requires_data
 def test_backtest_results_empty_history():
     """Test backtest results with no trading history."""
-    env = gym.make("swm/FinancialBacktest-v0")
+    env = gym.make("swm/Financial-v0")
     obs, info = env.reset(seed=42)
 
     # Get results immediately without any steps
@@ -343,7 +343,7 @@ def test_backtest_results_empty_history():
 @requires_data
 def test_returns_tear_sheet_data():
     """Test returns tear sheet data generation."""
-    env = gym.make("swm/FinancialBacktest-v0", max_steps=30)
+    env = gym.make("swm/Financial-v0", max_steps=30)
     obs, info = env.reset(seed=42)
 
     for _ in range(20):
@@ -371,7 +371,7 @@ def test_returns_tear_sheet_data():
 @requires_data
 def test_position_tear_sheet_data():
     """Test position tear sheet data generation."""
-    env = gym.make("swm/FinancialBacktest-v0", max_steps=30)
+    env = gym.make("swm/Financial-v0", max_steps=30)
     obs, info = env.reset(seed=42)
 
     for _ in range(20):
@@ -398,7 +398,7 @@ def test_position_tear_sheet_data():
 @requires_data
 def test_transaction_tear_sheet_data():
     """Test transaction tear sheet data generation."""
-    env = gym.make("swm/FinancialBacktest-v0", max_steps=30)
+    env = gym.make("swm/Financial-v0", max_steps=30)
     obs, info = env.reset(seed=42)
 
     # Execute multiple transactions
@@ -424,7 +424,7 @@ def test_transaction_tear_sheet_data():
 @requires_data
 def test_round_trip_tear_sheet_data():
     """Test round-trip trade analysis data generation."""
-    env = gym.make("swm/FinancialBacktest-v0", max_steps=40)
+    env = gym.make("swm/Financial-v0", max_steps=40)
     obs, info = env.reset(seed=42)
 
     # Execute complete round trips (buy then sell)
@@ -455,7 +455,7 @@ def test_round_trip_tear_sheet_data():
 @requires_data
 def test_capacity_analysis():
     """Test capacity analysis for liquidity constraints."""
-    env = gym.make("swm/FinancialBacktest-v0", max_steps=30)
+    env = gym.make("swm/Financial-v0", max_steps=30)
     obs, info = env.reset(seed=42)
 
     for _ in range(20):
@@ -484,7 +484,7 @@ def test_time_machine_reset_to_date():
     """Test time machine functionality for backtesting at specific dates."""
     import pandas as pd
 
-    env = gym.make("swm/FinancialBacktest-v0")
+    env = gym.make("swm/Financial-v0")
     unwrapped_env = env.unwrapped
 
     # Use a recent date within Alpaca free tier range (last 5 days)
@@ -511,7 +511,7 @@ def test_time_machine_reset_to_date():
 @requires_data
 def test_render_returns_dummy_array():
     """Test that render returns a dummy array for wrapper compatibility."""
-    env = gym.make("swm/FinancialBacktest-v0", max_steps=10)
+    env = gym.make("swm/Financial-v0", max_steps=10)
     obs, info = env.reset(seed=42)
 
     # Take a few actions
@@ -537,7 +537,7 @@ def test_render_returns_dummy_array():
 @requires_data
 def test_full_episode_workflow():
     """Test a complete episode workflow with all features."""
-    env = gym.make("swm/FinancialBacktest-v0", max_steps=50)
+    env = gym.make("swm/Financial-v0", max_steps=50)
     obs, info = env.reset(seed=42)
 
     episode_returns = []
@@ -1196,7 +1196,7 @@ def test_stability_edge_cases():
 
 def test_get_available_symbols():
     """Test get_available_symbols for line 382."""
-    env = gym.make("swm/FinancialBacktest-v0")
+    env = gym.make("swm/Financial-v0")
     unwrapped_env = env.unwrapped
 
     symbols = unwrapped_env.get_available_symbols()
@@ -1209,7 +1209,7 @@ def test_get_available_symbols():
 
 def test_get_date_range_info():
     """Test get_date_range_info for line 393."""
-    env = gym.make("swm/FinancialBacktest-v0")
+    env = gym.make("swm/Financial-v0")
     unwrapped_env = env.unwrapped
 
     info = unwrapped_env.get_date_range_info("AAPL")
@@ -1226,7 +1226,7 @@ def test_get_date_range_info():
 @requires_data
 def test_step_end_of_data():
     """Test step at end of market data for lines 503-506."""
-    env = gym.make("swm/FinancialBacktest-v0", max_steps=5)
+    env = gym.make("swm/Financial-v0", max_steps=5)
     obs, info = env.reset(seed=42)
 
     # Force current_data_index to end of data
@@ -1248,7 +1248,7 @@ def test_step_end_of_data():
 @requires_data
 def test_execute_buy_order_no_money():
     """Test buy order with no balance for line 587."""
-    env = gym.make("swm/FinancialBacktest-v0", max_steps=10)
+    env = gym.make("swm/Financial-v0", max_steps=10)
     obs, info = env.reset(seed=42)
 
     unwrapped_env = env.unwrapped
@@ -1266,7 +1266,7 @@ def test_execute_buy_order_no_money():
 @requires_data
 def test_execute_buy_order_close_short():
     """Test buy order when short position exists for line 611."""
-    env = gym.make("swm/FinancialBacktest-v0", max_steps=10)
+    env = gym.make("swm/Financial-v0", max_steps=10)
     obs, info = env.reset(seed=42)
 
     unwrapped_env = env.unwrapped
@@ -1287,7 +1287,7 @@ def test_execute_buy_order_close_short():
 @requires_data
 def test_execute_buy_order_insufficient_funds():
     """Test buy order with insufficient funds for line 635, 640."""
-    env = gym.make("swm/FinancialBacktest-v0", max_steps=10)
+    env = gym.make("swm/Financial-v0", max_steps=10)
     obs, info = env.reset(seed=42)
 
     unwrapped_env = env.unwrapped
@@ -1305,7 +1305,7 @@ def test_execute_buy_order_insufficient_funds():
 @requires_data
 def test_execute_sell_order_no_shares():
     """Test sell order with no shares and shorting disabled for line 640."""
-    env = gym.make("swm/FinancialBacktest-v0", max_steps=10)
+    env = gym.make("swm/Financial-v0", max_steps=10)
     obs, info = env.reset(seed=42)
 
     unwrapped_env = env.unwrapped
@@ -1322,7 +1322,7 @@ def test_execute_sell_order_no_shares():
 @requires_data
 def test_execute_sell_order_enter_short():
     """Test sell order entering short position for line 674."""
-    env = gym.make("swm/FinancialBacktest-v0", max_steps=10)
+    env = gym.make("swm/Financial-v0", max_steps=10)
     obs, info = env.reset(seed=42)
 
     unwrapped_env = env.unwrapped
@@ -1342,7 +1342,7 @@ def test_execute_sell_order_enter_short():
 @requires_data
 def test_close_short_position_success():
     """Test closing short position for line 692."""
-    env = gym.make("swm/FinancialBacktest-v0", max_steps=10)
+    env = gym.make("swm/Financial-v0", max_steps=10)
     obs, info = env.reset(seed=42)
 
     unwrapped_env = env.unwrapped
@@ -1364,7 +1364,7 @@ def test_close_short_position_success():
 @requires_data
 def test_close_short_position_no_short():
     """Test close short when no short position exists for line 730."""
-    env = gym.make("swm/FinancialBacktest-v0", max_steps=10)
+    env = gym.make("swm/Financial-v0", max_steps=10)
     obs, info = env.reset(seed=42)
 
     unwrapped_env = env.unwrapped
@@ -1380,7 +1380,7 @@ def test_close_short_position_no_short():
 @requires_data
 def test_close_short_position_insufficient_funds():
     """Test close short with insufficient funds for line 731."""
-    env = gym.make("swm/FinancialBacktest-v0", max_steps=10)
+    env = gym.make("swm/Financial-v0", max_steps=10)
     obs, info = env.reset(seed=42)
 
     unwrapped_env = env.unwrapped
@@ -1402,7 +1402,7 @@ def test_close_short_position_insufficient_funds():
 @requires_data
 def test_calculate_benchmark_return_insufficient_history():
     """Test benchmark return with insufficient history for line 759."""
-    env = gym.make("swm/FinancialBacktest-v0", max_steps=10)
+    env = gym.make("swm/Financial-v0", max_steps=10)
     obs, info = env.reset(seed=42)
 
     unwrapped_env = env.unwrapped
@@ -1425,7 +1425,7 @@ def test_calculate_benchmark_return_insufficient_history():
 @requires_data
 def test_calculate_reward_insufficient_history():
     """Test reward calculation with insufficient history for lines 790-793."""
-    env = gym.make("swm/FinancialBacktest-v0", max_steps=10)
+    env = gym.make("swm/Financial-v0", max_steps=10)
     obs, info = env.reset(seed=42)
 
     unwrapped_env = env.unwrapped
@@ -1450,7 +1450,7 @@ def test_calculate_reward_insufficient_history():
 @requires_data
 def test_calculate_max_drawdown_no_history():
     """Test max drawdown with no trade history for line 968."""
-    env = gym.make("swm/FinancialBacktest-v0", max_steps=10)
+    env = gym.make("swm/Financial-v0", max_steps=10)
     obs, info = env.reset(seed=42)
 
     unwrapped_env = env.unwrapped
@@ -1468,7 +1468,7 @@ def test_calculate_max_drawdown_no_history():
 @requires_data
 def test_analyze_drawdowns_insufficient_data():
     """Test drawdown analysis with insufficient data for line 985."""
-    env = gym.make("swm/FinancialBacktest-v0", max_steps=10)
+    env = gym.make("swm/Financial-v0", max_steps=10)
     obs, info = env.reset(seed=42)
 
     unwrapped_env = env.unwrapped
@@ -1489,7 +1489,7 @@ def test_analyze_drawdowns_insufficient_data():
 @requires_data
 def test_analyze_trades_no_history():
     """Test trade analysis with no history for line 1059."""
-    env = gym.make("swm/FinancialBacktest-v0", max_steps=10)
+    env = gym.make("swm/Financial-v0", max_steps=10)
     obs, info = env.reset(seed=42)
 
     unwrapped_env = env.unwrapped
@@ -1510,7 +1510,7 @@ def test_analyze_trades_no_history():
 @requires_data
 def test_analyze_trades_edge_cases():
     """Test trade analysis edge cases for lines 1111-1117."""
-    env = gym.make("swm/FinancialBacktest-v0", max_steps=10)
+    env = gym.make("swm/Financial-v0", max_steps=10)
     obs, info = env.reset(seed=42)
 
     unwrapped_env = env.unwrapped
@@ -1537,7 +1537,7 @@ def test_analyze_trades_edge_cases():
 @requires_data
 def test_analyze_trades_trading_frequency():
     """Test trading frequency calculation for line 1126."""
-    env = gym.make("swm/FinancialBacktest-v0", max_steps=10)
+    env = gym.make("swm/Financial-v0", max_steps=10)
     obs, info = env.reset(seed=42)
 
     unwrapped_env = env.unwrapped
@@ -1553,7 +1553,7 @@ def test_analyze_trades_trading_frequency():
 @requires_data
 def test_analyze_positions_no_history():
     """Test position analysis with no history for line 1163."""
-    env = gym.make("swm/FinancialBacktest-v0", max_steps=10)
+    env = gym.make("swm/Financial-v0", max_steps=10)
     obs, info = env.reset(seed=42)
 
     unwrapped_env = env.unwrapped
@@ -1574,7 +1574,7 @@ def test_analyze_positions_no_history():
 @requires_data
 def test_get_returns_tear_sheet_empty():
     """Test returns tear sheet with empty data for line 1236."""
-    env = gym.make("swm/FinancialBacktest-v0", max_steps=10)
+    env = gym.make("swm/Financial-v0", max_steps=10)
     obs, info = env.reset(seed=42)
 
     unwrapped_env = env.unwrapped
@@ -1598,7 +1598,7 @@ def test_get_returns_tear_sheet_empty():
 @requires_data
 def test_get_returns_tear_sheet_rolling_window():
     """Test returns tear sheet rolling calculations for lines 1260-1265."""
-    env = gym.make("swm/FinancialBacktest-v0", max_steps=10)
+    env = gym.make("swm/Financial-v0", max_steps=10)
     obs, info = env.reset(seed=42)
 
     unwrapped_env = env.unwrapped
@@ -1622,7 +1622,7 @@ def test_get_returns_tear_sheet_rolling_window():
 @requires_data
 def test_get_position_tear_sheet_empty():
     """Test position tear sheet with empty data for line 1313."""
-    env = gym.make("swm/FinancialBacktest-v0", max_steps=10)
+    env = gym.make("swm/Financial-v0", max_steps=10)
     obs, info = env.reset(seed=42)
 
     unwrapped_env = env.unwrapped
@@ -1640,7 +1640,7 @@ def test_get_position_tear_sheet_empty():
 @requires_data
 def test_get_transaction_tear_sheet_empty():
     """Test transaction tear sheet with empty data for lines 1364, 1370."""
-    env = gym.make("swm/FinancialBacktest-v0", max_steps=10)
+    env = gym.make("swm/Financial-v0", max_steps=10)
     obs, info = env.reset(seed=42)
 
     unwrapped_env = env.unwrapped
@@ -1669,7 +1669,7 @@ def test_get_transaction_tear_sheet_empty():
 @requires_data
 def test_get_round_trip_tear_sheet_empty():
     """Test round-trip tear sheet with empty data for lines 1421, 1471."""
-    env = gym.make("swm/FinancialBacktest-v0", max_steps=10)
+    env = gym.make("swm/Financial-v0", max_steps=10)
     obs, info = env.reset(seed=42)
 
     unwrapped_env = env.unwrapped
@@ -1697,7 +1697,7 @@ def test_get_round_trip_tear_sheet_empty():
 @requires_data
 def test_get_interesting_periods_analysis():
     """Test interesting periods analysis for lines 1509-1538."""
-    env = gym.make("swm/FinancialBacktest-v0", max_steps=20)
+    env = gym.make("swm/Financial-v0", max_steps=20)
     obs, info = env.reset(seed=42)
 
     # Run a few steps
@@ -1725,7 +1725,7 @@ def test_calculate_period_max_drawdown():
     """Test period max drawdown for lines 1542-1549."""
     import pandas as pd
 
-    env = gym.make("swm/FinancialBacktest-v0", max_steps=10)
+    env = gym.make("swm/Financial-v0", max_steps=10)
     obs, info = env.reset(seed=42)
 
     unwrapped_env = env.unwrapped
@@ -1746,7 +1746,7 @@ def test_calculate_period_max_drawdown():
 @requires_data
 def test_get_capacity_analysis_empty():
     """Test capacity analysis with empty data for line 1567."""
-    env = gym.make("swm/FinancialBacktest-v0", max_steps=10)
+    env = gym.make("swm/Financial-v0", max_steps=10)
     obs, info = env.reset(seed=42)
 
     unwrapped_env = env.unwrapped
@@ -1766,7 +1766,7 @@ def test_get_capacity_analysis_empty():
 
 def test_get_data_format_info():
     """Test get_data_format_info static method for line 393."""
-    env = gym.make("swm/FinancialBacktest-v0")
+    env = gym.make("swm/Financial-v0")
     unwrapped_env = env.unwrapped
 
     # Test static method (line 393)
@@ -1782,7 +1782,7 @@ def test_get_data_format_info():
 @requires_data
 def test_step_bankruptcy_truncation():
     """Test step with bankruptcy (truncation) for line 587."""
-    env = gym.make("swm/FinancialBacktest-v0", max_steps=50)
+    env = gym.make("swm/Financial-v0", max_steps=50)
     obs, info = env.reset(seed=42)
 
     unwrapped_env = env.unwrapped
@@ -1807,7 +1807,7 @@ def test_step_bankruptcy_truncation():
 @requires_data
 def test_execute_buy_order_actual_purchase():
     """Test successful buy order for line 635."""
-    env = gym.make("swm/FinancialBacktest-v0", max_steps=10)
+    env = gym.make("swm/Financial-v0", max_steps=10)
     obs, info = env.reset(seed=42)
 
     unwrapped_env = env.unwrapped
@@ -1827,7 +1827,7 @@ def test_execute_buy_order_actual_purchase():
 @requires_data
 def test_get_observation_no_market_data():
     """Test _get_observation with no market data for lines 730-731."""
-    env = gym.make("swm/FinancialBacktest-v0", max_steps=10)
+    env = gym.make("swm/Financial-v0", max_steps=10)
     obs, info = env.reset(seed=42)
 
     unwrapped_env = env.unwrapped
@@ -1848,7 +1848,7 @@ def test_get_observation_no_market_data():
 @requires_data
 def test_get_observation_insufficient_data_index():
     """Test _get_observation with insufficient data index for line 730."""
-    env = gym.make("swm/FinancialBacktest-v0", max_steps=10)
+    env = gym.make("swm/Financial-v0", max_steps=10)
     obs, info = env.reset(seed=42)
 
     unwrapped_env = env.unwrapped
@@ -1869,7 +1869,7 @@ def test_get_observation_insufficient_data_index():
 @requires_data
 def test_calculate_benchmark_return_with_single_price():
     """Test benchmark return calculation with single price for line 759."""
-    env = gym.make("swm/FinancialBacktest-v0", max_steps=10)
+    env = gym.make("swm/Financial-v0", max_steps=10)
     obs, info = env.reset(seed=42)
 
     unwrapped_env = env.unwrapped
@@ -1886,7 +1886,7 @@ def test_calculate_benchmark_return_with_single_price():
 @requires_data
 def test_calculate_reward_with_volatility():
     """Test reward calculation with sufficient history for lines 790-793."""
-    env = gym.make("swm/FinancialBacktest-v0", max_steps=20)
+    env = gym.make("swm/Financial-v0", max_steps=20)
     obs, info = env.reset(seed=42)
 
     unwrapped_env = env.unwrapped
@@ -1919,7 +1919,7 @@ def test_calculate_reward_with_volatility():
 @requires_data
 def test_analyze_drawdowns_with_periods():
     """Test drawdown analysis with actual drawdown periods for lines 1008-1021."""
-    env = gym.make("swm/FinancialBacktest-v0", max_steps=30)
+    env = gym.make("swm/Financial-v0", max_steps=30)
     obs, info = env.reset(seed=42)
 
     unwrapped_env = env.unwrapped
@@ -1954,7 +1954,7 @@ def test_analyze_drawdowns_with_periods():
 @requires_data
 def test_analyze_drawdowns_ongoing():
     """Test drawdown analysis with ongoing drawdown for lines 1028-1030."""
-    env = gym.make("swm/FinancialBacktest-v0", max_steps=30)
+    env = gym.make("swm/Financial-v0", max_steps=30)
     obs, info = env.reset(seed=42)
 
     unwrapped_env = env.unwrapped
@@ -1976,7 +1976,7 @@ def test_analyze_drawdowns_ongoing():
 @requires_data
 def test_analyze_trades_with_valid_history():
     """Test trade analysis with valid trade history for line 1126."""
-    env = gym.make("swm/FinancialBacktest-v0", max_steps=30)
+    env = gym.make("swm/Financial-v0", max_steps=30)
     obs, info = env.reset(seed=42)
 
     unwrapped_env = env.unwrapped
@@ -2023,7 +2023,7 @@ def test_analyze_trades_with_valid_history():
 @requires_data
 def test_get_returns_tear_sheet_mismatched_lengths():
     """Test returns tear sheet with mismatched return lengths for line 1260."""
-    env = gym.make("swm/FinancialBacktest-v0", max_steps=20)
+    env = gym.make("swm/Financial-v0", max_steps=20)
     obs, info = env.reset(seed=42)
 
     unwrapped_env = env.unwrapped
@@ -2045,7 +2045,7 @@ def test_get_returns_tear_sheet_mismatched_lengths():
 @requires_data
 def test_get_interesting_periods_with_valid_periods():
     """Test interesting periods analysis with valid data for lines 1512-1538."""
-    env = gym.make("swm/FinancialBacktest-v0", max_steps=30)
+    env = gym.make("swm/Financial-v0", max_steps=30)
     obs, info = env.reset(seed=42)
 
     # Run a few steps to generate data
@@ -2077,7 +2077,7 @@ def test_get_interesting_periods_with_valid_periods():
 @requires_data
 def test_get_interesting_periods_exception_handling():
     """Test interesting periods analysis exception handling for line 1538."""
-    env = gym.make("swm/FinancialBacktest-v0", max_steps=20)
+    env = gym.make("swm/Financial-v0", max_steps=20)
     obs, info = env.reset(seed=42)
 
     # Run a few steps
@@ -2106,7 +2106,7 @@ def test_calculate_period_max_drawdown_valid():
     """Test period max drawdown with valid data for lines 1545-1549."""
     import pandas as pd
 
-    env = gym.make("swm/FinancialBacktest-v0", max_steps=10)
+    env = gym.make("swm/Financial-v0", max_steps=10)
     obs, info = env.reset(seed=42)
 
     unwrapped_env = env.unwrapped
@@ -2146,7 +2146,7 @@ def test_annualized_return_years_clamping():
 @requires_data
 def test_execute_buy_with_total_cost_check():
     """Test buy order total cost check for line 635."""
-    env = gym.make("swm/FinancialBacktest-v0", max_steps=10)
+    env = gym.make("swm/Financial-v0", max_steps=10)
     obs, info = env.reset(seed=42)
 
     unwrapped_env = env.unwrapped
@@ -2168,7 +2168,7 @@ def test_execute_buy_with_total_cost_check():
 @requires_data
 def test_calculate_benchmark_return_with_two_prices():
     """Test benchmark return with exactly 2 prices for line 759."""
-    env = gym.make("swm/FinancialBacktest-v0", max_steps=10)
+    env = gym.make("swm/Financial-v0", max_steps=10)
     obs, info = env.reset(seed=42)
 
     unwrapped_env = env.unwrapped
@@ -2187,7 +2187,7 @@ def test_calculate_benchmark_return_with_two_prices():
 @requires_data
 def test_calculate_reward_with_exactly_10_returns():
     """Test reward calculation with exactly 10 returns for lines 790-793."""
-    env = gym.make("swm/FinancialBacktest-v0", max_steps=20)
+    env = gym.make("swm/Financial-v0", max_steps=20)
     obs, info = env.reset(seed=42)
 
     unwrapped_env = env.unwrapped
@@ -2219,7 +2219,7 @@ def test_calculate_reward_with_exactly_10_returns():
 @requires_data
 def test_analyze_trades_with_same_day_trades():
     """Test trade analysis with trades on same day for line 1126."""
-    env = gym.make("swm/FinancialBacktest-v0", max_steps=30)
+    env = gym.make("swm/Financial-v0", max_steps=30)
     obs, info = env.reset(seed=42)
 
     unwrapped_env = env.unwrapped
@@ -2258,7 +2258,7 @@ def test_analyze_trades_with_same_day_trades():
 @requires_data
 def test_get_returns_tear_sheet_with_matching_lengths():
     """Test returns tear sheet with matching return lengths for line 1260."""
-    env = gym.make("swm/FinancialBacktest-v0", max_steps=20)
+    env = gym.make("swm/Financial-v0", max_steps=20)
     obs, info = env.reset(seed=42)
 
     unwrapped_env = env.unwrapped
@@ -2287,7 +2287,7 @@ def test_get_returns_tear_sheet_with_matching_lengths():
 @requires_data
 def test_get_interesting_periods_with_valid_period_data():
     """Test interesting periods analysis with period containing data for line 1527."""
-    env = gym.make("swm/FinancialBacktest-v0", max_steps=30)
+    env = gym.make("swm/Financial-v0", max_steps=30)
     obs, info = env.reset(seed=42)
 
     # Run steps to generate data

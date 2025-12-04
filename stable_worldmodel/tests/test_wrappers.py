@@ -1524,7 +1524,7 @@ def test_mega_wrapper_with_financial_environment():
     # Don't use MagicMock for unwrapped to avoid render_multiview being auto-created
     class MockFinancialEnv:
         def __init__(self):
-            self.__class__.__name__ = "FinancialTradingEnv"
+            self.__class__.__name__ = "FinancialEnvironment"
             self.observation_space = mock_env.observation_space
             self.action_space = mock_env.action_space
 
@@ -1604,7 +1604,7 @@ def test_mega_wrapper_financial_with_none_image_shape():
 
     class MockFinancialEnv:
         def __init__(self):
-            self.__class__.__name__ = "FinancialTradingEnv"
+            self.__class__.__name__ = "FinancialEnvironment"
             self.observation_space = mock_env.observation_space
             self.action_space = mock_env.action_space
 

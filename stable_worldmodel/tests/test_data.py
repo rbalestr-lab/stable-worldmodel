@@ -951,3 +951,535 @@ def test_steps_dataset_action_reshape():
 
             # Action should be reshaped to (num_steps, action_dim)
             assert sample["action"].shape == (2, 2)
+
+
+###########################
+## FinancialDataset tests##
+###########################
+
+
+def test_alpaca_client_initialization_without_credentials():
+    """Test that data module handles missing Alpaca credentials gracefully."""
+    import subprocess
+    import sys
+
+    # Run a subprocess that imports the module without credentials
+    # This ensures lines 63-64 (the else clause) get executed
+    test_code = """
+import os
+# Remove Alpaca credentials
+os.environ.pop('ALPACA_API_KEY', None)
+os.environ.pop('ALPACA_SECRET_KEY', None)
+
+# Now import the module - this will execute lines 63-64
+from stable_worldmodel.data import FinancialDataset
+# If we get here, module loaded successfully without credentials
+print('SUCCESS')
+"""
+
+    result = subprocess.run(
+        [sys.executable, "-c", test_code],
+        capture_output=True,
+        text=True,
+        env={**os.environ, "ALPACA_API_KEY": "", "ALPACA_SECRET_KEY": ""},
+    )
+
+    # Check that module loaded successfully
+    assert "SUCCESS" in result.stdout or result.returncode == 0
+
+
+def test_financial_dataset_encode_bfloat16():
+    """Test encode_bfloat16 with valid price series."""
+    try:
+        from stable_worldmodel.data import FinancialDataset
+    except ImportError:
+        pytest.skip("ml_dtypes not installed")
+
+    import pandas as pd
+
+    prices = pd.Series([100.0, 101.5, 99.8, 102.3])
+    encoded = FinancialDataset.encode_bfloat16(prices)
+
+    assert isinstance(encoded, np.ndarray)
+    assert encoded.dtype == np.uint16
+    assert len(encoded) == len(prices)
+
+
+def test_financial_dataset_encode_bfloat16_no_ml_dtypes():
+    """Test encode_bfloat16 raises ImportError when ml_dtypes not available."""
+    from stable_worldmodel.data import FinancialDataset
+
+    with patch("stable_worldmodel.data.ml_dtypes", None):
+        import pandas as pd
+
+        prices = pd.Series([100.0, 101.5, 99.8])
+        with pytest.raises(ImportError, match="ml_dtypes required for bfloat16 encoding"):
+            FinancialDataset.encode_bfloat16(prices)
+
+
+def test_financial_dataset_decode_bfloat16():
+    """Test decode_bfloat16 with valid encoded data."""
+    try:
+        from stable_worldmodel.data import FinancialDataset
+    except ImportError:
+        pytest.skip("ml_dtypes not installed")
+
+    import pandas as pd
+
+    prices = pd.Series([100.0, 101.5, 99.8, 102.3])
+    encoded = FinancialDataset.encode_bfloat16(prices)
+    anchor = float(prices.iloc[0])
+
+    decoded = FinancialDataset.decode_bfloat16(encoded, anchor)
+
+    # Check decoded values are close to originals (bfloat16 has lower precision)
+    assert len(decoded) == len(prices)
+    np.testing.assert_allclose(decoded, prices.values, rtol=1e-2)
+
+
+def test_financial_dataset_decode_bfloat16_no_ml_dtypes():
+    """Test decode_bfloat16 raises ImportError when ml_dtypes not available."""
+    from stable_worldmodel.data import FinancialDataset
+
+    with patch("stable_worldmodel.data.ml_dtypes", None):
+        encoded = np.array([1, 2, 3], dtype=np.uint16)
+        anchor = 100.0
+        with pytest.raises(ImportError, match="ml_dtypes required for bfloat16 decoding"):
+            FinancialDataset.decode_bfloat16(encoded, anchor)
+
+
+def test_financial_dataset_encode_financial_data():
+    """Test encode_financial_data with OHLC DataFrame."""
+    try:
+        from stable_worldmodel.data import FinancialDataset
+    except ImportError:
+        pytest.skip("ml_dtypes not installed")
+
+    import pandas as pd
+
+    df = pd.DataFrame(
+        {
+            "timestamp": pd.date_range("2024-01-01", periods=5, freq="h"),
+            "open": [100.0, 101.0, 102.0, 103.0, 104.0],
+            "high": [101.0, 102.0, 103.0, 104.0, 105.0],
+            "low": [99.0, 100.0, 101.0, 102.0, 103.0],
+            "close": [100.5, 101.5, 102.5, 103.5, 104.5],
+            "volume": [1000, 1100, 1200, 1300, 1400],
+        }
+    )
+
+    df_encoded, metadata = FinancialDataset.encode_financial_data(df)
+
+    # Check encoded columns exist
+    assert "open_encoded" in df_encoded.columns
+    assert "high_encoded" in df_encoded.columns
+    assert "low_encoded" in df_encoded.columns
+    assert "close_encoded" in df_encoded.columns
+
+    # Check original OHLC columns removed
+    assert "open" not in df_encoded.columns
+    assert "high" not in df_encoded.columns
+    assert "low" not in df_encoded.columns
+    assert "close" not in df_encoded.columns
+
+    # Check metadata has anchors
+    assert "open_anchor" in metadata
+    assert "high_anchor" in metadata
+    assert "low_anchor" in metadata
+    assert "close_anchor" in metadata
+
+    # Check timestamp and volume preserved
+    assert "timestamp" in df_encoded.columns
+    assert "volume" in df_encoded.columns
+
+
+def test_financial_dataset_decode_financial_data():
+    """Test decode_financial_data with encoded DataFrame."""
+    try:
+        from stable_worldmodel.data import FinancialDataset
+    except ImportError:
+        pytest.skip("ml_dtypes not installed")
+
+    import pandas as pd
+
+    df = pd.DataFrame(
+        {
+            "timestamp": pd.date_range("2024-01-01", periods=5, freq="h"),
+            "open": [100.0, 101.0, 102.0, 103.0, 104.0],
+            "high": [101.0, 102.0, 103.0, 104.0, 105.0],
+            "low": [99.0, 100.0, 101.0, 102.0, 103.0],
+            "close": [100.5, 101.5, 102.5, 103.5, 104.5],
+            "volume": [1000, 1100, 1200, 1300, 1400],
+        }
+    )
+
+    df_encoded, metadata = FinancialDataset.encode_financial_data(df)
+    df_decoded = FinancialDataset.decode_financial_data(df_encoded, metadata)
+
+    # Check OHLC columns restored
+    assert "open" in df_decoded.columns
+    assert "high" in df_decoded.columns
+    assert "low" in df_decoded.columns
+    assert "close" in df_decoded.columns
+
+    # Check encoded columns removed
+    assert "open_encoded" not in df_decoded.columns
+    assert "high_encoded" not in df_decoded.columns
+    assert "low_encoded" not in df_decoded.columns
+    assert "close_encoded" not in df_decoded.columns
+
+    # Check values are close to originals
+    np.testing.assert_allclose(df_decoded["open"].values, df["open"].values, rtol=1e-2)
+    np.testing.assert_allclose(df_decoded["high"].values, df["high"].values, rtol=1e-2)
+    np.testing.assert_allclose(df_decoded["low"].values, df["low"].values, rtol=1e-2)
+    np.testing.assert_allclose(df_decoded["close"].values, df["close"].values, rtol=1e-2)
+
+
+def test_financial_dataset_load_with_existing_data():
+    """Test load method with existing cached data."""
+    try:
+        from stable_worldmodel.data import FinancialDataset
+    except ImportError:
+        pytest.skip("ml_dtypes not installed")
+
+    import pandas as pd
+
+    with tempfile.TemporaryDirectory() as tmpdir:
+        base_dir = Path(tmpdir)
+        storage_dir = base_dir / "numpyformat_bfloat16"
+        storage_dir.mkdir(parents=True, exist_ok=True)
+
+        # Create mock data file
+        symbol = "AAPL"
+        date = "2024-01-17"
+        timestamps = pd.date_range("2024-01-17 09:30", periods=10, freq="min")
+        prices_open = np.array([100.0 + i * 0.5 for i in range(10)])
+        prices_high = prices_open + 0.5
+        prices_low = prices_open - 0.3
+        prices_close = prices_open + 0.2
+        volumes = np.array([1000 + i * 100 for i in range(10)])
+
+        # Encode data
+        df_raw = pd.DataFrame(
+            {
+                "timestamp": timestamps,
+                "open": prices_open,
+                "high": prices_high,
+                "low": prices_low,
+                "close": prices_close,
+                "volume": volumes,
+            }
+        )
+
+        df_encoded, metadata = FinancialDataset.encode_financial_data(df_raw)
+
+        # Save to file
+        data_dict = {
+            "timestamps": df_encoded["timestamp"].values,
+            "open_encoded": df_encoded["open_encoded"].values,
+            "high_encoded": df_encoded["high_encoded"].values,
+            "low_encoded": df_encoded["low_encoded"].values,
+            "close_encoded": df_encoded["close_encoded"].values,
+            "volume": df_encoded["volume"].values,
+        }
+        for key, value in metadata.items():
+            data_dict[key] = np.array([value])
+
+        file_path = storage_dir / f"{symbol}_{date}.npz"
+        np.savez_compressed(file_path, **data_dict)
+
+        # Test load
+        result = FinancialDataset.load(stocks=[symbol], dates=[date], base_dir=str(base_dir))
+
+        assert not result.empty
+        assert len(result) == 10
+        assert "open" in result.columns
+        assert "high" in result.columns
+        assert "low" in result.columns
+        assert "close" in result.columns
+        assert "volume" in result.columns
+
+
+def test_financial_dataset_load_with_date_range():
+    """Test load method with date range including weekends."""
+    try:
+        from stable_worldmodel.data import FinancialDataset
+    except ImportError:
+        pytest.skip("ml_dtypes not installed")
+
+    import pandas as pd
+
+    with tempfile.TemporaryDirectory() as tmpdir:
+        base_dir = Path(tmpdir)
+        storage_dir = base_dir / "numpyformat_bfloat16"
+        storage_dir.mkdir(parents=True, exist_ok=True)
+
+        # Create mock data for weekdays only (2024-01-15 is Monday, 01-19 is Friday)
+        symbol = "TSLA"
+        weekdays = [
+            "2024-01-15",
+            "2024-01-16",
+            "2024-01-17",
+            "2024-01-18",
+            "2024-01-19",
+        ]
+
+        for date in weekdays:
+            timestamps = pd.date_range(f"{date} 09:30", periods=5, freq="min")
+            prices_open = np.array([200.0 + i * 0.5 for i in range(5)])
+            df_raw = pd.DataFrame(
+                {
+                    "timestamp": timestamps,
+                    "open": prices_open,
+                    "high": prices_open + 1.0,
+                    "low": prices_open - 0.5,
+                    "close": prices_open + 0.3,
+                    "volume": np.array([2000 + i * 100 for i in range(5)]),
+                }
+            )
+
+            df_encoded, metadata = FinancialDataset.encode_financial_data(df_raw)
+            data_dict = {
+                "timestamps": df_encoded["timestamp"].values,
+                "open_encoded": df_encoded["open_encoded"].values,
+                "high_encoded": df_encoded["high_encoded"].values,
+                "low_encoded": df_encoded["low_encoded"].values,
+                "close_encoded": df_encoded["close_encoded"].values,
+                "volume": df_encoded["volume"].values,
+            }
+            for key, value in metadata.items():
+                data_dict[key] = np.array([value])
+
+            file_path = storage_dir / f"{symbol}_{date}.npz"
+            np.savez_compressed(file_path, **data_dict)
+
+        # Test load with date range that includes weekend
+        result = FinancialDataset.load(
+            stocks=[symbol],
+            dates=[("2024-01-15", "2024-01-21")],
+            base_dir=str(base_dir),
+        )
+
+        assert not result.empty
+        # Should only load weekdays (5 days * 5 data points = 25)
+        assert len(result) == 25
+
+
+def test_financial_dataset_load_empty_result():
+    """Test load method returns empty DataFrame when no data available."""
+    import pandas as pd
+
+    from stable_worldmodel.data import FinancialDataset
+
+    with tempfile.TemporaryDirectory() as tmpdir:
+        base_dir = Path(tmpdir)
+
+        # Test with no cached data and no alpaca client
+        with patch("stable_worldmodel.data._alpaca_client", None):
+            result = FinancialDataset.load(stocks=["AAPL"], dates=["2024-01-17"], base_dir=str(base_dir))
+
+            assert isinstance(result, pd.DataFrame)
+            assert result.empty
+
+
+def test_financial_dataset_load_with_alpaca_download():
+    """Test load method with Alpaca API download for missing data."""
+    try:
+        from stable_worldmodel.data import FinancialDataset
+    except ImportError:
+        pytest.skip("ml_dtypes not installed")
+
+    import pandas as pd
+
+    with tempfile.TemporaryDirectory() as tmpdir:
+        base_dir = Path(tmpdir)
+        storage_dir = base_dir / "numpyformat_bfloat16"
+        storage_dir.mkdir(parents=True, exist_ok=True)
+
+        # Mock Alpaca client
+        mock_client = MagicMock()
+        mock_response = MagicMock()
+
+        # Create mock DataFrame with proper structure
+        timestamps = pd.date_range("2024-01-17 09:30", periods=5, freq="min", tz="UTC")
+        mock_df = pd.DataFrame(
+            {
+                "timestamp": timestamps,
+                "open": [150.0, 150.5, 151.0, 151.5, 152.0],
+                "high": [150.5, 151.0, 151.5, 152.0, 152.5],
+                "low": [149.5, 150.0, 150.5, 151.0, 151.5],
+                "close": [150.2, 150.7, 151.2, 151.7, 152.2],
+                "volume": [1000, 1100, 1200, 1300, 1400],
+            }
+        )
+
+        mock_response.df.reset_index.return_value = mock_df
+        mock_client.get_stock_bars.return_value = mock_response
+
+        with patch("stable_worldmodel.data._alpaca_client", mock_client):
+            with patch("stable_worldmodel.data.StockBarsRequest"):
+                result = FinancialDataset.load(stocks=["NVDA"], dates=["2024-01-17"], base_dir=str(base_dir))
+
+                # Check that Alpaca API was called
+                assert mock_client.get_stock_bars.called
+                assert not result.empty
+
+                # Check that data was saved to file
+                file_path = storage_dir / "NVDA_2024-01-17.npz"
+                assert file_path.exists()
+
+
+def test_financial_dataset_load_with_alpaca_empty_response():
+    """Test load handles empty response from Alpaca API."""
+    try:
+        from stable_worldmodel.data import FinancialDataset
+    except ImportError:
+        pytest.skip("ml_dtypes not installed")
+
+    import pandas as pd
+
+    with tempfile.TemporaryDirectory() as tmpdir:
+        base_dir = Path(tmpdir)
+
+        # Mock Alpaca client returning empty DataFrame
+        mock_client = MagicMock()
+        mock_response = MagicMock()
+        mock_response.df.reset_index.return_value = pd.DataFrame()
+        mock_client.get_stock_bars.return_value = mock_response
+
+        with patch("stable_worldmodel.data._alpaca_client", mock_client):
+            with patch("stable_worldmodel.data.StockBarsRequest"):
+                result = FinancialDataset.load(stocks=["TEST"], dates=["2024-01-17"], base_dir=str(base_dir))
+
+                # Should return empty DataFrame
+                assert result.empty
+
+
+def test_financial_dataset_load_with_alpaca_exception():
+    """Test load handles exceptions from Alpaca API gracefully."""
+    try:
+        from stable_worldmodel.data import FinancialDataset
+    except ImportError:
+        pytest.skip("ml_dtypes not installed")
+
+    with tempfile.TemporaryDirectory() as tmpdir:
+        base_dir = Path(tmpdir)
+
+        # Mock Alpaca client that raises exception
+        mock_client = MagicMock()
+        mock_client.get_stock_bars.side_effect = Exception("API error")
+
+        with patch("stable_worldmodel.data._alpaca_client", mock_client):
+            with patch("stable_worldmodel.data.StockBarsRequest"):
+                result = FinancialDataset.load(stocks=["TEST"], dates=["2024-01-17"], base_dir=str(base_dir))
+
+                # Should return empty DataFrame
+                assert result.empty
+
+
+def test_financial_dataset_load_multiple_stocks_and_dates():
+    """Test load with multiple stocks and dates."""
+    try:
+        from stable_worldmodel.data import FinancialDataset
+    except ImportError:
+        pytest.skip("ml_dtypes not installed")
+
+    import pandas as pd
+
+    with tempfile.TemporaryDirectory() as tmpdir:
+        base_dir = Path(tmpdir)
+        storage_dir = base_dir / "numpyformat_bfloat16"
+        storage_dir.mkdir(parents=True, exist_ok=True)
+
+        # Create data for multiple stocks and dates
+        symbols = ["AAPL", "TSLA"]
+        dates = ["2024-01-17", "2024-01-18"]
+
+        for symbol in symbols:
+            for date in dates:
+                timestamps = pd.date_range(f"{date} 09:30", periods=3, freq="min")
+                prices = np.array([100.0 + i for i in range(3)])
+                df_raw = pd.DataFrame(
+                    {
+                        "timestamp": timestamps,
+                        "open": prices,
+                        "high": prices + 0.5,
+                        "low": prices - 0.3,
+                        "close": prices + 0.2,
+                        "volume": np.array([1000 + i * 100 for i in range(3)]),
+                    }
+                )
+
+                df_encoded, metadata = FinancialDataset.encode_financial_data(df_raw)
+                data_dict = {
+                    "timestamps": df_encoded["timestamp"].values,
+                    "open_encoded": df_encoded["open_encoded"].values,
+                    "high_encoded": df_encoded["high_encoded"].values,
+                    "low_encoded": df_encoded["low_encoded"].values,
+                    "close_encoded": df_encoded["close_encoded"].values,
+                    "volume": df_encoded["volume"].values,
+                }
+                for key, value in metadata.items():
+                    data_dict[key] = np.array([value])
+
+                file_path = storage_dir / f"{symbol}_{date}.npz"
+                np.savez_compressed(file_path, **data_dict)
+
+        result = FinancialDataset.load(stocks=symbols, dates=dates, base_dir=str(base_dir))
+
+        assert not result.empty
+        # 2 stocks * 2 dates * 3 data points = 12
+        assert len(result) == 12
+
+
+def test_financial_dataset_load_default_base_dir():
+    """Test load with default base_dir (None)."""
+    try:
+        from stable_worldmodel.data import FinancialDataset
+    except ImportError:
+        pytest.skip("ml_dtypes not installed")
+
+    import pandas as pd
+
+    with tempfile.TemporaryDirectory() as tmpdir:
+        # Mock DATA_DIR to point to our temp directory
+        with patch.object(FinancialDataset, "DATA_DIR", tmpdir):
+            storage_dir = Path(tmpdir) / "numpyformat_bfloat16"
+            storage_dir.mkdir(parents=True, exist_ok=True)
+
+            # Create mock data
+            symbol = "MSFT"
+            date = "2024-01-17"
+            timestamps = pd.date_range(f"{date} 09:30", periods=3, freq="min")
+            prices = np.array([300.0, 301.0, 302.0])
+            df_raw = pd.DataFrame(
+                {
+                    "timestamp": timestamps,
+                    "open": prices,
+                    "high": prices + 1.0,
+                    "low": prices - 0.5,
+                    "close": prices + 0.5,
+                    "volume": np.array([5000, 5100, 5200]),
+                }
+            )
+
+            df_encoded, metadata = FinancialDataset.encode_financial_data(df_raw)
+            data_dict = {
+                "timestamps": df_encoded["timestamp"].values,
+                "open_encoded": df_encoded["open_encoded"].values,
+                "high_encoded": df_encoded["high_encoded"].values,
+                "low_encoded": df_encoded["low_encoded"].values,
+                "close_encoded": df_encoded["close_encoded"].values,
+                "volume": df_encoded["volume"].values,
+            }
+            for key, value in metadata.items():
+                data_dict[key] = np.array([value])
+
+            file_path = storage_dir / f"{symbol}_{date}.npz"
+            np.savez_compressed(file_path, **data_dict)
+
+            # Test with base_dir=None (should use DATA_DIR)
+            result = FinancialDataset.load(stocks=[symbol], dates=[date], base_dir=None)
+
+            assert not result.empty
+            assert len(result) == 3

@@ -445,7 +445,7 @@ class PotionLab(gym.Env):
                 "tools_config": swm.spaces.Dict(
                     {
                         "eject_offset_multiplier": swm.spaces.Box(
-                            low=0.0, high=4.0, init_value=1.5, shape=(), dtype=np.float32
+                            low=0.0, high=4.0, init_value=3, shape=(), dtype=np.float32
                         ),
                         "enchanter": swm.spaces.Dict(
                             {
@@ -514,10 +514,10 @@ class PotionLab(gym.Env):
                         "delivery_window": swm.spaces.Dict(
                             {
                                 "width_multiplier": swm.spaces.Box(
-                                    low=0.5, high=3.0, init_value=1.5, shape=(), dtype=np.float32
+                                    low=0.5, high=3.0, init_value=3, shape=(), dtype=np.float32
                                 ),
                                 "height_multiplier": swm.spaces.Box(
-                                    low=0.5, high=3.0, init_value=1.0, shape=(), dtype=np.float32
+                                    low=0.5, high=3.0, init_value=2.0, shape=(), dtype=np.float32
                                 ),
                                 "color": swm.spaces.RGBBox(init_value=np.array([60, 179, 113], dtype=np.uint8)),
                                 "feedback_duration": swm.spaces.Box(

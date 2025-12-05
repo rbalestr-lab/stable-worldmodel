@@ -2,7 +2,7 @@
   "rounds": [
     {
       "time_limit": 3600,
-      "background_color": [100, 0, 0],
+      "background_color": [100, 70, 50],
       "required_items": [
         {
           "base_essences": [1],

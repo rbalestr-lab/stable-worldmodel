@@ -9,7 +9,6 @@ You can set these in a .env file in the project root or export them in your shel
 """
 
 if __name__ == "__main__":
-    import gymnasium as gym
     import numpy as np
 
     import stable_worldmodel as swm
@@ -74,8 +73,8 @@ if __name__ == "__main__":
     print("Detailed Backtest Metrics (Single Environment):")
     print("=" * 60)
 
-    # Create a single environment to get detailed metrics
-    env = gym.make("swm/Financial-v0")
+    # Access the first environment from the world's vectorized environments
+    env = world.envs.envs[0]
     env.reset(seed=42)
 
     # Run a short episode
@@ -114,8 +113,6 @@ if __name__ == "__main__":
         print(f"  Win Rate: {backtest_results['win_rate']:.2%}")
 
     print(f"\nSample available metrics: {list(backtest_results.keys())[:8]}")
-
-    env.close()
 
     print("\n" + "=" * 60)
     print("Financial trading example completed successfully!")

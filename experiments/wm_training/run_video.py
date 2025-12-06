@@ -11,92 +11,9 @@ from loguru import logger as logging
 from omegaconf import OmegaConf, open_dict
 from torch.nn import functional as F
 from torch.utils.data import DataLoader
-from transformers import AutoModel, AutoModelForImageClassification
+from transformers import AutoModel, AutoModelForImageClassification, AutoVideoProcessor
 
 import stable_worldmodel as swm
-
-
-# def resnet_encoder(cfg):
-#     assert cfg.backbone.startswith("microsoft/resnet-"), f"ResNet encoder selected but backbone {cfg.backbone} is not."
-#     backbone = AutoModelForImageClassification.from_pretrained(cfg.backbone)
-#     backbone.classifier[1] = torch.nn.Identity()
-#     return backbone, backbone.config.hidden_sizes[-1], 1
-
-
-# def vit_encoder(cfg):
-#     assert cfg.backbone.startswith("google/vit-"), f"ViT encoder selected but backbone {cfg.backbone} is not ViT."
-#     backbone = AutoModel.from_pretrained(cfg.backbone)
-#     embedding_dim = backbone.config.hidden_size
-#     num_patches = (cfg.image_size // cfg.patch_size) ** 2
-#     return backbone, embedding_dim, num_patches
-
-
-# def dinov1_encoder(cfg):
-#     # https://huggingface.co/collections/JulianAssmann/dino-v1-models (dinov1)
-#     assert cfg.backbone.startswith("facebook/dino-"), f"DINO encoder selected but backbone {cfg.backbone} is not."
-#     backbone = AutoModel.from_pretrained(cfg.backbone)
-#     embedding_dim = backbone.config.hidden_size
-#     num_patches = (cfg.image_size // cfg.patch_size) ** 2
-#     return backbone, embedding_dim, num_patches
-
-
-# def dinov2_encoder(cfg):
-#     # https://huggingface.co/collections/facebook/dinov2
-#     assert cfg.backbone.startswith("facebook/dinov2-"), f"DINOv2 encoder selected but backbone {cfg.backbone} is not."
-#     backbone = AutoModel.from_pretrained(cfg.backbone)
-#     embedding_dim = backbone.config.hidden_size
-#     num_patches = (cfg.image_size // cfg.patch_size) ** 2
-#     return backbone, embedding_dim, num_patches
-
-
-# def dinov3_encoder(cfg):
-#     # https://huggingface.co/collections/facebook/dinov3
-#     assert cfg.backbone.startswith("facebook/dinov3-"), f"DINOv3 encoder selected but backbone {cfg.backbone} is not."
-#     backbone = AutoModel.from_pretrained(cfg.backbone)
-#     embedding_dim = backbone.config.hidden_size
-#     num_patches = (cfg.image_size // cfg.patch_size) ** 2
-#     return backbone, embedding_dim, num_patches
-
-
-# def mae_encoder(cfg):
-#     # facebook/vit-mae-base, vit-mae-large
-#     assert cfg.backbone.startswith("facebook/vit-mae-"), f"MAE encoder selected but backbone {cfg.backbone} is not."
-#     backbone = AutoModel.from_pretrained(cfg.backbone)
-#     embedding_dim = backbone.config.hidden_size
-#     num_patches = (cfg.image_size // cfg.patch_size) ** 2
-#     return backbone, embedding_dim, num_patches
-
-
-# def ijepa_encoder(cfg):
-#     # facebook/ijepa_vith14_1k, ijepa_vith14_22k (impact of pre-training dataset size)
-#     # facebook/ijepa_vith14_1k, facebook/ijepa_vith16_1k (impact of resolution 224 vs 448)
-#     assert cfg.backbone.startswith("facebook/ijepa-"), f"IJEPA encoder selected but backbone {cfg.backbone} is not."
-#     backbone = AutoModel.from_pretrained(cfg.backbone)
-#     embedding_dim = backbone.config.hidden_size
-#     num_patches = (cfg.image_size // cfg.patch_size) ** 2
-#     return backbone, embedding_dim, num_patches
-
-
-# def clip_encoder(cfg):
-#     # timm/vit_base_patch32_clip_224.metaclip_400m
-#     assert cfg.backbone.startswith("timm/vit_base_patch32_clip_"), (
-#         f"CLIP encoder selected but backbone {cfg.backbone} is not."
-#     )
-#     backbone = AutoModel.from_pretrained(cfg.backbone)
-#     embedding_dim = backbone.config.num_features
-#     num_patches = (cfg.image_size // cfg.patch_size) ** 2
-#     return backbone, embedding_dim, num_patches
-
-
-# def vjepa2_encoder(cfg):
-#     # https://huggingface.co/collections/facebook/v-jepa-2
-#     assert cfg.backbone.startswith("facebook/vjepa2-vit"), (
-#         f"V-JEPA 2 encoder selected but backbone {cfg.backbone} is not."
-#     )
-#     backbone = AutoModel.from_pretrained(cfg.backbone)
-#     embedding_dim = backbone.config.hidden_size
-#     num_patches = (cfg.image_size // cfg.patch_size) ** 2
-#     return backbone, embedding_dim, num_patches
 
 
 def get_encoder(cfg):
@@ -164,8 +81,27 @@ DINO_PATCH_SIZE = 14  # DINO encoder uses 14x14 patches
 # ============================================================================
 
 
+class VideoPipeline(spt.data.transforms.Transform):
+    def __init__(self, processor, source: str = "image", target: str = "image"):
+        super().__init__()
+        self.processor = processor
+        self.source = source
+        self.target = target
+
+    def __call__(self, x: dict):
+        frames = self.nested_get(x, self.source)
+        processed = self.processor(frames, return_tensors="pt")
+        self.nested_set(x, processed, self.target)
+        return x
+
+
 def get_data(cfg):
     """Setup dataset with image transforms and normalization."""
+
+    def get_video_pipeline(key, target):
+        """Backwards-compatible helper: returns a VideoPipeline transform."""
+        processor = AutoVideoProcessor.from_pretrained(cfg.backbone.name)
+        return VideoPipeline(processor, source=key, target=target)
 
     def get_img_pipeline(key, target, img_size=224):
         return spt.data.transforms.Compose(
@@ -208,6 +144,17 @@ def get_data(cfg):
         *all_norm_transforms,
     )
 
+    if "vjepa" in cfg.backbone.name:
+        transform = spt.data.transforms.Compose(
+            *[
+                get_video_pipeline(
+                    f"{col}.{i}",
+                    f"{col}.{i}",
+                )
+                for col in ["pixels"]
+                for i in range(cfg.n_steps)
+            ],
+        )
     dataset.transform = transform
     rnd_gen = torch.Generator().manual_seed(cfg.seed)
     train_set, val_set = spt.data.random_split(

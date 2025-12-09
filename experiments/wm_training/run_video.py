@@ -90,7 +90,7 @@ class VideoPipeline(spt.data.transforms.Transform):
 
     def __call__(self, x: dict):
         frames = self.nested_get(x, self.source)
-        processed = self.processor(frames, return_tensors="pt")["pixel_values_videos"]
+        processed = self.processor(frames, return_tensors="pt")["pixel_values_videos"].squeeze(0)
         self.nested_set(x, processed, self.target)
         return x
 
@@ -124,9 +124,13 @@ def get_data(cfg):
         trans_fn = spt.data.transforms.WrapTorchTransform(trans_fn, source=key, target=key)
         all_norm_transforms.append(trans_fn)
 
+    patch_size = 14
+    img_size = (cfg.image_size // cfg.patch_size) * patch_size
+
     # Apply transforms to all steps
     dataset.transform = spt.data.transforms.Compose(
         get_video_pipeline("pixels", "pixels"),
+        spt.data.transforms.Resize(img_size, source="pixels", target="pixels"),
         *all_norm_transforms,
     )
     rnd_gen = torch.Generator().manual_seed(cfg.seed)
@@ -174,7 +178,7 @@ def get_world_model(cfg):
             batch[key] = torch.nan_to_num(batch[key], 0.0)
 
         # Encode all timesteps into latent embeddings
-        batch = self.model.encode(batch, target="embed", is_video=cfg.get("backbone.is_video_encoder", False))
+        batch = self.model.encode(batch, target="embed", is_video=cfg.backbone.get("is_video_encoder", False))
 
         # Use history to predict next states
         embedding = batch["embed"][:, : cfg.pyro.history_size, :, :]  # (B, T-1, patches, dim)
@@ -232,8 +236,6 @@ def get_world_model(cfg):
     logging.info(f"Patches: {num_patches}, Embedding dim: {embedding_dim}")
 
     # Build causal predictor (transformer that predicts next latent states)
-
-    print(">>>> DIM PREDICTOR:", embedding_dim)
 
     predictor = swm.wm.pyro.CausalPredictor(
         num_patches=num_patches,

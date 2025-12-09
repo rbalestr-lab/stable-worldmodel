@@ -36,6 +36,7 @@ class PYRO(torch.nn.Module):
         emb_keys=None,
         prefix=None,
         target="embed",
+        is_video=False,
     ):
         assert target not in info, f"{target} key already in info_dict"
 
@@ -45,7 +46,7 @@ class PYRO(torch.nn.Module):
         # == pixels embeddings
         pixels = info[pixels_key].float()  # (B, T, 3, H, W)
         B = pixels.shape[0]
-        pixels = rearrange(pixels, "b t ... -> (b t) ...")
+        pixels = rearrange(pixels, "b t ... -> (b t) ...") if not is_video else pixels
 
         kwargs = {"interpolate_pos_encoding": True} if self.interpolate_pos_encoding else {}
         pixels_embed = self.backbone(pixels, **kwargs)
@@ -56,7 +57,7 @@ class PYRO(torch.nn.Module):
         else:
             pixels_embed = pixels_embed.logits.unsqueeze(1)  # (B*T, 1, emb_dim)
 
-        pixels_embed = rearrange(pixels_embed.detach(), "(b t) p d -> b t p d", b=B)
+        pixels_embed = rearrange(pixels_embed.detach(), "(b t) p d -> b t p d", b=B) if not is_video else pixels_embed
 
         # == improve the embedding
         n_patches = pixels_embed.shape[2]
@@ -197,20 +198,32 @@ class PYRO(torch.nn.Module):
             init_info_dict["embed"] = (
                 init_info_dict["embed"]
                 .unsqueeze(1)
-                .expand(-1, action_sequence.shape[1], *([-1] * (init_info_dict["embed"].ndim - 1)))
+                .expand(
+                    -1,
+                    action_sequence.shape[1],
+                    *([-1] * (init_info_dict["embed"].ndim - 1)),
+                )
                 .clone()
             )
             init_info_dict["pixels_embed"] = (
                 init_info_dict["pixels_embed"]
                 .unsqueeze(1)
-                .expand(-1, action_sequence.shape[1], *([-1] * (init_info_dict["pixels_embed"].ndim - 1)))
+                .expand(
+                    -1,
+                    action_sequence.shape[1],
+                    *([-1] * (init_info_dict["pixels_embed"].ndim - 1)),
+                )
             )
 
             for key in emb_keys:
                 init_info_dict[f"{key}_embed"] = (
                     init_info_dict[f"{key}_embed"]
                     .unsqueeze(1)
-                    .expand(-1, action_sequence.shape[1], *([-1] * (init_info_dict[f"{key}_embed"].ndim - 1)))
+                    .expand(
+                        -1,
+                        action_sequence.shape[1],
+                        *([-1] * (init_info_dict[f"{key}_embed"].ndim - 1)),
+                    )
                 )
 
             init_info_dict = {k: v.detach().clone() if torch.is_tensor(v) else v for k, v in init_info_dict.items()}
@@ -309,20 +322,32 @@ class PYRO(torch.nn.Module):
             goal_info_dict["goal_embed"] = (
                 goal_info_dict["goal_embed"]
                 .unsqueeze(1)
-                .expand(-1, action_candidates.shape[1], *([-1] * (goal_info_dict["goal_embed"].ndim - 1)))
+                .expand(
+                    -1,
+                    action_candidates.shape[1],
+                    *([-1] * (goal_info_dict["goal_embed"].ndim - 1)),
+                )
             )
 
             goal_info_dict["pixels_goal_embed"] = (
                 goal_info_dict["pixels_goal_embed"]
                 .unsqueeze(1)
-                .expand(-1, action_candidates.shape[1], *([-1] * (goal_info_dict["pixels_goal_embed"].ndim - 1)))
+                .expand(
+                    -1,
+                    action_candidates.shape[1],
+                    *([-1] * (goal_info_dict["pixels_goal_embed"].ndim - 1)),
+                )
             )
 
             for key in emb_keys:
                 goal_info_dict[f"{key}_goal_embed"] = (
                     goal_info_dict[f"{key}_goal_embed"]
                     .unsqueeze(1)
-                    .expand(-1, action_candidates.shape[1], *([-1] * (goal_info_dict[f"{key}_goal_embed"].ndim - 1)))
+                    .expand(
+                        -1,
+                        action_candidates.shape[1],
+                        *([-1] * (goal_info_dict[f"{key}_goal_embed"].ndim - 1)),
+                    )
                 )
 
             goal_info_dict = {k: v.detach() if torch.is_tensor(v) else v for k, v in goal_info_dict.items()}
@@ -450,7 +475,12 @@ class Attention(nn.Module):
         attn_mask = self.bias[:, :, :T, :T] == 1  # bool mask
 
         out = F.scaled_dot_product_attention(
-            q, k, v, attn_mask=attn_mask, dropout_p=self.dropout.p if self.training else 0.0, is_causal=False
+            q,
+            k,
+            v,
+            attn_mask=attn_mask,
+            dropout_p=self.dropout.p if self.training else 0.0,
+            is_causal=False,
         )
 
         out = rearrange(out, "b h n d -> b n (h d)")

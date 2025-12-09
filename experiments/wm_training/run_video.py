@@ -90,7 +90,7 @@ class VideoPipeline(spt.data.transforms.Transform):
 
     def __call__(self, x: dict):
         frames = self.nested_get(x, self.source)
-        processed = self.processor(frames, return_tensors="pt")
+        processed = self.processor(frames, return_tensors="pt")["pixel_values_videos"]
         self.nested_set(x, processed, self.target)
         return x
 
@@ -102,17 +102,6 @@ def get_data(cfg):
         """Backwards-compatible helper: returns a VideoPipeline transform."""
         processor = AutoVideoProcessor.from_pretrained(cfg.backbone.name)
         return VideoPipeline(processor, source=key, target=target)
-
-    def get_img_pipeline(key, target, img_size=224):
-        return spt.data.transforms.Compose(
-            spt.data.transforms.ToImage(
-                **spt.data.dataset_stats.ImageNet,
-                source=key,
-                target=target,
-            ),
-            spt.data.transforms.Resize(img_size, source=key, target=target),
-            spt.data.transforms.CenterCrop(img_size, source=key, target=target),
-        )
 
     def norm_col_transform(dataset, col="pixels"):
         """Normalize column to zero mean, unit variance."""
@@ -135,27 +124,11 @@ def get_data(cfg):
         trans_fn = spt.data.transforms.WrapTorchTransform(trans_fn, source=key, target=key)
         all_norm_transforms.append(trans_fn)
 
-    # Image size must be multiple of DINO patch size (14)
-    img_size = (cfg.image_size // cfg.patch_size) * DINO_PATCH_SIZE
-
     # Apply transforms to all steps
-    transform = spt.data.transforms.Compose(
-        *[get_img_pipeline(f"{col}.{i}", f"{col}.{i}", img_size) for col in ["pixels"] for i in range(cfg.n_steps)],
+    dataset.transform = spt.data.transforms.Compose(
+        get_video_pipeline("pixels", "pixels"),
         *all_norm_transforms,
     )
-
-    if "vjepa" in cfg.backbone.name:
-        transform = spt.data.transforms.Compose(
-            *[
-                get_video_pipeline(
-                    f"{col}.{i}",
-                    f"{col}.{i}",
-                )
-                for col in ["pixels"]
-                for i in range(cfg.n_steps)
-            ],
-        )
-    dataset.transform = transform
     rnd_gen = torch.Generator().manual_seed(cfg.seed)
     train_set, val_set = spt.data.random_split(
         dataset, lengths=[cfg.train_split, 1 - cfg.train_split], generator=rnd_gen
@@ -201,7 +174,7 @@ def get_world_model(cfg):
             batch[key] = torch.nan_to_num(batch[key], 0.0)
 
         # Encode all timesteps into latent embeddings
-        batch = self.model.encode(batch, target="embed")
+        batch = self.model.encode(batch, target="embed", is_video=cfg.get("backbone.is_video_encoder", False))
 
         # Use history to predict next states
         embedding = batch["embed"][:, : cfg.pyro.history_size, :, :]  # (B, T-1, patches, dim)

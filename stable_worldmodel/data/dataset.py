@@ -197,9 +197,8 @@ class FrameDataset(Dataset):
 
         # stack frames
         for col in self.decode_columns:
-            if col not in steps:
-                continue
-            steps[col] = torch.stack(steps[col])
+            if col in steps and type(steps[col]) is list:
+                steps[col] = torch.stack(steps[col])
 
         # reshape action
         act_shape = self.num_steps if not self.complete_traj else len(self.episode_indices[episode])
@@ -250,9 +249,8 @@ class VideoDataset(Dataset):
 
         # stack frames
         for col in self.decode_columns:
-            if col not in steps:
-                continue
-            steps[col] = torch.stack(steps[col])
+            if col in steps and type(steps[col]) is list:
+                steps[col] = torch.stack(steps[col])
 
         # reshape action
         act_shape = self.num_steps if not self.complete_traj else len(self.episode_indices[episode])

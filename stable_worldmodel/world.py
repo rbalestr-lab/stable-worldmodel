@@ -55,6 +55,7 @@ Todo:
 import hashlib
 import json
 import os
+from collections import defaultdict
 from collections.abc import Callable
 from copy import deepcopy
 from pathlib import Path
@@ -445,78 +446,6 @@ class World:
         print(f"Video saved to {video_path}")
 
     def record_dataset(self, dataset_name, episodes=10, seed=None, cache_dir=None, mode="frame", options=None):
-        """Collect episodes with the current policy and save as a HuggingFace Dataset.
-
-        Executes the attached policy to collect demonstration or rollout data,
-        automatically managing episode boundaries and saving all observations, actions,
-        rewards, and auxiliary information as a sharded Parquet dataset. Images are
-        stored as JPEG files with paths in the dataset.
-
-        The dataset is organized with the following structure:
-            - dataset_name/
-                - img/
-                    - {episode_idx}/
-                        - {step_idx}_{column_name}.jpeg
-                - data-{shard}.arrow (Parquet shards)
-                - dataset_info.json
-                - state.json
-
-        Args:
-            dataset_name (str): Name of the dataset. Used as subdirectory name in
-                cache_dir. Should be descriptive (e.g., 'pusht_expert_demos').
-            episodes (int, optional): Total number of complete episodes to collect.
-                Incomplete episodes at the end are discarded. Defaults to 10.
-            seed (int, optional): Base random seed for reproducibility. Each episode
-                gets an incremental offset. Defaults to None (non-deterministic).
-            cache_dir (str or Path, optional): Root directory for dataset storage.
-                If None, uses get_cache_dir(). Defaults to None.
-            mode (str, optional): Type of dataset to record. 'frame' for save as images,
-                'video' for save as videos. Defaults to 'frame'.
-            options (dict, optional): Reset options for environments. Use
-                {'variation': ['all']} for full domain randomization. Defaults to None.
-
-        Dataset Schema:
-            Each row contains:
-                - episode_idx (int32): Episode identifier
-                - step_idx (int32): Step within episode (0-indexed)
-                - episode_len (int32): Total length of the episode
-                - policy (string): Policy type identifier
-                - pixels (string): Relative path to observation image
-                - goal (string, optional): Relative path to goal image
-                - action (float array): Action taken at this step
-                - reward (float): Reward received
-                - Additional keys from environment infos
-
-        Note:
-            - Actions are shifted: action at step t leads to observation at step t+1
-            - Last action in each episode is NaN (no action leads from final state)
-            - Images are saved as JPEG for efficiency (may introduce compression artifacts)
-            - Dataset is automatically sharded: 1 shard per 50 episodes
-            - Only complete episodes are included in the final dataset
-
-        Raises:
-            AssertionError: If required keys ('pixels', 'episode_idx', 'step_idx',
-                'episode_len') are missing from recorded data.
-
-        Example:
-            Collect demonstration data with variations::
-
-                world.set_policy(expert_policy)
-                world.record_dataset(
-                    dataset_name="cube_expert_1k",
-                    episodes=1000,
-                    seed=42,
-                    options={'variation': ['all']}
-                )
-
-            Collect data for specific tasks::
-
-                world.record_dataset(
-                    dataset_name="pusht_task2_data",
-                    episodes=500,
-                    options={'task_id': 2}
-                )
-        """
         if self._history_size > 1:
             raise NotImplementedError("Dataset recording with frame history > 1 is not supported.")
 
@@ -529,30 +458,62 @@ class World:
             return
 
         recorded_episodes = 0
+        episode_idx = np.arange(self.num_envs)
 
         self.terminateds = np.zeros(self.num_envs)
         self.truncateds = np.zeros(self.num_envs)
-        episode_idx = np.arange(self.num_envs)
 
         self.reset(seed, options)  # <- incr global seed by num_envs
         root_seed = seed + self.num_envs if seed is not None else None
 
-        records = {}
-        for key, value in self.infos.items():
-            if key[0] == "_":
-                continue
+        records = {k: [] for k in ["episode_len", "episode_idx", "policy"]}
+        episode_buffers = [defaultdict(list) for _ in range(self.num_envs)]
 
-            value = value.squeeze(1) if isinstance(value, np.ndarray) else value
-            records[key] = list(value)
+        def dump_to_buffer(env_idx=None):
+            if not isinstance(env_idx, int) and env_idx is not None:
+                raise ValueError("env_idx must be an integer or None.")
 
-        records["episode_idx"] = list(episode_idx)
-        records["policy"] = [self.policy.type] * self.num_envs
+            env_idx = [env_idx] if env_idx is not None else list(range(self.num_envs))
+
+            for k, v in self.infos.items():
+                if k[0] == "_":
+                    continue
+
+                v = v.squeeze(1) if isinstance(v, np.ndarray) else v
+                for i in env_idx:
+                    buffer = episode_buffers[i]
+                    buffer[k].append(deepcopy(v[i]))
+
+        def flush_episode(env_idx):
+            buffer = episode_buffers[env_idx]
+            episode_len = len(buffer["step_idx"])
+            for k, v in buffer.items():
+                if k not in records:
+                    records[k] = []
+
+                # rotate actions to align with observations
+                if k == "action":
+                    v.append(v.pop(0))
+
+                records[k].extend(v)
+
+            records["episode_len"].extend([episode_len] * episode_len)
+            records["episode_idx"].extend([episode_idx[env_idx]] * episode_len)
+            records["policy"].extend([self.policy.type] * episode_len)
+
+            episode_buffers[env_idx] = defaultdict(list)
+
+        # dump the original reset data
+        dump_to_buffer()
 
         while True:
-            self.step()
             # start new episode for done envs
             for i in range(self.num_envs):
                 if self.terminateds[i] or self.truncateds[i]:
+                    flush_episode(i)
+
+                    # TODO open issue double nested insert with numpy arrays
+
                     # re-reset env with seed and options (no supported by auto-reset)
                     new_seed = root_seed + recorded_episodes if seed is not None else None
 
@@ -567,39 +528,13 @@ class World:
                     for k, v in infos.items():
                         self.infos[k][i] = np.asarray(v)
 
+                    dump_to_buffer(env_idx=i)
+
             if recorded_episodes >= episodes:
                 break
 
-            for key in self.infos:
-                if key[0] == "_":
-                    continue
-
-                data = self.infos[key]
-                data = data.squeeze(1) if isinstance(data, np.ndarray) else data
-
-                # shift actions
-                if key == "action":
-                    n_action = len(data)
-                    last_episode = records["episode_idx"][-n_action:]
-                    action_mask = (last_episode == episode_idx)[:, None]
-
-                    # override last actions of continuing episodes
-                    records[key][-n_action:] = np.where(
-                        action_mask,
-                        data,
-                        np.nan,
-                    )
-
-                    # add new dummy action
-                    action_shape = np.shape(data[0])
-                    action_dtype = self.single_action_space.dtype
-                    dummy_block = [np.full(action_shape, np.nan, dtype=action_dtype) for _ in range(self.num_envs)]
-                    records[key].extend(dummy_block)
-                else:
-                    records[key].extend(list(data))
-
-            records["episode_idx"].extend(list(episode_idx))
-            records["policy"].extend([self.policy.type] * self.num_envs)
+            self.step()
+            dump_to_buffer()
 
         # flatten time dimension
         for k, v in records.items():
@@ -607,8 +542,8 @@ class World:
                 records[k] = [item.squeeze() for item in v]
 
         # add the episode length
-        counts = np.bincount(np.array(records["episode_idx"]), minlength=max(records["episode_idx"]) + 1)
-        records["episode_len"] = [int(counts[ep]) for ep in records["episode_idx"]]
+        # counts = np.bincount(np.array(records["episode_idx"]), minlength=max(records["episode_idx"]) + 1)
+        # records["episode_len"] = [int(counts[ep]) for ep in records["episode_idx"]]
 
         ########################
         # Save dataset to disk #

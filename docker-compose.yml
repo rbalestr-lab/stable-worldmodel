@@ -1,0 +1,14 @@
+version: '3.8'
+
+services:
+  pyflyt:
+    build:
+      context: .
+      dockerfile: Dockerfile.pyflyt
+    volumes:
+      - .:/workspace
+    working_dir: /workspace
+    stdin_open: true
+    tty: true
+    environment:
+      - PYTHONUNBUFFERED=1

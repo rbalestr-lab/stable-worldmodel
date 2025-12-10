@@ -54,3 +54,8 @@ register(
     id="swm/SimpleNavigation-v0",
     entry_point="stable_worldmodel.envs.simple_nav.env:SimpleNavigationEnv",
 )
+
+register(
+    id="swm/PyFlytDogfight-v0",
+    entry_point="stable_worldmodel.envs.pyflyt_dogfight:PyFlytDogfightEnv",
+)

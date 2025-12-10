@@ -493,15 +493,19 @@ class World:
 
                 # rotate actions to align with observations
                 if k == "action":
-                    v.append(v.pop(0))
+                    nan = v.pop(0).astype(v[0].dtype)
+                    v.append(nan)
 
                 records[k].extend(v)
 
-            records["episode_len"].extend([episode_len] * episode_len)
-            records["episode_idx"].extend([episode_idx[env_idx]] * episode_len)
-            records["policy"].extend([self.policy.type] * episode_len)
+            records["episode_len"].extend([episode_len for _ in range(episode_len)])
+            records["episode_idx"].extend([recorded_episodes for _ in range(episode_len)])
+            records["policy"].extend([self.policy.type for _ in range(episode_len)])
 
             episode_buffers[env_idx] = defaultdict(list)
+
+            self.terminateds[env_idx] = False
+            self.truncateds[env_idx] = False
 
         # dump the original reset data
         dump_to_buffer()
@@ -560,11 +564,6 @@ class World:
         # save all jpeg images
         image_cols = {col for col in records if is_image(records[col][0])}
 
-        # # pre-create all directories
-        # for ep_idx in set(records["episode_idx"]):
-        #     img_folder = dataset_path / "img" / f"{ep_idx}"
-        #     img_folder.mkdir(parents=True, exist_ok=True)
-
         # TODO: should check if already some data has been saved
         episode_idx = np.unique(records["episode_idx"])
 
@@ -597,22 +596,6 @@ class World:
                 # Update records
                 for i, path in zip(step_mask, paths):
                     records[img_col][i] = path
-
-        # dump all images
-        # for i in range(len(records["episode_idx"])):
-        #     ep_idx = records["episode_idx"][i]
-        #     step_idx = records["step_idx"][i]
-
-        #     writer = i
-
-        #     for img_col in image_cols:
-        #         img = records[img_col][i]
-        #         img_folder = dataset_path / "img" / f"{ep_idx}"
-        #         img_path = img_folder / f"{step_idx}_{img_col.replace('.', '_')}.jpeg"
-        #         iio.imwrite(img_path, img)
-
-        #         # replace image in records with relative path
-        #         records[img_col][i] = str(img_path.relative_to(dataset_path))
 
         def determine_features(records):
             features = {
@@ -653,20 +636,13 @@ class World:
         records_feat = determine_features(records)
         records_ds = Dataset.from_dict(records, features=records_feat)
 
-        # flush incomplete episodes
-        # get episodes that are currently running (not done)
-        incomplete_episodes = episode_idx[~(self.terminateds | self.truncateds)]
-        # keep only episodes that are NOT in the incomplete list
-        keep_mask = ~np.isin(records_ds["episode_idx"], incomplete_episodes)
-        records_ds = records_ds.select(np.nonzero(keep_mask)[0])
-
         # flush all extra episodes saved (keep only first N episodes)
         episodes_to_keep = np.unique(records_ds["episode_idx"])[:episodes]
         keep_mask = np.isin(records_ds["episode_idx"], episodes_to_keep)
         records_ds = records_ds.select(np.nonzero(keep_mask)[0])
 
         # save dataset
-        records_path = dataset_path  # / "records"
+        records_path = dataset_path
         num_chunks = episodes // 50
         records_path.mkdir(parents=True, exist_ok=True)
         records_ds.save_to_disk(records_path, num_shards=num_chunks or 1)
@@ -768,8 +744,6 @@ class World:
             episode_len = len(episode)
 
             all_lengths = episode["episode_len"][:].tolist()
-
-            print(set(all_lengths))
 
             assert len(set(all_lengths)) == 1, "'episode_len' contains different values for the same episode"
             assert len(episode) == episode["episode_len"][0], (

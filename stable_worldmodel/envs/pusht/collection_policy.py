@@ -4,7 +4,7 @@ from stable_worldmodel.policy import BasePolicy
 
 
 class PushTCollectionPolicy(BasePolicy):
-    """Collection Policy for OGBench Manipulation Environments."""
+    """Collection policy for PushT environment."""
 
     def __init__(
         self,

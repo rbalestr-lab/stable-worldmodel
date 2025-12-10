@@ -137,7 +137,7 @@ class OGBCollectionPolicy(BasePolicy):
                     ],
                 }
 
-    def _get_cube_stack_prob(self):  # TODO: call this at env reset per env
+    def _get_cube_stack_prob(self):
         base_env = self.env.unwrapped
         if hasattr(base_env, "envs"):
             envs = [e.unwrapped for e in base_env.envs]
@@ -187,7 +187,7 @@ class OGBCollectionPolicy(BasePolicy):
                     self._xi[i] = np.random.uniform(0, self.action_noise)
 
                 self._agents[i] = self._oracle_agents[info["privileged/target_task"]][i]
-                self._agents[i].reset(None, info)  # TODO: provide correct obs and info
+                self._agents[i].reset(None, info)
 
             # action logic
             if np.random.rand() < self.p_random_action:
@@ -195,7 +195,7 @@ class OGBCollectionPolicy(BasePolicy):
                 action = env.action_space.sample()
             else:
                 # Get an action from the oracle.
-                action = self._agents[i].select_action(None, info)  # TODO: provide correct obs and info
+                action = self._agents[i].select_action(None, info)
                 action = np.array(action)
                 if self.type == "markov_oracle":
                     # Add Gaussian noise to the action.
@@ -208,10 +208,10 @@ class OGBCollectionPolicy(BasePolicy):
             if self._agents[i].done:
                 agent_ob, agent_info = env.unwrapped.set_new_target(p_stack=self._p_stack[i])
                 self._agents[i] = self._oracle_agents[agent_info["privileged/target_task"]][i]
-                self._agents[i].reset(agent_ob, agent_info)  # TODO: provide correct obs and info
+                self._agents[i].reset(agent_ob, agent_info)
 
-        # TODO: there is a health check in the Scene env that discards episodes where the cube is not visible, where do we deal with this?
-        # TODO: make sure actions are aligned with observations (see ogbench_data_collection.py "records")
+        # NOTE: there is a health check in the Scene env that discards episodes where the cube is not visible, think if we want to deal with this somehow
+        # NOTE: modify Scene tasks with closed drawer to open drawer
 
         # VecEnv expects (n_envs, action_dim)
         return actions

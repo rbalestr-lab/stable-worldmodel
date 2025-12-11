@@ -186,7 +186,8 @@ class Player:
         space: pymunk.Space,
         position: tuple[float, float],
         tile_size: float = 32.0,
-        size: float = 12.0,
+        render_size: float = 12.0,
+        hitbox_size: float = 12.0,
         mass: float = 1.0,
         friction: float = 0.3,
         elasticity: float = 0.0,
@@ -198,7 +199,11 @@ class Player:
         self.space = space
         self.tile_size = tile_size
         self.color = color
-        self.size = size
+        # Separate render size and hitbox size so visuals and collisions can differ
+        self.render_size = render_size
+        self.hitbox_size = hitbox_size
+        # Backwards-compatible alias for existing usages (hitbox size)
+        self.size = hitbox_size
         self.max_velocity = max_velocity
         self.force_scale = force_scale
         self.distance_slowdown_scale = distance_slowdown_scale
@@ -208,7 +213,7 @@ class Player:
         self.body = pymunk.Body(mass, moment)
         self.body.position = position
 
-        half_size = size / 2
+        half_size = hitbox_size / 2
         vertices = [
             (-half_size, -half_size),
             (half_size, -half_size),

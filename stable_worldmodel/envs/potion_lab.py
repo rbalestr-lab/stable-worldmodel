@@ -161,7 +161,14 @@ class PotionLab(gym.Env):
                         "size": swm.spaces.Box(
                             low=8.0,
                             high=50.0,
-                            init_value=36.0,
+                            init_value=32.0,
+                            shape=(),
+                            dtype=np.float32,
+                        ),
+                        "hitbox_size": swm.spaces.Box(
+                            low=8.0,
+                            high=50.0,
+                            init_value=20.0,
                             shape=(),
                             dtype=np.float32,
                         ),
@@ -175,7 +182,7 @@ class PotionLab(gym.Env):
                         "friction": swm.spaces.Box(
                             low=0.0,
                             high=1.0,
-                            init_value=0.3,
+                            init_value=0.2,
                             shape=(),
                             dtype=np.float32,
                         ),
@@ -216,21 +223,21 @@ class PotionLab(gym.Env):
                         "mass": swm.spaces.Box(
                             low=0.1,
                             high=2.0,
-                            init_value=0.5,
+                            init_value=1.0,
                             shape=(),
                             dtype=np.float32,
                         ),
                         "friction": swm.spaces.Box(
                             low=0.0,
                             high=1.0,
-                            init_value=0.5,
+                            init_value=1.0,
                             shape=(),
                             dtype=np.float32,
                         ),
                         "elasticity": swm.spaces.Box(
                             low=0.0,
                             high=1.0,
-                            init_value=0.0,
+                            init_value=1.0,
                             shape=(),
                             dtype=np.float32,
                         ),
@@ -445,7 +452,7 @@ class PotionLab(gym.Env):
                 "tools_config": swm.spaces.Dict(
                     {
                         "eject_offset_multiplier": swm.spaces.Box(
-                            low=0.0, high=4.0, init_value=3, shape=(), dtype=np.float32
+                            low=0.0, high=4.0, init_value=2, shape=(), dtype=np.float32
                         ),
                         "enchanter": swm.spaces.Dict(
                             {
@@ -544,7 +551,7 @@ class PotionLab(gym.Env):
                     {
                         "radius_scale": swm.spaces.Box(low=0.1, high=1.0, init_value=0.35, shape=(), dtype=np.float32),
                         "drag_coefficient": swm.spaces.Box(
-                            low=0.0, high=10.0, init_value=3.0, shape=(), dtype=np.float32
+                            low=0.0, high=10.0, init_value=5.0, shape=(), dtype=np.float32
                         ),
                     }
                 ),
@@ -816,7 +823,8 @@ class PotionLab(gym.Env):
             self.space,
             position=(float(start_pos[0]), float(start_pos[1])),
             tile_size=self.tile_size,
-            size=self.variation_space["player"]["size"].value,
+            render_size=self.variation_space["player"]["size"].value,
+            hitbox_size=self.variation_space["player"]["hitbox_size"].value,
             mass=self.variation_space["player"]["mass"].value,
             friction=self.variation_space["player"]["friction"].value,
             elasticity=self.variation_space["player"]["elasticity"].value,

@@ -2,7 +2,7 @@
   "rounds": [
     {
       "time_limit": 3600,
-      "background_color": [100, 70, 50],
+      "background_color": [232, 189, 137],
       "required_items": [
         {
           "base_essences": [1],
@@ -33,7 +33,6 @@
     },
     {
       "time_limit": 3600,
-      "background_color": [0, 100, 0],
       "required_items": [
         {
           "base_essences": [2],
@@ -82,7 +81,6 @@
     },
     {
       "time_limit": 3600,
-      "background_color": [100, 100, 0],
       "required_items": [
         {
           "base_essences": [3],
@@ -389,7 +387,6 @@
     },
     {
       "time_limit": 3600,
-      "background_color": [150, 50, 50],
       "required_items": [
         {
           "base_essences": [1],
@@ -558,7 +555,6 @@
     },
     {
       "time_limit": 3600,
-      "background_color": [100, 100, 100],
       "required_items": [
         {
           "base_essences": [1, 2],
@@ -685,7 +681,6 @@
     },
     {
       "time_limit": 3000,
-      "background_color": [50, 50, 150],
       "required_items": [
         {
           "base_essences": [1],

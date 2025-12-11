@@ -531,6 +531,48 @@ def _draw_dots_in_slice(
                     pygame.draw.circle(canvas, dot_color, (dot_x, dot_y), dot_radius)
 
 
+def _get_processing_progress(tool) -> float | None:
+    """
+    Compute normalized processing progress for single-input tools.
+
+    Returns:
+        Progress in [0, 1] when the tool is actively processing, otherwise None.
+    """
+    if not isinstance(tool, Enchanter | Refiner | Bottler):
+        return None
+
+    if getattr(tool, "state", None) != ToolState.PROCESSING:
+        return None
+
+    total_time = None
+    if isinstance(tool, Bottler):
+        total_time = getattr(tool, "bottling_time", None)
+    else:
+        total_time = getattr(tool, "processing_time", None)
+
+    if not total_time or total_time <= 0:
+        return None
+
+    remaining = max(0, getattr(tool, "timer", 0))
+    progress = 1.0 - min(remaining, total_time) / total_time
+    return max(0.0, min(1.0, progress))
+
+
+def _draw_processing_bar(canvas: pygame.Surface, tool, progress: float):
+    """Draw a small progress bar beneath a processing tool."""
+    bar_width = int(tool.size[0] * 0.8)
+    bar_height = 6
+    bar_x = int(tool.position[0] - bar_width / 2)
+    bar_y = int(tool.position[1] + tool.size[1] / 2 - 15)
+
+    pygame.draw.rect(canvas, (100, 100, 100), (bar_x, bar_y, bar_width, bar_height))
+
+    progress_width = int(bar_width * progress)
+    pygame.draw.rect(canvas, (100, 255, 100), (bar_x, bar_y, progress_width, bar_height))
+
+    pygame.draw.rect(canvas, (50, 50, 50), (bar_x, bar_y, bar_width, bar_height), 1)
+
+
 def draw_tool(
     canvas: pygame.Surface,
     tool,
@@ -567,10 +609,13 @@ def draw_tool(
 
         # Apply state-based color overlay
         if hasattr(tool, "state"):
-            if tool.state == ToolState.PROCESSING or tool.state == CauldronState.STIRRING:
-                # Create a tinted version for processing state
+            is_cauldron = isinstance(tool, Cauldron)
+            if (is_cauldron and tool.state in (ToolState.PROCESSING, CauldronState.STIRRING)) or (
+                not is_cauldron and tool.state == CauldronState.STIRRING
+            ):
+                # Only cauldron keeps the darker overlay while processing/stirring
                 overlay = pygame.Surface((scaled_width, scaled_height), pygame.SRCALPHA)
-                overlay.fill((40, 40, 40, 100))  # Semi-transparent white overlay
+                overlay.fill((40, 40, 40, 100))
                 scaled_image.blit(overlay, (0, 0))
             elif tool.state == ToolState.DONE or tool.state == CauldronState.DONE:
                 # Green tint for done state
@@ -608,6 +653,11 @@ def draw_tool(
         text = font.render(tool.get_display_name(), True, (255, 255, 255))
         text_rect = text.get_rect(center=(int(pos[0]), int(pos[1])))
         canvas.blit(text, text_rect)
+
+    # Draw progress bar for single-input tools while processing
+    progress = _get_processing_progress(tool)
+    if progress is not None:
+        _draw_processing_bar(canvas, tool, progress)
 
     # Special rendering for Cauldron - show essences in slots (drawn on top of the image)
     if isinstance(tool, Cauldron):
@@ -662,7 +712,9 @@ def _draw_cauldron_contents(canvas: pygame.Surface, cauldron, tile_size: float):
 def draw_player(canvas: pygame.Surface, player: Player):
     """Draw the player character using wizard asset."""
     pos = player.body.position
-    player_size = player.size  # This is the full size of the player's hitbox
+    # Separate render size from hitbox size (fallback to legacy attributes)
+    render_size = getattr(player, "render_size", getattr(player, "size", 20))
+    hitbox_size = getattr(player, "hitbox_size", getattr(player, "size", 20))
 
     # Load the wizard asset
     wizard_image = _load_asset("Player")
@@ -670,8 +722,8 @@ def draw_player(canvas: pygame.Surface, player: Player):
     if wizard_image is not None:
         # Scale the image to fit within the player's hitbox while maintaining aspect ratio
         img_width, img_height = wizard_image.get_size()
-        scale_x = player_size / img_width
-        scale_y = player_size / img_height
+        scale_x = render_size / img_width
+        scale_y = render_size / img_height
         scale = min(scale_x, scale_y)  # Maintain aspect ratio
 
         scaled_width = int(img_width * scale)
@@ -688,7 +740,7 @@ def draw_player(canvas: pygame.Surface, player: Player):
 
     else:
         # Fallback to original square drawing if asset not found
-        half_size = player_size / 2
+        half_size = render_size / 2
         vertices = [
             (int(pos.x - half_size), int(pos.y - half_size)),
             (int(pos.x + half_size), int(pos.y - half_size)),
@@ -704,7 +756,7 @@ def draw_player(canvas: pygame.Surface, player: Player):
     vel = player.body.velocity
     if vel.length > 0.1:
         screen_pos = (int(pos.x), int(pos.y))
-        direction = vel.normalized() * (player_size / 2) * 0.8
+        direction = vel.normalized() * (hitbox_size / 2) * 0.8
         end_pos = (int(pos.x + direction.x), int(pos.y + direction.y))
         # Draw semi-transparent white line (50% alpha) using aaline
         pygame.draw.aaline(canvas, (255, 255, 255, 128), screen_pos, end_pos, 3)

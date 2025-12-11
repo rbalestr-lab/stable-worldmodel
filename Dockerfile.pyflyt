@@ -1,0 +1,36 @@
+FROM python:3.11-slim
+
+# Install system dependencies
+RUN apt-get update && apt-get install -y \
+    build-essential \
+    cmake \
+    git \
+    swig \
+    libgl1 \
+    libglib2.0-0 \
+    libsm6 \
+    libxext6 \
+    libxrender1 \
+    && rm -rf /var/lib/apt/lists/*
+
+# Set working directory
+WORKDIR /workspace
+
+# Copy the entire stable_worldmodel package first
+COPY . /workspace/
+
+# Install stable-worldmodel with all dependencies (excluding torchcodec)
+RUN pip install --no-cache-dir -e ".[dev]" || \
+    (pip install --no-cache-dir gymnasium pygame opencv-python && \
+     pip install --no-cache-dir pytest pytest-xdist && \
+     pip install --no-cache-dir -e .)
+
+# Install PyFlyt and pybullet AFTER stable-worldmodel, with numpy downgrade
+# This ensures numpy stays at a compatible version
+RUN pip install --no-cache-dir "numpy<1.25" && \
+    pip install --no-cache-dir --no-deps pybullet PyFlyt
+
+# Set environment variable for headless rendering
+ENV DISPLAY=:99
+
+CMD ["/bin/bash"]

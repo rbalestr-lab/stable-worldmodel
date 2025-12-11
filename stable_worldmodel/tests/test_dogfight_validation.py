@@ -45,8 +45,6 @@ def test_dogfight_basic_functionality():
     # Test 6: Domain randomization
     world.reset(seed=789, options={'variation': ['all']})
 
-    print("✓ All PyFlyt Dogfight environment features working correctly")
-
 
 def test_dogfight_observation_structure():
     """Test that observations have the correct structure."""
@@ -75,8 +73,6 @@ def test_dogfight_observation_structure():
 
     # Check after step
     assert world.infos["pixels"].shape[:4] == (1, 1, 224, 224)
-
-    print("✓ PyFlyt Dogfight observations have correct structure")
 
 
 def test_dogfight_variation_space():
@@ -108,5 +104,3 @@ def test_dogfight_variation_space():
 
     # Check lighting variations
     assert "ambient_color" in var_space.spaces["lighting"].spaces
-
-    print("✓ PyFlyt Dogfight variation space properly defined")

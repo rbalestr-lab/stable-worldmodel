@@ -204,10 +204,11 @@ class PyFlytDogfightEnv(gym.Env):
                 pass
 
         # Create new PyFlyt environment
-        # Note: We use None for render_mode to avoid GUI issues in headless environments
-        # If rgb_array rendering is needed, we'll capture it via pybullet's getCameraImage
+        # Note: PyFlyt Dogfight only supports 'human' render mode which requires a display.
+        # In headless environments (Docker), we use None to avoid errors, though this means
+        # no visual rendering. The environment still works for state-based observations.
         self.pz_env = MAFixedwingDogfightEnvV2(
-            render_mode=None,  # Always use headless mode
+            render_mode=None,  # PyFlyt doesn't support headless rgb_array rendering
             team_size=self.team_size,
             max_duration_seconds=self.max_duration_seconds,
             damage_per_hit=self.damage_per_hit,

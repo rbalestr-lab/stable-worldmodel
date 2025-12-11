@@ -1,0 +1,28 @@
+defaults:
+  - _self_
+
+dataset_name: pusht_expert_train
+model_name: dinowm_pusht_fixed
+cache_dir: null
+
+device: cuda
+
+batch_size: 32
+num_workers: 16
+visual_split: 0.01 # fraction of data used for visualization
+seed: 42
+
+image_size: 224
+patch_size: 16
+
+n_steps: ${eval:'${dinowm.num_preds} + ${dinowm.history_size}'}
+frameskip: 5
+
+dinowm:
+  history_size: 3
+  num_preds: 1
+  proprio_dim: 4
+  action_dim: 2
+  encoding: # key: target dim
+    proprio: 10
+    action: 10

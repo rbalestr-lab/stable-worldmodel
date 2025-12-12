@@ -1,5 +1,6 @@
 import gymnasium as gym
 import hydra
+import matplotlib.pyplot as plt
 import numpy as np
 import torch
 from einops import rearrange
@@ -197,30 +198,34 @@ def get_state_from_grid(env, grid_element, dim: int | list = 0):
     return grid_state
 
 
-def get_state_grid(
-    env,
-    grid_size: int = 10,
-):
-    # compute dims on which we do the grid for pusht, min/max and reference position
-    # ideally, dim should contain 2 indices or less for visualization purposes
-    print("env type:", type(env))
+def get_state_grid(env, grid_size: int = 10):
+    logging.info(f"Generating state grid for env type: {type(env)}")
+
     if isinstance(env, PushT):
-        dim = [0, 1]
-        min_val = [env.variation_space["agent"]["start_position"].low[x] for x in dim]
-        max_val = [env.variation_space["agent"]["start_position"].high[x] for x in dim]
+        dim = [0, 1]  # Agent X, Y
+        # Extract low/high limits for the specified dims
+        min_val = [env.variation_space["agent"]["start_position"].low[d] for d in dim]
+        max_val = [env.variation_space["agent"]["start_position"].high[d] for d in dim]
     elif isinstance(env, TwoRoomEnv):
-        # TODO
-        dim = 0
-        min_val = 0.0
-        max_val = 1.0
-    # for each dimension in dim, create a linspace from min to max with grid_size points
-    linspaces = []
-    for d in dim:
-        linspaces.append(np.linspace(min_val, max_val, grid_size))
-    grid = np.array(np.meshgrid(*linspaces)).T.reshape(-1, len(dim))
-    print("grid shape:", grid.shape)
+        dim = [0, 1]  # Assuming 2D room coords
+        min_val = [0.0, 0.0]
+        max_val = [1.0, 1.0]  # Adjust based on actual env limits
+    else:
+        # Fallback default
+        dim = [0, 1]
+        min_val, max_val = [0.0, 0.0], [1.0, 1.0]
+
+    # Create linear spaces for each dimension
+    linspaces = [np.linspace(mn, mx, grid_size) for mn, mx in zip(min_val, max_val)]
+
+    # Create the meshgrid and reshape to (N, 2)
+    # Using indexing='ij' ensures x varies with axis 0, y with axis 1
+    mesh = np.meshgrid(*linspaces, indexing="ij")
+    grid = np.stack(mesh, axis=-1).reshape(-1, len(dim))
+
+    # Convert grid points to full state vectors
     state_grid = [get_state_from_grid(env, x, dim) for x in grid]
-    print("state_grid shape:", np.array(state_grid).shape)
+
     return grid, state_grid
 
 
@@ -243,6 +248,49 @@ def collect_embeddings(world_model, env, process, transform, cfg):
 
 
 # ===========================================================================
+# Plotting utilities
+# ===========================================================================
+
+
+def plot_representations(grid, embeddings_2d, save_path="latent_vis.png"):
+    """
+    Plots the ground truth grid and the learned latent embeddings side-by-side.
+    Colors are generated based on the grid position to visualize topology.
+    """
+    # 1. Create colors based on grid position (Normalized x, y -> R, G, 0)
+    # Normalize grid to [0, 1] for coloring
+    grid_norm = (grid - grid.min(axis=0)) / (grid.max(axis=0) - grid.min(axis=0) + 1e-6)
+
+    # Create an RGBA array: Red=X, Green=Y, Blue=0.5, Alpha=1.0
+    colors = np.zeros((len(grid), 4))
+    colors[:, 0] = grid_norm[:, 0]  # Red varies with dimension 0
+    colors[:, 1] = grid_norm[:, 1]  # Green varies with dimension 1
+    colors[:, 2] = 0.5  # Constant Blue
+    colors[:, 3] = 1.0  # Alpha
+
+    fig, axes = plt.subplots(1, 2, figsize=(14, 6))
+
+    # Plot 1: Ground Truth Grid (Physical State)
+    axes[0].scatter(grid[:, 0], grid[:, 1], c=colors, s=50, edgecolor="k", alpha=0.8)
+    axes[0].set_title("Physical State Grid (Ground Truth)")
+    axes[0].set_xlabel("State Dim 0 (e.g., Agent X)")
+    axes[0].set_ylabel("State Dim 1 (e.g., Agent Y)")
+    axes[0].grid(True, linestyle="--", alpha=0.3)
+
+    # Plot 2: Latent Space (t-SNE)
+    axes[1].scatter(embeddings_2d[:, 0], embeddings_2d[:, 1], c=colors, s=50, edgecolor="k", alpha=0.8)
+    axes[1].set_title("Latent Space (t-SNE Projection)")
+    axes[1].set_xlabel("t-SNE Dim 1")
+    axes[1].set_ylabel("t-SNE Dim 2")
+    axes[1].grid(True, linestyle="--", alpha=0.3)
+
+    plt.tight_layout()
+    plt.savefig(save_path, dpi=300)
+    logging.info(f"Visualization saved to {save_path}")
+    plt.show()
+
+
+# ===========================================================================
 # Main function
 # ===========================================================================
 
@@ -250,27 +298,39 @@ def collect_embeddings(world_model, env, process, transform, cfg):
 @hydra.main(version_base=None, config_path="./", config_name="config")
 def run(cfg):
     """Run visualization script."""
-
     cache_dir = swm.data.utils.get_cache_dir()
     cfg.cache_dir = cache_dir
 
     env, process, transform = get_env(cfg)
     world_model = get_world_model(cfg)
 
-    # go through the dataset and encode all frames
-    # embeddings will be stored in a list
     logging.info("Computing embeddings from environment...")
     grid, embeddings = collect_embeddings(world_model, env, process, transform, cfg)
-    # TODO should also return the corresponding states for coloring
 
-    # now we compute t-SNE on the embeddings
-    logging.info("Computing t-SNE...")
+    # Convert list of tensors to a single numpy array
+    # Shape: (N_samples, Embedding_Dim)
     embeddings = torch.cat(embeddings, dim=0).numpy()
-    # flatten the embeddings
-    # TODO make sure we dont have action embedding here
+
+    # Flatten if embeddings are spatial (e.g. from patch tokens)
+    # If using CLS token, this does nothing.
     embeddings = rearrange(embeddings, "b ... -> b (...)")
-    tsne = TSNE(n_components=2, random_state=cfg.seed)
+
+    logging.info(f"Collected {len(embeddings)} samples. Shape: {embeddings.shape}")
+
+    # Compute t-SNE
+    logging.info("Computing t-SNE...")
+    n_samples = embeddings.shape[0]
+
+    # Perplexity must be < n_samples. Default is 30, which breaks for small grids (e.g. 5x5).
+    perplexity = min(30, n_samples - 1) if n_samples > 1 else 1
+
+    tsne = TSNE(n_components=2, perplexity=perplexity, random_state=cfg.get("seed", 42))
     embeddings_2d = tsne.fit_transform(embeddings)
+
+    # Visualization
+    logging.info("Generating plots...")
+    plot_representations(grid, embeddings_2d, save_path="latent_space_vis.png")
+
     return embeddings_2d
 
 

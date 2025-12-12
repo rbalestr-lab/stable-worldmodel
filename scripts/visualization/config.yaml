@@ -1,16 +1,20 @@
 defaults:
   - _self_
 
-dataset_name: pusht_expert_train
 model_name: dinowm_pusht_fixed
 cache_dir: null
 
 device: cuda
-
-batch_size: 32
-num_workers: 16
-visual_split: 0.01 # fraction of data used for visualization
 seed: 42
+
+env:
+  env_name: pusht
+
+dataset:
+  dataset_name: pusht_expert_train
+  batch_size: 32
+  num_workers: 16
+  visual_split: 0.01 # fraction of data used for visualization
 
 image_size: 224
 patch_size: 16

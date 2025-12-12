@@ -8,7 +8,9 @@ device: cuda
 seed: 42
 
 env:
-  env_name: pusht
+  env_name: swm/PushT-v1
+  history_size: 1
+  frame_skip: 1
 
 dataset:
   dataset_name: pusht_expert_train

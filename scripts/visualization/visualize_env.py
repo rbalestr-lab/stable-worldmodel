@@ -52,7 +52,7 @@ def get_envs(cfg):
             )
         ]
         + ([]),
-        max_episode_steps=cfg.env.max_episode_steps,
+        max_episode_steps=50,
         render_mode="rgb_array",
     )
 

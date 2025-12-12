@@ -197,7 +197,7 @@ def get_state_grid(env, grid_size: int = 10, dim: int | list = 0):
     return state_grid
 
 
-def collect_embeddings(model, env, process, transform, world_model, cfg):
+def collect_embeddings(world_model, env, process, transform, cfg):
     """Go through the environment and collect embeddings using the world model."""
 
     state_grid = get_state_grid(env.unwrapped.env[0], cfg.env.grid_size)

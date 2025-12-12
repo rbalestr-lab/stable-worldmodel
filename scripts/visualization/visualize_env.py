@@ -10,6 +10,8 @@ from torchvision.transforms import v2 as transforms
 from tqdm import tqdm
 
 import stable_worldmodel as swm
+from stable_worldmodel.envs.pusht.env import PushT
+from stable_worldmodel.envs.two_room.env import TwoRoomEnv
 from stable_worldmodel.wrappers import MegaWrapper, VariationWrapper
 
 
@@ -84,7 +86,7 @@ def get_env(cfg):
         "goal_proprio": proprio_process,
     }
 
-    return env, transform, process
+    return env, process, transform
 
 
 def prepare_info(info_dict, process, transform):
@@ -177,29 +179,55 @@ def get_world_model(cfg):
 # ============================================================================
 
 
-def get_state_from_grid(env, grid_element):
-    grid_state = np.zeros(env.state_dim, dtype=np.float32)
-    # fill in the relevant dimensions from grid_element
+def get_state_from_grid(env, grid_element, dim: int | list = 0):
+    # computing the full state from a grid element
+    if isinstance(dim, int):
+        dim = [dim]
+    if isinstance(env, PushT):
+        grid_state = np.concatenate(
+            [
+                env.variation_space["agent"]["start_position"].value.tolist(),
+                env.variation_space["block"]["start_position"].value.tolist(),
+                [env.variation_space["block"]["angle"].value],
+                env.variation_space["agent"]["velocity"].value.tolist(),
+            ]
+        )
+    for i, d in enumerate(dim):
+        grid_state[d] = grid_element[i]
     return grid_state
 
 
-def get_state_grid(env, grid_size: int = 10, dim: int | list = 0):
+def get_state_grid(
+    env,
+    grid_size: int = 10,
+):
+    # compute dims on which we do the grid for pusht, min/max and reference position
+    # ideally, dim should contain 2 indices or less for visualization purposes
+    print("env type:", type(env))
+    if isinstance(env, PushT):
+        dim = [0, 1]
+        min_val = [env.variation_space["agent"]["start_position"].low[x] for x in dim]
+        max_val = [env.variation_space["agent"]["start_position"].high[x] for x in dim]
+    elif isinstance(env, TwoRoomEnv):
+        # TODO
+        dim = 0
+        min_val = 0.0
+        max_val = 1.0
     # for each dimension in dim, create a linspace from min to max with grid_size points
-    if isinstance(dim, int):
-        dim = [dim]
     linspaces = []
     for d in dim:
-        min_val, max_val = env.state_bounds[d]
         linspaces.append(np.linspace(min_val, max_val, grid_size))
     grid = np.array(np.meshgrid(*linspaces)).T.reshape(-1, len(dim))
-    state_grid = [get_state_from_grid(env, x) for x in grid]
-    return state_grid
+    print("grid shape:", grid.shape)
+    state_grid = [get_state_from_grid(env, x, dim) for x in grid]
+    print("state_grid shape:", np.array(state_grid).shape)
+    return grid, state_grid
 
 
 def collect_embeddings(world_model, env, process, transform, cfg):
     """Go through the environment and collect embeddings using the world model."""
 
-    state_grid = get_state_grid(env.unwrapped.envs[0], cfg.env.grid_size)
+    grid, state_grid = get_state_grid(env.unwrapped.envs[0].unwrapped, cfg.env.grid_size)
     embeddings = []
     for state in tqdm(state_grid, desc="Collecting embeddings"):
         options = {"state": state}
@@ -211,7 +239,7 @@ def collect_embeddings(world_model, env, process, transform, cfg):
         infos = world_model.encode(infos, target="embed")
         embeddings.append(infos["embed"].cpu().detach())
 
-    return embeddings
+    return grid, embeddings
 
 
 # ===========================================================================
@@ -232,7 +260,7 @@ def run(cfg):
     # go through the dataset and encode all frames
     # embeddings will be stored in a list
     logging.info("Computing embeddings from environment...")
-    embeddings = collect_embeddings(world_model, env, process, transform, cfg)
+    grid, embeddings = collect_embeddings(world_model, env, process, transform, cfg)
     # TODO should also return the corresponding states for coloring
 
     # now we compute t-SNE on the embeddings

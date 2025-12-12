@@ -35,7 +35,7 @@ def get_data(cfg):
         return lambda x: (x - mean) / std
 
     dataset = swm.data.FrameDataset(
-        cfg.dataset_name,
+        cfg.dataset.dataset_name,
         num_steps=cfg.n_steps,
         frameskip=cfg.frameskip,
         transform=None,
@@ -59,13 +59,15 @@ def get_data(cfg):
 
     dataset.transform = transform
     rnd_gen = torch.Generator().manual_seed(cfg.seed)
-    visual_set, _ = spt.data.random_split(dataset, lengths=[cfg.visual_split, 1 - cfg.visual_split], generator=rnd_gen)
+    visual_set, _ = spt.data.random_split(
+        dataset, lengths=[cfg.dataset.visual_split, 1 - cfg.dataset.visual_split], generator=rnd_gen
+    )
     logging.info(f"Visual: {len(visual_set)}")
 
     visual = DataLoader(
         visual_set,
-        batch_size=cfg.batch_size,
-        num_workers=cfg.num_workers,
+        batch_size=cfg.dataset.batch_size,
+        num_workers=cfg.dataset.num_workers,
         drop_last=True,
         persistent_workers=True,
         pin_memory=True,

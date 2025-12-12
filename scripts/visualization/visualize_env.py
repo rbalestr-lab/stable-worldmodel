@@ -33,10 +33,10 @@ def img_transform():
     return transform
 
 
-def get_envs(cfg):
+def get_env(cfg):
     """Setup dataset with image transforms and normalization."""
 
-    envs = gym.make_vec(
+    env = gym.make_vec(
         cfg.env.env_name,
         num_envs=1,
         vectorization_mode="sync",
@@ -56,8 +56,8 @@ def get_envs(cfg):
         render_mode="rgb_array",
     )
 
-    envs = VariationWrapper(envs)
-    envs.unwrapped.autoreset_mode = gym.vector.AutoresetMode.DISABLED
+    env = VariationWrapper(env)
+    env.unwrapped.autoreset_mode = gym.vector.AutoresetMode.DISABLED
 
     # create the transform
     transform = {
@@ -85,7 +85,7 @@ def get_envs(cfg):
         "goal_proprio": proprio_process,
     }
 
-    return envs, transform, process
+    return env, transform, process
 
 
 def prepare_info(info_dict, process, transform):
@@ -197,19 +197,20 @@ def get_state_grid(env, grid_size: int = 10, dim: int | list = 0):
     return state_grid
 
 
-def collect_embeddings(envs, process, transform, world_model, cfg):
+def collect_embeddings(model, env, process, transform, world_model, cfg):
     """Go through the environment and collect embeddings using the world model."""
 
+    state_grid = get_state_grid(env.unwrapped.env[0], cfg.env.grid_size)
     embeddings = []
-    states, infos = envs.reset(seed=seed, options=options)
-
-    state_grid = get_state_grid(envs.unwrapped.envs[0], cfg.env.grid_size)
-
-    env = envs.unwrapped.envs[0]
     for state in tqdm(state_grid, desc="Collecting embeddings"):
-        env._set_state(state)
-        infos["pixels"] = env.render()
-        prepare_info(infos, process, transform)
+        options = {"state": state}
+        _, infos = env.reset(options=options)
+        infos = prepare_info(infos, process, transform)
+        for key in infos:
+            if isinstance(infos[key], torch.Tensor):
+                infos[key] = infos[key].to(cfg.get("device", "cpu"))
+        infos = world_model.encode(infos, target="embed")
+        embeddings.append(infos["embed"].cpu().detach())
 
     return embeddings
 
@@ -226,13 +227,13 @@ def run(cfg):
     cache_dir = swm.data.utils.get_cache_dir()
     cfg.cache_dir = cache_dir
 
-    envs, process, transform = get_envs(cfg)
+    env, process, transform = get_env(cfg)
     world_model = get_world_model(cfg)
 
     # go through the dataset and encode all frames
     # embeddings will be stored in a list
     logging.info("Computing embeddings from environment...")
-    embeddings = collect_embeddings(envs, process, transform, world_model, cfg)
+    embeddings = collect_embeddings(env, process, transform, world_model, cfg)
     # TODO should also return the corresponding states for coloring
 
     # now we compute t-SNE on the embeddings
@@ -243,6 +244,7 @@ def run(cfg):
     embeddings = rearrange(embeddings, "b ... -> b (...)")
     tsne = TSNE(n_components=2, random_state=cfg.seed)
     embeddings_2d = tsne.fit_transform(embeddings)
+    return embeddings_2d
 
 
 if __name__ == "__main__":

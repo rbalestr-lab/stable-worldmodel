@@ -11,6 +11,7 @@ env:
   env_name: swm/PushT-v1
   history_size: 1
   frame_skip: 1
+  grid_size: 10  # number of states per dimension for visualization
 
 dataset:
   dataset_name: pusht_expert_train

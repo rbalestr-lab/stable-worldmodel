@@ -10,7 +10,7 @@ from torchvision.transforms import v2 as transforms
 from tqdm import tqdm
 
 import stable_worldmodel as swm
-from stable_worldmodel.envs.wrappers import MegaWrapper, VariationWrapper
+from stable_worldmodel.wrappers import MegaWrapper, VariationWrapper
 
 
 DINO_PATCH_SIZE = 14  # DINO encoder uses 14x14 patches
@@ -44,8 +44,7 @@ def get_env(cfg):
             lambda x: MegaWrapper(
                 x,
                 image_shape=(cfg.image_size, cfg.image_size),
-                image_transform=None,
-                goal_shape=None,
+                pixels_transform=None,
                 goal_transform=None,
                 history_size=cfg.env.history_size,
                 frame_skip=cfg.env.frame_skip,

@@ -199,7 +199,7 @@ def get_state_grid(env, grid_size: int = 10, dim: int | list = 0):
 def collect_embeddings(world_model, env, process, transform, cfg):
     """Go through the environment and collect embeddings using the world model."""
 
-    state_grid = get_state_grid(env.unwrapped.env[0], cfg.env.grid_size)
+    state_grid = get_state_grid(env.unwrapped.envs[0], cfg.env.grid_size)
     embeddings = []
     for state in tqdm(state_grid, desc="Collecting embeddings"):
         options = {"state": state}
@@ -232,7 +232,7 @@ def run(cfg):
     # go through the dataset and encode all frames
     # embeddings will be stored in a list
     logging.info("Computing embeddings from environment...")
-    embeddings = collect_embeddings(env, process, transform, world_model, cfg)
+    embeddings = collect_embeddings(world_model, env, process, transform, cfg)
     # TODO should also return the corresponding states for coloring
 
     # now we compute t-SNE on the embeddings

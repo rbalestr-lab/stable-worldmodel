@@ -126,9 +126,6 @@ def get_world_model(cfg):
 def run(cfg):
     """Run visualization script."""
 
-    cache_dir = swm.data.utils.get_cache_dir()
-    cfg.cache_dir = cache_dir
-
     data = get_data(cfg)
     world_model = get_world_model(cfg)
 
@@ -152,6 +149,7 @@ def run(cfg):
     embeddings = rearrange(embeddings, "b ... -> b (...)")
     tsne = TSNE(n_components=2, random_state=cfg.seed)
     embeddings_2d = tsne.fit_transform(embeddings)
+    return embeddings_2d
 
 
 if __name__ == "__main__":

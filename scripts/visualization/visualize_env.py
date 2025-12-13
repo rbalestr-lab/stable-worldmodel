@@ -247,17 +247,104 @@ def collect_embeddings(world_model, env, process, transform, cfg):
     return grid, embeddings
 
 
-# ===========================================================================
-# Plotting utilities
-# ===========================================================================
+# ============================================================================
+# Dimensionality Reduction
+# ============================================================================
 
 
-def plot_representations(grid, embeddings_2d, save_path="latent_vis.png"):
+def compute_tsne(embeddings, cfg):
     """
-    Plots the ground truth grid and the learned latent embeddings side-by-side.
+    Computes t-SNE projection on the collected embeddings.
+    """
+    logging.info("Computing t-SNE...")
+    # Flatten if embeddings are spatial (e.g. from patch tokens)
+    # Shape: (N_samples, Embedding_Dim)
+    embeddings = rearrange(embeddings, "b ... -> b (...)")
+
+    n_samples = embeddings.shape[0]
+
+    # Perplexity must be < n_samples. Default is 30, which breaks for small grids.
+    perplexity = min(30, n_samples - 1) if n_samples > 1 else 1
+
+    # Initialize and fit t-SNE
+    tsne = TSNE(n_components=2, perplexity=perplexity, random_state=cfg.get("seed", 42))
+    embeddings_2d = tsne.fit_transform(embeddings)
+
+    return embeddings_2d
+
+
+# ============================================================================
+# Visualization
+# ============================================================================
+
+
+def plot_distance_maps(grid, embeddings, grid_size, save_path="distance_maps.png"):
+    """
+    Plots heat maps showing the Euclidean distance in latent space from specific
+    reference positions to all other points.
+
+    Args:
+        grid: (N*N, 2) array of physical state coordinates.
+        embeddings: (N*N, D) array of high-dim embeddings.
+        grid_size: int, the side length of the grid (N).
+    """
+    # Reshape data back to 2D grid format for continuous plotting
+    # Note: We assume the grid was flattened in 'C' order (row-major).
+    X = grid[:, 0].reshape(grid_size, grid_size)
+    Y = grid[:, 1].reshape(grid_size, grid_size)
+
+    # Reshape embeddings to (Height, Width, Features)
+    emb_reshaped = embeddings.reshape(grid_size, grid_size, -1)
+
+    # Define Reference Indices (in the grid coordinates)
+    # We pick 4 points: Top-Left, Top-Right, Center, Bottom-Right
+    ref_indices = [
+        (0, 0),  # Top-Left (or bottom-left depending on axis)
+        (0, grid_size - 1),  # Top-Right
+        (grid_size // 2, grid_size // 2),  # Center
+        (grid_size - 1, grid_size // 2),  # Bottom-Center
+    ]
+
+    fig, axes = plt.subplots(1, 4, figsize=(20, 5))
+
+    for i, (r_idx, c_idx) in enumerate(ref_indices):
+        ax = axes[i]
+
+        # Get the reference embedding vector
+        ref_emb = emb_reshaped[r_idx, c_idx]
+
+        # Compute Euclidean distance from reference to ALL points
+        # dists shape: (grid_size, grid_size)
+        dists = np.linalg.norm(emb_reshaped - ref_emb, axis=-1)
+
+        # Plot Heatmap
+        # contourf creates filled contours for a smooth look
+        contour = ax.contourf(X, Y, dists, levels=50, cmap="viridis")
+
+        # Mark the reference position
+        ref_x = X[r_idx, c_idx]
+        ref_y = Y[r_idx, c_idx]
+        ax.scatter(ref_x, ref_y, c="red", marker="X", s=100, edgecolors="white", label="Reference")
+
+        ax.set_title(f"Ref: ({ref_x:.2f}, {ref_y:.2f})")
+        ax.axis("off")  # Clean look
+
+    # Add a colorbar to the last plot to indicate scale
+    cbar = fig.colorbar(contour, ax=axes.ravel().tolist(), orientation="vertical", fraction=0.02, pad=0.04)
+    cbar.set_label("Latent Distance (L2)")
+
+    plt.suptitle("Latent Space Distance Fields (Lighter = Further away)", fontsize=16)
+    plt.savefig(save_path, dpi=300)
+    logging.info(f"Distance maps saved to {save_path}")
+    plt.show()
+
+
+def plot_representations(grid, representations_2d, title_suffix="Latent Space", save_path="latent_vis.png"):
+    """
+    Plots the ground truth grid and the 2D representations side-by-side.
     Colors are generated based on the grid position to visualize topology.
     """
-    # 1. Create colors based on grid position (Normalized x, y -> R, G, 0)
+    # Create colors based on grid position (Normalized x, y -> R, G, 0)
     # Normalize grid to [0, 1] for coloring
     grid_norm = (grid - grid.min(axis=0)) / (grid.max(axis=0) - grid.min(axis=0) + 1e-6)
 
@@ -273,15 +360,15 @@ def plot_representations(grid, embeddings_2d, save_path="latent_vis.png"):
     # Plot 1: Ground Truth Grid (Physical State)
     axes[0].scatter(grid[:, 0], grid[:, 1], c=colors, s=50, edgecolor="k", alpha=0.8)
     axes[0].set_title("Physical State Grid (Ground Truth)")
-    axes[0].set_xlabel("State Dim 0 (e.g., Agent X)")
-    axes[0].set_ylabel("State Dim 1 (e.g., Agent Y)")
+    axes[0].set_xlabel("State Dim 0")
+    axes[0].set_ylabel("State Dim 1")
     axes[0].grid(True, linestyle="--", alpha=0.3)
 
-    # Plot 2: Latent Space (t-SNE)
-    axes[1].scatter(embeddings_2d[:, 0], embeddings_2d[:, 1], c=colors, s=50, edgecolor="k", alpha=0.8)
-    axes[1].set_title("Latent Space (t-SNE Projection)")
-    axes[1].set_xlabel("t-SNE Dim 1")
-    axes[1].set_ylabel("t-SNE Dim 2")
+    # Plot 2: 2D Representation
+    axes[1].scatter(representations_2d[:, 0], representations_2d[:, 1], c=colors, s=50, edgecolor="k", alpha=0.8)
+    axes[1].set_title(f"2D Projection ({title_suffix})")
+    axes[1].set_xlabel("Projected Dim 1")
+    axes[1].set_ylabel("Projected Dim 2")
     axes[1].grid(True, linestyle="--", alpha=0.3)
 
     plt.tight_layout()
@@ -305,33 +392,29 @@ def run(cfg):
     world_model = get_world_model(cfg)
 
     logging.info("Computing embeddings from environment...")
-    grid, embeddings = collect_embeddings(world_model, env, process, transform, cfg)
+    grid, embeddings_list = collect_embeddings(world_model, env, process, transform, cfg)
 
     # Convert list of tensors to a single numpy array
     # Shape: (N_samples, Embedding_Dim)
-    embeddings = torch.cat(embeddings, dim=0).numpy()
+    embeddings = torch.cat(embeddings_list, dim=0).numpy()
 
-    # Flatten if embeddings are spatial (e.g. from patch tokens)
-    # If using CLS token, this does nothing.
+    # Flatten if embeddings are spatial (e.g. patch tokens -> flat vector)
     embeddings = rearrange(embeddings, "b ... -> b (...)")
 
     logging.info(f"Collected {len(embeddings)} samples. Shape: {embeddings.shape}")
 
-    # Compute t-SNE
-    logging.info("Computing t-SNE...")
-    n_samples = embeddings.shape[0]
+    # --- Visualization 1: t-SNE Topology ---
+    representations_2d = compute_tsne(embeddings, cfg)
+    plot_representations(
+        grid, representations_2d, title_suffix="t-SNE Projection", save_path="latent_space_tsne_vis.png"
+    )
 
-    # Perplexity must be < n_samples. Default is 30, which breaks for small grids (e.g. 5x5).
-    perplexity = min(30, n_samples - 1) if n_samples > 1 else 1
+    # --- Visualization 2: Distance Fields ---
+    # We use cfg.env.grid_size to reconstruct the 2D shape
+    logging.info("Generating distance maps...")
+    plot_distance_maps(grid, embeddings, grid_size=cfg.env.grid_size, save_path="latent_distance_maps.png")
 
-    tsne = TSNE(n_components=2, perplexity=perplexity, random_state=cfg.get("seed", 42))
-    embeddings_2d = tsne.fit_transform(embeddings)
-
-    # Visualization
-    logging.info("Generating plots...")
-    plot_representations(grid, embeddings_2d, save_path="latent_space_vis.png")
-
-    return embeddings_2d
+    return representations_2d
 
 
 if __name__ == "__main__":

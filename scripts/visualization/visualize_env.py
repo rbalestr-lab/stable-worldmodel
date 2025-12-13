@@ -234,6 +234,7 @@ def collect_embeddings(world_model, env, process, transform, cfg):
 
     grid, state_grid = get_state_grid(env.unwrapped.envs[0].unwrapped, cfg.env.grid_size)
     embeddings = []
+    pixels = []
     for state in tqdm(state_grid, desc="Collecting embeddings"):
         options = {"state": state}
         _, infos = env.reset(options=options)
@@ -243,8 +244,9 @@ def collect_embeddings(world_model, env, process, transform, cfg):
                 infos[key] = infos[key].to(cfg.get("device", "cpu"))
         infos = world_model.encode(infos, target="embed")
         embeddings.append(infos["embed"].cpu().detach())
+        pixels.append(infos["pixels"][0].cpu().detach())
 
-    return grid, embeddings
+    return grid, embeddings, pixels
 
 
 # ============================================================================
@@ -278,62 +280,67 @@ def compute_tsne(embeddings, cfg):
 # ============================================================================
 
 
-def plot_distance_maps(grid, embeddings, grid_size, save_path="distance_maps.png"):
+def plot_distance_maps(grid, embeddings, pixels, save_path="distance_maps.png"):
     """
-    Plots heat maps showing the Euclidean distance in latent space from specific
-    reference positions to all other points.
+    Plots pairs of (Reference Image, Distance Heatmap).
 
     Args:
-        grid: (N*N, 2) array of physical state coordinates.
-        embeddings: (N*N, D) array of high-dim embeddings.
-        grid_size: int, the side length of the grid (N).
+        grid: (H, W, 2) array of physical state coordinates.
+        embeddings: (H, W, D) array of high-dim embeddings.
+        pixels: (H, W, C, H_img, W_img) or (H, W, H_img, W_img, C) array of images.
+                Assumes pixel values are float [0,1] or [-1,1], or uint8 [0,255].
     """
-    # Reshape data back to 2D grid format for continuous plotting
-    # Note: We assume the grid was flattened in 'C' order (row-major).
-    X = grid[:, 0].reshape(grid_size, grid_size)
-    Y = grid[:, 1].reshape(grid_size, grid_size)
+    # Derive dimensions
+    height, width = grid.shape[0], grid.shape[1]
+    X = grid[:, :, 0]
+    Y = grid[:, :, 1]
 
-    # Reshape embeddings to (Height, Width, Features)
-    emb_reshaped = embeddings.reshape(grid_size, grid_size, -1)
+    # Define Reference Indices (Top-Left, Top-Right, Center, Bottom-Center)
+    ref_indices = [(0, 0), (0, width - 1), (height // 2, width // 2), (height - 1, width // 2)]
 
-    # Define Reference Indices (in the grid coordinates)
-    # We pick 4 points: Top-Left, Top-Right, Center, Bottom-Right
-    ref_indices = [
-        (0, 0),  # Top-Left (or bottom-left depending on axis)
-        (0, grid_size - 1),  # Top-Right
-        (grid_size // 2, grid_size // 2),  # Center
-        (grid_size - 1, grid_size // 2),  # Bottom-Center
-    ]
-
-    fig, axes = plt.subplots(1, 4, figsize=(20, 5))
+    # Create subplots: 4 rows (one per reference), 2 columns (Image, Heatmap)
+    # You can also do 1 row with 8 cols, but 4x2 is usually clearer for pairs.
+    fig, axes = plt.subplots(len(ref_indices), 2, figsize=(10, 4 * len(ref_indices)))
 
     for i, (r_idx, c_idx) in enumerate(ref_indices):
-        ax = axes[i]
+        ax_img = axes[i, 0]
+        ax_map = axes[i, 1]
 
-        # Get the reference embedding vector
-        ref_emb = emb_reshaped[r_idx, c_idx]
+        # --- A. Plot Reference Image ---
+        ref_img = pixels[r_idx, c_idx]
 
-        # Compute Euclidean distance from reference to ALL points
-        # dists shape: (grid_size, grid_size)
-        dists = np.linalg.norm(emb_reshaped - ref_emb, axis=-1)
+        # Handle format: Un-normalize if necessary (assuming [-1, 1] from your transform)
+        if ref_img.min() < 0:
+            ref_img = (ref_img * 0.5) + 0.5
 
-        # Plot Heatmap
-        # contourf creates filled contours for a smooth look
-        contour = ax.contourf(X, Y, dists, levels=50, cmap="viridis")
+        # Handle format: Channels First (C, H, W) -> Channels Last (H, W, C) for Matplotlib
+        if ref_img.shape[0] in [1, 3]:
+            ref_img = np.moveaxis(ref_img, 0, -1)
 
-        # Mark the reference position
+        ax_img.imshow(ref_img.clip(0, 1))
+        ax_img.set_title("Reference Observation")
+        ax_img.axis("off")
+
+        # --- B. Plot Distance Heatmap ---
+        ref_emb = embeddings[r_idx, c_idx]
+        dists = np.linalg.norm(embeddings - ref_emb, axis=-1)
+
+        contour = ax_map.contourf(X, Y, dists, levels=50, cmap="viridis")
+
+        # Mark reference on the map too
         ref_x = X[r_idx, c_idx]
         ref_y = Y[r_idx, c_idx]
-        ax.scatter(ref_x, ref_y, c="red", marker="X", s=100, edgecolors="white", label="Reference")
+        ax_map.scatter(ref_x, ref_y, c="red", marker="X", s=100, edgecolors="white")
 
-        ax.set_title(f"Ref: ({ref_x:.2f}, {ref_y:.2f})")
-        ax.axis("off")  # Clean look
+        ax_map.set_title(f"Distance from ({ref_x:.2f}, {ref_y:.2f})")
+        ax_map.axis("off")
 
-    # Add a colorbar to the last plot to indicate scale
-    cbar = fig.colorbar(contour, ax=axes.ravel().tolist(), orientation="vertical", fraction=0.02, pad=0.04)
-    cbar.set_label("Latent Distance (L2)")
+        # Add colorbar for this row
+        cbar = fig.colorbar(contour, ax=ax_map, fraction=0.046, pad=0.04)
+        cbar.set_label("L2 Distance")
 
-    plt.suptitle("Latent Space Distance Fields (Lighter = Further away)", fontsize=16)
+    plt.suptitle("Latent Distances vs. Visual Input", fontsize=16)
+    plt.tight_layout(rect=[0, 0.03, 1, 0.95])  # Make room for suptitle
     plt.savefig(save_path, dpi=300)
     logging.info(f"Distance maps saved to {save_path}")
     plt.show()
@@ -392,29 +399,42 @@ def run(cfg):
     world_model = get_world_model(cfg)
 
     logging.info("Computing embeddings from environment...")
-    grid, embeddings_list = collect_embeddings(world_model, env, process, transform, cfg)
+    # grid: (N*N, 2)
+    # embeddings_list: List of (1, D)
+    # pixels_list: List of (1, C, H, W) or similar
+    grid, embeddings_list, pixels_list = collect_embeddings(world_model, env, process, transform, cfg)
+    print(f"pixels_list[0] shape: {pixels_list[0].shape}")
+    input("Check pixel shape. Press Enter to continue...")
 
-    # Convert list of tensors to a single numpy array
-    # Shape: (N_samples, Embedding_Dim)
+    # Convert lists to numpy
     embeddings = torch.cat(embeddings_list, dim=0).numpy()
-
-    # Flatten if embeddings are spatial (e.g. patch tokens -> flat vector)
     embeddings = rearrange(embeddings, "b ... -> b (...)")
+
+    # Process pixels: Stack -> Numpy
+    # Assuming pixels are Tensors (B, C, H, W), we stack them into (N*N, C, H, W)
+    pixels = torch.cat(pixels_list, dim=0).cpu().numpy()
 
     logging.info(f"Collected {len(embeddings)} samples. Shape: {embeddings.shape}")
 
-    # --- Visualization 1: t-SNE Topology ---
+    # --- Visualization 1: t-SNE ---
     representations_2d = compute_tsne(embeddings, cfg)
     plot_representations(
         grid, representations_2d, title_suffix="t-SNE Projection", save_path="latent_space_tsne_vis.png"
     )
 
     # --- Visualization 2: Distance Fields ---
-    # We use cfg.env.grid_size to reconstruct the 2D shape
     logging.info("Generating distance maps...")
-    plot_distance_maps(grid, embeddings, grid_size=cfg.env.grid_size, save_path="latent_distance_maps.png")
 
-    return representations_2d
+    grid_size = cfg.env.grid_size
+
+    # Reshape all data to (Grid_H, Grid_W, ...)
+    grid_reshaped = grid.reshape(grid_size, grid_size, -1)
+    embeddings_reshaped = embeddings.reshape(grid_size, grid_size, -1)
+    pixels_reshaped = pixels.reshape(grid_size, grid_size, *pixels.shape[1:])
+
+    plot_distance_maps(grid_reshaped, embeddings_reshaped, pixels_reshaped, save_path="latent_distance_maps.png")
+
+    return
 
 
 if __name__ == "__main__":

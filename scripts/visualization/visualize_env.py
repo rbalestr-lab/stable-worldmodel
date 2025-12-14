@@ -181,11 +181,11 @@ def get_world_model(cfg):
 
 
 def get_state_from_grid(env, grid_element, dim: int | list = 0):
-    # computing the full state from a grid element
+    # first retrieve the reference state depending on the env type
     if isinstance(dim, int):
         dim = [dim]
     if isinstance(env, PushT):
-        grid_state = np.concatenate(
+        reference_state = np.concatenate(
             [
                 env.variation_space["agent"]["start_position"].value.tolist(),
                 env.variation_space["block"]["start_position"].value.tolist(),
@@ -193,8 +193,23 @@ def get_state_from_grid(env, grid_element, dim: int | list = 0):
                 env.variation_space["agent"]["velocity"].value.tolist(),
             ]
         )
+        # get the positions of the block and the agent closer
+        reference_state[2:4] = reference_state[0:2] + 0.3 * (reference_state[2:4] - reference_state[0:2])
+    elif isinstance(env, TwoRoomEnv):
+        reference_state = np.concatenate(
+            [env.variation_space["agent"]["position"].value, env.variation_space["goal"]["position"].value]
+        )
+    # computing the state from a grid element
+    grid_state = reference_state.copy()
     for i, d in enumerate(dim):
         grid_state[d] = grid_element[i]
+    if isinstance(env, PushT):
+        # relative position of agent and block remains the same
+        # we set the position of the block accordingly
+        grid_state[2:4] = grid_state[0:2] + (reference_state[2:4] - reference_state[0:2])
+    elif isinstance(env, TwoRoomEnv):
+        # TODO should check position is feasible
+        grid_state
     return grid_state
 
 
@@ -206,14 +221,17 @@ def get_state_grid(env, grid_size: int = 10):
         # Extract low/high limits for the specified dims
         min_val = [env.variation_space["agent"]["start_position"].low[d] for d in dim]
         max_val = [env.variation_space["agent"]["start_position"].high[d] for d in dim]
+        range_val = [max_v - min_v for min_v, max_v in zip(min_val, max_val)]
+        # decrease range a bit to avoid unreachable states
+        min_val = [min_v + 0.15 * r for min_v, r in zip(min_val, range_val)]
+        max_val = [max_v - 0.15 * r for max_v, r in zip(max_val, range_val)]
     elif isinstance(env, TwoRoomEnv):
-        dim = [0, 1]  # Assuming 2D room coords
-        min_val = [0.0, 0.0]
-        max_val = [1.0, 1.0]  # Adjust based on actual env limits
+        dim = [0, 1]  # Agent X, Y
+        # Extract low/high limits for the specified dims
+        min_val = [env.variation_space["agent"]["position"].low[d] for d in dim]
+        max_val = [env.variation_space["agent"]["position"].high[d] for d in dim]
     else:
-        # Fallback default
-        dim = [0, 1]
-        min_val, max_val = [0.0, 0.0], [1.0, 1.0]
+        raise NotImplementedError(f"State grid generation not implemented for env type: {type(env)}")
 
     # Create linear spaces for each dimension
     linspaces = [np.linspace(mn, mx, grid_size) for mn, mx in zip(min_val, max_val)]
@@ -403,8 +421,6 @@ def run(cfg):
     # embeddings_list: List of (1, D)
     # pixels_list: List of (1, C, H, W) or similar
     grid, embeddings_list, pixels_list = collect_embeddings(world_model, env, process, transform, cfg)
-    print(f"pixels_list[0] shape: {pixels_list[0].shape}")
-    input("Check pixel shape. Press Enter to continue...")
 
     # Convert lists to numpy
     embeddings = torch.cat(embeddings_list, dim=0).numpy()

@@ -298,7 +298,7 @@ def compute_tsne(embeddings, cfg):
 # ============================================================================
 
 
-def plot_distance_maps(grid, embeddings, pixels, save_path="distance_maps.png"):
+def plot_distance_maps(grid, embeddings, pixels, save_path="distance_maps.pdf"):
     """
     Plots pairs of (Reference Image, Distance Heatmap).
 
@@ -306,9 +306,7 @@ def plot_distance_maps(grid, embeddings, pixels, save_path="distance_maps.png"):
         grid: (H, W, 2) array of physical state coordinates.
         embeddings: (H, W, D) array of high-dim embeddings.
         pixels: (H, W, C, H_img, W_img) or (H, W, H_img, W_img, C) array of images.
-                Assumes pixel values are float [0,1] or [-1,1], or uint8 [0,255].
     """
-    # Derive dimensions
     height, width = grid.shape[0], grid.shape[1]
     X = grid[:, :, 0]
     Y = grid[:, :, 1]
@@ -327,11 +325,10 @@ def plot_distance_maps(grid, embeddings, pixels, save_path="distance_maps.png"):
         # --- A. Plot Reference Image ---
         ref_img = pixels[r_idx, c_idx]
 
-        # Handle format: Un-normalize if necessary (assuming [-1, 1] from your transform)
+        # Handle format: Un-normalize and Channels First/Last
         if ref_img.min() < 0:
             ref_img = (ref_img * 0.5) + 0.5
 
-        # Handle format: Channels First (C, H, W) -> Channels Last (H, W, C) for Matplotlib
         if ref_img.shape[0] in [1, 3]:
             ref_img = np.moveaxis(ref_img, 0, -1)
 
@@ -358,22 +355,21 @@ def plot_distance_maps(grid, embeddings, pixels, save_path="distance_maps.png"):
         cbar.set_label("L2 Distance")
 
     plt.suptitle("Latent Distances vs. Visual Input", fontsize=16)
-    plt.tight_layout(rect=[0, 0.03, 1, 0.95])  # Make room for suptitle
-    plt.savefig(save_path, dpi=300)
+    plt.tight_layout(rect=[0, 0.03, 1, 0.95])
+    # Save as PDF
+    plt.savefig(save_path, format="pdf")
     logging.info(f"Distance maps saved to {save_path}")
-    plt.show()
+    plt.close(fig)
 
 
-def plot_representations(grid, representations_2d, title_suffix="Latent Space", save_path="latent_vis.png"):
+def plot_representations(grid, representations_2d, title_suffix="Latent Space", save_path="latent_vis.pdf"):
     """
     Plots the ground truth grid and the 2D representations side-by-side.
     Colors are generated based on the grid position to visualize topology.
     """
     # Create colors based on grid position (Normalized x, y -> R, G, 0)
-    # Normalize grid to [0, 1] for coloring
     grid_norm = (grid - grid.min(axis=0)) / (grid.max(axis=0) - grid.min(axis=0) + 1e-6)
 
-    # Create an RGBA array: Red=X, Green=Y, Blue=0.5, Alpha=1.0
     colors = np.zeros((len(grid), 4))
     colors[:, 0] = grid_norm[:, 0]  # Red varies with dimension 0
     colors[:, 1] = grid_norm[:, 1]  # Green varies with dimension 1
@@ -384,7 +380,7 @@ def plot_representations(grid, representations_2d, title_suffix="Latent Space", 
 
     # Plot 1: Ground Truth Grid (Physical State)
     axes[0].scatter(grid[:, 0], grid[:, 1], c=colors, s=50, edgecolor="k", alpha=0.8)
-    axes[0].set_title("Physical State Grid (Ground Truth)")
+    axes[0].set_title("Physical State Grid")
     axes[0].set_xlabel("State Dim 0")
     axes[0].set_ylabel("State Dim 1")
     axes[0].grid(True, linestyle="--", alpha=0.3)
@@ -397,9 +393,10 @@ def plot_representations(grid, representations_2d, title_suffix="Latent Space", 
     axes[1].grid(True, linestyle="--", alpha=0.3)
 
     plt.tight_layout()
-    plt.savefig(save_path, dpi=300)
+    # Save as PDF
+    plt.savefig(save_path, format="pdf")
     logging.info(f"Visualization saved to {save_path}")
-    plt.show()
+    plt.close(fig)
 
 
 # ===========================================================================
@@ -416,10 +413,12 @@ def run(cfg):
     env, process, transform = get_env(cfg)
     world_model = get_world_model(cfg)
 
+    # --- Define filenames using environment name ---
+    env_name = type(env.unwrapped.envs[0].unwrapped).__name__
+    tsne_save_path = f"{env_name}_latent_space_tsne_vis.pdf"
+    distmap_save_path = f"{env_name}_latent_distance_maps.pdf"
+
     logging.info("Computing embeddings from environment...")
-    # grid: (N*N, 2)
-    # embeddings_list: List of (1, D)
-    # pixels_list: List of (1, C, H, W) or similar
     grid, embeddings_list, pixels_list = collect_embeddings(world_model, env, process, transform, cfg)
 
     # Convert lists to numpy
@@ -435,7 +434,10 @@ def run(cfg):
     # --- Visualization 1: t-SNE ---
     representations_2d = compute_tsne(embeddings, cfg)
     plot_representations(
-        grid, representations_2d, title_suffix="t-SNE Projection", save_path="latent_space_tsne_vis.png"
+        grid,
+        representations_2d,
+        title_suffix="t-SNE Projection",
+        save_path=tsne_save_path,  # Use PDF path
     )
 
     # --- Visualization 2: Distance Fields ---
@@ -448,7 +450,12 @@ def run(cfg):
     embeddings_reshaped = embeddings.reshape(grid_size, grid_size, -1)
     pixels_reshaped = pixels.reshape(grid_size, grid_size, *pixels.shape[1:])
 
-    plot_distance_maps(grid_reshaped, embeddings_reshaped, pixels_reshaped, save_path="latent_distance_maps.png")
+    plot_distance_maps(
+        grid_reshaped,
+        embeddings_reshaped,
+        pixels_reshaped,
+        save_path=distmap_save_path,  # Use PDF path
+    )
 
     return
 

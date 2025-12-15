@@ -350,6 +350,7 @@ def plot_distance_maps(grid, embeddings, pixels, save_path="distance_maps.pdf"):
         dists = np.linalg.norm(embeddings - ref_emb, axis=-1)
 
         contour = ax_map.contourf(X, Y, dists, levels=50, cmap="viridis")
+        ax_map.invert_yaxis()  # Match image coordinate system (y axis going downwards)
 
         # Mark reference on the map too
         ref_x = X[r_idx, c_idx]

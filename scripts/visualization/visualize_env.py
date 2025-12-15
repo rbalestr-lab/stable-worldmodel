@@ -257,13 +257,11 @@ def collect_embeddings(world_model, env, process, transform, cfg):
     for variation_cfg in cfg.env.variations:
         variation_embeddings = []
         variation_pixels = []
-        print(f"Collecting embeddings for variation: {variation_cfg}")
         for i, state in tqdm(enumerate(state_grid), desc="Collecting embeddings"):
             options = {"state": state}
             # for the first state of each variation, add variation options
             if i == 0 and variation_cfg["variation"] is not None:
                 options["variation"] = OmegaConf.to_container(variation_cfg["variation"], resolve=True)
-            print(f"Options used: {options}")
             _, infos = env.reset(options=options)
             infos = prepare_info(infos, process, transform)
             for key in infos:
@@ -373,12 +371,21 @@ def plot_distance_maps(grid, embeddings, pixels, save_path="distance_maps.pdf"):
     plt.close(fig)
 
 
-def plot_representations(grid, representations_2d, title_suffix="Latent Space", save_path="latent_vis.pdf"):
+def plot_representations(
+    grid,
+    representations_2d,
+    variations_cfg,
+    samples_per_variation,
+    title_suffix="Latent Space",
+    save_path="latent_vis.pdf",
+):
     """
     Plots the ground truth grid and the 2D representations side-by-side.
     Colors are generated based on the grid position to visualize topology.
+    Different variations are plotted with different markers.
     """
     # Create colors based on grid position (Normalized x, y -> R, G, 0)
+    # This color map applies to ONE grid. We will reuse it for every variation.
     grid_norm = (grid - grid.min(axis=0)) / (grid.max(axis=0) - grid.min(axis=0) + 1e-6)
 
     colors = np.zeros((len(grid), 4))
@@ -387,24 +394,54 @@ def plot_representations(grid, representations_2d, title_suffix="Latent Space", 
     colors[:, 2] = 0.5  # Constant Blue
     colors[:, 3] = 1.0  # Alpha
 
-    fig, axes = plt.subplots(1, 2, figsize=(14, 6))
+    fig, axes = plt.subplots(1, 2, figsize=(16, 7))
 
-    # Plot 1: Ground Truth Grid (Physical State)
-    axes[0].scatter(grid[:, 0], grid[:, 1], c=colors, s=50, edgecolor="k", alpha=0.8)
+    # --- Plot 1: Ground Truth Grid (Physical State) ---
+    # We only plot the grid once as it is the same for all variations
+    axes[0].scatter(grid[:, 0], grid[:, 1], c=colors, s=50, edgecolor="k", alpha=0.8, marker="o")
     axes[0].set_title("Physical State Grid")
     axes[0].set_xlabel("State Dim 0")
     axes[0].set_ylabel("State Dim 1")
     axes[0].grid(True, linestyle="--", alpha=0.3)
 
-    # Plot 2: 2D Representation
-    axes[1].scatter(representations_2d[:, 0], representations_2d[:, 1], c=colors, s=50, edgecolor="k", alpha=0.8)
+    # --- Plot 2: 2D Representation (All Variations) ---
+    # Define a list of markers to distinguish variations
+    markers = ["o", "s", "^", "D", "v", "<", ">", "p", "*", "h", "X", "d"]
+
+    for var_idx in range(len(variations_cfg)):
+        # Calculate indices for this variation
+        start_idx = var_idx * samples_per_variation
+        end_idx = start_idx + samples_per_variation
+
+        # Extract subset of t-SNE points for this variation
+        subset_2d = representations_2d[start_idx:end_idx]
+
+        # Cycle through markers if variations > len(markers)
+        marker = markers[var_idx % len(markers)]
+
+        var_label = (
+            f"Var {variations_cfg[var_idx]['variation'][0]}"
+            if variations_cfg[var_idx]["variation"] is not None
+            else "Original"
+        )
+        axes[1].scatter(
+            subset_2d[:, 0],
+            subset_2d[:, 1],
+            c=colors,  # Reuse the same topology colors
+            s=50,
+            edgecolor="k",
+            alpha=0.8,
+            marker=marker,
+            label=var_label,
+        )
+
     axes[1].set_title(f"2D Projection ({title_suffix})")
     axes[1].set_xlabel("Projected Dim 1")
     axes[1].set_ylabel("Projected Dim 2")
     axes[1].grid(True, linestyle="--", alpha=0.3)
+    axes[1].legend(loc="best", title="Variations")
 
     plt.tight_layout()
-    # Save as PDF
     plt.savefig(save_path, format="pdf")
     logging.info(f"Visualization saved to {save_path}")
     plt.close(fig)
@@ -426,46 +463,65 @@ def run(cfg):
 
     # --- Define naming components ---
     env_name = type(env.unwrapped.envs[0].unwrapped).__name__
-    model_name = cfg.model_name  # Extract model name for saving files
+    model_name = cfg.model_name
 
     logging.info("Computing embeddings from environment...")
-    # embeddings_variations and pixels_variations are now lists of lists (Variations -> Grid Points)
     grid, embeddings_variations, pixels_variations = collect_embeddings(world_model, env, process, transform, cfg)
 
-    # Pre-calculate grid size for reshaping later
+    # Prepare Data for t-SNE
+    # We need to flatten the batch lists for each variation, and then stack variations.
+    all_embeddings_list = []
+
+    for var_list in embeddings_variations:
+        # Concatenate batches within one variation -> (N_grid, D)
+        var_emb = torch.cat(var_list, dim=0).cpu().numpy()
+        var_emb = rearrange(var_emb, "b ... -> b (...)")
+        all_embeddings_list.append(var_emb)
+
+    # Stack all variations -> (N_variations * N_grid, D)
+    all_embeddings_global = np.concatenate(all_embeddings_list, axis=0)
+
+    # Metadata for plotting
+    num_variations = len(all_embeddings_list)
+    samples_per_variation = all_embeddings_list[0].shape[0]
+
+    # Compute Global t-SNE
+    logging.info(
+        f"Computing global t-SNE for {num_variations} variations ({all_embeddings_global.shape[0]} total samples)..."
+    )
+    representations_2d_global = compute_tsne(all_embeddings_global, cfg)
+
+    # Plot Combined t-SNE
+    tsne_save_path = f"{model_name}_{env_name}_tsne.pdf"
+    plot_representations(
+        grid,
+        representations_2d_global,
+        variations_cfg=cfg.env.variations,
+        samples_per_variation=samples_per_variation,
+        title_suffix="Latent Space",
+        save_path=tsne_save_path,
+    )
+
+    # Process Distance Maps (Per Variation)
+    # We still loop here because distance maps are best viewed individually per reference image
     grid_size = cfg.env.grid_size
 
-    # Iterate over each variation returned
-    for var_idx, (var_embeddings_list, var_pixels_list) in enumerate(zip(embeddings_variations, pixels_variations)):
-        logging.info(f"--- Processing Variation {var_idx} ---")
+    for var_idx, var_pixels_list in enumerate(pixels_variations):
+        logging.info(f"--- Processing Distance Maps for Variation {var_idx} ---")
 
-        # Prepare Data: Convert lists of tensors -> Single Numpy Array for this variation
-        # Embeddings Shape: (N_samples, Embed_Dim)
-        embeddings = torch.cat(var_embeddings_list, dim=0).cpu().numpy()
-        embeddings = rearrange(embeddings, "b ... -> b (...)")
+        # Re-extract the embeddings for this specific variation from our global list
+        # to ensure we use the exact data corresponding to the pixels
+        embeddings = all_embeddings_list[var_idx]  # (N_grid, D)
 
         # Pixels Shape: (N_samples, C, H, W)
         pixels = torch.cat(var_pixels_list, dim=0).cpu().numpy()
-        print(f"Pixels shape before reshape: {pixels.shape}")
 
-        logging.info(f"Variation {var_idx}: Collected {len(embeddings)} samples.")
-
-        # Define filenames
-        base_filename = f"{model_name}_{env_name}_var_{var_idx}"
-        tsne_save_path = f"{base_filename}_tsne.pdf"
-        distmap_save_path = f"{base_filename}_distmap.pdf"
-
-        # Visualization: t-SNE
-        representations_2d = compute_tsne(embeddings, cfg)
-        plot_representations(
-            grid,
-            representations_2d,
-            title_suffix=f"t-SNE Projection (Var {var_idx})",
-            save_path=tsne_save_path,
+        var_suffix = (
+            f"var_{cfg.env.variations[var_idx]['variation'][0]}"
+            if cfg.env.variations[var_idx]["variation"] is not None
+            else "var_original"
         )
-
-        # Visualization: Distance Fields
-        logging.info(f"Variation {var_idx}: Generating distance maps...")
+        distmap_save_path = f"{model_name}_{env_name}_{var_suffix}_distmap.pdf"
 
         # Reshape to (Grid_H, Grid_W, ...)
         grid_reshaped = grid.reshape(grid_size, grid_size, -1)

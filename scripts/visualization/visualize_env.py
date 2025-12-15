@@ -5,6 +5,7 @@ import numpy as np
 import torch
 from einops import rearrange
 from loguru import logger as logging
+from omegaconf import OmegaConf
 from sklearn import preprocessing
 from sklearn.manifold import TSNE
 from torchvision.transforms import v2 as transforms
@@ -253,16 +254,26 @@ def collect_embeddings(world_model, env, process, transform, cfg):
     grid, state_grid = get_state_grid(env.unwrapped.envs[0].unwrapped, cfg.env.grid_size)
     embeddings = []
     pixels = []
-    for state in tqdm(state_grid, desc="Collecting embeddings"):
-        options = {"state": state}
-        _, infos = env.reset(options=options)
-        infos = prepare_info(infos, process, transform)
-        for key in infos:
-            if isinstance(infos[key], torch.Tensor):
-                infos[key] = infos[key].to(cfg.get("device", "cpu"))
-        infos = world_model.encode(infos, target="embed")
-        embeddings.append(infos["embed"].cpu().detach())
-        pixels.append(infos["pixels"][0].cpu().detach())
+    for variation_cfg in cfg.env.variations:
+        variation_embeddings = []
+        variation_pixels = []
+        print(f"Collecting embeddings for variation: {variation_cfg}")
+        for i, state in tqdm(enumerate(state_grid), desc="Collecting embeddings"):
+            options = {"state": state}
+            # for the first state of each variation, add variation options
+            if i == 0 and variation_cfg["variation"] is not None:
+                options["variation"] = OmegaConf.to_container(variation_cfg["variation"], resolve=True)
+            print(f"Options used: {options}")
+            _, infos = env.reset(options=options)
+            infos = prepare_info(infos, process, transform)
+            for key in infos:
+                if isinstance(infos[key], torch.Tensor):
+                    infos[key] = infos[key].to(cfg.get("device", "cpu"))
+            infos = world_model.encode(infos, target="embed")
+            variation_embeddings.append(infos["embed"].cpu().detach())
+            variation_pixels.append(infos["pixels"][0].cpu().detach())
+        embeddings.append(variation_embeddings)
+        pixels.append(variation_pixels)
 
     return grid, embeddings, pixels
 
@@ -413,50 +424,62 @@ def run(cfg):
     env, process, transform = get_env(cfg)
     world_model = get_world_model(cfg)
 
-    # --- Define filenames using environment name ---
+    # --- Define naming components ---
     env_name = type(env.unwrapped.envs[0].unwrapped).__name__
-    tsne_save_path = f"{env_name}_latent_space_tsne_vis.pdf"
-    distmap_save_path = f"{env_name}_latent_distance_maps.pdf"
+    model_name = cfg.model_name  # Extract model name for saving files
 
     logging.info("Computing embeddings from environment...")
-    grid, embeddings_list, pixels_list = collect_embeddings(world_model, env, process, transform, cfg)
+    # embeddings_variations and pixels_variations are now lists of lists (Variations -> Grid Points)
+    grid, embeddings_variations, pixels_variations = collect_embeddings(world_model, env, process, transform, cfg)
 
-    # Convert lists to numpy
-    embeddings = torch.cat(embeddings_list, dim=0).numpy()
-    embeddings = rearrange(embeddings, "b ... -> b (...)")
-
-    # Process pixels: Stack -> Numpy
-    # Assuming pixels are Tensors (B, C, H, W), we stack them into (N*N, C, H, W)
-    pixels = torch.cat(pixels_list, dim=0).cpu().numpy()
-
-    logging.info(f"Collected {len(embeddings)} samples. Shape: {embeddings.shape}")
-
-    # --- Visualization 1: t-SNE ---
-    representations_2d = compute_tsne(embeddings, cfg)
-    plot_representations(
-        grid,
-        representations_2d,
-        title_suffix="t-SNE Projection",
-        save_path=tsne_save_path,  # Use PDF path
-    )
-
-    # --- Visualization 2: Distance Fields ---
-    logging.info("Generating distance maps...")
-
+    # Pre-calculate grid size for reshaping later
     grid_size = cfg.env.grid_size
 
-    # Reshape all data to (Grid_H, Grid_W, ...)
-    grid_reshaped = grid.reshape(grid_size, grid_size, -1)
-    embeddings_reshaped = embeddings.reshape(grid_size, grid_size, -1)
-    pixels_reshaped = pixels.reshape(grid_size, grid_size, *pixels.shape[1:])
+    # Iterate over each variation returned
+    for var_idx, (var_embeddings_list, var_pixels_list) in enumerate(zip(embeddings_variations, pixels_variations)):
+        logging.info(f"--- Processing Variation {var_idx} ---")
 
-    plot_distance_maps(
-        grid_reshaped,
-        embeddings_reshaped,
-        pixels_reshaped,
-        save_path=distmap_save_path,  # Use PDF path
-    )
+        # Prepare Data: Convert lists of tensors -> Single Numpy Array for this variation
+        # Embeddings Shape: (N_samples, Embed_Dim)
+        embeddings = torch.cat(var_embeddings_list, dim=0).cpu().numpy()
+        embeddings = rearrange(embeddings, "b ... -> b (...)")
 
+        # Pixels Shape: (N_samples, C, H, W)
+        pixels = torch.cat(var_pixels_list, dim=0).cpu().numpy()
+        print(f"Pixels shape before reshape: {pixels.shape}")
+
+        logging.info(f"Variation {var_idx}: Collected {len(embeddings)} samples.")
+
+        # Define filenames
+        base_filename = f"{model_name}_{env_name}_var_{var_idx}"
+        tsne_save_path = f"{base_filename}_tsne.pdf"
+        distmap_save_path = f"{base_filename}_distmap.pdf"
+
+        # Visualization: t-SNE
+        representations_2d = compute_tsne(embeddings, cfg)
+        plot_representations(
+            grid,
+            representations_2d,
+            title_suffix=f"t-SNE Projection (Var {var_idx})",
+            save_path=tsne_save_path,
+        )
+
+        # Visualization: Distance Fields
+        logging.info(f"Variation {var_idx}: Generating distance maps...")
+
+        # Reshape to (Grid_H, Grid_W, ...)
+        grid_reshaped = grid.reshape(grid_size, grid_size, -1)
+        embeddings_reshaped = embeddings.reshape(grid_size, grid_size, -1)
+        pixels_reshaped = pixels.reshape(grid_size, grid_size, *pixels.shape[1:])
+
+        plot_distance_maps(
+            grid_reshaped,
+            embeddings_reshaped,
+            pixels_reshaped,
+            save_path=distmap_save_path,
+        )
+
+    logging.info("All variations processed.")
     return
 
 

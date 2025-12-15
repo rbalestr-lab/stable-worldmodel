@@ -12,6 +12,9 @@ env:
   history_size: 1
   frame_skip: 1
   grid_size: 10  # number of states per dimension for visualization
+  variations:
+    - variation: null # default environment
+    - variation: ["background.color"] # vary background color
 
 image_size: 224
 patch_size: 16

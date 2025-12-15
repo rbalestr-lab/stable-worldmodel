@@ -404,7 +404,7 @@ def plot_representations(grid, representations_2d, title_suffix="Latent Space", 
 # ===========================================================================
 
 
-@hydra.main(version_base=None, config_path="./", config_name="config")
+@hydra.main(version_base=None, config_path="./configs", config_name="config_envs")
 def run(cfg):
     """Run visualization script."""
     cache_dir = swm.data.utils.get_cache_dir()

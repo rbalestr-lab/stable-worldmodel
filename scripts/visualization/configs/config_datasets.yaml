@@ -1,0 +1,40 @@
+defaults:
+  - _self_
+
+# Global Settings (Must be consistent across datasets for TSNE dimensions to match)
+device: cuda
+seed: 42
+image_size: 224
+patch_size: 16
+n_steps: ${eval:'${dinowm.num_preds} + ${dinowm.history_size}'}
+frameskip: 5
+cache_dir: null
+
+dinowm:
+  history_size: 3
+  num_preds: 1
+  proprio_dim: 4
+  action_dim: 2
+  encoding:
+    proprio: 10
+    action: 10
+
+# Define multiple dataset-model pairs here
+datasets:
+  - dataset:
+      dataset_name: pusht_expert_train
+      batch_size: 32
+      num_workers: 16
+      visual_split: 0.002
+    model:
+      name: dinowm_pusht_fixed
+      ckpt_path: "dinowm_pusht_weights.ckpt" # path relative to cache_dir
+
+  - dataset:
+      dataset_name: pusht_expert_val
+      batch_size: 32
+      num_workers: 16
+      visual_split: 1.0
+    model:
+      name: dinowm_pusht_fixed
+      ckpt_path: "dinowm_pusht_weights.ckpt"

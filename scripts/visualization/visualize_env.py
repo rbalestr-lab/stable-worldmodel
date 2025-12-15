@@ -268,7 +268,10 @@ def collect_embeddings(world_model, env, process, transform, cfg):
                 if isinstance(infos[key], torch.Tensor):
                     infos[key] = infos[key].to(cfg.get("device", "cpu"))
             infos = world_model.encode(infos, target="embed")
-            variation_embeddings.append(infos["embed"].cpu().detach())
+            if cfg.get("backbone_only", False):  # use only vision backbone embeddings
+                variation_embeddings.append(infos["pixels_embed"].cpu().detach())
+            else:  # use full model embeddings (proropio + action + vision)
+                variation_embeddings.append(infos["embed"].cpu().detach())
             variation_pixels.append(infos["pixels"][0].cpu().detach())
         embeddings.append(variation_embeddings)
         pixels.append(variation_pixels)

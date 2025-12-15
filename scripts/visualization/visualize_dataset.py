@@ -159,7 +159,10 @@ def collect_embeddings(cfg, exp_cfg):
 
         # Encode
         batch = world_model.encode(batch, target="embed")
-        dataset_embeddings.append(batch["embed"].cpu().detach())
+        if cfg.get("backbone_only", False):  # use only vision backbone embeddings
+            dataset_embeddings.append(batch["pixels_embed"].cpu().detach())
+        else:  # use full model embeddings (proropio + action + vision)
+            dataset_embeddings.append(batch["embed"].cpu().detach())
 
     # Consolidate and flatten embeddings for this dataset
     if len(dataset_embeddings) > 0:

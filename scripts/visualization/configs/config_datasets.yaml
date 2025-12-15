@@ -15,6 +15,7 @@ dinowm:
   num_preds: 1
   proprio_dim: 4
   action_dim: 2
+  backbone_only: true # whether to use the full model or just the vision backbone for encoding
   encoding:
     proprio: 10
     action: 10

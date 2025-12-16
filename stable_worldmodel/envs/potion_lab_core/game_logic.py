@@ -10,6 +10,7 @@ Contains:
 
 import json
 import os
+from typing import Any
 
 import numpy as np
 import pygame
@@ -31,6 +32,14 @@ from .entities import (
     ToolState,
     TrashCan,
 )
+
+
+# Rendering constants
+PROGRESS_BAR_HEIGHT_SCALE = 0.2  # Progress bar height relative to tile_size
+PROGRESS_BAR_WIDTH_SCALE = 0.8  # Progress bar width relative to tool width
+PROGRESS_BAR_OFFSET_SCALE = 0.5  # Progress bar offset relative to tile_size
+CAULDRON_SLOT_OFFSET_SCALE = 0.6  # Distance of cauldron slots from center
+ESSENCE_RADIUS_SCALE_DEFAULT = 0.35  # Default radius for essence rendering
 
 
 def _get_asset_path(asset_name: str) -> str:
@@ -141,8 +150,8 @@ def draw_tool(
             overlay_color = None
             is_cauldron = isinstance(tool, Cauldron)
 
-            if (is_cauldron and tool.state in (ToolState.PROCESSING, CauldronState.STIRRING)) or (
-                not is_cauldron and tool.state == CauldronState.STIRRING
+            if (is_cauldron and tool.state == CauldronState.STIRRING) or (
+                not is_cauldron and tool.state == ToolState.PROCESSING
             ):
                 overlay_color = (40, 40, 40, 100)  # Dark for processing
             elif tool.state == ToolState.DONE or tool.state == CauldronState.DONE:
@@ -185,12 +194,11 @@ def draw_tool(
 def _draw_processing_bar(canvas: pygame.Surface, tool, progress: float):
     """Draw a small progress bar beneath a processing tool."""
     tile_size = tool.tile_size
-    bar_width = int(tool.size[0] * 0.8)
-    bar_height = max(4, int(tile_size * 0.2))  # Relative to tile_size
+    bar_width = int(tool.size[0] * PROGRESS_BAR_WIDTH_SCALE)
+    bar_height = max(4, int(tile_size * PROGRESS_BAR_HEIGHT_SCALE))
 
     bar_x = int(tool.position[0] - bar_width / 2)
-    # Offset relative to tile_size instead of 15
-    bar_y = int(tool.position[1] + tool.size[1] / 2 - (tile_size * 0.5))
+    bar_y = int(tool.position[1] + tool.size[1] / 2 - (tile_size * PROGRESS_BAR_OFFSET_SCALE))
 
     pygame.draw.rect(canvas, (100, 100, 100), (bar_x, bar_y, bar_width, bar_height))
     progress_width = int(bar_width * progress)
@@ -203,8 +211,8 @@ def _draw_cauldron_contents(canvas: pygame.Surface, cauldron):
     pos = cauldron.position
     tile_size = cauldron.tile_size
 
-    slot_offset = tile_size * 0.6
-    essence_radius = int(tile_size * 0.35)
+    slot_offset = tile_size * CAULDRON_SLOT_OFFSET_SCALE
+    essence_radius = int(tile_size * ESSENCE_RADIUS_SCALE_DEFAULT)
 
     # Positions for 4 slots: top, right, bottom, left
     slot_positions = [
@@ -229,11 +237,11 @@ def _draw_cauldron_contents(canvas: pygame.Surface, cauldron):
     # Draw stir progress bar
     if cauldron.state == CauldronState.STIRRING and cauldron.stir_time > 0:
         progress = cauldron.stir_progress / cauldron.stir_time
-        bar_width = int(cauldron.size[0] * 0.8)
-        bar_height = max(4, int(tile_size * 0.2))
+        bar_width = int(cauldron.size[0] * PROGRESS_BAR_WIDTH_SCALE)
+        bar_height = max(4, int(tile_size * PROGRESS_BAR_HEIGHT_SCALE))
 
         bar_x = int(pos[0] - bar_width / 2)
-        bar_y = int(pos[1] + cauldron.size[1] / 2 - (tile_size * 0.5))
+        bar_y = int(pos[1] + cauldron.size[1] / 2 - (tile_size * PROGRESS_BAR_OFFSET_SCALE))
 
         pygame.draw.rect(canvas, (100, 100, 100), (bar_x, bar_y, bar_width, bar_height))
         progress_width = int(bar_width * progress)
@@ -266,23 +274,18 @@ def draw_player(canvas: pygame.Surface, player: Player):
 
 def _apply_essence_tint(image: pygame.Surface, tint_color: tuple[int, int, int]) -> pygame.Surface:
     """Apply essence color tinting to non-transparent pixels of an image."""
-    tinted_image = pygame.Surface(image.get_size(), pygame.SRCALPHA)
+    # Create a copy to preserve alpha channel
+    tinted_image = image.copy()
 
-    pixels = pygame.PixelArray(image)
-    tint_r, tint_g, tint_b = tint_color
+    # Create a color overlay surface
     tint_alpha = 0.7
+    overlay = pygame.Surface(image.get_size(), pygame.SRCALPHA)
+    tint_color_with_alpha = (*tint_color, int(255 * tint_alpha))
+    overlay.fill(tint_color_with_alpha)
 
-    for y in range(image.get_height()):
-        for x in range(image.get_width()):
-            pixel = image.get_at((x, y))
-            if pixel.a > 0:
-                original_r, original_g, original_b, original_a = pixel
-                new_r = int(original_r * (1 - tint_alpha) + tint_r * tint_alpha)
-                new_g = int(original_g * (1 - tint_alpha) + tint_g * tint_alpha)
-                new_b = int(original_b * (1 - tint_alpha) + tint_b * tint_alpha)
-                tinted_image.set_at((x, y), (new_r, new_g, new_b, original_a))
+    # Blend the tint with the original image
+    tinted_image.blit(overlay, (0, 0), special_flags=pygame.BLEND_RGBA_MULT)
 
-    del pixels
     return tinted_image
 
 
@@ -946,7 +949,7 @@ def create_default_layout(
     layout_config: dict,
     tool_params: dict,
     dispenser_params: dict,
-) -> dict[str, any]:
+) -> dict[str, Any]:
     """
     Create the laboratory layout from supplied configuration (positions and tool parameters).
 

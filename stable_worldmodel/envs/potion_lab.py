@@ -614,15 +614,11 @@ class PotionLab(gym.Env):
         self.step_count = 0
         self.round_time_remaining = 0
 
-        self.rng = None  # gets seeded in reset
-
         self.latest_action = None
 
     def reset(self, seed: int | None = None, options: dict | None = None):
         """Reset the environment to start a new episode."""
         super().reset(seed=seed)
-
-        self.rng = np.random.default_rng(seed)
 
         if hasattr(self, "variation_space"):
             self.variation_space.seed(seed)
@@ -797,6 +793,7 @@ class PotionLab(gym.Env):
             ],
             dtype=np.float32,
         )
+        # Update the variation space value
         self.variation_space["player"]["start_position"]._value = clamped_start
 
     def _setup(self):
@@ -804,7 +801,6 @@ class PotionLab(gym.Env):
         self.space = setup_physics_space()
 
         self.space.gravity = self.variation_space["physics"]["gravity"].value.tolist()
-        # Remove global damping so player speed/force are not muted by default 0.8 damping
         self.space.damping = 1.0
 
         add_walls(self.space, self.map_width, self.map_height, wall_thickness=self.env_config["wall_thickness"])
@@ -847,9 +843,9 @@ class PotionLab(gym.Env):
         # Initially disable all tools and dispensers (they start removed from physics space)
         # They will be enabled later when rounds require them
         for tool in self.tools.values():
-            tool.disable()  # Remove from physics space
+            tool.disable()
         for dispenser in self.dispensers:
-            dispenser.disable()  # Remove from physics space
+            dispenser.disable()
 
         self.collision_handler = CollisionHandler(self)
         self.collision_handler.setup_handlers(self.space)
@@ -1017,61 +1013,19 @@ class PotionLab(gym.Env):
         radius_scale = self.essence_config["radius_scale"]
         drag_coefficient = self.essence_config["drag_coefficient"]
 
-        if hasattr(self.tools["enchanter"], "eject_essence"):
-            essence_state = self.tools["enchanter"].eject_essence()
-            if essence_state is not None:
-                pos = (self.tools["enchanter"].position[0] + eject_offset, self.tools["enchanter"].position[1])
-                essence = Essence(
-                    self.space,
-                    pos,
-                    essence_state,
-                    self.tile_size,
-                    mass,
-                    friction,
-                    elasticity,
-                    radius_scale=radius_scale,
-                    drag_coefficient=drag_coefficient,
-                )
-                self.essences.append(essence)
+        # Define eject offsets for each tool (x_offset, y_offset)
+        tool_offsets = {
+            "enchanter": (eject_offset, 0),
+            "refiner": (-eject_offset, 0),
+            "cauldron": (0, eject_offset),
+            "bottler": (0, eject_offset),
+        }
 
-        if hasattr(self.tools["refiner"], "eject_essence"):
-            essence_state = self.tools["refiner"].eject_essence()
+        for tool_name, (x_offset, y_offset) in tool_offsets.items():
+            tool = self.tools[tool_name]
+            essence_state = tool.eject_essence()
             if essence_state is not None:
-                pos = (self.tools["refiner"].position[0] - eject_offset, self.tools["refiner"].position[1])
-                essence = Essence(
-                    self.space,
-                    pos,
-                    essence_state,
-                    self.tile_size,
-                    mass,
-                    friction,
-                    elasticity,
-                    radius_scale=radius_scale,
-                    drag_coefficient=drag_coefficient,
-                )
-                self.essences.append(essence)
-
-        if hasattr(self.tools["cauldron"], "eject_essence"):
-            essence_state = self.tools["cauldron"].eject_essence()
-            if essence_state is not None:
-                pos = (self.tools["cauldron"].position[0], self.tools["cauldron"].position[1] + eject_offset)
-                essence = Essence(
-                    self.space,
-                    pos,
-                    essence_state,
-                    self.tile_size,
-                    mass,
-                    friction,
-                    elasticity,
-                    radius_scale=radius_scale,
-                    drag_coefficient=drag_coefficient,
-                )
-                self.essences.append(essence)
-
-        if hasattr(self.tools["bottler"], "eject_essence"):
-            essence_state = self.tools["bottler"].eject_essence()
-            if essence_state is not None:
-                pos = (self.tools["bottler"].position[0], self.tools["bottler"].position[1] + eject_offset)
+                pos = (tool.position[0] + x_offset, tool.position[1] + y_offset)
                 essence = Essence(
                     self.space,
                     pos,
@@ -1141,10 +1095,10 @@ class PotionLab(gym.Env):
         time_limit = round_config["time_limit"] if round_config else 1.0
         time_norm = np.array([self.round_time_remaining / max(1.0, time_limit)], dtype=np.float32)
 
-        # 3. Requirements (80 floats)
+        # 3. Requirements (70 floats)
         req_encoded = self._encode_requirements()
 
-        # Combine all parts (85 floats total)
+        # Combine all parts (75 floats total)
         proprio = np.concatenate([player_pos, player_vel, time_norm, req_encoded])
 
         return {"image": img, "proprio": proprio}

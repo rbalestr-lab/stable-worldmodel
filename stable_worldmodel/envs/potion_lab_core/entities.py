@@ -612,6 +612,7 @@ class Cauldron(Tool):
 
         self.essence_slots: list[EssenceState | None] = [None, None, None, None]
         self.stir_progress = 0
+        self.combined_essence: EssenceState | None = None
 
     def accept_essence(self, essence: Essence) -> bool:
         """Try to accept an essence into the cauldron."""
@@ -844,7 +845,7 @@ class TrashCan(Tool):
 # ============================================================================
 
 
-class Dispenser:
+class Dispenser(Tool):
     """
     Dispenser: Spawns essences of a specific type when player collides with it.
     Cooldown: 30 steps between dispenses.
@@ -859,28 +860,21 @@ class Dispenser:
         size_multiplier: float = 0.8,
         cooldown_duration: int = 30,
     ):
-        self.space = space
-        self.position = position
+        size = (size_multiplier * tile_size, size_multiplier * tile_size)
+        color = ESSENCE_TYPES[essence_type][1]
+
+        # Initialize Tool base class with sensor=False
+        super().__init__(space, position, size, tile_size, color, is_sensor=False)
+
         self.essence_type = essence_type
-        self.tile_size = tile_size
         self.cooldown = 0
         self.cooldown_duration = cooldown_duration
 
-        self.body = pymunk.Body(body_type=pymunk.Body.STATIC)
-        self.body.position = position
-        size = (size_multiplier * tile_size, size_multiplier * tile_size)
-        self.size = size
-        self.shape = pymunk.Poly.create_box(self.body, size)
-        self.shape.sensor = False
+        # Override collision type for dispenser
         self.shape.collision_type = PhysicsConfig.LAYER_DISPENSER
-        self.shape.friction = 0.5
-        self.shape.elasticity = 0.0
 
+        # Store reference
         self.shape.dispenser_obj = self
-
-        self.color = ESSENCE_TYPES[essence_type][1]
-
-        space.add(self.body, self.shape)
 
     def update(self, dt: float):
         """Update cooldown timer."""
@@ -912,15 +906,9 @@ class Dispenser:
 
         return essence_state
 
-    def enable(self):
-        """Enable this dispenser by adding it to the physics space."""
-        if self.body not in self.space.bodies:
-            self.space.add(self.body, self.shape)
-
-    def disable(self):
-        """Disable this dispenser by removing it from the physics space."""
-        if self.body in self.space.bodies:
-            self.space.remove(self.body, self.shape)
+    def get_display_name(self) -> str:
+        """Get the display name for this dispenser."""
+        return "Dispenser"
 
 
 # ============================================================================
@@ -995,3 +983,9 @@ class DeliveryWindow(Tool):
     def all_requirements_met(self) -> bool:
         """Check if all requirements have been completed."""
         return all(req.get("completed", False) for req in self.required_items)
+
+    def reset(self):
+        """Reset delivery window to initial state."""
+        self.state = DeliveryState.WAITING
+        self.timer = 0
+        self.required_items = []

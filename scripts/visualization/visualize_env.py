@@ -8,7 +8,6 @@ import stable_pretraining as spt
 import torch
 from einops import rearrange
 from loguru import logger as logging
-from omegaconf import OmegaConf
 from sklearn import preprocessing
 from sklearn.manifold import TSNE
 from torchvision.transforms import v2 as transforms
@@ -357,8 +356,16 @@ def collect_embeddings(world_model, env, process, transform, cfg):
         for i, state in tqdm(enumerate(state_grid), desc="Collecting embeddings"):
             options = {"state": state}
             # for the first state of each variation, add variation options
-            if i == 0 and variation_cfg["variation"] is not None:
-                options["variation"] = OmegaConf.to_container(variation_cfg["variation"], resolve=True)
+            if variation_cfg.variation["fields"] is not None:
+                assert variation_cfg.variation["values"] is not None and len(variation_cfg.variation["fields"]) == len(
+                    variation_cfg.variation["values"]
+                ), "Both fields and values must be provided for variation."
+                options["variation_values"] = dict(
+                    zip(
+                        variation_cfg.variation["fields"],
+                        variation_cfg.variation["values"],
+                    )
+                )
             _, infos = env.reset(options=options)
             infos = prepare_info(infos, process, transform)
             for key in infos:
@@ -521,8 +528,8 @@ def plot_representations(
         marker = markers[var_idx % len(markers)]
 
         var_label = (
-            f"Var {variations_cfg[var_idx]['variation'][0]}"
-            if variations_cfg[var_idx]["variation"] is not None
+            f"Var {variations_cfg[var_idx]['variation']['fields'][0]}"
+            if variations_cfg[var_idx]["variation"]["fields"] is not None
             else "Original"
         )
         axes[1].scatter(
@@ -618,8 +625,8 @@ def run(cfg):
         pixels = torch.cat(var_pixels_list, dim=0).cpu().numpy()
 
         var_suffix = (
-            f"var_{cfg.env.variations[var_idx]['variation'][0]}"
-            if cfg.env.variations[var_idx]["variation"] is not None
+            f"var_{cfg.env.variations[var_idx]['variation']['fields'][0]}"
+            if cfg.env.variations[var_idx]["variation"]["fields"] is not None
             else "var_original"
         )
         distmap_save_path = f"{model_name}_{env_name}_{var_suffix}_distmap.pdf"

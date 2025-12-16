@@ -20,5 +20,9 @@ env:
   frame_skip: 1
   grid_size: 10  # number of states per dimension for visualization
   variations:
-    - variation: null # default environment
-    - variation: ["background.color"] # vary background color
+    - variation:
+        fields: null # default environment
+        values: null
+    - variation:
+        fields: ["background.color"] # vary background color
+        values: [[0.1, 0.2, 0.3]]

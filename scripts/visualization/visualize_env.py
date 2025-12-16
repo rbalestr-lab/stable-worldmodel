@@ -8,6 +8,7 @@ import stable_pretraining as spt
 import torch
 from einops import rearrange
 from loguru import logger as logging
+from omegaconf import open_dict
 from sklearn import preprocessing
 from sklearn.manifold import TSNE
 from torchvision.transforms import v2 as transforms
@@ -90,6 +91,15 @@ def get_env(cfg):
         "proprio": proprio_process,
         "goal_proprio": proprio_process,
     }
+
+    with open_dict(cfg) as cfg:
+        cfg.extra_dims = {
+            "action": env.unwrapped.action_space.shape[1],
+            "proprio": env.unwrapped.observation_space.spaces["proprio"].shape[1],
+        }
+        for key in cfg.world_model.get("encoding", {}):
+            if key not in cfg.extra_dims:
+                raise ValueError(f"Encoding key '{key}' not found in env obs.")
 
     return env, process, transform
 
@@ -248,7 +258,7 @@ def get_world_model(cfg):
             num_patches=num_patches,
             num_frames=cfg.world_model.history_size,
             dim=embedding_dim,
-            **cfg.predictor,
+            **cfg.world_model.predictor,
         )
 
         # Build action and proprioception encoders
@@ -269,6 +279,8 @@ def get_world_model(cfg):
             num_pred=cfg.world_model.num_preds,
             interpolate_pos_encoding=interp_pos_enc,
         )
+        model.to(cfg.get("device", "cpu"))
+        model = model.eval()
     return model
 
 
@@ -571,7 +583,12 @@ def run(cfg):
 
     # --- Define naming components ---
     env_name = type(env.unwrapped.envs[0].unwrapped).__name__
-    model_name = cfg.world_model.model_name if cfg.world_model.model_name is not None else "custom_model"
+    if cfg.world_model.model_name is not None:
+        model_name = cfg.world_model.model_name
+    elif cfg.world_model.backbone.name is not None:
+        model_name = cfg.world_model.backbone.type
+    else:
+        model_name = "custom_model"
 
     logging.info("Computing embeddings from environment...")
     grid, embeddings_variations, pixels_variations = collect_embeddings(world_model, env, process, transform, cfg)

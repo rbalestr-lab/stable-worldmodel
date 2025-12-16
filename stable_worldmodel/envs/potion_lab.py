@@ -157,7 +157,9 @@ class PotionLab(gym.Env):
             {
                 "player": swm.spaces.Dict(
                     {
-                        "color": swm.spaces.RGBBox(init_value=np.array(pygame.Color("RoyalBlue")[:3], dtype=np.uint8)),
+                        "color": swm.spaces.RGBBox(
+                            init_value=np.array(pygame.Color("RoyalBlue")[:3], dtype=np.uint8)
+                        ),  # color is used when asset is not available
                         "size": swm.spaces.Box(
                             low=8.0,
                             high=50.0,
@@ -218,6 +220,13 @@ class PotionLab(gym.Env):
                         ),
                     }
                 ),
+                "player_control": swm.spaces.Dict(
+                    {
+                        "distance_slowdown_scale": swm.spaces.Box(
+                            low=1.0, high=200.0, init_value=20.0, shape=(), dtype=np.float32
+                        ),
+                    }
+                ),
                 "essence": swm.spaces.Dict(
                     {
                         "mass": swm.spaces.Box(
@@ -241,6 +250,20 @@ class PotionLab(gym.Env):
                             shape=(),
                             dtype=np.float32,
                         ),
+                        "radius_scale": swm.spaces.Box(
+                            low=0.1,
+                            high=1.0,
+                            init_value=0.35,
+                            shape=(),
+                            dtype=np.float32,
+                        ),
+                        "drag_coefficient": swm.spaces.Box(
+                            low=0.0,
+                            high=10.0,
+                            init_value=5.0,
+                            shape=(),
+                            dtype=np.float32,
+                        ),
                     }
                 ),
                 "physics": swm.spaces.Dict(
@@ -257,17 +280,6 @@ class PotionLab(gym.Env):
                 "background": swm.spaces.Dict(
                     {
                         "color": swm.spaces.RGBBox(init_value=np.array([100, 0, 0], dtype=np.uint8)),
-                    }
-                ),
-                "render": swm.spaces.Dict(
-                    {
-                        "window_size": swm.spaces.Box(
-                            low=256.0,
-                            high=1024.0,
-                            init_value=float(self.window_size),
-                            shape=(),
-                            dtype=np.float32,
-                        ),
                     }
                 ),
                 "grid": swm.spaces.Dict(
@@ -547,30 +559,23 @@ class PotionLab(gym.Env):
                         ),
                     }
                 ),
-                "essence_config": swm.spaces.Dict(
-                    {
-                        "radius_scale": swm.spaces.Box(low=0.1, high=1.0, init_value=0.35, shape=(), dtype=np.float32),
-                        "drag_coefficient": swm.spaces.Box(
-                            low=0.0, high=10.0, init_value=5.0, shape=(), dtype=np.float32
-                        ),
-                    }
-                ),
-                "player_control": swm.spaces.Dict(
-                    {
-                        "distance_slowdown_scale": swm.spaces.Box(
-                            low=1.0, high=200.0, init_value=20.0, shape=(), dtype=np.float32
-                        ),
-                    }
-                ),
                 "environment": swm.spaces.Dict(
                     {
                         "wall_thickness": swm.spaces.Box(
                             low=1.0, high=50.0, init_value=10.0, shape=(), dtype=np.float32
                         ),
+                        "window_size": swm.spaces.Box(
+                            low=256.0,
+                            high=1024.0,
+                            init_value=float(self.window_size),
+                            shape=(),
+                            dtype=np.float32,
+                        ),
                     }
                 ),
             },
             sampling_order=[
+                "environment",
                 "background",
                 "physics",
                 "essence",
@@ -579,11 +584,8 @@ class PotionLab(gym.Env):
                 "layout",
                 "tools_config",
                 "dispenser_config",
-                "essence_config",
                 "player_control",
-                "environment",
                 "grid",
-                "render",
             ],
         )
 
@@ -671,7 +673,7 @@ class PotionLab(gym.Env):
 
     def _apply_variation_config(self):
         """Apply sampled variation values to derived configuration and cached params."""
-        self.window_size = float(self.variation_space["render"]["window_size"].value)
+        self.window_size = float(self.variation_space["environment"]["window_size"].value)
         self.map_width_tiles = int(self.variation_space["grid"]["map_width_tiles"].value)
         self.map_height_tiles = int(self.variation_space["grid"]["map_height_tiles"].value)
 
@@ -772,7 +774,7 @@ class PotionLab(gym.Env):
             "spawn_offset_multiplier": float(dispenser_cfg["spawn_offset_multiplier"].value),
         }
 
-        essence_cfg = self.variation_space["essence_config"]
+        essence_cfg = self.variation_space["essence"]
         self.essence_config = {
             "radius_scale": float(essence_cfg["radius_scale"].value),
             "drag_coefficient": float(essence_cfg["drag_coefficient"].value),
@@ -809,8 +811,6 @@ class PotionLab(gym.Env):
 
         layout = create_default_layout(
             self.space,
-            self.map_width,
-            self.map_height,
             self.tile_size,
             self.layout_config,
             self.tool_params,
@@ -1195,9 +1195,9 @@ class PotionLab(gym.Env):
         # Only draw unlocked tools (excluding delivery_window which is always shown)
         for tool_name, tool in self.tools.items():
             if tool_name != "delivery_window" and tool_name in self.unlocked_tools:
-                draw_tool(game_surface, tool, self.tile_size)
+                draw_tool(game_surface, tool)
 
-        draw_tool(game_surface, self.tools["delivery_window"], self.tile_size)
+        draw_tool(game_surface, self.tools["delivery_window"])
 
         # Only draw unlocked dispensers
         for dispenser in self.dispensers:
@@ -1205,7 +1205,7 @@ class PotionLab(gym.Env):
                 draw_dispenser(game_surface, dispenser)
 
         for essence in self.essences:
-            draw_essence(game_surface, essence, self.tile_size)
+            draw_essence(game_surface, essence)
 
         draw_player(game_surface, self.player)
 
@@ -1302,7 +1302,6 @@ class PotionLab(gym.Env):
                 enchanted,
                 refined,
                 is_bottled,
-                variations=None,  # Pass variations if needed
             )
 
     def close(self):

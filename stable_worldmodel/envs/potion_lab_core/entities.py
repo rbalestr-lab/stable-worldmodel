@@ -14,8 +14,51 @@ from enum import Enum
 import numpy as np
 import pymunk
 
-from .constants import ESSENCE_TYPES, PhysicsConfig
 
+"""
+Constants and configuration for Potion Lab environment.
+
+Contains:
+- Physics configuration (collision layers, physics constants)
+- Essence type definitions (colors and names)
+"""
+
+
+# ============================================================================
+# Physics Configuration
+# ============================================================================
+
+
+class PhysicsConfig:
+    """Configuration for the physics simulation."""
+
+    # Collision layers
+    LAYER_PLAYER = 1
+    LAYER_ESSENCE = 2
+    LAYER_TOOL = 3
+    LAYER_WALL = 4
+    LAYER_DISPENSER = 5
+    LAYER_CAULDRON = 6
+    LAYER_DISABLED = 99  # For locked/unavailable items
+
+    # Physics constants
+    GRAVITY = (0, 0)
+    DAMPING = 0.8
+    ITERATIONS = 20
+    TIMESTEP = 1 / 60
+
+
+# ============================================================================
+# Essence Type Definitions
+# ============================================================================
+
+# Essence type definitions (ID -> (Name, Color))
+ESSENCE_TYPES = {
+    1: ("Fire", (231, 76, 60)),  # Red
+    2: ("Water", (52, 152, 219)),  # Blue
+    3: ("Earth", (46, 204, 113)),  # Green
+    4: ("Air", (241, 196, 15)),  # Yellow
+}
 
 # ============================================================================
 # Essence State and Visual Patterns
@@ -141,30 +184,39 @@ class Essence:
         if self.state.is_bottled != requirement["bottled"]:
             return False
 
-        # Check if base essences match (order-independent)
-        if set(self.state.essence_types) != set(requirement["base_essences"]):
+        req_types = sorted(requirement["base_essences"])
+        self_types = sorted(self.state.essence_types)
+
+        if req_types != self_types:
             return False
 
-        # For combined essences, match per-essence patterns
-        # Build mapping from requirement essence ID to item essence index
-        requirement_map = {}
-        for req_essence_id in requirement["base_essences"]:
-            try:
-                item_idx = self.state.essence_types.index(req_essence_id)
-                requirement_map[req_essence_id] = item_idx
-            except ValueError:
-                return False
+        # Create a list of available essence component indices
+        available_indices = list(range(len(self.state.essence_types)))
 
-        # Check enchanted status for each essence
-        for i, req_essence_id in enumerate(requirement["base_essences"]):
-            item_idx = requirement_map[req_essence_id]
-            if self.state.enchanted_per_essence[item_idx] != requirement["enchanted"][i]:
-                return False
+        # Iterate through each required component
+        for i, req_type in enumerate(requirement["base_essences"]):
+            req_enchanted = requirement["enchanted"][i]
+            req_refined = requirement["refined"][i]
 
-        # Check refined status for each essence
-        for i, req_essence_id in enumerate(requirement["base_essences"]):
-            item_idx = requirement_map[req_essence_id]
-            if self.state.refined_per_essence[item_idx] != requirement["refined"][i]:
+            match_found = False
+
+            # Find a matching available component in the essence
+            for idx in available_indices:
+                # Check type
+                if self.state.essence_types[idx] != req_type:
+                    continue
+
+                # Check properties
+                if (
+                    self.state.enchanted_per_essence[idx] == req_enchanted
+                    and self.state.refined_per_essence[idx] == req_refined
+                ):
+                    # Found a match! Consume this index
+                    available_indices.remove(idx)
+                    match_found = True
+                    break
+
+            if not match_found:
                 return False
 
         return True

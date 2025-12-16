@@ -4,8 +4,8 @@ Potion Lab environment package.
 Contains the core game logic and entities for the Potion Brewing Laboratory.
 """
 
-from .constants import ESSENCE_TYPES, PhysicsConfig
 from .entities import (
+    ESSENCE_TYPES,
     Bottler,
     Cauldron,
     DeliveryWindow,
@@ -13,6 +13,7 @@ from .entities import (
     Enchanter,
     Essence,
     EssenceState,
+    PhysicsConfig,
     Player,
     Refiner,
     TrashCan,

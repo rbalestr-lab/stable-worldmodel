@@ -16,8 +16,8 @@ import pygame
 import pymunk
 from pymunk.vec2d import Vec2d
 
-from .constants import ESSENCE_TYPES, PhysicsConfig
 from .entities import (
+    ESSENCE_TYPES,
     Bottler,
     Cauldron,
     CauldronState,
@@ -25,6 +25,7 @@ from .entities import (
     Dispenser,
     Enchanter,
     Essence,
+    PhysicsConfig,
     Player,
     Refiner,
     ToolState,
@@ -32,15 +33,9 @@ from .entities import (
 )
 
 
-# Asset loading and caching
-_ASSET_CACHE = {}
-
-
-def _load_asset(asset_name: str) -> pygame.Surface | None:
-    """Load and cache a tool asset image."""
-    if asset_name in _ASSET_CACHE:
-        return _ASSET_CACHE[asset_name]
-
+def _get_asset_path(asset_name: str) -> str:
+    """Get absolute path to an asset."""
+    current_dir = os.path.dirname(os.path.abspath(__file__))
     # Map tool class names to asset filenames
     asset_map = {
         "Enchanter": "enchanter.png",
@@ -53,21 +48,280 @@ def _load_asset(asset_name: str) -> pygame.Surface | None:
     }
 
     filename = asset_map.get(asset_name)
-    if filename is None:
-        _ASSET_CACHE[asset_name] = None
+    if not filename:
         return None
 
-    # Get path to assets directory
-    current_dir = os.path.dirname(os.path.abspath(__file__))
-    asset_path = os.path.join(current_dir, "assets", filename)
+    return os.path.join(current_dir, "assets", filename)
+
+
+def _ensure_asset_loaded(obj, asset_name: str, size: tuple[float, float]) -> pygame.Surface | None:
+    """
+    Ensure the object has its asset loaded and cached.
+
+    Args:
+        obj: The game object (Tool, Dispenser, Player)
+        asset_name: Name of the asset to load
+        size: Target size (width, height)
+
+    Returns:
+        The cached pygame Surface or None if loading failed.
+    """
+    # Check if we already have the cached image and it's the right size
+    cached_image = getattr(obj, "cached_image", None)
+    cached_size = getattr(obj, "cached_size", None)
+
+    # If cached image exists and size matches (tolerance for float precision), return it
+    if cached_image and cached_size and abs(cached_size[0] - size[0]) < 1.0 and abs(cached_size[1] - size[1]) < 1.0:
+        return cached_image
+
+    # Load and scale
+    path = _get_asset_path(asset_name)
+    if not path:
+        return None
 
     try:
-        image = pygame.image.load(asset_path).convert_alpha()
-        _ASSET_CACHE[asset_name] = image
-        return image
-    except pygame.error:
-        _ASSET_CACHE[asset_name] = None
+        if not os.path.exists(path):
+            return None
+
+        image = pygame.image.load(path).convert_alpha()
+
+        # Scale to fit while maintaining aspect ratio
+        img_width, img_height = image.get_size()
+        target_width, target_height = size
+
+        scale_x = target_width / img_width
+        scale_y = target_height / img_height
+        scale = min(scale_x, scale_y)
+
+        scaled_width = int(img_width * scale)
+        scaled_height = int(img_height * scale)
+
+        scaled_image = pygame.transform.smoothscale(image, (scaled_width, scaled_height))
+
+        # Cache it on the object
+        obj.cached_image = scaled_image
+        obj.cached_size = size
+
+        # Also clear any cached overlays/tints since base image changed
+        if hasattr(obj, "cached_overlays"):
+            obj.cached_overlays = {}
+
+        return scaled_image
+    except (pygame.error, FileNotFoundError):
         return None
+
+
+def draw_tool(
+    canvas: pygame.Surface,
+    tool,
+    custom_width: float | None = None,
+    custom_height: float | None = None,
+):
+    """Draw a tool with its current state visualization using PNG assets."""
+    pos = tool.position
+    size = tool.size
+
+    # Use custom dimensions if provided, otherwise use tool's size
+    draw_width = custom_width if custom_width is not None else size[0]
+    draw_height = custom_height if custom_height is not None else size[1]
+
+    # Get the base image (cached)
+    scaled_image = _ensure_asset_loaded(tool, tool.get_display_name(), (draw_width, draw_height))
+
+    if scaled_image is not None:
+        # Position centered
+        img_rect = scaled_image.get_rect(center=(int(pos[0]), int(pos[1])))
+
+        # Draw base image
+        canvas.blit(scaled_image, img_rect)
+
+        # Apply state overlays
+        # We can cache overlays too if needed, but they are simple fills
+        if hasattr(tool, "state"):
+            overlay_color = None
+            is_cauldron = isinstance(tool, Cauldron)
+
+            if (is_cauldron and tool.state in (ToolState.PROCESSING, CauldronState.STIRRING)) or (
+                not is_cauldron and tool.state == CauldronState.STIRRING
+            ):
+                overlay_color = (40, 40, 40, 100)  # Dark for processing
+            elif tool.state == ToolState.DONE or tool.state == CauldronState.DONE:
+                overlay_color = (0, 155, 0, 80)  # Green for done
+            elif tool.state == CauldronState.READY_TO_STIR:
+                overlay_color = (20, 20, 20, 60)  # Light shadow for ready
+
+            if overlay_color:
+                # Check for cached overlay
+                overlay_key = f"state_{tool.state.name}"
+                if not hasattr(tool, "cached_overlays"):
+                    tool.cached_overlays = {}
+
+                overlay = tool.cached_overlays.get(overlay_key)
+                if not overlay:
+                    overlay = pygame.Surface(scaled_image.get_size(), pygame.SRCALPHA)
+                    overlay.fill(overlay_color)
+                    tool.cached_overlays[overlay_key] = overlay
+
+                canvas.blit(overlay, img_rect.topleft)
+
+    else:
+        # Fallback drawing
+        rect = pygame.Rect(
+            int(pos[0] - draw_width / 2), int(pos[1] - draw_height / 2), int(draw_width), int(draw_height)
+        )
+        pygame.draw.rect(canvas, tool.color, rect)
+        pygame.draw.rect(canvas, (50, 50, 50), rect, 3)
+
+    # Draw progress bar
+    progress = _get_processing_progress(tool)
+    if progress is not None:
+        _draw_processing_bar(canvas, tool, progress)
+
+    # Special rendering for Cauldron
+    if isinstance(tool, Cauldron):
+        _draw_cauldron_contents(canvas, tool)
+
+
+def _draw_processing_bar(canvas: pygame.Surface, tool, progress: float):
+    """Draw a small progress bar beneath a processing tool."""
+    tile_size = tool.tile_size
+    bar_width = int(tool.size[0] * 0.8)
+    bar_height = max(4, int(tile_size * 0.2))  # Relative to tile_size
+
+    bar_x = int(tool.position[0] - bar_width / 2)
+    # Offset relative to tile_size instead of 15
+    bar_y = int(tool.position[1] + tool.size[1] / 2 - (tile_size * 0.5))
+
+    pygame.draw.rect(canvas, (100, 100, 100), (bar_x, bar_y, bar_width, bar_height))
+    progress_width = int(bar_width * progress)
+    pygame.draw.rect(canvas, (100, 255, 100), (bar_x, bar_y, progress_width, bar_height))
+    pygame.draw.rect(canvas, (50, 50, 50), (bar_x, bar_y, bar_width, bar_height), 1)
+
+
+def _draw_cauldron_contents(canvas: pygame.Surface, cauldron):
+    """Draw essences in the cauldron's 4 slots and stir progress."""
+    pos = cauldron.position
+    tile_size = cauldron.tile_size
+
+    slot_offset = tile_size * 0.6
+    essence_radius = int(tile_size * 0.35)
+
+    # Positions for 4 slots: top, right, bottom, left
+    slot_positions = [
+        (pos[0], pos[1] - slot_offset),  # Top
+        (pos[0] + slot_offset, pos[1]),  # Right
+        (pos[0], pos[1] + slot_offset),  # Bottom
+        (pos[0] - slot_offset, pos[1]),  # Left
+    ]
+
+    for i, essence_state in enumerate(cauldron.essence_slots):
+        if essence_state is not None:
+            render_essence(
+                canvas,
+                slot_positions[i],
+                essence_radius,
+                essence_state.essence_types,
+                essence_state.enchanted_per_essence,
+                essence_state.refined_per_essence,
+                is_bottled=False,
+            )
+
+    # Draw stir progress bar
+    if cauldron.state == CauldronState.STIRRING and cauldron.stir_time > 0:
+        progress = cauldron.stir_progress / cauldron.stir_time
+        bar_width = int(cauldron.size[0] * 0.8)
+        bar_height = max(4, int(tile_size * 0.2))
+
+        bar_x = int(pos[0] - bar_width / 2)
+        bar_y = int(pos[1] + cauldron.size[1] / 2 - (tile_size * 0.5))
+
+        pygame.draw.rect(canvas, (100, 100, 100), (bar_x, bar_y, bar_width, bar_height))
+        progress_width = int(bar_width * progress)
+        pygame.draw.rect(canvas, (100, 255, 100), (bar_x, bar_y, progress_width, bar_height))
+        pygame.draw.rect(canvas, (50, 50, 50), (bar_x, bar_y, bar_width, bar_height), 1)
+
+
+def draw_player(canvas: pygame.Surface, player: Player):
+    """Draw the player character using wizard asset."""
+    pos = player.body.position
+    render_size = getattr(player, "render_size", getattr(player, "size", 20))
+
+    scaled_image = _ensure_asset_loaded(player, "Player", (render_size, render_size))
+
+    if scaled_image is not None:
+        img_rect = scaled_image.get_rect(center=(int(pos.x), int(pos.y)))
+        canvas.blit(scaled_image, img_rect)
+    else:
+        # Fallback
+        half_size = render_size / 2
+        vertices = [
+            (int(pos.x - half_size), int(pos.y - half_size)),
+            (int(pos.x + half_size), int(pos.y - half_size)),
+            (int(pos.x + half_size), int(pos.y + half_size)),
+            (int(pos.x - half_size), int(pos.y + half_size)),
+        ]
+        pygame.draw.polygon(canvas, player.color, vertices)
+        pygame.draw.polygon(canvas, (30, 30, 30), vertices, 3)
+
+
+def _apply_essence_tint(image: pygame.Surface, tint_color: tuple[int, int, int]) -> pygame.Surface:
+    """Apply essence color tinting to non-transparent pixels of an image."""
+    tinted_image = pygame.Surface(image.get_size(), pygame.SRCALPHA)
+
+    pixels = pygame.PixelArray(image)
+    tint_r, tint_g, tint_b = tint_color
+    tint_alpha = 0.7
+
+    for y in range(image.get_height()):
+        for x in range(image.get_width()):
+            pixel = image.get_at((x, y))
+            if pixel.a > 0:
+                original_r, original_g, original_b, original_a = pixel
+                new_r = int(original_r * (1 - tint_alpha) + tint_r * tint_alpha)
+                new_g = int(original_g * (1 - tint_alpha) + tint_g * tint_alpha)
+                new_b = int(original_b * (1 - tint_alpha) + tint_b * tint_alpha)
+                tinted_image.set_at((x, y), (new_r, new_g, new_b, original_a))
+
+    del pixels
+    return tinted_image
+
+
+def draw_dispenser(canvas: pygame.Surface, dispenser: Dispenser):
+    """Draw a dispenser using PNG asset with essence color tinting."""
+    pos = dispenser.position
+    size = dispenser.size
+
+    # Check for cached tinted image
+    if not hasattr(dispenser, "cached_tinted_image"):
+        # Load base asset first to ensure scaling
+        _ensure_asset_loaded(dispenser, "Dispenser", size)
+
+        # If we have base image, tint it and cache it
+        if dispenser.cached_image:
+            # This is a one-time tint operation per dispenser
+            dispenser.cached_tinted_image = _apply_essence_tint(dispenser.cached_image, dispenser.color)
+        else:
+            dispenser.cached_tinted_image = None
+
+    tinted_image = getattr(dispenser, "cached_tinted_image", None)
+
+    if tinted_image is not None:
+        img_rect = tinted_image.get_rect(center=(int(pos[0]), int(pos[1])))
+        canvas.blit(tinted_image, img_rect)
+
+        # Draw cooldown indicator
+        if dispenser.cooldown > 0:
+            alpha = int(255 * (dispenser.cooldown / dispenser.cooldown_duration))
+            # Cache overlay surface if size/alpha predictable?
+            # Alpha changes every frame, so simple surface creation is okay, or just reuse one surface and set alpha
+            overlay = pygame.Surface(tinted_image.get_size(), pygame.SRCALPHA)
+            overlay.fill((0, 0, 0, alpha // 2))
+            canvas.blit(overlay, img_rect.topleft)
+    else:
+        # Fallback
+        rect = pygame.Rect(int(pos[0] - size[0] / 2), int(pos[1] - size[1] / 2), int(size[0]), int(size[1]))
+        pygame.draw.rect(canvas, dispenser.color, rect)
+        pygame.draw.rect(canvas, (30, 30, 30), rect, 3)
 
 
 def setup_physics_space() -> pymunk.Space:
@@ -256,16 +510,13 @@ class CollisionHandler:
         if essence_obj is None or tool_obj is None:
             return
 
-        # Only allow interaction if tool is unlocked (delivery window is always unlocked)
         if tool_name != "delivery_window" and tool_name not in self.env.unlocked_tools:
             return False  # Prevent collision
 
-        # Create collision key to ensure we only process once *when accepted*
         collision_key = (id(essence_obj), id(tool_obj))
         if collision_key in self.essence_tool_collisions:
             return
 
-        # Handle delivery window specially
         if tool_name == "delivery_window":
             if hasattr(tool_obj, "validate_delivery"):
                 accepted = tool_obj.validate_delivery(essence_obj)
@@ -273,7 +524,6 @@ class CollisionHandler:
                     self.essence_tool_collisions.add(collision_key)
                     if essence_obj in self.env.essences:
                         self.env.essences.remove(essence_obj)
-        # Try to accept the essence for other tools
         elif hasattr(tool_obj, "accept_essence"):
             accepted = tool_obj.accept_essence(essence_obj)
             if accepted:
@@ -327,7 +577,6 @@ def render_essence(
     enchanted: list[bool],
     refined: list[bool],
     is_bottled: bool = False,
-    variations: dict | None = None,
 ):
     """
     Unified function to render an essence (or combined essence) at a specific location.
@@ -340,7 +589,6 @@ def render_essence(
         enchanted: List of booleans indicating if each essence part is enchanted
         refined: List of booleans indicating if each essence part is refined
         is_bottled: Whether the essence is in a bottle
-        variations: Optional dictionary of visual variations (unused for now, but ready for future)
     """
     screen_pos = (int(center[0]), int(center[1]))
     screen_radius = int(radius)
@@ -404,9 +652,11 @@ def render_essence(
             _draw_dots(canvas, screen_pos, screen_radius)
 
 
-def draw_essence(canvas: pygame.Surface, essence: Essence, tile_size: float):
+def draw_essence(canvas: pygame.Surface, essence: Essence):
     """
     Draw an essence with its visual patterns using the unified render function.
+    Wrapper to take in an Essence object, whereas render_essence is also used for
+    window, cauldron, etc.
     """
     render_essence(
         canvas,
@@ -558,303 +808,6 @@ def _get_processing_progress(tool) -> float | None:
     return max(0.0, min(1.0, progress))
 
 
-def _draw_processing_bar(canvas: pygame.Surface, tool, progress: float):
-    """Draw a small progress bar beneath a processing tool."""
-    bar_width = int(tool.size[0] * 0.8)
-    bar_height = 6
-    bar_x = int(tool.position[0] - bar_width / 2)
-    bar_y = int(tool.position[1] + tool.size[1] / 2 - 15)
-
-    pygame.draw.rect(canvas, (100, 100, 100), (bar_x, bar_y, bar_width, bar_height))
-
-    progress_width = int(bar_width * progress)
-    pygame.draw.rect(canvas, (100, 255, 100), (bar_x, bar_y, progress_width, bar_height))
-
-    pygame.draw.rect(canvas, (50, 50, 50), (bar_x, bar_y, bar_width, bar_height), 1)
-
-
-def draw_tool(
-    canvas: pygame.Surface,
-    tool,
-    tile_size: float,
-    custom_width: float | None = None,
-    custom_height: float | None = None,
-):
-    """Draw a tool with its current state visualization using PNG assets."""
-    pos = tool.position
-    size = tool.size
-
-    # Use custom dimensions if provided, otherwise use tool's size
-    draw_width = custom_width if custom_width is not None else size[0]
-    draw_height = custom_height if custom_height is not None else size[1]
-
-    # Load the asset image
-    asset_image = _load_asset(tool.get_display_name())
-
-    if asset_image is not None:
-        # Scale the image to fit within the draw dimensions while maintaining aspect ratio
-        img_width, img_height = asset_image.get_size()
-        scale_x = draw_width / img_width
-        scale_y = draw_height / img_height
-        scale = min(scale_x, scale_y)
-
-        scaled_width = int(img_width * scale)
-        scaled_height = int(img_height * scale)
-
-        # Scale the image
-        scaled_image = pygame.transform.smoothscale(asset_image, (scaled_width, scaled_height))
-
-        # Position the image centered on the tool position
-        img_rect = scaled_image.get_rect(center=(int(pos[0]), int(pos[1])))
-
-        # Apply state-based color overlay
-        if hasattr(tool, "state"):
-            is_cauldron = isinstance(tool, Cauldron)
-            if (is_cauldron and tool.state in (ToolState.PROCESSING, CauldronState.STIRRING)) or (
-                not is_cauldron and tool.state == CauldronState.STIRRING
-            ):
-                # Only cauldron keeps the darker overlay while processing/stirring
-                overlay = pygame.Surface((scaled_width, scaled_height), pygame.SRCALPHA)
-                overlay.fill((40, 40, 40, 100))
-                scaled_image.blit(overlay, (0, 0))
-            elif tool.state == ToolState.DONE or tool.state == CauldronState.DONE:
-                # Green tint for done state
-                overlay = pygame.Surface((scaled_width, scaled_height), pygame.SRCALPHA)
-                overlay.fill((0, 155, 0, 80))  # Semi-transparent green overlay
-                scaled_image.blit(overlay, (0, 0))
-            elif tool.state == CauldronState.READY_TO_STIR:
-                # Light tint for ready to stir
-                overlay = pygame.Surface((scaled_width, scaled_height), pygame.SRCALPHA)
-                overlay.fill((20, 20, 20, 60))  # Semi-transparent light overlay
-                scaled_image.blit(overlay, (0, 0))
-
-        # Draw the scaled image
-        canvas.blit(scaled_image, img_rect)
-
-    else:
-        # Fallback to original rectangle drawing if asset not found
-        rect = pygame.Rect(
-            int(pos[0] - draw_width / 2), int(pos[1] - draw_height / 2), int(draw_width), int(draw_height)
-        )
-
-        color = tool.color
-        if hasattr(tool, "state"):
-            if tool.state == ToolState.PROCESSING or tool.state == CauldronState.STIRRING:
-                color = tuple(min(255, c + 40) for c in color)
-            elif tool.state == ToolState.DONE or tool.state == CauldronState.DONE:
-                color = (100, 255, 100)
-            elif tool.state == CauldronState.READY_TO_STIR:
-                color = tuple(min(255, c + 20) for c in color)
-
-        pygame.draw.rect(canvas, color, rect)
-        pygame.draw.rect(canvas, (50, 50, 50), rect, 3)
-
-        font = pygame.font.SysFont("Arial", 10)
-        text = font.render(tool.get_display_name(), True, (255, 255, 255))
-        text_rect = text.get_rect(center=(int(pos[0]), int(pos[1])))
-        canvas.blit(text, text_rect)
-
-    # Draw progress bar for single-input tools while processing
-    progress = _get_processing_progress(tool)
-    if progress is not None:
-        _draw_processing_bar(canvas, tool, progress)
-
-    # Special rendering for Cauldron - show essences in slots (drawn on top of the image)
-    if isinstance(tool, Cauldron):
-        _draw_cauldron_contents(canvas, tool, tile_size)
-
-
-def _draw_cauldron_contents(canvas: pygame.Surface, cauldron, tile_size: float):
-    """Draw essences in the cauldron's 4 slots and stir progress."""
-    pos = cauldron.position
-    slot_offset = tile_size * 0.6
-    essence_radius = int(tile_size * 0.35)
-
-    # Positions for 4 slots: top, right, bottom, left
-    slot_positions = [
-        (pos[0], pos[1] - slot_offset),  # Top
-        (pos[0] + slot_offset, pos[1]),  # Right
-        (pos[0], pos[1] + slot_offset),  # Bottom
-        (pos[0] - slot_offset, pos[1]),  # Left
-    ]
-
-    # Draw essences in slots with patterns
-    for i, essence_state in enumerate(cauldron.essence_slots):
-        if essence_state is not None:
-            slot_pos = slot_positions[i]
-            render_essence(
-                canvas,
-                slot_pos,
-                essence_radius,
-                essence_state.essence_types,
-                essence_state.enchanted_per_essence,
-                essence_state.refined_per_essence,
-                is_bottled=False,
-            )
-
-    # Draw stir progress bar if stirring
-    if cauldron.state == CauldronState.STIRRING and cauldron.stir_time > 0:
-        progress = cauldron.stir_progress / cauldron.stir_time
-        bar_width = int(cauldron.size[0] * 0.8)
-        bar_height = 6
-        bar_x = int(pos[0] - bar_width / 2)
-        bar_y = int(pos[1] + cauldron.size[1] / 2 - 15)
-
-        # Background
-        pygame.draw.rect(canvas, (100, 100, 100), (bar_x, bar_y, bar_width, bar_height))
-        # Progress
-        progress_width = int(bar_width * progress)
-        pygame.draw.rect(canvas, (100, 255, 100), (bar_x, bar_y, progress_width, bar_height))
-        # Border
-        pygame.draw.rect(canvas, (50, 50, 50), (bar_x, bar_y, bar_width, bar_height), 1)
-
-
-def draw_player(canvas: pygame.Surface, player: Player):
-    """Draw the player character using wizard asset."""
-    pos = player.body.position
-    # Separate render size from hitbox size (fallback to legacy attributes)
-    render_size = getattr(player, "render_size", getattr(player, "size", 20))
-    hitbox_size = getattr(player, "hitbox_size", getattr(player, "size", 20))
-
-    # Load the wizard asset
-    wizard_image = _load_asset("Player")
-
-    if wizard_image is not None:
-        # Scale the image to fit within the player's hitbox while maintaining aspect ratio
-        img_width, img_height = wizard_image.get_size()
-        scale_x = render_size / img_width
-        scale_y = render_size / img_height
-        scale = min(scale_x, scale_y)  # Maintain aspect ratio
-
-        scaled_width = int(img_width * scale)
-        scaled_height = int(img_height * scale)
-
-        # Scale the image
-        scaled_image = pygame.transform.smoothscale(wizard_image, (scaled_width, scaled_height))
-
-        # Position the image centered on the player position
-        img_rect = scaled_image.get_rect(center=(int(pos.x), int(pos.y)))
-
-        # Draw the scaled wizard image
-        canvas.blit(scaled_image, img_rect)
-
-    else:
-        # Fallback to original square drawing if asset not found
-        half_size = render_size / 2
-        vertices = [
-            (int(pos.x - half_size), int(pos.y - half_size)),
-            (int(pos.x + half_size), int(pos.y - half_size)),
-            (int(pos.x + half_size), int(pos.y + half_size)),
-            (int(pos.x - half_size), int(pos.y + half_size)),
-        ]
-
-        # Draw player square
-        pygame.draw.polygon(canvas, player.color, vertices)
-        pygame.draw.polygon(canvas, (30, 30, 30), vertices, 3)
-
-    # Draw direction indicator (on top of the wizard image)
-    vel = player.body.velocity
-    if vel.length > 0.1:
-        screen_pos = (int(pos.x), int(pos.y))
-        direction = vel.normalized() * (hitbox_size / 2) * 0.8
-        end_pos = (int(pos.x + direction.x), int(pos.y + direction.y))
-        # Draw semi-transparent white line (50% alpha) using aaline
-        pygame.draw.aaline(canvas, (255, 255, 255, 128), screen_pos, end_pos, 3)
-
-
-def _apply_essence_tint(image: pygame.Surface, tint_color: tuple[int, int, int]) -> pygame.Surface:
-    """Apply essence color tinting to non-transparent pixels of an image."""
-    # Create a new surface with the same size and alpha channel
-    tinted_image = pygame.Surface(image.get_size(), pygame.SRCALPHA)
-
-    # Get the pixel data
-    pixels = pygame.PixelArray(image)
-
-    # Convert tint color to RGBA for blending
-    tint_r, tint_g, tint_b = tint_color
-    tint_alpha = 0.7  # How strongly to apply the tint (0.0 = no tint, 1.0 = full tint)
-
-    # Process each pixel
-    for y in range(image.get_height()):
-        for x in range(image.get_width()):
-            pixel = image.get_at((x, y))
-
-            # Check if pixel is not transparent (alpha > 0)
-            if pixel.a > 0:
-                # Blend the original pixel color with the tint color
-                original_r, original_g, original_b, original_a = pixel
-
-                # Apply tint by blending with the essence color
-                # We use a weighted average where tint_alpha controls the strength
-                new_r = int(original_r * (1 - tint_alpha) + tint_r * tint_alpha)
-                new_g = int(original_g * (1 - tint_alpha) + tint_g * tint_alpha)
-                new_b = int(original_b * (1 - tint_alpha) + tint_b * tint_alpha)
-
-                # Keep the original alpha
-                tinted_pixel = (new_r, new_g, new_b, original_a)
-                tinted_image.set_at((x, y), tinted_pixel)
-
-    # Clean up pixel array
-    del pixels
-
-    return tinted_image
-
-
-def draw_dispenser(canvas: pygame.Surface, dispenser: Dispenser):
-    """Draw a dispenser using PNG asset with essence color tinting."""
-    pos = dispenser.position
-    size = dispenser.size
-
-    # Load the dispenser asset
-    asset_image = _load_asset("Dispenser")
-
-    if asset_image is not None:
-        # Scale the image to fit within the dispenser size while maintaining aspect ratio
-        img_width, img_height = asset_image.get_size()
-        scale_x = size[0] / img_width
-        scale_y = size[1] / img_height
-        scale = min(scale_x, scale_y)
-
-        scaled_width = int(img_width * scale)
-        scaled_height = int(img_height * scale)
-
-        # Scale the image
-        scaled_image = pygame.transform.smoothscale(asset_image, (scaled_width, scaled_height))
-
-        # Apply essence color tinting to non-transparent pixels
-        tinted_image = _apply_essence_tint(scaled_image, dispenser.color)
-
-        # Position the image centered on the dispenser position
-        img_rect = tinted_image.get_rect(center=(int(pos[0]), int(pos[1])))
-
-        # Draw the tinted scaled image
-        canvas.blit(tinted_image, img_rect)
-
-        # Draw cooldown indicator on top of the image
-        if dispenser.cooldown > 0:
-            alpha = int(255 * (dispenser.cooldown / dispenser.cooldown_duration))
-            overlay = pygame.Surface((scaled_width, scaled_height), pygame.SRCALPHA)
-            overlay.fill((0, 0, 0, alpha // 2))
-            canvas.blit(overlay, img_rect.topleft)
-
-    else:
-        # Fallback to original rectangle drawing if asset not found
-        rect = pygame.Rect(int(pos[0] - size[0] / 2), int(pos[1] - size[1] / 2), int(size[0]), int(size[1]))
-
-        # Draw dispenser with essence color
-        pygame.draw.rect(canvas, dispenser.color, rect)
-        pygame.draw.rect(canvas, (30, 30, 30), rect, 3)
-
-        # Draw cooldown indicator
-        if dispenser.cooldown > 0:
-            # Draw overlay
-            alpha = int(255 * (dispenser.cooldown / dispenser.cooldown_duration))
-            overlay = pygame.Surface((int(size[0]), int(size[1])))
-            overlay.fill((0, 0, 0))
-            overlay.set_alpha(alpha // 2)
-            canvas.blit(overlay, rect.topleft)
-
-
 def draw_ui(
     canvas: pygame.Surface,
     time_remaining: int,
@@ -989,8 +942,6 @@ class RoundManager:
 
 def create_default_layout(
     space: pymunk.Space,
-    map_width: float,
-    map_height: float,
     tile_size: float,
     layout_config: dict,
     tool_params: dict,
@@ -1001,8 +952,6 @@ def create_default_layout(
 
     Args:
         space: Pymunk physics space
-        map_width: Width of the map in pixels (unused, kept for compatibility)
-        map_height: Height of the map in pixels (unused, kept for compatibility)
         tile_size: Size of each tile in pixels
         layout_config: Dict with dispenser/tool/player positions and essence types
         tool_params: Dict with per-tool size/colors/timings

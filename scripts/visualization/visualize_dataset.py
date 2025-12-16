@@ -51,7 +51,7 @@ def get_data(cfg, dataset_cfg):
 
     all_norm_transforms = []
     # Use global cfg for encoding keys to ensure consistency
-    for key in cfg.dinowm.get("encoding", {}):
+    for key in cfg.world_model.get("encoding", {}):
         trans_fn = norm_col_transform(dataset.dataset, key)
         trans_fn = spt.data.transforms.WrapTorchTransform(trans_fn, source=key, target=key)
         all_norm_transforms.append(trans_fn)
@@ -159,7 +159,7 @@ def collect_embeddings(cfg, exp_cfg):
 
         # Encode
         batch = world_model.encode(batch, target="embed")
-        if cfg.get("backbone_only", False):  # use only vision backbone embeddings
+        if cfg.world_model.get("backbone_only", False):  # use only vision backbone embeddings
             dataset_embeddings.append(batch["pixels_embed"].cpu().detach())
         else:  # use full model embeddings (proropio + action + vision)
             dataset_embeddings.append(batch["embed"].cpu().detach())

@@ -1,7 +1,10 @@
+from collections import OrderedDict
+
 import gymnasium as gym
 import hydra
 import matplotlib.pyplot as plt
 import numpy as np
+import stable_pretraining as spt
 import torch
 from einops import rearrange
 from loguru import logger as logging
@@ -10,6 +13,7 @@ from sklearn import preprocessing
 from sklearn.manifold import TSNE
 from torchvision.transforms import v2 as transforms
 from tqdm import tqdm
+from transformers import AutoModel, AutoModelForImageClassification
 
 import stable_worldmodel as swm
 from stable_worldmodel.envs.pusht.env import PushT
@@ -137,42 +141,135 @@ def prepare_info(info_dict, process, transform):
 # ============================================================================
 
 
+def get_encoder(cfg):
+    """Factory function to create encoder based on backbone type."""
+
+    # Define encoder configurations
+    ENCODER_CONFIGS = {
+        "resnet": {
+            "prefix": "microsoft/resnet-",
+            "model_class": AutoModelForImageClassification,
+            "embedding_attr": lambda model: model.config.hidden_sizes[-1],
+            "post_init": lambda model: setattr(model.classifier, "1", torch.nn.Identity()),
+            "interpolate_pos_encoding": False,
+        },
+        "vit": {"prefix": "google/vit-"},
+        "dino": {"prefix": "facebook/dino-"},
+        "dinov2": {"prefix": "facebook/dinov2-"},
+        "dinov3": {"prefix": "facebook/dinov3-"},  # TODO handle resnet base in dinov3
+        "mae": {"prefix": "facebook/vit-mae-"},
+        "ijepa": {"prefix": "facebook/ijepa"},
+        "vjepa2": {"prefix": "facebook/vjepa2-vit"},
+        "siglip2": {"prefix": "google/siglip2-"},
+    }
+
+    # Find matching encoder
+    encoder_type = None
+    for name, config in ENCODER_CONFIGS.items():
+        if cfg.world_model.backbone.name.startswith(config["prefix"]):
+            encoder_type = name
+            break
+
+    if encoder_type is None:
+        raise ValueError(f"Unsupported backbone: {cfg.world_model.backbone.name}")
+
+    config = ENCODER_CONFIGS[encoder_type]
+
+    # Load model
+    backbone = config.get("model_class", AutoModel).from_pretrained(cfg.world_model.backbone.name)
+
+    # CLIP style model
+    if hasattr(backbone, "vision_model"):
+        backbone = backbone.vision_model
+
+    # Post-initialization if needed (e.g., ResNet)
+    if "post_init" in config:
+        config["post_init"](backbone)
+
+    # Get embedding dimension
+    embedding_dim = config.get("embedding_attr", lambda model: model.config.hidden_size)(backbone)
+
+    # Determine number of patches
+    is_cnn = encoder_type == "resnet"
+    num_patches = 1 if is_cnn else (cfg.image_size // cfg.patch_size) ** 2
+
+    interp_pos_enc = config.get("interpolate_pos_encoding", True)
+
+    return backbone, embedding_dim, num_patches, interp_pos_enc
+
+
 def get_world_model(cfg):
     """Load and setup world model.
     For visualization, we only need the model to implement the `encode` method."""
 
-    model = swm.policy.AutoCostModel(cfg.model_name).to(cfg.get("device", "cpu"))
-    torch.hub._validate_not_a_forked_repo = lambda a, b, c: True
+    if cfg.world_model.model_name is not None:
+        model = swm.policy.AutoCostModel(cfg.world_model.model_name).to(cfg.get("device", "cpu"))
+        torch.hub._validate_not_a_forked_repo = lambda a, b, c: True
 
-    class DinoV2Encoder(torch.nn.Module):
-        def __init__(self, name, feature_key):
-            super().__init__()
-            self.name = name
-            self.base_model = torch.hub.load("facebookresearch/dinov2", name)
-            self.feature_key = feature_key
-            self.emb_dim = self.base_model.num_features
-            if feature_key == "x_norm_patchtokens":
-                self.latent_ndim = 2
-            elif feature_key == "x_norm_clstoken":
-                self.latent_ndim = 1
-            else:
-                raise ValueError(f"Invalid feature key: {feature_key}")
+        class DinoV2Encoder(torch.nn.Module):
+            def __init__(self, name, feature_key):
+                super().__init__()
+                self.name = name
+                self.base_model = torch.hub.load("facebookresearch/dinov2", name)
+                self.feature_key = feature_key
+                self.emb_dim = self.base_model.num_features
+                if feature_key == "x_norm_patchtokens":
+                    self.latent_ndim = 2
+                elif feature_key == "x_norm_clstoken":
+                    self.latent_ndim = 1
+                else:
+                    raise ValueError(f"Invalid feature key: {feature_key}")
 
-            self.patch_size = self.base_model.patch_size
+                self.patch_size = self.base_model.patch_size
 
-        def forward(self, x):
-            emb = self.base_model.forward_features(x)[self.feature_key]
-            if self.latent_ndim == 1:
-                emb = emb.unsqueeze(1)  # dummy patch dim
-            return emb
+            def forward(self, x):
+                emb = self.base_model.forward_features(x)[self.feature_key]
+                if self.latent_ndim == 1:
+                    emb = emb.unsqueeze(1)  # dummy patch dim
+                return emb
 
-    ckpt = torch.load(swm.data.utils.get_cache_dir() / "dinowm_pusht_weights.ckpt")
-    model.backbone = DinoV2Encoder("dinov2_vits14", feature_key="x_norm_patchtokens").to(cfg.get("device", "cpu"))
-    model.predictor.load_state_dict(ckpt["predictor"], strict=False)
-    model.action_encoder.load_state_dict(ckpt["action_encoder"])
-    model.proprio_encoder.load_state_dict(ckpt["proprio_encoder"])
-    model = model.to(cfg.get("device", "cpu"))
-    model = model.eval()
+        ckpt = torch.load(swm.data.utils.get_cache_dir() / "dinowm_pusht_weights.ckpt")
+        model.backbone = DinoV2Encoder("dinov2_vits14", feature_key="x_norm_patchtokens").to(cfg.get("device", "cpu"))
+        model.predictor.load_state_dict(ckpt["predictor"], strict=False)
+        model.action_encoder.load_state_dict(ckpt["action_encoder"])
+        model.proprio_encoder.load_state_dict(ckpt["proprio_encoder"])
+        model = model.to(cfg.get("device", "cpu"))
+        model = model.eval()
+    else:
+        encoder, embedding_dim, num_patches, interp_pos_enc = get_encoder(cfg)
+        embedding_dim += sum(emb_dim for emb_dim in cfg.world_model.get("encoding", {}).values())  # add all extra dims
+
+        logging.info(f"Patches: {num_patches}, Embedding dim: {embedding_dim}")
+
+        # Build causal predictor (transformer that predicts next latent states)
+
+        print(">>>> DIM PREDICTOR:", embedding_dim)
+
+        predictor = swm.wm.pyro.CausalPredictor(
+            num_patches=num_patches,
+            num_frames=cfg.world_model.history_size,
+            dim=embedding_dim,
+            **cfg.predictor,
+        )
+
+        # Build action and proprioception encoders
+        extra_encoders = OrderedDict()
+        for key, emb_dim in cfg.world_model.get("encoding", {}).items():
+            inpt_dim = cfg.extra_dims[key]
+            extra_encoders[key] = swm.wm.pyro.Embedder(in_chans=inpt_dim, emb_dim=emb_dim)
+            print(f"Build encoder for {key} with input dim {inpt_dim} and emb dim {emb_dim}")
+
+        extra_encoders = torch.nn.ModuleDict(extra_encoders)
+
+        # Assemble world model
+        model = swm.wm.PYRO(
+            encoder=spt.backbone.EvalOnly(encoder),
+            predictor=predictor,
+            extra_encoders=extra_encoders,
+            history_size=cfg.world_model.history_size,
+            num_pred=cfg.world_model.num_preds,
+            interpolate_pos_encoding=interp_pos_enc,
+        )
     return model
 
 
@@ -268,7 +365,7 @@ def collect_embeddings(world_model, env, process, transform, cfg):
                 if isinstance(infos[key], torch.Tensor):
                     infos[key] = infos[key].to(cfg.get("device", "cpu"))
             infos = world_model.encode(infos, target="embed")
-            if cfg.get("backbone_only", False):  # use only vision backbone embeddings
+            if cfg.world_model.get("backbone_only", False):  # use only vision backbone embeddings
                 variation_embeddings.append(infos["pixels_embed"].cpu().detach())
             else:  # use full model embeddings (proropio + action + vision)
                 variation_embeddings.append(infos["embed"].cpu().detach())
@@ -467,7 +564,7 @@ def run(cfg):
 
     # --- Define naming components ---
     env_name = type(env.unwrapped.envs[0].unwrapped).__name__
-    model_name = cfg.model_name
+    model_name = cfg.world_model.model_name if cfg.world_model.model_name is not None else "custom_model"
 
     logging.info("Computing embeddings from environment...")
     grid, embeddings_variations, pixels_variations = collect_embeddings(world_model, env, process, transform, cfg)

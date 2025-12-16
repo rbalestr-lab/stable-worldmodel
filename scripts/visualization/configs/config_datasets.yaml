@@ -1,26 +1,17 @@
 defaults:
   - _self_
+  - world_model: pyro
 
 # Global Settings (Must be consistent across datasets for TSNE dimensions to match)
 device: cuda
 seed: 42
 image_size: 224
 patch_size: 16
-n_steps: ${eval:'${dinowm.num_preds} + ${dinowm.history_size}'}
+n_steps: ${eval:'${world_model.num_preds} + ${world_model.history_size}'}
 frameskip: 5
 cache_dir: null
 
-dinowm:
-  history_size: 3
-  num_preds: 1
-  proprio_dim: 4
-  action_dim: 2
-  backbone_only: true # whether to use the full model or just the vision backbone for encoding
-  encoding:
-    proprio: 10
-    action: 10
-
-# Define multiple dataset-model pairs here
+# Define multiple dataset-model pairs to visualize
 datasets:
   - dataset:
       dataset_name: pusht_expert_train

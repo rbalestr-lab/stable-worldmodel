@@ -1,12 +1,19 @@
 defaults:
   - _self_
+  - world_model: pyro
 
-model_name: dinowm_pusht_fixed
 cache_dir: null
 
 device: cuda
 seed: 42
 
+image_size: 224
+patch_size: 16
+
+n_steps: ${eval:'${dinowm.num_preds} + ${dinowm.history_size}'}
+frameskip: 5
+
+# Define environment to visualize (and potential variations)
 env:
   env_name: swm/PushT-v1
   history_size: 1
@@ -15,19 +22,3 @@ env:
   variations:
     - variation: null # default environment
     - variation: ["background.color"] # vary background color
-
-image_size: 224
-patch_size: 16
-
-n_steps: ${eval:'${dinowm.num_preds} + ${dinowm.history_size}'}
-frameskip: 5
-
-dinowm:
-  history_size: 3
-  num_preds: 1
-  proprio_dim: 4
-  action_dim: 2
-  backbone_only: true # whether to use the full model or just the vision backbone for encoding
-  encoding: # key: target dim
-    proprio: 10
-    action: 10

@@ -1,8 +1,5 @@
 """
-Potion Lab Environment - A physics-based continual learning environment for world models.
-
-This environment tests compositional generalization, catastrophic forgetting, and
-long-horizon planning through potion brewing mechanics.
+Potion Lab environment module.
 """
 
 import os
@@ -17,12 +14,22 @@ from gymnasium import spaces
 
 import stable_worldmodel as swm
 
-# Import core game components
-from .potion_lab_core import (
-    CollisionHandler,
+from .entities import (
+    ESSENCE_TYPES,
+    Bottler,
+    Cauldron,
+    DeliveryWindow,
+    Dispenser,
+    Enchanter,
     Essence,
+    EssenceState,
     PhysicsConfig,
     Player,
+    Refiner,
+    TrashCan,
+)
+from .game_logic import (
+    CollisionHandler,
     RoundManager,
     add_walls,
     create_default_layout,
@@ -30,9 +37,10 @@ from .potion_lab_core import (
     draw_essence,
     draw_player,
     draw_tool,
+    draw_ui,
+    render_essence,
     setup_physics_space,
 )
-from .potion_lab_core.game_logic import render_essence
 
 
 DEFAULT_VARIATIONS = (
@@ -82,7 +90,7 @@ class PotionLab(gym.Env):
             render_mode: "human" or "rgb_array"
             resolution: Render resolution (square image)
             render_action: Whether to render action indicators
-            rounds_path: Path to rounds JSON file (default: potion_lab_core/rounds.json)
+            rounds_path: Path to rounds JSON file (default: potion_lab/rounds.json)
         """
         super().__init__()
 
@@ -94,7 +102,7 @@ class PotionLab(gym.Env):
 
         # Config files (use defaults if not provided)
         current_dir = os.path.dirname(os.path.abspath(__file__))
-        self.rounds_path = rounds_path or os.path.join(current_dir, "potion_lab_core", "rounds.json")
+        self.rounds_path = rounds_path or os.path.join(current_dir, "rounds.json")
 
         # Layout defaults, overwritten by variation space
         layout_data = {
@@ -1266,3 +1274,31 @@ class PotionLab(gym.Env):
             self.window = None
             self.clock = None
         self.canvas = None
+
+
+__all__ = [
+    "PotionLab",
+    "Essence",
+    "EssenceState",
+    "Player",
+    "Enchanter",
+    "Refiner",
+    "Cauldron",
+    "Bottler",
+    "TrashCan",
+    "Dispenser",
+    "DeliveryWindow",
+    "ESSENCE_TYPES",
+    "PhysicsConfig",
+    "setup_physics_space",
+    "add_walls",
+    "CollisionHandler",
+    "RoundManager",
+    "create_default_layout",
+    "draw_essence",
+    "draw_tool",
+    "draw_player",
+    "draw_dispenser",
+    "draw_ui",
+    "render_essence",
+]

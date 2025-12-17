@@ -1,7 +1,5 @@
 """
 Potion Lab environment package.
-
-Contains the core game logic and entities for the Potion Brewing Laboratory.
 """
 
 from .entities import (
@@ -18,6 +16,7 @@ from .entities import (
     Refiner,
     TrashCan,
 )
+from .env import PotionLab
 from .game_logic import (
     CollisionHandler,
     RoundManager,
@@ -34,6 +33,7 @@ from .game_logic import (
 
 
 __all__ = [
+    "PotionLab",
     "Essence",
     "EssenceState",
     "Player",

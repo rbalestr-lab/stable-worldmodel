@@ -1,6 +1,6 @@
 defaults:
   - _self_
-  - backbone: dinov3_small
+  - backbone: mae_base
 
 
 model_name: null

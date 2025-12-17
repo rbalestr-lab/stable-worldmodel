@@ -1,3 +1,5 @@
+from collections import OrderedDict
+
 import hydra
 import matplotlib.pyplot as plt
 import numpy as np
@@ -5,9 +7,11 @@ import stable_pretraining as spt
 import torch
 from einops import rearrange
 from loguru import logger as logging
+from omegaconf import open_dict
 from sklearn.manifold import TSNE
 from torch.utils.data import DataLoader
 from tqdm import tqdm
+from transformers import AutoModel, AutoModelForImageClassification
 
 import stable_worldmodel as swm
 
@@ -19,7 +23,7 @@ DINO_PATCH_SIZE = 14  # DINO encoder uses 14x14 patches
 # ============================================================================
 
 
-def get_data(cfg, dataset_cfg):
+def get_data(cfg, dataset_cfg, model_cfg):
     """Setup dataset with image transforms and normalization."""
 
     def get_img_pipeline(key, target, img_size=224):
@@ -43,7 +47,7 @@ def get_data(cfg, dataset_cfg):
     # Use dataset_cfg for specific dataset parameters
     dataset = swm.data.FrameDataset(
         dataset_cfg.dataset_name,
-        num_steps=cfg.n_steps,
+        num_steps=dataset_cfg.n_steps,
         frameskip=cfg.frameskip,
         transform=None,
         cache_dir=cfg.get("cache_dir", None),
@@ -51,7 +55,7 @@ def get_data(cfg, dataset_cfg):
 
     all_norm_transforms = []
     # Use global cfg for encoding keys to ensure consistency
-    for key in cfg.world_model.get("encoding", {}):
+    for key in model_cfg.get("encoding", {}):
         trans_fn = norm_col_transform(dataset.dataset, key)
         trans_fn = spt.data.transforms.WrapTorchTransform(trans_fn, source=key, target=key)
         all_norm_transforms.append(trans_fn)
@@ -61,7 +65,11 @@ def get_data(cfg, dataset_cfg):
 
     # Apply transforms to all steps
     transform = spt.data.transforms.Compose(
-        *[get_img_pipeline(f"{col}.{i}", f"{col}.{i}", img_size) for col in ["pixels"] for i in range(cfg.n_steps)],
+        *[
+            get_img_pipeline(f"{col}.{i}", f"{col}.{i}", img_size)
+            for col in ["pixels"]
+            for i in range(dataset_cfg.n_steps)
+        ],
         *all_norm_transforms,
     )
 
@@ -84,6 +92,13 @@ def get_data(cfg, dataset_cfg):
         shuffle=True,
         generator=rnd_gen,
     )
+    with open_dict(model_cfg) as model_cfg:
+        model_cfg.extra_dims = {}
+        for key in model_cfg.get("encoding", {}):
+            if key not in dataset.dataset.column_names:
+                raise ValueError(f"Encoding key '{key}' not found in dataset columns.")
+            inpt_dim = dataset.dataset[0][key].numel()
+            model_cfg.extra_dims[key] = inpt_dim if key != "action" else inpt_dim * cfg.frameskip
 
     return visual
 
@@ -93,45 +108,137 @@ def get_data(cfg, dataset_cfg):
 # ============================================================================
 
 
+def get_encoder(cfg, model_cfg):
+    """Factory function to create encoder based on backbone type."""
+
+    # Define encoder configurations
+    ENCODER_CONFIGS = {
+        "resnet": {
+            "prefix": "microsoft/resnet-",
+            "model_class": AutoModelForImageClassification,
+            "embedding_attr": lambda model: model.config.hidden_sizes[-1],
+            "post_init": lambda model: setattr(model.classifier, "1", torch.nn.Identity()),
+            "interpolate_pos_encoding": False,
+        },
+        "vit": {"prefix": "google/vit-"},
+        "dino": {"prefix": "facebook/dino-"},
+        "dinov2": {"prefix": "facebook/dinov2-"},
+        "dinov3": {"prefix": "facebook/dinov3-"},  # TODO handle resnet base in dinov3
+        "mae": {"prefix": "facebook/vit-mae-"},
+        "ijepa": {"prefix": "facebook/ijepa"},
+        "vjepa2": {"prefix": "facebook/vjepa2-vit"},
+        "siglip2": {"prefix": "google/siglip2-"},
+    }
+
+    # Find matching encoder
+    encoder_type = None
+    for name, config in ENCODER_CONFIGS.items():
+        if model_cfg.backbone.name.startswith(config["prefix"]):
+            encoder_type = name
+            break
+
+    if encoder_type is None:
+        raise ValueError(f"Unsupported backbone: {model_cfg.backbone.name}")
+
+    config = ENCODER_CONFIGS[encoder_type]
+
+    # Load model
+    backbone = config.get("model_class", AutoModel).from_pretrained(model_cfg.backbone.name)
+
+    # CLIP style model
+    if hasattr(backbone, "vision_model"):
+        backbone = backbone.vision_model
+
+    # Post-initialization if needed (e.g., ResNet)
+    if "post_init" in config:
+        config["post_init"](backbone)
+
+    # Get embedding dimension
+    embedding_dim = config.get("embedding_attr", lambda model: model.config.hidden_size)(backbone)
+
+    # Determine number of patches
+    is_cnn = encoder_type == "resnet"
+    num_patches = 1 if is_cnn else (cfg.image_size // cfg.patch_size) ** 2
+
+    interp_pos_enc = config.get("interpolate_pos_encoding", True)
+
+    return backbone, embedding_dim, num_patches, interp_pos_enc
+
+
 def get_world_model(cfg, model_cfg):
     """Load and setup world model.
     For visualization, we only need the model to implement the `encode` method."""
 
-    model = swm.policy.AutoCostModel(model_cfg.name).to(cfg.get("device", "cpu"))
-    torch.hub._validate_not_a_forked_repo = lambda a, b, c: True
+    if model_cfg.model_name is not None:
+        model = swm.policy.AutoCostModel(model_cfg.model_name).to(cfg.get("device", "cpu"))
+        torch.hub._validate_not_a_forked_repo = lambda a, b, c: True
 
-    class DinoV2Encoder(torch.nn.Module):
-        def __init__(self, name, feature_key):
-            super().__init__()
-            self.name = name
-            self.base_model = torch.hub.load("facebookresearch/dinov2", name)
-            self.feature_key = feature_key
-            self.emb_dim = self.base_model.num_features
-            if feature_key == "x_norm_patchtokens":
-                self.latent_ndim = 2
-            elif feature_key == "x_norm_clstoken":
-                self.latent_ndim = 1
-            else:
-                raise ValueError(f"Invalid feature key: {feature_key}")
+        class DinoV2Encoder(torch.nn.Module):
+            def __init__(self, name, feature_key):
+                super().__init__()
+                self.name = name
+                self.base_model = torch.hub.load("facebookresearch/dinov2", name)
+                self.feature_key = feature_key
+                self.emb_dim = self.base_model.num_features
+                if feature_key == "x_norm_patchtokens":
+                    self.latent_ndim = 2
+                elif feature_key == "x_norm_clstoken":
+                    self.latent_ndim = 1
+                else:
+                    raise ValueError(f"Invalid feature key: {feature_key}")
 
-            self.patch_size = self.base_model.patch_size
+                self.patch_size = self.base_model.patch_size
 
-        def forward(self, x):
-            emb = self.base_model.forward_features(x)[self.feature_key]
-            if self.latent_ndim == 1:
-                emb = emb.unsqueeze(1)  # dummy patch dim
-            return emb
+            def forward(self, x):
+                emb = self.base_model.forward_features(x)[self.feature_key]
+                if self.latent_ndim == 1:
+                    emb = emb.unsqueeze(1)  # dummy patch dim
+                return emb
 
-    # Load specific checkpoint from experiment config
-    ckpt_path = swm.data.utils.get_cache_dir() / model_cfg.ckpt_path
-    ckpt = torch.load(ckpt_path)
+        ckpt = torch.load(swm.data.utils.get_cache_dir() / model_cfg.ckpt_path)
+        model.backbone = DinoV2Encoder("dinov2_vits14", feature_key="x_norm_patchtokens").to(cfg.get("device", "cpu"))
+        model.predictor.load_state_dict(ckpt["predictor"], strict=False)
+        model.action_encoder.load_state_dict(ckpt["action_encoder"])
+        model.proprio_encoder.load_state_dict(ckpt["proprio_encoder"])
+        model = model.to(cfg.get("device", "cpu"))
+        model = model.eval()
+    else:
+        encoder, embedding_dim, num_patches, interp_pos_enc = get_encoder(cfg, model_cfg)
+        embedding_dim += sum(emb_dim for emb_dim in model_cfg.get("encoding", {}).values())  # add all extra dims
 
-    model.backbone = DinoV2Encoder("dinov2_vits14", feature_key="x_norm_patchtokens").to(cfg.get("device", "cpu"))
-    model.predictor.load_state_dict(ckpt["predictor"], strict=False)
-    model.action_encoder.load_state_dict(ckpt["action_encoder"])
-    model.proprio_encoder.load_state_dict(ckpt["proprio_encoder"])
-    model = model.to(cfg.get("device", "cpu"))
-    model = model.eval()
+        logging.info(f"Patches: {num_patches}, Embedding dim: {embedding_dim}")
+
+        # Build causal predictor (transformer that predicts next latent states)
+
+        print(">>>> DIM PREDICTOR:", embedding_dim)
+
+        predictor = swm.wm.pyro.CausalPredictor(
+            num_patches=num_patches,
+            num_frames=model_cfg.history_size,
+            dim=embedding_dim,
+            **model_cfg.predictor,
+        )
+
+        # Build action and proprioception encoders
+        extra_encoders = OrderedDict()
+        for key, emb_dim in model_cfg.get("encoding", {}).items():
+            inpt_dim = model_cfg.extra_dims[key]
+            extra_encoders[key] = swm.wm.pyro.Embedder(in_chans=inpt_dim, emb_dim=emb_dim)
+            print(f"Build encoder for {key} with input dim {inpt_dim} and emb dim {emb_dim}")
+
+        extra_encoders = torch.nn.ModuleDict(extra_encoders)
+
+        # Assemble world model
+        model = swm.wm.PYRO(
+            encoder=spt.backbone.EvalOnly(encoder),
+            predictor=predictor,
+            extra_encoders=extra_encoders,
+            history_size=model_cfg.history_size,
+            num_pred=model_cfg.num_preds,
+            interpolate_pos_encoding=interp_pos_enc,
+        )
+        model.to(cfg.get("device", "cpu"))
+        model = model.eval()
     return model
 
 
@@ -145,10 +252,10 @@ def collect_embeddings(cfg, exp_cfg):
     Loads a specific dataset and its corresponding world model,
     encodes the data, and returns the flattened embeddings.
     """
-    data = get_data(cfg, exp_cfg.dataset)
-    world_model = get_world_model(cfg, exp_cfg.model)
+    data = get_data(cfg, exp_cfg.dataset, exp_cfg.world_model)
+    world_model = get_world_model(cfg, exp_cfg.world_model)
 
-    logging.info(f"Encoding dataset: {exp_cfg.dataset.dataset_name} using model: {exp_cfg.model.name}...")
+    logging.info(f"Encoding dataset: {exp_cfg.dataset.dataset_name} using model: {exp_cfg.world_model.model_name}...")
     dataset_embeddings = []
 
     # Process batches and collect embeddings
@@ -159,7 +266,7 @@ def collect_embeddings(cfg, exp_cfg):
 
         # Encode
         batch = world_model.encode(batch, target="embed")
-        if cfg.world_model.get("backbone_only", False):  # use only vision backbone embeddings
+        if exp_cfg.world_model.get("backbone_only", False):  # use only vision backbone embeddings
             dataset_embeddings.append(batch["pixels_embed"].cpu().detach())
         else:  # use full model embeddings (proropio + action + vision)
             dataset_embeddings.append(batch["embed"].cpu().detach())
@@ -229,7 +336,7 @@ def run(cfg):
     all_labels_list = []  # Added to track source datasets
 
     # Iterate over all defined datasets and collect embeddings
-    for exp_cfg in cfg.datasets:
+    for exp_cfg in cfg.datasets.values():
         embeddings = collect_embeddings(cfg, exp_cfg)
 
         if embeddings is not None:

@@ -10,9 +10,6 @@ seed: 42
 image_size: 224
 patch_size: 16
 
-n_steps: ${eval:'${dinowm.num_preds} + ${dinowm.history_size}'}
-frameskip: 5
-
 # Define environment to visualize (and potential variations)
 env:
   env_name: swm/PushT-v1

@@ -11,6 +11,8 @@ patch_size: 16
 frameskip: 5
 cache_dir: null
 
+dimensionality_reduction: tsne
+
 # Define multiple dataset-model pairs to visualize
 datasets:
   pusht_train:

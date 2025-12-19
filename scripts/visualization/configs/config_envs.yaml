@@ -10,6 +10,8 @@ seed: 42
 image_size: 224
 patch_size: 16
 
+dimensionality_reduction: tsne
+
 # Define environment to visualize (and potential variations)
 env:
   env_name: swm/PushT-v1

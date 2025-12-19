@@ -10,6 +10,7 @@ from einops import rearrange
 from loguru import logger as logging
 from omegaconf import open_dict
 from sklearn import preprocessing
+from sklearn.decomposition import PCA
 from sklearn.manifold import TSNE
 from torchvision.transforms import v2 as transforms
 from tqdm import tqdm
@@ -400,11 +401,11 @@ def collect_embeddings(world_model, env, process, transform, cfg):
 # ============================================================================
 
 
-def compute_tsne(embeddings, cfg):
+def compute_dimensionality_reduction(embeddings, cfg):
     """
     Computes t-SNE projection on the collected embeddings.
     """
-    logging.info("Computing t-SNE...")
+    logging.info(f"Computing dimensionality reduction with {cfg.dimensionality_reduction}")
     # Flatten if embeddings are spatial (e.g. from patch tokens)
     # Shape: (N_samples, Embedding_Dim)
     embeddings = rearrange(embeddings, "b ... -> b (...)")
@@ -415,8 +416,12 @@ def compute_tsne(embeddings, cfg):
     perplexity = min(30, n_samples - 1) if n_samples > 1 else 1
 
     # Initialize and fit t-SNE
-    tsne = TSNE(n_components=2, perplexity=perplexity, random_state=cfg.get("seed", 42))
-    embeddings_2d = tsne.fit_transform(embeddings)
+    if cfg.dimensionality_reduction == "tsne":
+        tsne = TSNE(n_components=2, perplexity=perplexity, random_state=cfg.get("seed", 42))
+        embeddings_2d = tsne.fit_transform(embeddings)
+    elif cfg.dimensionality_reduction == "pca":
+        pca = PCA(n_components=2, random_state=cfg.seed)
+        embeddings_2d = pca.fit_transform(embeddings)
 
     return embeddings_2d
 
@@ -614,17 +619,17 @@ def run(cfg):
     logging.info(
         f"Computing global t-SNE for {num_variations} variations ({all_embeddings_global.shape[0]} total samples)..."
     )
-    representations_2d_global = compute_tsne(all_embeddings_global, cfg)
+    representations_2d_global = compute_dimensionality_reduction(all_embeddings_global, cfg)
 
-    # Plot Combined t-SNE
-    tsne_save_path = f"{model_name}_{env_name}_tsne.pdf"
+    # Plot Combined Dimensionality Reduction
+    dr_save_path = f"{model_name}_{env_name}_{cfg.dimensionality_reduction}.pdf"
     plot_representations(
         grid,
         representations_2d_global,
         variations_cfg=cfg.env.variations,
         samples_per_variation=samples_per_variation,
         title_suffix="Latent Space",
-        save_path=tsne_save_path,
+        save_path=dr_save_path,
     )
 
     # Process Distance Maps (Per Variation)

@@ -8,6 +8,7 @@ import torch
 from einops import rearrange
 from loguru import logger as logging
 from omegaconf import open_dict
+from sklearn.decomposition import PCA
 from sklearn.manifold import TSNE
 from torch.utils.data import DataLoader
 from tqdm import tqdm
@@ -286,9 +287,9 @@ def collect_embeddings(cfg, exp_cfg):
 # ============================================================================
 
 
-def plot_joint_tsne(embeddings_2d, labels, output_file="joint_tsne.pdf"):
+def plot_joint_dimensionality_reduction(embeddings_2d, labels, output_file="joint_tsne.pdf"):
     """
-    Plots the 2D t-SNE embeddings, coloring points by their dataset label.
+    Plots the 2D embeddings from any dimensionality reduction method, coloring points by their dataset label.
 
     Args:
         embeddings_2d (np.ndarray): Shape (N, 2) containing 2D coordinates.
@@ -347,7 +348,7 @@ def run(cfg):
             num_points = embeddings.shape[0]
             all_labels_list.extend([dataset_name] * num_points)
 
-    # Concatenate all datasets for joint TSNE
+    # Concatenate all datasets for joint dimensionality reduction
     if not all_embeddings_list:
         logging.warning("No embeddings generated from any experiment.")
         return
@@ -361,19 +362,27 @@ def run(cfg):
                 "Ensure image_size, patch_size, and model architecture are consistent across all datasets."
             )
 
-    logging.info("Computing Joint t-SNE...")
-    # Concatenate all tensors then convert to numpy for TSNE
+    logging.info("Computing Joint Dimensionality Reduction...")
+    # Concatenate all tensors then convert to numpy for dimensionality reduction
     full_embeddings = torch.cat(all_embeddings_list, dim=0).numpy()
     all_labels = np.array(all_labels_list)  # Convert labels to numpy array
 
-    # now we compute t-SNE on the embeddings
-    tsne = TSNE(n_components=2, random_state=cfg.seed)
-    embeddings_2d = tsne.fit_transform(full_embeddings)
+    if cfg.dimensionality_reduction == "tsne":
+        # now we compute t-SNE on the embeddings
+        tsne = TSNE(n_components=2, random_state=cfg.seed)
+        embeddings_2d = tsne.fit_transform(full_embeddings)
+    elif cfg.dimensionality_reduction == "pca":
+        pca = PCA(n_components=2, random_state=cfg.seed)
+        embeddings_2d = pca.fit_transform(full_embeddings)
 
-    logging.info(f"t-SNE completed. Output shape: {embeddings_2d.shape}")
+    logging.info(
+        f"Dimensionality reduction ({cfg.dimensionality_reduction}) completed. Output shape: {embeddings_2d.shape}"
+    )
 
     # Plot the results
-    plot_joint_tsne(embeddings_2d, all_labels)
+    plot_joint_dimensionality_reduction(
+        embeddings_2d, all_labels, output_file=f"joint_{cfg.dimensionality_reduction}.pdf"
+    )
 
     return
 

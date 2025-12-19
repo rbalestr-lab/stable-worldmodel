@@ -3,6 +3,7 @@ from pathlib import Path
 
 import datasets
 import hydra
+import matplotlib.animation as animation
 import matplotlib.pyplot as plt
 import numpy as np
 import stable_pretraining as spt
@@ -123,8 +124,9 @@ def get_data(cfg, dataset_cfg, model_cfg):
             episode=sampled_ep_indices[j],
             start=start_steps[j],
             end=end_steps[j],
-        )
-        traj_list.append(data[0])
+        )[0]
+        data["id"] = torch.ones(data["pixels"].shape[0], 1) * sampled_ep_indices[j]
+        traj_list.append(data)
 
     with open_dict(model_cfg) as model_cfg:
         model_cfg.extra_dims = {}
@@ -332,49 +334,143 @@ def collect_embeddings(cfg, exp_cfg):
 # ============================================================================
 
 
-def plot_trajectories(embeddings_2d, labels, output_file="trajectories_tsne.pdf"):
+def reconstruct_trajectories(flat_embeddings_2d, trajectory_lengths):
     """
-    Plots the 2D t-SNE embeddings, coloring points by their dataset label.
+    Splits the flattened t-SNE results back into a list of trajectory arrays.
+    """
+    trajs_2d = []
+    start_idx = 0
+    for length in trajectory_lengths:
+        end_idx = start_idx + length
+        trajs_2d.append(flat_embeddings_2d[start_idx:end_idx])
+        start_idx = end_idx
+    return trajs_2d
 
-    Args:
-        embeddings_2d (np.ndarray): Shape (N, 2) containing 2D coordinates.
-        labels (list or np.ndarray): Shape (N,) containing dataset names for each point.
-        output_file (str): Path to save the resulting plot.
+
+def plot_static_trajectories(trajs_2d, labels, output_file="trajectories_tsne.pdf"):
+    """
+    Plots all trajectories on the same 2D plane.
+    Colors differentiate datasets.
     """
     plt.figure(figsize=(12, 10))
 
-    # Get unique datasets to iterate over for the legend
-    unique_datasets = np.unique(labels)
+    unique_labels = np.unique(labels)
+    # Generate a distinct color for each dataset
+    colors = plt.cm.get_cmap("tab10")(np.linspace(0, 1, len(unique_labels)))
+    label_color_map = dict(zip(unique_labels, colors))
 
-    # Use a colormap suitable for categorical data
-    colors = plt.cm.rainbow(np.linspace(0, 1, len(unique_datasets)))
+    # We use a set to keep track of which labels we've added to the legend
+    added_labels = set()
 
-    for dataset_name, color in zip(unique_datasets, colors):
-        # Select indices belonging to this dataset
-        indices = np.where(labels == dataset_name)
+    for traj, label in zip(trajs_2d, labels):
+        color = label_color_map[label]
 
-        plt.scatter(
-            embeddings_2d[indices, 0],
-            embeddings_2d[indices, 1],
-            label=dataset_name,
-            c=[color],
-            alpha=0.6,
-            s=10,  # Marker size
-        )
+        # Plot the path
+        plt.plot(traj[:, 0], traj[:, 1], color=color, alpha=0.6, linewidth=1)
 
-    plt.title("Joint t-SNE of Dataset Embeddings")
-    plt.xlabel("Dimension 1")
-    plt.ylabel("Dimension 2")
-    plt.legend(title="Datasets", bbox_to_anchor=(1.05, 1), loc="upper left")
+        # Plot start and end points
+        plt.scatter(traj[0, 0], traj[0, 1], color=color, marker="o", s=30, alpha=0.8)  # Start
+        plt.scatter(traj[-1, 0], traj[-1, 1], color=color, marker="x", s=30, alpha=0.8)  # End
+
+        # Add to legend only once per dataset
+        if label not in added_labels:
+            plt.plot([], [], color=color, label=label, linewidth=2)
+            added_labels.add(label)
+
+    plt.title("Trajectory Embeddings in 2D Latent Space")
+    plt.xlabel("t-SNE dim 1")
+    plt.ylabel("t-SNE dim 2")
+    plt.legend()
     plt.tight_layout()
-
-    logging.info(f"Saving plot to {output_file}")
-    # Matplotlib automatically handles the output format based on the file extension
-    plt.savefig(output_file, dpi=300)
+    plt.savefig(output_file)
     plt.close()
+    logging.info(f"Static trajectory plot saved to {output_file}")
 
 
-# TODO have a function that makes a mp4 with pixels of the trajectory next to the tsne point moving in the latent space
+def create_video_visualization(trajs_2d, trajs_pixels, labels, output_file="trajectories_video.mp4", max_trajs=5):
+    """
+    Creates an MP4 with pixel video on left and moving t-SNE point on right.
+    Limited to `max_trajs` rows to prevent creating unreadable massive videos.
+    """
+    # Select a subset of trajectories to visualize to keep video size manageable
+    indices = np.linspace(0, len(trajs_2d) - 1, min(len(trajs_2d), max_trajs), dtype=int)
+
+    subset_trajs_2d = [trajs_2d[i] for i in indices]
+    subset_pixels = [trajs_pixels[i] for i in indices]
+    subset_labels = [labels[i] for i in indices]
+
+    n_rows = len(subset_trajs_2d)
+    max_len = max([t.shape[0] for t in subset_trajs_2d])
+
+    # Setup Figure: Rows = trajectories, Cols = 2 (Video, Latent)
+    fig, axes = plt.subplots(n_rows, 2, figsize=(10, 3 * n_rows))
+    if n_rows == 1:
+        axes = axes[np.newaxis, :]
+
+    # Pre-calculate bounds for 2D plots so axes don't shift
+    all_points = np.vstack(subset_trajs_2d)
+    x_min, x_max = all_points[:, 0].min(), all_points[:, 0].max()
+    y_min, y_max = all_points[:, 1].min(), all_points[:, 1].max()
+    margin = (x_max - x_min) * 0.1
+
+    # Initialize plots
+    img_plots = []
+    scatter_plots = []
+
+    for i in range(n_rows):
+        ax_vid = axes[i, 0]
+        ax_lat = axes[i, 1]
+
+        # --- Left: Video Frame ---
+        # Initialize with first frame (black if needed)
+        # Note: Pixels are likely (T, C, H, W), need (H, W, C)
+        # Also need to handle normalization. Simple min-max for viz.
+        frame0 = subset_pixels[i][0].permute(1, 2, 0).numpy()
+        frame0 = (frame0 - frame0.min()) / (frame0.max() - frame0.min() + 1e-6)
+
+        img_plot = ax_vid.imshow(frame0)
+        ax_vid.set_title(f"{subset_labels[i]}")
+        ax_vid.axis("off")
+        img_plots.append(img_plot)
+
+        # --- Right: Latent Space ---
+        # Plot the full faint trajectory background
+        ax_lat.plot(subset_trajs_2d[i][:, 0], subset_trajs_2d[i][:, 1], "k-", alpha=0.2)
+        # Plot the moving point
+        scat_plot = ax_lat.plot([], [], "ro", markersize=8)[0]
+
+        ax_lat.set_xlim(x_min - margin, x_max + margin)
+        ax_lat.set_ylim(y_min - margin, y_max + margin)
+        ax_lat.set_title("Latent Space")
+        scatter_plots.append(scat_plot)
+
+    def update(frame_idx):
+        for i in range(n_rows):
+            traj_len = len(subset_trajs_2d[i])
+            # Clamp index to last frame if this trajectory is shorter than max_len
+            idx = min(frame_idx, traj_len - 1)
+
+            # Update Video
+            frame = subset_pixels[i][idx].permute(1, 2, 0).numpy()
+            frame = (frame - frame.min()) / (frame.max() - frame.min() + 1e-6)
+            img_plots[i].set_data(frame)
+
+            # Update Scatter
+            pos = subset_trajs_2d[i][idx]
+            scatter_plots[i].set_data([pos[0]], [pos[1]])
+
+        return img_plots + scatter_plots
+
+    logging.info(f"Generating animation with {n_rows} trajectories over {max_len} frames...")
+    ani = animation.FuncAnimation(fig, update, frames=max_len, interval=100, blit=True)
+    ani.save(output_file, fps=10, extra_args=["-vcodec", "libx264"])
+    plt.close()
+    logging.info(f"Animation saved to {output_file}")
+
+
+# ============================================================================
+# Main Run Loop
+# ============================================================================
 
 
 @hydra.main(version_base=None, config_path="./configs", config_name="config_trajectories")
@@ -382,53 +478,67 @@ def run(cfg):
     """Run visualization script for multiple datasets and compute joint t-SNE."""
 
     all_embeddings_list = []
-    all_predicted_embeddings_list = []
+    # all_predicted_embeddings_list = []
     all_pixels_list = []
     all_labels_list = []  # Added to track source datasets
+    trajectory_lengths = []  # Track lengths to split t-SNE results later
 
     # Iterate over all defined datasets and collect embeddings
-    for key in cfg.datasets:
-        print(f"Processing dataset key: {key}, with {cfg.datasets[key].dataset.n_trajectories} trajectories")
-    for exp_cfg in cfg.datasets.values():
-        embeddings, predicted_embeddings, trajs_pixels = collect_embeddings(cfg, exp_cfg)
+    if cfg.datasets:
+        for key in cfg.datasets:
+            print(f"Processing dataset key: {key}")
+            exp_cfg = cfg.datasets[key]
 
-        if embeddings is not None:
-            all_embeddings_list.append(embeddings)
-            all_predicted_embeddings_list.append(predicted_embeddings)
-            all_pixels_list.append(trajs_pixels)
+            # Note: Assuming collect_embeddings returns list of tensors
+            embeddings, _, trajs_pixels = collect_embeddings(cfg, exp_cfg)
 
-            # Create a label entry for every point in this batch
-            dataset_name = exp_cfg.dataset.dataset_name
-            num_points = embeddings.shape[0]
-            all_labels_list.extend([dataset_name] * num_points)
+            if embeddings is not None:
+                all_embeddings_list.extend(embeddings)
+                all_pixels_list.extend(trajs_pixels)
+
+                dataset_name = exp_cfg.dataset.dataset_name
+                num_traj = len(embeddings)
+
+                # Store labels for each trajectory
+                all_labels_list.extend([dataset_name] * num_traj)
+
+                # Store lengths
+                for emb in embeddings:
+                    trajectory_lengths.append(emb.shape[0])
 
     # Concatenate all datasets for joint TSNE
     if not all_embeddings_list:
         logging.warning("No embeddings generated from any experiment.")
         return
 
-    # Ensure dimensions match before concatenating
+    # Check dims
     ref_dim = all_embeddings_list[0].shape[1]
     for i, emb in enumerate(all_embeddings_list):
         if emb.shape[1] != ref_dim:
-            raise ValueError(
-                f"Dimension mismatch in dataset {i}: expected {ref_dim}, got {emb.shape[1]}. "
-                "Ensure image_size, patch_size, and model architecture are consistent across all datasets."
-            )
+            raise ValueError(f"Dimension mismatch. Expected {ref_dim}, got {emb.shape[1]}")
 
-    logging.info("Computing Joint t-SNE...")
-    # Concatenate all tensors then convert to numpy for TSNE
+    logging.info(f"Computing Joint t-SNE on {len(all_embeddings_list)} trajectories...")
+
+    # Flatten everything into (N_total_frames, Dim)
     full_embeddings = torch.cat(all_embeddings_list, dim=0).numpy()
-    all_labels = np.array(all_labels_list)  # Convert labels to numpy array
 
-    # now we compute t-SNE on the embeddings
+    # Run t-SNE
     tsne = TSNE(n_components=2, random_state=cfg.seed)
-    embeddings_2d = tsne.fit_transform(full_embeddings)
+    embeddings_2d_flat = tsne.fit_transform(full_embeddings)
 
-    logging.info(f"t-SNE completed. Output shape: {embeddings_2d.shape}")
+    logging.info(f"t-SNE completed. Output shape: {embeddings_2d_flat.shape}")
 
-    # Plot the results
-    plot_trajectories(embeddings_2d, all_labels)
+    # Reconstruct list of (T, 2) arrays
+    trajs_2d = reconstruct_trajectories(embeddings_2d_flat, trajectory_lengths)
+
+    # Plot 1: Static 2D Latent Space
+    plot_static_trajectories(trajs_2d, all_labels_list, output_file="trajectories_tsne.pdf")
+
+    # Plot 2: Video Visualization
+    # Note: Pass max_trajs to avoid creating a video with 100 rows
+    create_video_visualization(
+        trajs_2d, all_pixels_list, all_labels_list, output_file="trajectories_video.mp4", max_trajs=4
+    )
 
     return
 

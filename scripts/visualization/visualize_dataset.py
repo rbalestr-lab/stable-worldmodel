@@ -46,13 +46,24 @@ def get_data(cfg, dataset_cfg, model_cfg):
         return lambda x: (x - mean) / std
 
     # Use dataset_cfg for specific dataset parameters
-    dataset = swm.data.FrameDataset(
-        dataset_cfg.dataset_name,
-        num_steps=dataset_cfg.n_steps,
-        frameskip=cfg.frameskip,
-        transform=None,
-        cache_dir=cfg.get("cache_dir", None),
-    )
+    if dataset_cfg.data_format == "frame":
+        dataset = swm.data.FrameDataset(
+            dataset_cfg.dataset_name,
+            num_steps=dataset_cfg.n_steps,
+            frameskip=cfg.frameskip,
+            transform=None,
+            cache_dir=cfg.get("cache_dir", None),
+        )
+    elif dataset_cfg.data_format == "video":
+        dataset = swm.data.VideoDataset(
+            dataset_cfg.dataset_name,
+            num_steps=dataset_cfg.n_steps,
+            frameskip=cfg.frameskip,
+            transform=None,
+            cache_dir=cfg.get("cache_dir", None),
+        )
+    else:
+        raise NotImplementedError(f"Data format '{dataset_cfg.data_format}' not supported.")
 
     all_norm_transforms = []
     # Use global cfg for encoding keys to ensure consistency

@@ -13,6 +13,7 @@ from einops import rearrange
 from loguru import logger as logging
 from omegaconf import open_dict
 from scipy.interpolate import interp1d
+from sklearn.decomposition import PCA
 from sklearn.manifold import TSNE
 from tqdm import tqdm
 from transformers import AutoModel, AutoModelForImageClassification
@@ -320,7 +321,7 @@ def collect_embeddings(cfg, exp_cfg):
             trajs_embeddings.append(flat_embed.cpu().detach())
 
         # predict trajectory
-        traj = world_model.rollout(init_state, traj["action"].unsqueeze(0))
+        traj = world_model.rollout(init_state, traj["action"][:, :-1].unsqueeze(0))
         if exp_cfg.world_model.get("backbone_only", False):  # use only vision backbone embeddings
             flat_predicted = rearrange(traj["predicted_pixels_embed"][0, 0], "t p d ->t (p d)")
             predicted_embeddings.append(flat_predicted.cpu().detach())
@@ -349,12 +350,14 @@ def reconstruct_trajectories(flat_embeddings_2d, trajectory_lengths):
     return trajs_2d
 
 
-def plot_static_trajectories(trajs_2d, labels, output_file="trajectories_tsne.pdf", interp_factor=10):
+def plot_static_trajectories(trajs_2d, preds_2d, labels, output_file="trajectories_tsne.pdf", interp_factor=10):
     """
-    Plots all trajectories as sequences of points on the same 2D plane.
-
+    Plots truth and predicted trajectories.
+    Truth = Solid lines.
+    Prediction = Dashed lines.
     Args:
         trajs_2d: List of (N, 2) numpy arrays.
+        preds_2d: List of (N, 2) numpy arrays corresponding to predicted trajectories.
         labels: List of labels corresponding to trajs_2d.
         output_file: Filename for the saved plot.
         interp_factor: How many times to increase point density.
@@ -363,63 +366,66 @@ def plot_static_trajectories(trajs_2d, labels, output_file="trajectories_tsne.pd
     plt.figure(figsize=(12, 10))
 
     unique_labels = np.unique(labels)
-    # Use colormaps directly
     cmap = plt.cm.get_cmap("tab10")
     colors = cmap(np.linspace(0, 1, len(unique_labels)))
     label_color_map = dict(zip(unique_labels, colors))
 
     added_labels = set()
 
-    for traj, label in zip(trajs_2d, labels):
-        # Skip trajectories that are too short to interpolate
-        if len(traj) < 2:
+    # Zip truth and prediction together
+    for traj, pred, label in zip(trajs_2d, preds_2d, labels):
+        # Skip trajectories that are too short
+        if len(traj) < 2 or len(pred) < 2:
             continue
 
         base_color = label_color_map[label]
         rgb = mcolors.to_rgb(base_color)
 
-        # --- Interpolation Step ---
-        # Original indices (0, 1, 2, ... N-1)
-        x_indices = np.arange(len(traj))
+        # --- Helper for interpolation ---
+        def get_dense_traj(arr_2d):
+            x_ind = np.arange(len(arr_2d))
+            new_ind = np.linspace(0, len(arr_2d) - 1, num=len(arr_2d) * interp_factor)
+            f_x = interp1d(x_ind, arr_2d[:, 0], kind="linear")
+            f_y = interp1d(x_ind, arr_2d[:, 1], kind="linear")
+            return f_x(new_ind), f_y(new_ind)
 
-        # New finer indices (0, 0.1, 0.2, ... N-1)
-        # We generate 'interp_factor' times more points
-        new_indices = np.linspace(0, len(traj) - 1, num=len(traj) * interp_factor)
+        # 1. Plot Truth (Solid)
+        t_x, t_y = get_dense_traj(traj)
+        num_points = len(t_x)
 
-        # Create interpolation functions for x and y coordinates
-        # kind='linear' ensures we strictly follow the straight path between points
-        f_x = interp1d(x_indices, traj[:, 0], kind="linear")
-        f_y = interp1d(x_indices, traj[:, 1], kind="linear")
+        # Color gradient for truth
+        t_colors = np.zeros((num_points, 4))
+        t_colors[:, :3] = rgb
+        t_colors[:, 3] = np.linspace(0.1, 1.0, num_points)  # Alpha gradient
 
-        # Generate the new dense trajectory
-        traj_dense_x = f_x(new_indices)
-        traj_dense_y = f_y(new_indices)
-
-        num_points = len(traj_dense_x)
-
-        # --- Color Gradient Step ---
-        point_colors = np.zeros((num_points, 4))
-        point_colors[:, :3] = rgb
-        # Alpha increases from 0.05 to 1.0 (start lighter since points are denser)
-        point_colors[:, 3] = np.linspace(0.05, 1.0, num_points)
-
-        # Plot the dense points
-        # s=5: reduced size because points are now much closer together
-        plt.scatter(traj_dense_x, traj_dense_y, c=point_colors, s=5, edgecolors="none")
-
-        # --- Markers ---
-        # Plot markers at the REAL original start and end locations
+        plt.scatter(t_x, t_y, c=t_colors, s=5, edgecolors="none")
+        # Markers for Truth
         plt.scatter(
-            traj[0, 0], traj[0, 1], color=base_color, marker="o", s=40, alpha=1.0, edgecolors="white", zorder=10
+            traj[0, 0],
+            traj[0, 1],
+            color=base_color,
+            marker="o",
+            s=40,
+            zorder=10,
+            label=label if label not in added_labels else "",
         )
-        plt.scatter(traj[-1, 0], traj[-1, 1], color=base_color, marker="x", s=40, alpha=1.0, linewidth=2, zorder=10)
+        plt.scatter(traj[-1, 0], traj[-1, 1], color=base_color, marker="x", s=40, zorder=10)
 
-        # Legend handling
-        if label not in added_labels:
-            plt.scatter([], [], color=base_color, label=label, s=30)
-            added_labels.add(label)
+        # 2. Plot Prediction (Dashed line effect via scatter with spacing or simple plot)
+        # Using simple plot for dashed effect is cleaner for predictions
+        p_x, p_y = get_dense_traj(pred)
 
-    plt.title("Trajectory Embeddings (Interpolated)")
+        # We plot the prediction as a faint dashed line to distinguish it
+        plt.plot(p_x, p_y, color=base_color, linestyle="--", linewidth=1.5, alpha=0.7)
+
+        # End marker for prediction (Distinct from truth)
+        plt.scatter(
+            pred[-1, 0], pred[-1, 1], color=base_color, marker="*", s=50, zorder=10, edgecolors="white", linewidth=0.5
+        )
+
+        added_labels.add(label)
+
+    plt.title("Trajectory Embeddings: Truth (Solid) vs Prediction (Dashed)")
     plt.xlabel("t-SNE dim 1")
     plt.ylabel("t-SNE dim 2")
     plt.legend()
@@ -429,113 +435,113 @@ def plot_static_trajectories(trajs_2d, labels, output_file="trajectories_tsne.pd
     logging.info(f"Static trajectory plot saved to {output_file}")
 
 
-def create_video_visualization(trajs_2d, trajs_pixels, labels, output_file="trajectories_video.mp4", max_trajs=5):
+def create_video_visualization(
+    trajs_2d, preds_2d, trajs_pixels, labels, output_file="trajectories_video.mp4", max_trajs=5
+):
     """
-    Creates an MP4 with pixel video on left and moving t-SNE trail on right.
-    - Colors match the static plot (per dataset).
-    - Latent space shows a 'trail' where past points fade out.
+    Creates MP4 with:
+    Left: Video pixels
+    Right: Latent space with TWO trails (Truth = Circle, Pred = Star/Cross)
     """
-    # Select a subset of trajectories to visualize
     indices = np.linspace(0, len(trajs_2d) - 1, min(len(trajs_2d), max_trajs), dtype=int)
 
-    subset_trajs_2d = [trajs_2d[i] for i in indices]
+    subset_trajs = [trajs_2d[i] for i in indices]
+    subset_preds = [preds_2d[i] for i in indices]
     subset_pixels = [trajs_pixels[i] for i in indices]
     subset_labels = [labels[i] for i in indices]
 
-    n_rows = len(subset_trajs_2d)
-    max_len = max([t.shape[0] for t in subset_trajs_2d])
+    n_rows = len(subset_trajs)
+    max_len = max([t.shape[0] for t in subset_trajs])
 
-    # --- Color Setup ---
+    # Color Setup
     unique_labels = np.unique(labels)
-    # Using the same colormap as the static plot for consistency
     cmap = plt.cm.get_cmap("tab10")
     colors = cmap(np.linspace(0, 1, len(unique_labels)))
     label_color_map = dict(zip(unique_labels, colors))
 
-    # Setup Figure
     fig, axes = plt.subplots(n_rows, 2, figsize=(10, 3 * n_rows))
     if n_rows == 1:
         axes = axes[np.newaxis, :]
 
-    # Pre-calculate bounds
-    all_points = np.vstack(subset_trajs_2d)
+    # Calculate bounds based on both truth and preds
+    all_points = np.vstack(subset_trajs + subset_preds)
     x_min, x_max = all_points[:, 0].min(), all_points[:, 0].max()
     y_min, y_max = all_points[:, 1].min(), all_points[:, 1].max()
     margin = (x_max - x_min) * 0.1
 
     img_plots = []
-    scatter_plots = []
+    scat_truth_plots = []
+    scat_pred_plots = []
 
     for i in range(n_rows):
         ax_vid = axes[i, 0]
         ax_lat = axes[i, 1]
-
         label = subset_labels[i]
         base_color = label_color_map[label]
 
-        # --- Left: Video Frame ---
-        # Initialize with first frame
+        # --- Left: Video ---
         frame0 = subset_pixels[i][0].permute(1, 2, 0).numpy()
         frame0 = (frame0 - frame0.min()) / (frame0.max() - frame0.min() + 1e-6)
-
-        img_plot = ax_vid.imshow(frame0)
+        img_plots.append(ax_vid.imshow(frame0))
         ax_vid.set_title(f"{label}")
         ax_vid.axis("off")
-        img_plots.append(img_plot)
 
-        # --- Right: Latent Space ---
-        # Plot the FULL static trajectory faintly in the background for context
+        # --- Right: Latent ---
+        # Background faint traces
+        ax_lat.plot(subset_trajs[i][:, 0], subset_trajs[i][:, 1], color=base_color, alpha=0.15, linewidth=1)
         ax_lat.plot(
-            subset_trajs_2d[i][:, 0], subset_trajs_2d[i][:, 1], color=base_color, alpha=0.15, linewidth=1, zorder=1
+            subset_preds[i][:, 0], subset_preds[i][:, 1], color=base_color, alpha=0.15, linewidth=1, linestyle="--"
         )
 
-        # Initialize the dynamic scatter plot (the "trail")
-        # We start with empty data
-        scat_plot = ax_lat.scatter([], [], color=base_color, s=20, zorder=2)
+        # Dynamic scatter trails
+        # Truth trail
+        scat_t = ax_lat.scatter([], [], color=base_color, s=20, marker="o", zorder=2)
+        # Prediction trail
+        scat_p = ax_lat.scatter(
+            [], [], color=base_color, s=30, marker="*", zorder=2, edgecolors="black", linewidth=0.2
+        )
+
+        scat_truth_plots.append(scat_t)
+        scat_pred_plots.append(scat_p)
 
         ax_lat.set_xlim(x_min - margin, x_max + margin)
         ax_lat.set_ylim(y_min - margin, y_max + margin)
-        ax_lat.set_title("Latent Space Trail")
-        scatter_plots.append(scat_plot)
+        ax_lat.set_title("Latent: Truth (o) vs Pred (*)")
 
     def update(frame_idx):
         artists = []
         for i in range(n_rows):
-            traj_len = len(subset_trajs_2d[i])
+            traj_len = len(subset_trajs[i])
             idx = min(frame_idx, traj_len - 1)
 
-            # --- Update Video ---
+            # Update Video
             frame = subset_pixels[i][idx].permute(1, 2, 0).numpy()
             frame = (frame - frame.min()) / (frame.max() - frame.min() + 1e-6)
             img_plots[i].set_data(frame)
             artists.append(img_plots[i])
 
-            # --- Update Latent Trail ---
-            # Get the path history up to the current frame
-            current_path = subset_trajs_2d[i][: idx + 1]
+            # Helper for trail colors
+            def get_trail_colors(n_pts):
+                c = np.zeros((n_pts, 4))
+                c[:, :3] = mcolors.to_rgb(label_color_map[subset_labels[i]])
+                c[:, 3] = np.linspace(0.1, 1.0, n_pts)
+                return c
 
-            # Create the gradient colors
-            base_rgb = mcolors.to_rgb(label_color_map[subset_labels[i]])
-            num_points = len(current_path)
+            # Update Truth Trail
+            path_t = subset_trajs[i][: idx + 1]
+            scat_truth_plots[i].set_offsets(path_t)
+            scat_truth_plots[i].set_color(get_trail_colors(len(path_t)))
+            artists.append(scat_truth_plots[i])
 
-            rgba_colors = np.zeros((num_points, 4))
-            rgba_colors[:, :3] = base_rgb
-            # Alpha increases from 0.05 (oldest) to 1.0 (current/newest)
-            rgba_colors[:, 3] = np.linspace(0.05, 1.0, num_points)
-
-            # Update position and color
-            scatter_plots[i].set_offsets(current_path)
-            scatter_plots[i].set_color(rgba_colors)
-
-            # Make the current "head" point slightly larger if desired (optional)
-            # scatter_plots[i].set_sizes(...)
-
-            artists.append(scatter_plots[i])
+            # Update Pred Trail
+            path_p = subset_preds[i][: idx + 1]
+            scat_pred_plots[i].set_offsets(path_p)
+            scat_pred_plots[i].set_color(get_trail_colors(len(path_p)))
+            artists.append(scat_pred_plots[i])
 
         return artists
 
-    logging.info(f"Generating animation with {n_rows} trajectories over {max_len} frames...")
-    # interval=100ms -> 10fps
+    logging.info(f"Generating animation with {n_rows} trajectories...")
     ani = animation.FuncAnimation(fig, update, frames=max_len, interval=100, blit=True)
     ani.save(output_file, fps=10, extra_args=["-vcodec", "libx264"])
     plt.close()
@@ -552,10 +558,10 @@ def run(cfg):
     """Run visualization script for multiple datasets and compute joint t-SNE."""
 
     all_embeddings_list = []
-    # all_predicted_embeddings_list = []
+    all_predicted_embeddings_list = []
     all_pixels_list = []
-    all_labels_list = []  # Added to track source datasets
-    trajectory_lengths = []  # Track lengths to split t-SNE results later
+    all_labels_list = []
+    trajectory_lengths = []
 
     # Iterate over all defined datasets and collect embeddings
     if cfg.datasets:
@@ -563,26 +569,23 @@ def run(cfg):
             print(f"Processing dataset key: {key}")
             exp_cfg = cfg.datasets[key]
 
-            # Note: Assuming collect_embeddings returns list of tensors
-            embeddings, _, trajs_pixels = collect_embeddings(cfg, exp_cfg)
+            embeddings, predicted_embeddings, trajs_pixels = collect_embeddings(cfg, exp_cfg)
 
             if embeddings is not None:
                 all_embeddings_list.extend(embeddings)
+                all_predicted_embeddings_list.extend(predicted_embeddings)
                 all_pixels_list.extend(trajs_pixels)
 
                 dataset_name = exp_cfg.dataset.dataset_name
                 num_traj = len(embeddings)
 
-                # Store labels for each trajectory
                 all_labels_list.extend([dataset_name] * num_traj)
 
-                # Store lengths
                 for emb in embeddings:
                     trajectory_lengths.append(emb.shape[0])
 
-    # Concatenate all datasets for joint TSNE
     if not all_embeddings_list:
-        logging.warning("No embeddings generated from any experiment.")
+        logging.warning("No embeddings generated.")
         return
 
     # Check dims
@@ -590,28 +593,50 @@ def run(cfg):
     for i, emb in enumerate(all_embeddings_list):
         if emb.shape[1] != ref_dim:
             raise ValueError(f"Dimension mismatch. Expected {ref_dim}, got {emb.shape[1]}")
+        if all_predicted_embeddings_list[i].shape[1] != ref_dim:
+            raise ValueError(
+                f"Dimension mismatch in predicted embeddings. Expected {ref_dim}, got {all_predicted_embeddings_list[i].shape[1]}"
+            )
 
-    logging.info(f"Computing Joint t-SNE on {len(all_embeddings_list)} trajectories...")
+    # Concatenate Truth embeddings
+    truth_tensor = torch.cat(all_embeddings_list, dim=0)
+    # Concatenate Predicted embeddings
+    pred_tensor = torch.cat(all_predicted_embeddings_list, dim=0)
 
-    # Flatten everything into (N_total_frames, Dim)
-    full_embeddings = torch.cat(all_embeddings_list, dim=0).numpy()
+    # Create Joint tensor for dimensionality reduction
+    full_embeddings = torch.cat([truth_tensor, pred_tensor], dim=0).numpy()
 
-    # Run t-SNE
-    tsne = TSNE(n_components=2, random_state=cfg.seed)
-    embeddings_2d_flat = tsne.fit_transform(full_embeddings)
+    # Run dimensionality reduction:
+    if cfg.dimensionality_reduction == "tsne":
+        logging.info(f"Computing t-SNE on {full_embeddings.shape[0]} points (Truth + Pred)...")
+        tsne = TSNE(n_components=2, random_state=cfg.seed)
+        embeddings_2d_flat = tsne.fit_transform(full_embeddings)
+    elif cfg.dimensionality_reduction == "pca":
+        logging.info(f"Computing PCA on {full_embeddings.shape[0]} points (Truth + Pred)...")
+        pca = PCA(n_components=2, random_state=cfg.seed)
+        embeddings_2d_flat = pca.fit_transform(full_embeddings)
+    else:
+        raise ValueError(f"Unsupported dimensionality reduction method: {cfg.dimensionality_reduction}")
 
-    logging.info(f"t-SNE completed. Output shape: {embeddings_2d_flat.shape}")
+    logging.info(f"Dimensionality reduction completed. Output shape: {embeddings_2d_flat.shape}")
 
-    # Reconstruct list of (T, 2) arrays
-    trajs_2d = reconstruct_trajectories(embeddings_2d_flat, trajectory_lengths)
+    # Split back into Truth and Pred components
+    total_points = embeddings_2d_flat.shape[0]
+    split_idx = total_points // 2  # Exact split since truth and pred have same lengths
 
-    # Plot 1: Static 2D Latent Space
-    plot_static_trajectories(trajs_2d, all_labels_list, output_file="trajectories_tsne.pdf")
+    truth_2d_flat = embeddings_2d_flat[:split_idx]
+    pred_2d_flat = embeddings_2d_flat[split_idx:]
 
-    # Plot 2: Video Visualization
-    # Note: Pass max_trajs to avoid creating a video with 100 rows
+    # Reconstruct list of (T, 2) arrays for both
+    trajs_2d = reconstruct_trajectories(truth_2d_flat, trajectory_lengths)
+    preds_2d = reconstruct_trajectories(pred_2d_flat, trajectory_lengths)
+
+    # Plot 1: Static 2D Latent Space (Truth + Pred)
+    plot_static_trajectories(trajs_2d, preds_2d, all_labels_list, output_file="trajectories_tsne.pdf")
+
+    # Plot 2: Video Visualization (Truth + Pred)
     create_video_visualization(
-        trajs_2d, all_pixels_list, all_labels_list, output_file="trajectories_video.mp4", max_trajs=4
+        trajs_2d, preds_2d, all_pixels_list, all_labels_list, output_file="trajectories_video.mp4", max_trajs=4
     )
 
     return

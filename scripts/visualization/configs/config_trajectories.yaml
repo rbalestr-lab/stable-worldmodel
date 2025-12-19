@@ -10,6 +10,7 @@ image_size: 224
 patch_size: 16
 frameskip: 5
 cache_dir: null
+dimensionality_reduction: pca
 
 # Define multiple dataset-model pairs to visualize
 datasets:

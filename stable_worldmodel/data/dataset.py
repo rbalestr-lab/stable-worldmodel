@@ -1,4 +1,5 @@
 import logging
+import numbers
 import os
 from pathlib import Path
 
@@ -106,13 +107,13 @@ class Dataset:
         raise NotImplementedError("Dataset.decode must be implemented in subclass")
 
     def load_chunk(self, episode, start, end):
-        if type(episode) is int:
+        if isinstance(episode, numbers.Integral):
             episode = [episode]
 
-        if type(start) is int:
+        if isinstance(start, numbers.Integral):
             start = [start] * len(episode)
 
-        if type(end) is int:
+        if isinstance(end, numbers.Integral):
             end = [end] * len(episode)
 
         if not (self.frameskip == 1 and self.num_steps == 1):
@@ -133,6 +134,11 @@ class Dataset:
 
             if en > len(episode_indices) or s < 0 or en <= s:
                 raise ValueError(f"Invalid start/end indices for episode {ep}: [{s}, {en})")
+
+            if (en - s) % self.frameskip != 0:
+                raise ValueError(
+                    f"Invalid start/end indices for episode {ep} with frameskip {self.frameskip}: [{s}, {en}). Must be divisible by frameskip."
+                )
 
             episode_mask = self.dataset["episode_idx"][:] == ep
             steps_mask = self.dataset["step_idx"][:]
@@ -162,7 +168,7 @@ class Dataset:
 
             # reshape action
             if "action" in steps:
-                act_shape = en - s
+                act_shape = (en - s) // self.frameskip
                 steps["action"] = steps["action"].reshape(act_shape, -1)
 
             chunks.append(steps)

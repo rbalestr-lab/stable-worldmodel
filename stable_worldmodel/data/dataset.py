@@ -99,6 +99,10 @@ class Dataset:
 
         return
 
+    @property
+    def column_names(self):
+        return self.dataset.column_names
+
     def __len__(self):
         return int(self.episode_starts[-1]) if not self.complete_traj else len(self.episodes)
 
@@ -311,12 +315,27 @@ class InjectedDataset:
         self.idx_to_ds = np.searchsorted(self.cumulative_sizes, np.arange(len(self)), side="right") - 1
         return
 
+    @property
+    def column_names(self):
+        return self.datasets[0].column_names
+
     def check_consistency(self):
         fs = self.datasets[0].frameskip
         ns = self.datasets[0].num_steps
         for ds in self.datasets[1:]:
             if ds.frameskip != fs or ds.num_steps != ns:
                 raise ValueError("All datasets must have the same frameskip and num_steps")
+
+        # keep only the intersection of column names
+        column_sets = [set(ds.column_names) for ds in self.datasets]
+        common_columns = set.intersection(*column_sets)
+
+        for i, ds in enumerate(self.datasets):
+            cols_to_remove = set(ds.column_names) - common_columns
+            if len(cols_to_remove) > 0:
+                print(f"InjectedDataset: Removing columns {cols_to_remove} from dataset {i} for consistency")
+                self.datasets[i].dataset = ds.dataset.remove_columns(list(cols_to_remove))
+
         return
 
     def __len__(self):

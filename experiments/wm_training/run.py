@@ -109,7 +109,7 @@ def get_data(cfg):
         "cache_dir": cfg.get("cache_dir", None),
     }
 
-    dataset = swm.data.VideoDataset(
+    dataset = swm.data.FrameDataset(
         cfg.dataset_name,
         **ds_config,
     )
@@ -131,7 +131,15 @@ def get_data(cfg):
 
     dataset.transform = transform
 
-    print(cfg.injected_dataset.names, len(cfg.injected_dataset.names))
+    with open_dict(cfg) as cfg:
+        cfg.extra_dims = {}
+        for key in cfg.pyro.get("encoding", {}):
+            if key not in dataset.column_names:
+                raise ValueError(f"Encoding key '{key}' not found in dataset columns.")
+            inpt_dim = dataset.dataset[0][key].numel()
+            cfg.extra_dims[key] = inpt_dim if key != "action" else inpt_dim * cfg.frameskip
+
+    # add injected datasets if specified
     if len(cfg.injected_dataset.names) > 0:
         assert cfg.injected_dataset.proportions is not None
         assert len(cfg.injected_dataset.proportions) == len(cfg.injected_dataset.names)
@@ -166,14 +174,6 @@ def get_data(cfg):
         generator=rnd_gen,
     )
     val = DataLoader(val_set, batch_size=cfg.batch_size, num_workers=cfg.num_workers, pin_memory=True)
-
-    with open_dict(cfg) as cfg:
-        cfg.extra_dims = {}
-        for key in cfg.pyro.get("encoding", {}):
-            if key not in dataset.dataset.column_names:
-                raise ValueError(f"Encoding key '{key}' not found in dataset columns.")
-            inpt_dim = dataset.dataset[0][key].numel()
-            cfg.extra_dims[key] = inpt_dim if key != "action" else inpt_dim * cfg.frameskip
 
     return spt.data.DataModule(train=train, val=val)
 

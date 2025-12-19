@@ -96,6 +96,7 @@ python experiments/wm_training/run.py --config-name=pusht.yaml --multirun backbo
 ```bash
 python experiments/wm_training/run.py --config-name=pusht.yaml --multirun backbone=dinov2_small dataset_name=pusht_weak_100,pusht_weak_300 launcher=your_name
 ```
+>>> need fix
 
 ## quality interpolation
 

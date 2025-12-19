@@ -4,6 +4,7 @@ from pathlib import Path
 import datasets
 import hydra
 import matplotlib.animation as animation
+import matplotlib.colors as mcolors
 import matplotlib.pyplot as plt
 import numpy as np
 import stable_pretraining as spt
@@ -11,6 +12,7 @@ import torch
 from einops import rearrange
 from loguru import logger as logging
 from omegaconf import open_dict
+from scipy.interpolate import interp1d
 from sklearn.manifold import TSNE
 from tqdm import tqdm
 from transformers import AutoModel, AutoModelForImageClassification
@@ -330,7 +332,7 @@ def collect_embeddings(cfg, exp_cfg):
 
 
 # ============================================================================
-# Main Visualization Script
+# Visualization Functions
 # ============================================================================
 
 
@@ -347,37 +349,77 @@ def reconstruct_trajectories(flat_embeddings_2d, trajectory_lengths):
     return trajs_2d
 
 
-def plot_static_trajectories(trajs_2d, labels, output_file="trajectories_tsne.pdf"):
+def plot_static_trajectories(trajs_2d, labels, output_file="trajectories_tsne.pdf", interp_factor=10):
     """
-    Plots all trajectories on the same 2D plane.
-    Colors differentiate datasets.
+    Plots all trajectories as sequences of points on the same 2D plane.
+
+    Args:
+        trajs_2d: List of (N, 2) numpy arrays.
+        labels: List of labels corresponding to trajs_2d.
+        output_file: Filename for the saved plot.
+        interp_factor: How many times to increase point density.
+                       1 = original points, 10 = 10x denser.
     """
     plt.figure(figsize=(12, 10))
 
     unique_labels = np.unique(labels)
-    # Generate a distinct color for each dataset
-    colors = plt.cm.get_cmap("tab10")(np.linspace(0, 1, len(unique_labels)))
+    # Use colormaps directly
+    cmap = plt.cm.get_cmap("tab10")
+    colors = cmap(np.linspace(0, 1, len(unique_labels)))
     label_color_map = dict(zip(unique_labels, colors))
 
-    # We use a set to keep track of which labels we've added to the legend
     added_labels = set()
 
     for traj, label in zip(trajs_2d, labels):
-        color = label_color_map[label]
+        # Skip trajectories that are too short to interpolate
+        if len(traj) < 2:
+            continue
 
-        # Plot the path
-        plt.plot(traj[:, 0], traj[:, 1], color=color, alpha=0.6, linewidth=1)
+        base_color = label_color_map[label]
+        rgb = mcolors.to_rgb(base_color)
 
-        # Plot start and end points
-        plt.scatter(traj[0, 0], traj[0, 1], color=color, marker="o", s=30, alpha=0.8)  # Start
-        plt.scatter(traj[-1, 0], traj[-1, 1], color=color, marker="x", s=30, alpha=0.8)  # End
+        # --- Interpolation Step ---
+        # Original indices (0, 1, 2, ... N-1)
+        x_indices = np.arange(len(traj))
 
-        # Add to legend only once per dataset
+        # New finer indices (0, 0.1, 0.2, ... N-1)
+        # We generate 'interp_factor' times more points
+        new_indices = np.linspace(0, len(traj) - 1, num=len(traj) * interp_factor)
+
+        # Create interpolation functions for x and y coordinates
+        # kind='linear' ensures we strictly follow the straight path between points
+        f_x = interp1d(x_indices, traj[:, 0], kind="linear")
+        f_y = interp1d(x_indices, traj[:, 1], kind="linear")
+
+        # Generate the new dense trajectory
+        traj_dense_x = f_x(new_indices)
+        traj_dense_y = f_y(new_indices)
+
+        num_points = len(traj_dense_x)
+
+        # --- Color Gradient Step ---
+        point_colors = np.zeros((num_points, 4))
+        point_colors[:, :3] = rgb
+        # Alpha increases from 0.05 to 1.0 (start lighter since points are denser)
+        point_colors[:, 3] = np.linspace(0.05, 1.0, num_points)
+
+        # Plot the dense points
+        # s=5: reduced size because points are now much closer together
+        plt.scatter(traj_dense_x, traj_dense_y, c=point_colors, s=5, edgecolors="none")
+
+        # --- Markers ---
+        # Plot markers at the REAL original start and end locations
+        plt.scatter(
+            traj[0, 0], traj[0, 1], color=base_color, marker="o", s=40, alpha=1.0, edgecolors="white", zorder=10
+        )
+        plt.scatter(traj[-1, 0], traj[-1, 1], color=base_color, marker="x", s=40, alpha=1.0, linewidth=2, zorder=10)
+
+        # Legend handling
         if label not in added_labels:
-            plt.plot([], [], color=color, label=label, linewidth=2)
+            plt.scatter([], [], color=base_color, label=label, s=30)
             added_labels.add(label)
 
-    plt.title("Trajectory Embeddings in 2D Latent Space")
+    plt.title("Trajectory Embeddings (Interpolated)")
     plt.xlabel("t-SNE dim 1")
     plt.ylabel("t-SNE dim 2")
     plt.legend()
@@ -389,10 +431,11 @@ def plot_static_trajectories(trajs_2d, labels, output_file="trajectories_tsne.pd
 
 def create_video_visualization(trajs_2d, trajs_pixels, labels, output_file="trajectories_video.mp4", max_trajs=5):
     """
-    Creates an MP4 with pixel video on left and moving t-SNE point on right.
-    Limited to `max_trajs` rows to prevent creating unreadable massive videos.
+    Creates an MP4 with pixel video on left and moving t-SNE trail on right.
+    - Colors match the static plot (per dataset).
+    - Latent space shows a 'trail' where past points fade out.
     """
-    # Select a subset of trajectories to visualize to keep video size manageable
+    # Select a subset of trajectories to visualize
     indices = np.linspace(0, len(trajs_2d) - 1, min(len(trajs_2d), max_trajs), dtype=int)
 
     subset_trajs_2d = [trajs_2d[i] for i in indices]
@@ -402,18 +445,24 @@ def create_video_visualization(trajs_2d, trajs_pixels, labels, output_file="traj
     n_rows = len(subset_trajs_2d)
     max_len = max([t.shape[0] for t in subset_trajs_2d])
 
-    # Setup Figure: Rows = trajectories, Cols = 2 (Video, Latent)
+    # --- Color Setup ---
+    unique_labels = np.unique(labels)
+    # Using the same colormap as the static plot for consistency
+    cmap = plt.cm.get_cmap("tab10")
+    colors = cmap(np.linspace(0, 1, len(unique_labels)))
+    label_color_map = dict(zip(unique_labels, colors))
+
+    # Setup Figure
     fig, axes = plt.subplots(n_rows, 2, figsize=(10, 3 * n_rows))
     if n_rows == 1:
         axes = axes[np.newaxis, :]
 
-    # Pre-calculate bounds for 2D plots so axes don't shift
+    # Pre-calculate bounds
     all_points = np.vstack(subset_trajs_2d)
     x_min, x_max = all_points[:, 0].min(), all_points[:, 0].max()
     y_min, y_max = all_points[:, 1].min(), all_points[:, 1].max()
     margin = (x_max - x_min) * 0.1
 
-    # Initialize plots
     img_plots = []
     scatter_plots = []
 
@@ -421,47 +470,72 @@ def create_video_visualization(trajs_2d, trajs_pixels, labels, output_file="traj
         ax_vid = axes[i, 0]
         ax_lat = axes[i, 1]
 
+        label = subset_labels[i]
+        base_color = label_color_map[label]
+
         # --- Left: Video Frame ---
-        # Initialize with first frame (black if needed)
-        # Note: Pixels are likely (T, C, H, W), need (H, W, C)
-        # Also need to handle normalization. Simple min-max for viz.
+        # Initialize with first frame
         frame0 = subset_pixels[i][0].permute(1, 2, 0).numpy()
         frame0 = (frame0 - frame0.min()) / (frame0.max() - frame0.min() + 1e-6)
 
         img_plot = ax_vid.imshow(frame0)
-        ax_vid.set_title(f"{subset_labels[i]}")
+        ax_vid.set_title(f"{label}")
         ax_vid.axis("off")
         img_plots.append(img_plot)
 
         # --- Right: Latent Space ---
-        # Plot the full faint trajectory background
-        ax_lat.plot(subset_trajs_2d[i][:, 0], subset_trajs_2d[i][:, 1], "k-", alpha=0.2)
-        # Plot the moving point
-        scat_plot = ax_lat.plot([], [], "ro", markersize=8)[0]
+        # Plot the FULL static trajectory faintly in the background for context
+        ax_lat.plot(
+            subset_trajs_2d[i][:, 0], subset_trajs_2d[i][:, 1], color=base_color, alpha=0.15, linewidth=1, zorder=1
+        )
+
+        # Initialize the dynamic scatter plot (the "trail")
+        # We start with empty data
+        scat_plot = ax_lat.scatter([], [], color=base_color, s=20, zorder=2)
 
         ax_lat.set_xlim(x_min - margin, x_max + margin)
         ax_lat.set_ylim(y_min - margin, y_max + margin)
-        ax_lat.set_title("Latent Space")
+        ax_lat.set_title("Latent Space Trail")
         scatter_plots.append(scat_plot)
 
     def update(frame_idx):
+        artists = []
         for i in range(n_rows):
             traj_len = len(subset_trajs_2d[i])
-            # Clamp index to last frame if this trajectory is shorter than max_len
             idx = min(frame_idx, traj_len - 1)
 
-            # Update Video
+            # --- Update Video ---
             frame = subset_pixels[i][idx].permute(1, 2, 0).numpy()
             frame = (frame - frame.min()) / (frame.max() - frame.min() + 1e-6)
             img_plots[i].set_data(frame)
+            artists.append(img_plots[i])
 
-            # Update Scatter
-            pos = subset_trajs_2d[i][idx]
-            scatter_plots[i].set_data([pos[0]], [pos[1]])
+            # --- Update Latent Trail ---
+            # Get the path history up to the current frame
+            current_path = subset_trajs_2d[i][: idx + 1]
 
-        return img_plots + scatter_plots
+            # Create the gradient colors
+            base_rgb = mcolors.to_rgb(label_color_map[subset_labels[i]])
+            num_points = len(current_path)
+
+            rgba_colors = np.zeros((num_points, 4))
+            rgba_colors[:, :3] = base_rgb
+            # Alpha increases from 0.05 (oldest) to 1.0 (current/newest)
+            rgba_colors[:, 3] = np.linspace(0.05, 1.0, num_points)
+
+            # Update position and color
+            scatter_plots[i].set_offsets(current_path)
+            scatter_plots[i].set_color(rgba_colors)
+
+            # Make the current "head" point slightly larger if desired (optional)
+            # scatter_plots[i].set_sizes(...)
+
+            artists.append(scatter_plots[i])
+
+        return artists
 
     logging.info(f"Generating animation with {n_rows} trajectories over {max_len} frames...")
+    # interval=100ms -> 10fps
     ani = animation.FuncAnimation(fig, update, frames=max_len, interval=100, blit=True)
     ani.save(output_file, fps=10, extra_args=["-vcodec", "libx264"])
     plt.close()

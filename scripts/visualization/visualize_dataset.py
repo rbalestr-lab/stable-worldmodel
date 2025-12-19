@@ -286,7 +286,7 @@ def collect_embeddings(cfg, exp_cfg):
 # ============================================================================
 
 
-def plot_joint_tsne(embeddings_2d, labels, output_file="joint_tsne.pdf"):  # <-- Changed default extension to .pdf
+def plot_joint_tsne(embeddings_2d, labels, output_file="joint_tsne.pdf"):
     """
     Plots the 2D t-SNE embeddings, coloring points by their dataset label.
 

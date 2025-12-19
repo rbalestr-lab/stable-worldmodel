@@ -275,6 +275,10 @@ class InjectedDataset:
         self.datasets = [original_dataset] + external_datasets
         self.proportions = proportions or [1.0 / len(self.datasets)] * len(self.datasets)
 
+        # infer original dataset proportion
+        og_prop = 1.0 - sum(self.proportions)
+        self.proportions = [og_prop] + self.proportions
+
         if sum(self.proportions) != 1.0:
             raise ValueError("Proportions must sum to 1.0")
 

@@ -340,6 +340,10 @@ def get_state_grid(env, grid_size: int = 10):
         # Extract low/high limits for the specified dims
         min_val = [env.variation_space["agent"]["position"].low[d] for d in dim]
         max_val = [env.variation_space["agent"]["position"].high[d] for d in dim]
+        # decrease range a bit to avoid unreachable states
+        range_val = [max_v - min_v for min_v, max_v in zip(min_val, max_val)]
+        min_val = [min_v + 0.1 * r for min_v, r in zip(min_val, range_val)]
+        max_val = [max_v - 0.1 * r for max_v, r in zip(max_val, range_val)]
     else:
         raise NotImplementedError(f"State grid generation not implemented for env type: {type(env)}")
 

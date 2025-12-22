@@ -183,38 +183,9 @@ def get_world_model(cfg, model_cfg):
 
     if model_cfg.model_name is not None:
         model = swm.policy.AutoCostModel(model_cfg.model_name).to(cfg.get("device", "cpu"))
-        torch.hub._validate_not_a_forked_repo = lambda a, b, c: True
-
-        class DinoV2Encoder(torch.nn.Module):
-            def __init__(self, name, feature_key):
-                super().__init__()
-                self.name = name
-                self.base_model = torch.hub.load("facebookresearch/dinov2", name)
-                self.feature_key = feature_key
-                self.emb_dim = self.base_model.num_features
-                if feature_key == "x_norm_patchtokens":
-                    self.latent_ndim = 2
-                elif feature_key == "x_norm_clstoken":
-                    self.latent_ndim = 1
-                else:
-                    raise ValueError(f"Invalid feature key: {feature_key}")
-
-                self.patch_size = self.base_model.patch_size
-
-            def forward(self, x):
-                emb = self.base_model.forward_features(x)[self.feature_key]
-                if self.latent_ndim == 1:
-                    emb = emb.unsqueeze(1)  # dummy patch dim
-                return emb
-
-        ckpt = torch.load(swm.data.utils.get_cache_dir() / model_cfg.ckpt_path)
-        model.backbone = DinoV2Encoder("dinov2_vits14", feature_key="x_norm_patchtokens").to(cfg.get("device", "cpu"))
-        model.predictor.load_state_dict(ckpt["predictor"], strict=False)
-        model.action_encoder.load_state_dict(ckpt["action_encoder"])
-        model.proprio_encoder.load_state_dict(ckpt["proprio_encoder"])
         model = model.to(cfg.get("device", "cpu"))
         model = model.eval()
-    else:
+    else:  # no checkpoint found, build model from scratch
         encoder, embedding_dim, num_patches, interp_pos_enc = get_encoder(cfg, model_cfg)
         embedding_dim += sum(emb_dim for emb_dim in model_cfg.get("encoding", {}).values())  # add all extra dims
 

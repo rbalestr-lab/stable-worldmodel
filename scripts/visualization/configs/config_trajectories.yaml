@@ -23,7 +23,6 @@ datasets:
   #     n_steps: ${eval:'${..world_model.num_preds} + ${..world_model.history_size}'}
   #   world_model:
   #     model_name: dinowm_pusht_fixed
-  #     ckpt_path: dinowm_pusht_weights.ckpt
   pusht_val:
     dataset:
       dataset_name: pusht_expert_val
@@ -32,5 +31,4 @@ datasets:
       n_trajectories: 2
       n_steps: ${eval:'${..world_model.num_preds} + ${..world_model.history_size}'}
     world_model:
-      model_name: dinowm_pusht_fixed
-      ckpt_path: dinowm_pusht_weights.ckpt
+      model_name: pusht_dinov2_small_psmall_epoch_20

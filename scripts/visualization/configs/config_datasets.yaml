@@ -30,7 +30,6 @@ datasets:
       n_steps: ${eval:'${..world_model.num_preds} + ${..world_model.history_size}'}
     world_model:
       model_name: null
-      ckpt_path: null
   pusht_val:
     dataset:
       dataset_name: pusht_expert_val
@@ -41,7 +40,6 @@ datasets:
       n_steps: ${eval:'${..world_model.num_preds} + ${..world_model.history_size}'}
     world_model:
       model_name: null
-      ckpt_path: null
   pusht_background_color_variation:
     dataset:
       dataset_name: pusht_single_var_weak_100/background/color
@@ -52,7 +50,6 @@ datasets:
       n_steps: ${eval:'${..world_model.num_preds} + ${..world_model.history_size}'}
     world_model:
       model_name: null
-      ckpt_path: null
   pusht_block_color_variation:
     dataset:
       dataset_name: pusht_single_var_weak_100/block/color
@@ -63,7 +60,6 @@ datasets:
       n_steps: ${eval:'${..world_model.num_preds} + ${..world_model.history_size}'}
     world_model:
       model_name: null
-      ckpt_path: null
   pusht_agent_color_variation:
     dataset:
       dataset_name: pusht_single_var_weak_100/agent/color
@@ -74,7 +70,6 @@ datasets:
       n_steps: ${eval:'${..world_model.num_preds} + ${..world_model.history_size}'}
     world_model:
       model_name: null
-      ckpt_path: null
   pusht_block_shape_variation:
     dataset:
       dataset_name: pusht_single_var_weak_100/block/shape
@@ -85,7 +80,6 @@ datasets:
       n_steps: ${eval:'${..world_model.num_preds} + ${..world_model.history_size}'}
     world_model:
       model_name: null
-      ckpt_path: null
   pusht_agent_shape_variation:
     dataset:
       dataset_name: pusht_single_var_weak_100/agent/shape
@@ -96,4 +90,3 @@ datasets:
       n_steps: ${eval:'${..world_model.num_preds} + ${..world_model.history_size}'}
     world_model:
       model_name: null
-      ckpt_path: null

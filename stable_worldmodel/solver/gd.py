@@ -137,7 +137,6 @@ class GradientSolver(torch.nn.Module):
 
             # We initialize the optimizer class passed in __init__ with the kwargs
             optim = self.optimizer_cls([batch_init], **self.optimizer_kwargs)
-            optim = torch.optim.SGD([batch_init], lr=1.0)
 
             # Prepare Batch Infos
             # Slice the input info_dict and then expand dimensions

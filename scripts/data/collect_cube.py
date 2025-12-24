@@ -40,9 +40,6 @@ def collect_shard(shard_id, seed, cfg):
         options = cfg.get("options")
         traj_per_shard = cfg.num_traj // cfg.num_shards
 
-        traj_per_shard = cfg.num_traj // cfg.num_shards
-        options = cfg.get("options")
-
         logging.info(f"Process {shard_id}: Started collecting {traj_per_shard} trajectories...")
 
         world.record_dataset(

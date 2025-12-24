@@ -73,9 +73,6 @@ def get_encoder(cfg):
     return backbone, embedding_dim, num_patches, interp_pos_enc
 
 
-DINO_PATCH_SIZE = 14  # DINO encoder uses 14x14 patches
-
-
 # ============================================================================
 # Data Setup
 # ============================================================================
@@ -124,8 +121,8 @@ def get_data(cfg):
         trans_fn = spt.data.transforms.WrapTorchTransform(trans_fn, source=key, target=key)
         all_norm_transforms.append(trans_fn)
 
-    patch_size = 14
-    img_size = (cfg.image_size // cfg.patch_size) * patch_size
+    # patch_size = 14
+    img_size = 224  # (cfg.image_size // cfg.patch_size) * patch_size
 
     # Apply transforms to all steps
     dataset.transform = spt.data.transforms.Compose(
@@ -232,6 +229,8 @@ def get_world_model(cfg):
 
     encoder, embedding_dim, num_patches, interp_pos_enc = get_encoder(cfg)
     embedding_dim += sum(emb_dim for emb_dim in cfg.pyro.get("encoding", {}).values())  # add all extra dims
+
+    num_patches = 196 * max(1, cfg.pyro.history_size)
 
     logging.info(f"Patches: {num_patches}, Embedding dim: {embedding_dim}")
 

@@ -2,8 +2,6 @@ import time
 
 import numpy as np
 import torch
-from gymnasium.spaces import Box
-from loguru import logger as logging
 
 from .solver import Costable
 
@@ -33,17 +31,6 @@ class CEMSolver:
         self.topk = topk
         self.device = device
         self.torch_gen = torch.Generator(device=device).manual_seed(seed)
-
-    def configure(self, *, action_space, n_envs: int, config) -> None:
-        self._action_space = action_space
-        self._n_envs = n_envs
-        self._config = config
-        self._action_dim = int(np.prod(action_space.shape[1:]))
-        self._configured = True
-
-        # warning if action space is discrete
-        if not isinstance(action_space, Box):
-            logging.warning(f"Action space is discrete, got {type(action_space)}. CEMSolver may not work as expected.")
 
     @property
     def n_envs(self) -> int:

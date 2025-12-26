@@ -6,6 +6,8 @@ defaults:
   - world_model@datasets.pusht_agent_color_variation.world_model: pyro
   - world_model@datasets.pusht_block_shape_variation.world_model: pyro
   - world_model@datasets.pusht_agent_shape_variation.world_model: pyro
+  - world_model@datasets.tworoom.world_model: pyro
+  - world_model@datasets.tworoom_agent_color_variation.world_model: pyro
   - _self_ # Overrides from this file apply LAST
 
 # Global Settings (Must be consistent across datasets for TSNE dimensions to match)
@@ -83,6 +85,26 @@ datasets:
   pusht_agent_shape_variation:
     dataset:
       dataset_name: pusht_single_var_weak_100/agent/shape
+      batch_size: 1
+      num_workers: 1
+      visual_split: 0.0005
+      data_format: video
+      n_steps: ${eval:'${..world_model.num_preds} + ${..world_model.history_size}'}
+    world_model:
+      model_name: null
+  tworoom:
+    dataset:
+      dataset_name: tworoom_noisy
+      batch_size: 1
+      num_workers: 1
+      visual_split: 0.0005
+      data_format: video
+      n_steps: ${eval:'${..world_model.num_preds} + ${..world_model.history_size}'}
+    world_model:
+      model_name: null
+  tworoom_agent_color_variation:
+    dataset:
+      dataset_name: tworoom_noisy_single_var/agent/color
       batch_size: 1
       num_workers: 1
       visual_split: 0.0005

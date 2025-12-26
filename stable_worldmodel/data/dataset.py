@@ -92,6 +92,17 @@ class Dataset:
 
         self.clip_len = max(frameskip * num_steps, 1) if not self.complete_traj else 0
 
+        # # Uncomment to print episode length distribution stats
+        # lengths = [len(self.episode_indices[ep]) for ep in self.episodes]
+        # print("Episode length distribution:")
+        # dist = Counter(lengths)
+        # for length in sorted(dist):
+        #     print(f"{length:4d}: {dist[length]}")
+        # print(f"Min episode length: {min(lengths)}")
+        # print(f"Max episode length: {max(lengths)}")
+        # print(f"Average episode length: {sum(lengths) / len(lengths):.2f}")
+        # ######################################################
+
         if any(len(self.episode_indices[ep]) < self.clip_len for ep in self.episodes):
             if all(len(self.episode_indices[ep]) < self.clip_len for ep in self.episodes):
                 raise ValueError(f"At least one episode must have at least {self.clip_len} steps")

@@ -64,3 +64,8 @@ register(
     id="swm/PFRocketLanding-v0",
     entry_point="stable_worldmodel.envs.rocket_landing.pyflyt_rocketlanding:RocketLandingEnv",
 )
+
+register(
+    id="swm/PotionLab-v0",
+    entry_point="stable_worldmodel.envs.potion_lab:PotionLab",
+)

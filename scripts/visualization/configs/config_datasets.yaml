@@ -109,7 +109,7 @@ datasets:
       dataset_name: tworoom_noisy_single_var/agent/color
       batch_size: 1
       num_workers: 1
-      visual_split: 0.0005
+      visual_split: 0.012
       data_format: video
       n_steps: ${eval:'${..world_model.num_preds} + ${..world_model.history_size}'}
     world_model:
@@ -119,7 +119,7 @@ datasets:
       dataset_name: ogb_cube_oracle
       batch_size: 1
       num_workers: 1
-      visual_split: 0.00005
+      visual_split: 0.00003
       data_format: video
       n_steps: ${eval:'${..world_model.num_preds} + ${..world_model.history_size}'}
     world_model:
@@ -129,7 +129,7 @@ datasets:
       dataset_name: ogb_scene_oracle
       batch_size: 1
       num_workers: 1
-      visual_split: 0.00005
+      visual_split: 0.00003
       data_format: video
       n_steps: ${eval:'${..world_model.num_preds} + ${..world_model.history_size}'}
     world_model:

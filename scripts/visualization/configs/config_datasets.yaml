@@ -9,6 +9,7 @@ defaults:
   - world_model@datasets.tworoom.world_model: pyro
   - world_model@datasets.tworoom_agent_color_variation.world_model: pyro
   - world_model@datasets.ogbench_cube.world_model: pyro_action_only
+  - world_model@datasets.ogbench_scene.world_model: pyro_action_only
   - _self_ # Overrides from this file apply LAST
 
 # Global Settings (Must be consistent across datasets for TSNE dimensions to match)
@@ -116,6 +117,16 @@ datasets:
   ogbench_cube:
     dataset:
       dataset_name: ogb_cube_oracle
+      batch_size: 1
+      num_workers: 1
+      visual_split: 0.00005
+      data_format: video
+      n_steps: ${eval:'${..world_model.num_preds} + ${..world_model.history_size}'}
+    world_model:
+      model_name: null
+  ogbench_scene:
+    dataset:
+      dataset_name: ogb_scene_oracle
       batch_size: 1
       num_workers: 1
       visual_split: 0.00005

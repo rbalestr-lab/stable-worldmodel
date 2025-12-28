@@ -99,7 +99,7 @@ datasets:
       dataset_name: tworoom_noisy
       batch_size: 1
       num_workers: 1
-      visual_split: 0.0005
+      visual_split: 0.0009
       data_format: video
       n_steps: ${eval:'${..world_model.num_preds} + ${..world_model.history_size}'}
     world_model:
@@ -109,7 +109,7 @@ datasets:
       dataset_name: tworoom_noisy_single_var/agent/color
       batch_size: 1
       num_workers: 1
-      visual_split: 0.012
+      visual_split: 0.014
       data_format: video
       n_steps: ${eval:'${..world_model.num_preds} + ${..world_model.history_size}'}
     world_model:

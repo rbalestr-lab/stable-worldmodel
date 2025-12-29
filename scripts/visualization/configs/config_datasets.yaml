@@ -8,6 +8,9 @@ defaults:
   - world_model@datasets.pusht_agent_shape_variation.world_model: pyro
   - world_model@datasets.tworoom.world_model: pyro
   - world_model@datasets.tworoom_agent_color_variation.world_model: pyro
+  - world_model@datasets.tworoom_agent_radius_variation.world_model: pyro
+  - world_model@datasets.tworoom_wall_color_variation.world_model: pyro
+  - world_model@datasets.tworoom_background_color_variation.world_model: pyro
   - world_model@datasets.ogbench_cube.world_model: pyro_action_only
   - world_model@datasets.ogbench_scene.world_model: pyro_action_only
   - _self_ # Overrides from this file apply LAST
@@ -107,6 +110,36 @@ datasets:
   tworoom_agent_color_variation:
     dataset:
       dataset_name: tworoom_noisy_single_var/agent/color
+      batch_size: 1
+      num_workers: 1
+      visual_split: 0.014
+      data_format: video
+      n_steps: ${eval:'${..world_model.num_preds} + ${..world_model.history_size}'}
+    world_model:
+      model_name: null
+  tworoom_background_color_variation:
+    dataset:
+      dataset_name: tworoom_noisy_single_var/background/color
+      batch_size: 1
+      num_workers: 1
+      visual_split: 0.014
+      data_format: video
+      n_steps: ${eval:'${..world_model.num_preds} + ${..world_model.history_size}'}
+    world_model:
+      model_name: null
+  tworoom_wall_color_variation:
+    dataset:
+      dataset_name: tworoom_noisy_single_var/wall/color
+      batch_size: 1
+      num_workers: 1
+      visual_split: 0.014
+      data_format: video
+      n_steps: ${eval:'${..world_model.num_preds} + ${..world_model.history_size}'}
+    world_model:
+      model_name: null
+  tworoom_agent_radius_variation:
+    dataset:
+      dataset_name: tworoom_noisy_single_var/agent/radius
       batch_size: 1
       num_workers: 1
       visual_split: 0.014

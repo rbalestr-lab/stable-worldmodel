@@ -119,7 +119,7 @@ def get_data(cfg):
 
     def norm_col_transform(dataset, col="pixels"):
         """Normalize column to zero mean, unit variance."""
-        data = dataset[col][:]
+        data = dataset[col][:].squeeze()
         mean = data.mean(0).unsqueeze(0)
         std = data.std(0).unsqueeze(0)
         return lambda x: (x - mean) / std
@@ -234,7 +234,7 @@ def get_world_model(cfg):
 
         # Replace NaN values with 0 (occurs at sequence boundaries)
         for key in self.model.extra_encoders.keys():
-            batch[key] = torch.nan_to_num(batch[key], 0.0)
+            batch[key] = torch.nan_to_num(batch[key], 0.0).squeeze()
 
         # Encode all timesteps into latent embeddings
         batch = self.model.encode(batch, target="embed", is_video=cfg.backbone.get("is_video_encoder", False))

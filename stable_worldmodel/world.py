@@ -969,8 +969,8 @@ class World:
         columns = dataset.dataset.column_names
 
         # keep relevant part of the chunk
-        init_step_per_env = {c: [] for c in columns}
-        goal_step_per_env = {c: [] for c in columns}
+        init_step_per_env = defaultdict(list)
+        goal_step_per_env = defaultdict(list)
 
         for i, ep in enumerate(data):
             for col in columns:
@@ -979,6 +979,10 @@ class World:
                 if col.startswith("pixels"):
                     # permute channel to be last
                     ep[col] = ep[col].permute(0, 2, 3, 1)
+
+                # TODO handle better
+                if not isinstance(ep[col], (torch.Tensor | np.ndarray)):
+                    continue
 
                 init_data = ep[col][0]
                 goal_data = ep[col][-1]

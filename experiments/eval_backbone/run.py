@@ -1,7 +1,6 @@
 import time
 from pathlib import Path
 
-import datasets
 import hydra
 import numpy as np
 import stable_pretraining as spt
@@ -56,16 +55,27 @@ def run(cfg: DictConfig):
         "goal": img_transform(),
     }
 
-    dataset_path = Path(cfg.cache_dir or swm.data.utils.get_cache_dir(), cfg.eval.dataset_name)
-    dataset = datasets.load_from_disk(dataset_path).with_format("numpy")
-    ep_indices, _ = np.unique(dataset["episode_idx"][:], return_index=True)
+    dataset_path = Path(cfg.cache_dir or swm.data.utils.get_cache_dir())
+
+    data_class = (
+        swm.data.FrameDataset
+        if "expert" in cfg.eval.dataset_name and "video" not in cfg.eval.dataset_name
+        else swm.data.VideoDataset
+    )
+
+    print("Using dataset class:", data_class.__name__)
+
+    dataset = data_class(cfg.eval.dataset_name, cache_dir=dataset_path)
+    hf_dataset = dataset.dataset.with_format("numpy")
+
+    ep_indices, _ = np.unique(hf_dataset["episode_idx"][:], return_index=True)
 
     # create the processing
     action_process = preprocessing.StandardScaler()
-    action_process.fit(dataset["action"][:])
+    action_process.fit(hf_dataset["action"][:])
 
     proprio_process = preprocessing.StandardScaler()
-    proprio_process.fit(dataset["proprio"][:])
+    proprio_process.fit(hf_dataset["proprio"][:])
 
     process = {
         "action": action_process,
@@ -78,23 +88,22 @@ def run(cfg: DictConfig):
     model = model.to("cuda")
     model = model.eval()
     model.requires_grad_(False)
-
-    # model.interpolate_pos_encoding = True
+    model.interpolate_pos_encoding = True
 
     config = swm.PlanConfig(**cfg.plan_config)
     solver = hydra.utils.instantiate(cfg.solver, model=model)
     policy = swm.policy.WorldModelPolicy(solver=solver, config=config, process=process, transform=transform)
 
     # sample the episodes and the starting indices
-    episode_len = get_episodes_length(dataset, ep_indices)
+    episode_len = get_episodes_length(hf_dataset, ep_indices)
     max_start_idx = episode_len - cfg.eval.goal_offset_steps - 1
     max_start_idx_dict = {ep_id: max_start_idx[i] for i, ep_id in enumerate(ep_indices)}
     # Map each dataset row’s episode_idx to its max_start_idx
-    max_start_per_row = np.array([max_start_idx_dict[ep_id] for ep_id in dataset["episode_idx"]])
+    max_start_per_row = np.array([max_start_idx_dict[ep_id] for ep_id in hf_dataset["episode_idx"][:]])
 
     # remove all the lines of dataset for which dataset['step_idx'] > max_start_per_row
-    valid_mask = dataset["step_idx"] <= max_start_per_row
-    dataset_start = dataset.select(np.nonzero(valid_mask)[0])
+    valid_mask = hf_dataset["step_idx"][:] <= max_start_per_row
+    dataset_start = hf_dataset.select(np.nonzero(valid_mask)[0])
 
     g = np.random.default_rng(cfg.seed)
     random_episode_indices = g.choice(len(dataset_start) - 1, size=cfg.eval.num_eval, replace=False)
@@ -106,8 +115,6 @@ def run(cfg: DictConfig):
 
     world.set_policy(policy)
 
-    dataset = swm.data.FrameDataset(cfg.eval.dataset_name)
-
     start_time = time.time()
     metrics = world.evaluate_from_dataset(
         dataset,
@@ -115,10 +122,7 @@ def run(cfg: DictConfig):
         goal_offset_steps=cfg.eval.goal_offset_steps,
         eval_budget=cfg.eval.eval_budget,
         episodes_idx=eval_episodes.tolist(),
-        callables={
-            "_set_state": "state",
-            "_set_goal_state": "goal_state",
-        },
+        callables=cfg.eval.get("callables"),
     )
     end_time = time.time()
 

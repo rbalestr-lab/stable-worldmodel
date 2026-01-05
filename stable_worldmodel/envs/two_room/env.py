@@ -207,7 +207,8 @@ class TwoRoomEnv(gym.Env):
             goal_state = options["goal_state"]
         else:
             goal_state = self.variation_space["goal"]["position"].value
-        self._set_state(np.concatenate([goal_state, goal_state]))
+        self._goal_state = np.concatenate([goal_state, goal_state])
+        self._set_state(self._goal_state)
         self._goal = self.render()
 
         # restore original state
@@ -453,7 +454,7 @@ class TwoRoomEnv(gym.Env):
         self.space.on_collision(0, 0, post_solve=self._handle_collision)
         self.n_contact_points = 0
 
-    def _set_state(self, state):
+    def _set_proprio(self, state):
         if isinstance(state, np.ndarray):
             state = state.tolist()
 
@@ -464,6 +465,9 @@ class TwoRoomEnv(gym.Env):
         self.goal.position = pos_goal
 
         self.space.step(self.dt)
+
+    def _set_goal_proprio(self, goal_state):
+        self._goal_state = goal_state
 
     def _get_obs(self):
         speed = self.variation_space["agent"]["speed"].value.item()
@@ -481,7 +485,9 @@ class TwoRoomEnv(gym.Env):
             "goal": self._goal,
             "energy": self.energy,
             "max_energy": self.variation_space["agent"]["max_energy"].value,
+            "goal_proprio": np.concatenate((self._goal_state[2:4], self._goal_state[-2:])),
         }
+
         return info
 
     def _set_body_color(self, body, color):

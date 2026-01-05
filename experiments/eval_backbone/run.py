@@ -1,3 +1,9 @@
+import os
+
+
+os.environ["MUJOCO_GL"] = "egl"
+
+
 import time
 from pathlib import Path
 
@@ -5,7 +11,7 @@ import hydra
 import numpy as np
 import stable_pretraining as spt
 import torch
-from omegaconf import DictConfig
+from omegaconf import DictConfig, OmegaConf
 from sklearn import preprocessing
 from torchvision.transforms import v2 as transforms
 
@@ -41,6 +47,7 @@ def run(cfg: DictConfig):
     assert cfg.plan_config.horizon * cfg.plan_config.action_block <= cfg.eval.eval_budget, (
         "Planning horizon must be smaller than or equal to eval_budget"
     )
+
     if cfg.wandb.use_wandb:
         # Initialize wandb
         wandb.init(project=cfg.wandb.project, entity=cfg.wandb.entity, config=dict(cfg))
@@ -84,15 +91,20 @@ def run(cfg: DictConfig):
     }
 
     # -- run evaluation
-    model = swm.policy.AutoCostModel(cfg.policy)
-    model = model.to("cuda")
-    model = model.eval()
-    model.requires_grad_(False)
-    model.interpolate_pos_encoding = True
+    policy = cfg.get("policy", "random")
 
-    config = swm.PlanConfig(**cfg.plan_config)
-    solver = hydra.utils.instantiate(cfg.solver, model=model)
-    policy = swm.policy.WorldModelPolicy(solver=solver, config=config, process=process, transform=transform)
+    if policy != "random":
+        model = swm.policy.AutoCostModel(cfg.policy)
+        model = model.to("cuda")
+        model = model.eval()
+        model.requires_grad_(False)
+        model.interpolate_pos_encoding = True
+
+        config = swm.PlanConfig(**cfg.plan_config)
+        solver = hydra.utils.instantiate(cfg.solver, model=model)
+        policy = swm.policy.WorldModelPolicy(solver=solver, config=config, process=process, transform=transform)
+    else:
+        policy = swm.policy.RandomPolicy()
 
     # sample the episodes and the starting indices
     episode_len = get_episodes_length(hf_dataset, ep_indices)
@@ -122,7 +134,7 @@ def run(cfg: DictConfig):
         goal_offset_steps=cfg.eval.goal_offset_steps,
         eval_budget=cfg.eval.eval_budget,
         episodes_idx=eval_episodes.tolist(),
-        callables=cfg.eval.get("callables"),
+        callables=OmegaConf.to_container(cfg.eval.get("callables"), resolve=True),
     )
     end_time = time.time()
 

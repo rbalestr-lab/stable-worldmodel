@@ -454,7 +454,7 @@ class TwoRoomEnv(gym.Env):
         self.space.on_collision(0, 0, post_solve=self._handle_collision)
         self.n_contact_points = 0
 
-    def _set_proprio(self, state):
+    def _set_state(self, state):
         if isinstance(state, np.ndarray):
             state = state.tolist()
 
@@ -466,7 +466,7 @@ class TwoRoomEnv(gym.Env):
 
         self.space.step(self.dt)
 
-    def _set_goal_proprio(self, goal_state):
+    def _set_goal_state(self, goal_state):
         self._goal_state = goal_state
 
     def _get_obs(self):

@@ -4,6 +4,7 @@ defaults:
   - override /hydra/launcher: submitit_slurm
 
 n_gpus: 8
+n_nodes: 1
 cpus_per_task: 16
 mem_per_gpu_gb: 210
 cache_dir: null # Use stable-worldmodel default cache
@@ -27,7 +28,7 @@ hydra:
     mem_gb: ${mem_per_gpu_gb} # ${n_gpus} * ${mem_per_gpu_gb}
     gpus_per_node: ${n_gpus}
     tasks_per_node: ${n_gpus}
-    nodes: 1
+    nodes: ${n_nodes}
     partition: learn
     account: fair_amaia_cw_video
     qos: explore

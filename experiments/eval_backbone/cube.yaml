@@ -33,20 +33,21 @@ eval:
   dataset_name: ogb_cube_oracle
   callables:
     # -- set state
-    set_state:
-      qpos:
-        value: qpos
-      qvel:
-        value: qvel
+    - method: set_state
+      args:
+        qpos:
+          value: qpos
+        qvel:
+          value: qvel
     # -- set target pos
-    set_target_pos:
-      cude_id:
-        value: 0
-        in_dataset: False
-      target_pos:
-        value: goal_privileged/block_0_pos
-        set_target_quat:
-      target_quat:
-        value: goal_privileged/block_0_quat
+    - method: set_target_pos
+      args:
+        cube_id:
+          value: 0
+          in_dataset: False
+        target_pos:
+          value: goal_privileged/block_0_pos
+        target_quat:
+          value: goal_privileged/block_0_quat
 output:
   filename: ogb_cube_results.txt

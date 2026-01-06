@@ -24,18 +24,17 @@ eval:
   goal_offset_steps: 25
   eval_budget: 50
   dataset_name: pusht_expert_train
-  # callables:
-  #   _set_state: state
-  #   _set_goal_state: goal_state
   callables:
     # -- set state
-    _set_state:
-      state:
-        value: state
+    - method: _set_state
+      args:
+        state:
+          value: state
     # -- set goal state
-    _set_goal_state:
-      goal_state:
-        value: goal_state
+    - method: _set_goal_state
+      args:
+        goal_state:
+          value: goal_state
 
 output:
   filename: pusht_results.txt

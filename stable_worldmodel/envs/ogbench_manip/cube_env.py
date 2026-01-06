@@ -1129,12 +1129,12 @@ class CubeEnv(ManipSpaceEnv):
 
         return cube_successes
 
-    def set_target_pos(self, cude_id, target_pos, target_quat=None):
+    def set_target_pos(self, cube_id, target_pos, target_quat=None):
         """Set the target position and optional orientation for a specific cube."""
         num_target_pos = len(self._cube_target_mocap_ids)
-        if cude_id < 0 or cude_id >= num_target_pos:
-            raise ValueError(f"cude_id out of range (maximum {num_target_pos - 1})")
-        mocap_id = self._cube_target_mocap_ids[cude_id]
+        if cube_id < 0 or cube_id >= num_target_pos:
+            raise ValueError(f"cube_id out of range (maximum {num_target_pos - 1})")
+        mocap_id = self._cube_target_mocap_ids[cube_id]
         self._data.mocap_pos[mocap_id] = np.asarray(target_pos, dtype=np.float64)
         if target_quat is not None:
             self._data.mocap_quat[mocap_id] = target_quat

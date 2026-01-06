@@ -1017,29 +1017,31 @@ class World:
         for i, env in enumerate(self.envs.unwrapped.envs):
             env = env.unwrapped
 
-            for method_name, args in callables.items():
+            for spec in callables:
+                method_name = spec["method"]
                 if not hasattr(env, method_name):
                     logging.warning(f"Env {env} has no method {method_name}, skipping callable")
                     continue
 
-            method = getattr(env, method_name)
+                method = getattr(env, method_name)
+                args = spec.get("args", spec)
 
-            # prepare args
-            prepared_args = {}
-            for args_name, args_data in args.items():
-                value = args_data.get("value", None)
-                is_in_datset = args_data.get("in_dataset", True)
+                # prepare args
+                prepared_args = {}
+                for args_name, args_data in args.items():
+                    value = args_data.get("value", None)
+                    is_in_datset = args_data.get("in_dataset", True)
 
-                if is_in_datset:
-                    if value not in init_step:
-                        logging.warning(f"Col {value} not found in dataset, skipping callable for env {env}")
-                        continue
-                    prepared_args[args_name] = deepcopy(init_step[value][i])
-                else:
-                    prepared_args[args_name] = args_data.get("value")
+                    if is_in_datset:
+                        if value not in init_step:
+                            logging.warning(f"Col {value} not found in dataset, skipping callable for env {env}")
+                            continue
+                        prepared_args[args_name] = deepcopy(init_step[value][i])
+                    else:
+                        prepared_args[args_name] = args_data.get("value")
 
-            # call method with prepared args
-            method(**prepared_args)
+                # call method with prepared args
+                method(**prepared_args)
 
         for i, env in enumerate(self.envs.unwrapped.envs):
             env = env.unwrapped

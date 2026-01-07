@@ -35,6 +35,7 @@ def get_encoder(cfg):
         "dino": {"prefix": "facebook/dino-"},
         "dinov2": {"prefix": "facebook/dinov2-"},
         "dinov3": {"prefix": "facebook/dinov3-"},
+        "webssl": {"prefix": "facebook/webssl-"},
         "mae": {"prefix": "facebook/vit-mae-"},
         "ijepa": {"prefix": "facebook/ijepa"},
         "vjepa2": {"prefix": "facebook/vjepa2-vit"},
@@ -252,25 +253,20 @@ def get_world_model(cfg):
 
         start = pixels_dim
         action_dim_range = [0, 0]
+
         for key in self.model.extra_encoders.keys():
             emb_dim = batch[f"{key}_embed"].shape[-1]
+            lo, hi = start, start + emb_dim
+
             if key == "action":
-                action_dim_range = [start, start + emb_dim]
-                continue  # skip action encoding loss
-
-            emb_dim = batch[f"{key}_embed"].shape[-1]
-            pred_embedding[..., start : start + emb_dim]
-            target_embedding[..., start : start + emb_dim]
-
-            if key in self.model.extra_encoders:
-                extra_loss = F.mse_loss(
-                    pred_embedding[..., start : start + emb_dim],
-                    target_embedding[..., start : start + emb_dim].detach(),
+                action_dim_range = [lo, hi]
+            else:
+                batch[f"{key}_loss"] = F.mse_loss(
+                    pred_embedding[..., lo:hi],
+                    target_embedding[..., lo:hi].detach(),
                 )
-                # loss = loss + extra_loss
-                batch[f"{key}_loss"] = extra_loss
 
-            start += emb_dim
+            start = hi
 
         # Total loss
         actionless_pred = torch.cat(

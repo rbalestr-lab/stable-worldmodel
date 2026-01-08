@@ -14,7 +14,7 @@ hydra:
   launcher:
     # ===== SLURM resources =====
     account: torch_pr_305_general
-    time: 2-00:00:00
+    timeout_min: 2880 # 2 days
 
     gres: gpu:1
     cpus_per_task: 8

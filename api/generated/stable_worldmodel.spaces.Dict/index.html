@@ -99,7 +99,6 @@
 </ul>
 </li>
 <li class="toctree-l1" x-data="{ expanded: $el.classList.contains('current') ? true : false }"><a :class="{ 'expanded' : expanded }" @click="expanded = !expanded" class="reference internal expandable" href="../../solver/">Solver<button @click.prevent.stop="expanded = !expanded" type="button"><span class="sr-only"></span><svg fill="currentColor" height="18px" stroke="none" viewbox="0 0 24 24" width="18px" xmlns="http://www.w3.org/2000/svg"><path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"></path></svg></button></a><ul x-show="expanded">
-<li class="toctree-l2"><a class="reference internal" href="../stable_worldmodel.solver.GDSolver/">GDSolver</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../stable_worldmodel.solver.CEMSolver/">CEMSolver</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../stable_worldmodel.solver.MPPISolver/">MPPISolver</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../stable_worldmodel.solver.NevergradSolver/">NevergradSolver</a></li>
@@ -168,7 +167,7 @@
 <h1>Dict<a class="headerlink" href="#dict" title="Link to this heading"><svg height="1em" viewbox="0 0 24 24" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"></path></svg></a></h1>
 <dl class="py class">
 <dt class="sig sig-object py" id="stable_worldmodel.spaces.Dict">
-<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Dict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">init_value</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">constrain_fn</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sampling_order</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/stable_worldmodel/spaces/#Dict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.spaces.Dict" title="Link to this definition" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#stable_worldmodel.spaces.Dict'"><svg height="1em" viewbox="0 0 24 24" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"></path></svg></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Dict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">init_value</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">constrain_fn</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sampling_order</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/stable_worldmodel/spaces/#Dict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.spaces.Dict" title="Link to this definition" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#stable_worldmodel.spaces.Dict'"><svg height="1em" viewbox="0 0 24 24" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"></path></svg></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code></p>
 <p>Extended dictionary space with ordered sampling and nested support.</p>
 <p>This class extends <code class="docutils literal notranslate"><span class="pre">gymnasium.spaces.Dict</span></code> to add state management,
@@ -331,7 +330,7 @@ False otherwise.</p>
 </dd></dl>
 <dl class="py property">
 <dt class="sig sig-object py" id="stable_worldmodel.spaces.Dict.init_value">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">init_value</span></span><a class="headerlink" href="#stable_worldmodel.spaces.Dict.init_value" title="Link to this definition" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#stable_worldmodel.spaces.Dict.init_value'"><svg height="1em" viewbox="0 0 24 24" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"></path></svg></a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">init_value</span></span><a class="headerlink" href="#stable_worldmodel.spaces.Dict.init_value" title="Link to this definition" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#stable_worldmodel.spaces.Dict.init_value'"><svg height="1em" viewbox="0 0 24 24" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"></path></svg></a></dt>
 <dd><p>Initial values for all contained spaces.</p>
 <p>Constructs initial value dictionary from contained spaces’ init_value
 properties. Falls back to sampling if a space lacks init_value.</p>
@@ -407,7 +406,7 @@ Defaults to True.</p></li>
 </dd></dl>
 <dl class="py property">
 <dt class="sig sig-object py" id="stable_worldmodel.spaces.Dict.sampling_order">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">sampling_order</span></span><a class="headerlink" href="#stable_worldmodel.spaces.Dict.sampling_order" title="Link to this definition" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#stable_worldmodel.spaces.Dict.sampling_order'"><svg height="1em" viewbox="0 0 24 24" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"></path></svg></a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">sampling_order</span></span><a class="headerlink" href="#stable_worldmodel.spaces.Dict.sampling_order" title="Link to this definition" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#stable_worldmodel.spaces.Dict.sampling_order'"><svg height="1em" viewbox="0 0 24 24" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"></path></svg></a></dt>
 <dd><p>Set of dotted paths for all variables in sampling order.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
@@ -422,6 +421,40 @@ Defaults to True.</p></li>
 </dd>
 <dt class="field-odd">Type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>set</p>
+</dd>
+</dl>
+</dd></dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="stable_worldmodel.spaces.Dict.set_init_value">
+<span class="sig-name descname"><span class="pre">set_init_value</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">variations_values</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/stable_worldmodel/spaces/#Dict.set_init_value"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.spaces.Dict.set_init_value" title="Link to this definition" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#stable_worldmodel.spaces.Dict.set_init_value'"><svg height="1em" viewbox="0 0 24 24" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"></path></svg></a></dt>
+<dd><p>Set initial values for specific keys in the Dict space.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>variations_values</strong> (<em>dict</em>) – A dictionary of key-value pairs to set as initial values.
+Keys should use dot notation for nested spaces.</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>ValueError</strong> – If a specified key is not found in the Dict space.</p></li>
+<li><p><strong>AssertionError</strong> – If the values violate the space constraints.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="stable_worldmodel.spaces.Dict.set_value">
+<span class="sig-name descname"><span class="pre">set_value</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">variations_values</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/stable_worldmodel/spaces/#Dict.set_value"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.spaces.Dict.set_value" title="Link to this definition" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#stable_worldmodel.spaces.Dict.set_value'"><svg height="1em" viewbox="0 0 24 24" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"></path></svg></a></dt>
+<dd><p>Set current values for specific keys in the Dict space.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>variations_values</strong> (<em>dict</em>) – A dictionary of key-value pairs to set as current values.
+Keys should use dot notation for nested spaces.</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>ValueError</strong> – If a specified key is not found in the Dict space.</p></li>
+<li><p><strong>AssertionError</strong> – If the values violate the space constraints.</p></li>
+</ul>
 </dd>
 </dl>
 </dd></dl>
@@ -450,7 +483,7 @@ Keys should use dot notation for nested spaces.</p>
 </dd></dl>
 <dl class="py property">
 <dt class="sig sig-object py" id="stable_worldmodel.spaces.Dict.value">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">value</span></span><a class="headerlink" href="#stable_worldmodel.spaces.Dict.value" title="Link to this definition" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#stable_worldmodel.spaces.Dict.value'"><svg height="1em" viewbox="0 0 24 24" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"></path></svg></a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">value</span></span><a class="headerlink" href="#stable_worldmodel.spaces.Dict.value" title="Link to this definition" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#stable_worldmodel.spaces.Dict.value'"><svg height="1em" viewbox="0 0 24 24" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"></path></svg></a></dt>
 <dd><p>Current values of all contained spaces.</p>
 <p>Constructs value dictionary from contained spaces’ value properties.</p>
 <dl class="field-list simple">
@@ -482,6 +515,8 @@ Keys should use dot notation for nested spaces.</p>
 <li><a :data-current="activeSection === '#stable_worldmodel.spaces.Dict.reset'" class="reference internal" href="#stable_worldmodel.spaces.Dict.reset"><code class="docutils literal notranslate"><span class="pre">Dict.reset()</span></code></a></li>
 <li><a :data-current="activeSection === '#stable_worldmodel.spaces.Dict.sample'" class="reference internal" href="#stable_worldmodel.spaces.Dict.sample"><code class="docutils literal notranslate"><span class="pre">Dict.sample()</span></code></a></li>
 <li><a :data-current="activeSection === '#stable_worldmodel.spaces.Dict.sampling_order'" class="reference internal" href="#stable_worldmodel.spaces.Dict.sampling_order"><code class="docutils literal notranslate"><span class="pre">Dict.sampling_order</span></code></a></li>
+<li><a :data-current="activeSection === '#stable_worldmodel.spaces.Dict.set_init_value'" class="reference internal" href="#stable_worldmodel.spaces.Dict.set_init_value"><code class="docutils literal notranslate"><span class="pre">Dict.set_init_value()</span></code></a></li>
+<li><a :data-current="activeSection === '#stable_worldmodel.spaces.Dict.set_value'" class="reference internal" href="#stable_worldmodel.spaces.Dict.set_value"><code class="docutils literal notranslate"><span class="pre">Dict.set_value()</span></code></a></li>
 <li><a :data-current="activeSection === '#stable_worldmodel.spaces.Dict.to_str'" class="reference internal" href="#stable_worldmodel.spaces.Dict.to_str"><code class="docutils literal notranslate"><span class="pre">Dict.to_str()</span></code></a></li>
 <li><a :data-current="activeSection === '#stable_worldmodel.spaces.Dict.update'" class="reference internal" href="#stable_worldmodel.spaces.Dict.update"><code class="docutils literal notranslate"><span class="pre">Dict.update()</span></code></a></li>
 <li><a :data-current="activeSection === '#stable_worldmodel.spaces.Dict.value'" class="reference internal" href="#stable_worldmodel.spaces.Dict.value"><code class="docutils literal notranslate"><span class="pre">Dict.value</span></code></a></li>
@@ -495,7 +530,7 @@ Keys should use dot notation for nested spaces.</p>
 </div><footer class="py-6 border-t border-border md:py-0">
 <div class="container flex flex-col items-center justify-between gap-4 md:h-24 md:flex-row">
 <div class="flex flex-col items-center gap-4 px-8 md:flex-row md:gap-2 md:px-0">
-<p class="text-sm leading-loose text-center text-muted-foreground md:text-left">© 2025 Built with <a class="font-medium underline underline-offset-4" href="https://www.sphinx-doc.org" rel="noreferrer">Sphinx 8.2.3</a></p>
+<p class="text-sm leading-loose text-center text-muted-foreground md:text-left">© 2026 Built with <a class="font-medium underline underline-offset-4" href="https://www.sphinx-doc.org" rel="noreferrer">Sphinx 8.1.3</a></p>
 </div>
 </div>
 </footer>

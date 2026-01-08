@@ -132,7 +132,6 @@
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../../../api/solver/">Solver</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="../../../api/generated/stable_worldmodel.solver.GDSolver/">GDSolver</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../api/generated/stable_worldmodel.solver.CEMSolver/">CEMSolver</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../api/generated/stable_worldmodel.solver.MPPISolver/">MPPISolver</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../api/generated/stable_worldmodel.solver.NevergradSolver/">NevergradSolver</a></li>
@@ -223,261 +222,278 @@
 </span><span id="line-5">
 </span><span id="line-6"><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
 </span><span id="line-7"><span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
-</span><span id="line-8">
-</span><span id="line-9"><span class="kn">import</span><span class="w"> </span><span class="nn">stable_worldmodel</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">swm</span>
-</span><span id="line-10"><span class="kn">from</span><span class="w"> </span><span class="nn">stable_worldmodel.solver</span><span class="w"> </span><span class="kn">import</span> <span class="n">Solver</span>
-</span><span id="line-11">
-</span><span id="line-12">
+</span><span id="line-8"><span class="kn">from</span><span class="w"> </span><span class="nn">loguru</span><span class="w"> </span><span class="kn">import</span> <span class="n">logger</span> <span class="k">as</span> <span class="n">logging</span>
+</span><span id="line-9"><span class="kn">from</span><span class="w"> </span><span class="nn">torchvision</span><span class="w"> </span><span class="kn">import</span> <span class="n">tv_tensors</span>
+</span><span id="line-10">
+</span><span id="line-11"><span class="kn">import</span><span class="w"> </span><span class="nn">stable_worldmodel</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">swm</span>
+</span><span id="line-12"><span class="kn">from</span><span class="w"> </span><span class="nn">stable_worldmodel.solver</span><span class="w"> </span><span class="kn">import</span> <span class="n">Solver</span>
+</span><span id="line-13">
+</span><span id="line-14">
 <div class="viewcode-block" id="PlanConfig">
 <a class="viewcode-back" href="../../../stable_worldmodel/#stable_worldmodel.policy.PlanConfig">[docs]</a>
-</span><span id="line-13"><span class="nd">@dataclass</span><span class="p">(</span><span class="n">frozen</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-</span><span id="line-14"><span class="k">class</span><span class="w"> </span><span class="nc">PlanConfig</span><span class="p">:</span>
-</span><span id="line-15"><span class="w">    </span><span class="sd">&quot;&quot;&quot;Configuration for the planning process.&quot;&quot;&quot;</span>
-</span><span id="line-16">
-</span><span id="line-17">    <span class="n">horizon</span><span class="p">:</span> <span class="nb">int</span>
-</span><span id="line-18">    <span class="n">receding_horizon</span><span class="p">:</span> <span class="nb">int</span>
-</span><span id="line-19">    <span class="n">history_len</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span>
-</span><span id="line-20">    <span class="n">action_block</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span>  <span class="c1"># frameskip</span>
-</span><span id="line-21">    <span class="n">warm_start</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>  <span class="c1"># use previous plan to warm start</span>
-</span><span id="line-22">
-</span><span id="line-23">    <span class="nd">@property</span>
-</span><span id="line-24">    <span class="k">def</span><span class="w"> </span><span class="nf">plan_len</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-</span><span id="line-25">        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">horizon</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">action_block</span></div>
+</span><span id="line-15"><span class="nd">@dataclass</span><span class="p">(</span><span class="n">frozen</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</span><span id="line-16"><span class="k">class</span><span class="w"> </span><span class="nc">PlanConfig</span><span class="p">:</span>
+</span><span id="line-17"><span class="w">    </span><span class="sd">&quot;&quot;&quot;Configuration for the planning process.&quot;&quot;&quot;</span>
+</span><span id="line-18">
+</span><span id="line-19">    <span class="n">horizon</span><span class="p">:</span> <span class="nb">int</span>
+</span><span id="line-20">    <span class="n">receding_horizon</span><span class="p">:</span> <span class="nb">int</span>
+</span><span id="line-21">    <span class="n">history_len</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span>
+</span><span id="line-22">    <span class="n">action_block</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span>  <span class="c1"># frameskip</span>
+</span><span id="line-23">    <span class="n">warm_start</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>  <span class="c1"># use previous plan to warm start</span>
+</span><span id="line-24">
+</span><span id="line-25">    <span class="nd">@property</span>
+</span><span id="line-26">    <span class="k">def</span><span class="w"> </span><span class="nf">plan_len</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+</span><span id="line-27">        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">horizon</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">action_block</span></div>
 
-</span><span id="line-26">
-</span><span id="line-27">
+</span><span id="line-28">
+</span><span id="line-29">
 <div class="viewcode-block" id="Transformable">
 <a class="viewcode-back" href="../../../stable_worldmodel/#stable_worldmodel.policy.Transformable">[docs]</a>
-</span><span id="line-28"><span class="k">class</span><span class="w"> </span><span class="nc">Transformable</span><span class="p">(</span><span class="n">Protocol</span><span class="p">):</span>
-</span><span id="line-29"><span class="w">    </span><span class="sd">&quot;&quot;&quot;Protocol for input transformation.&quot;&quot;&quot;</span>
-</span><span id="line-30">
+</span><span id="line-30"><span class="k">class</span><span class="w"> </span><span class="nc">Transformable</span><span class="p">(</span><span class="n">Protocol</span><span class="p">):</span>
+</span><span id="line-31"><span class="w">    </span><span class="sd">&quot;&quot;&quot;Protocol for input transformation.&quot;&quot;&quot;</span>
+</span><span id="line-32">
 <div class="viewcode-block" id="Transformable.transform">
 <a class="viewcode-back" href="../../../stable_worldmodel/#stable_worldmodel.policy.Transformable.transform">[docs]</a>
-</span><span id="line-31">    <span class="k">def</span><span class="w"> </span><span class="nf">transform</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
-</span><span id="line-32"><span class="w">        </span><span class="sd">&quot;&quot;&quot;Pre-process&quot;&quot;&quot;</span>
-</span><span id="line-33">        <span class="o">...</span></div>
+</span><span id="line-33">    <span class="k">def</span><span class="w"> </span><span class="nf">transform</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
+</span><span id="line-34"><span class="w">        </span><span class="sd">&quot;&quot;&quot;Pre-process&quot;&quot;&quot;</span>
+</span><span id="line-35">        <span class="o">...</span></div>
 
-</span><span id="line-34">
+</span><span id="line-36">
 <div class="viewcode-block" id="Transformable.inverse_transform">
 <a class="viewcode-back" href="../../../stable_worldmodel/#stable_worldmodel.policy.Transformable.inverse_transform">[docs]</a>
-</span><span id="line-35">    <span class="k">def</span><span class="w"> </span><span class="nf">inverse_transform</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
-</span><span id="line-36"><span class="w">        </span><span class="sd">&quot;&quot;&quot;Revert pre-processed&quot;&quot;&quot;</span>
-</span><span id="line-37">        <span class="o">...</span></div>
+</span><span id="line-37">    <span class="k">def</span><span class="w"> </span><span class="nf">inverse_transform</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
+</span><span id="line-38"><span class="w">        </span><span class="sd">&quot;&quot;&quot;Revert pre-processed&quot;&quot;&quot;</span>
+</span><span id="line-39">        <span class="o">...</span></div>
 </div>
 
-</span><span id="line-38">
-</span><span id="line-39">
+</span><span id="line-40">
+</span><span id="line-41">
 <div class="viewcode-block" id="BasePolicy">
 <a class="viewcode-back" href="../../../stable_worldmodel/#stable_worldmodel.policy.BasePolicy">[docs]</a>
-</span><span id="line-40"><span class="k">class</span><span class="w"> </span><span class="nc">BasePolicy</span><span class="p">:</span>
-</span><span id="line-41"><span class="w">    </span><span class="sd">&quot;&quot;&quot;Base class for agent policies.&quot;&quot;&quot;</span>
-</span><span id="line-42">
-</span><span id="line-43">    <span class="c1"># a policy takes in an environment and a planner</span>
-</span><span id="line-44">    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-</span><span id="line-45">        <span class="bp">self</span><span class="o">.</span><span class="n">env</span> <span class="o">=</span> <span class="kc">None</span>
-</span><span id="line-46">        <span class="bp">self</span><span class="o">.</span><span class="n">type</span> <span class="o">=</span> <span class="s2">&quot;base&quot;</span>
-</span><span id="line-47">        <span class="k">for</span> <span class="n">arg</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-</span><span id="line-48">            <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">arg</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
-</span><span id="line-49">
+</span><span id="line-42"><span class="k">class</span><span class="w"> </span><span class="nc">BasePolicy</span><span class="p">:</span>
+</span><span id="line-43"><span class="w">    </span><span class="sd">&quot;&quot;&quot;Base class for agent policies.&quot;&quot;&quot;</span>
+</span><span id="line-44">
+</span><span id="line-45">    <span class="c1"># a policy takes in an environment and a planner</span>
+</span><span id="line-46">    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+</span><span id="line-47">        <span class="bp">self</span><span class="o">.</span><span class="n">env</span> <span class="o">=</span> <span class="kc">None</span>
+</span><span id="line-48">        <span class="bp">self</span><span class="o">.</span><span class="n">type</span> <span class="o">=</span> <span class="s2">&quot;base&quot;</span>
+</span><span id="line-49">        <span class="k">for</span> <span class="n">arg</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+</span><span id="line-50">            <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">arg</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+</span><span id="line-51">
 <div class="viewcode-block" id="BasePolicy.get_action">
 <a class="viewcode-back" href="../../../stable_worldmodel/#stable_worldmodel.policy.BasePolicy.get_action">[docs]</a>
-</span><span id="line-50">    <span class="k">def</span><span class="w"> </span><span class="nf">get_action</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obs</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-</span><span id="line-51"><span class="w">        </span><span class="sd">&quot;&quot;&quot;Get action from the policy given the observation.&quot;&quot;&quot;</span>
-</span><span id="line-52">        <span class="k">raise</span> <span class="ne">NotImplementedError</span></div>
+</span><span id="line-52">    <span class="k">def</span><span class="w"> </span><span class="nf">get_action</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obs</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+</span><span id="line-53"><span class="w">        </span><span class="sd">&quot;&quot;&quot;Get action from the policy given the observation.&quot;&quot;&quot;</span>
+</span><span id="line-54">        <span class="k">raise</span> <span class="ne">NotImplementedError</span></div>
 
-</span><span id="line-53">
+</span><span id="line-55">
 <div class="viewcode-block" id="BasePolicy.set_env">
 <a class="viewcode-back" href="../../../stable_worldmodel/#stable_worldmodel.policy.BasePolicy.set_env">[docs]</a>
-</span><span id="line-54">    <span class="k">def</span><span class="w"> </span><span class="nf">set_env</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">env</span><span class="p">):</span>
-</span><span id="line-55">        <span class="bp">self</span><span class="o">.</span><span class="n">env</span> <span class="o">=</span> <span class="n">env</span></div>
+</span><span id="line-56">    <span class="k">def</span><span class="w"> </span><span class="nf">set_env</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">env</span><span class="p">):</span>
+</span><span id="line-57">        <span class="bp">self</span><span class="o">.</span><span class="n">env</span> <span class="o">=</span> <span class="n">env</span></div>
 </div>
 
-</span><span id="line-56">
-</span><span id="line-57">
+</span><span id="line-58">
+</span><span id="line-59">
 <div class="viewcode-block" id="RandomPolicy">
 <a class="viewcode-back" href="../../../stable_worldmodel/#stable_worldmodel.policy.RandomPolicy">[docs]</a>
-</span><span id="line-58"><span class="k">class</span><span class="w"> </span><span class="nc">RandomPolicy</span><span class="p">(</span><span class="n">BasePolicy</span><span class="p">):</span>
-</span><span id="line-59"><span class="w">    </span><span class="sd">&quot;&quot;&quot;Random Policy.&quot;&quot;&quot;</span>
-</span><span id="line-60">
-</span><span id="line-61">    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-</span><span id="line-62">        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-</span><span id="line-63">        <span class="bp">self</span><span class="o">.</span><span class="n">type</span> <span class="o">=</span> <span class="s2">&quot;random&quot;</span>
-</span><span id="line-64">        <span class="bp">self</span><span class="o">.</span><span class="n">seed</span> <span class="o">=</span> <span class="n">seed</span>
-</span><span id="line-65">
+</span><span id="line-60"><span class="k">class</span><span class="w"> </span><span class="nc">RandomPolicy</span><span class="p">(</span><span class="n">BasePolicy</span><span class="p">):</span>
+</span><span id="line-61"><span class="w">    </span><span class="sd">&quot;&quot;&quot;Random Policy.&quot;&quot;&quot;</span>
+</span><span id="line-62">
+</span><span id="line-63">    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+</span><span id="line-64">        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+</span><span id="line-65">        <span class="bp">self</span><span class="o">.</span><span class="n">type</span> <span class="o">=</span> <span class="s2">&quot;random&quot;</span>
+</span><span id="line-66">        <span class="bp">self</span><span class="o">.</span><span class="n">seed</span> <span class="o">=</span> <span class="n">seed</span>
+</span><span id="line-67">
 <div class="viewcode-block" id="RandomPolicy.get_action">
 <a class="viewcode-back" href="../../../stable_worldmodel/#stable_worldmodel.policy.RandomPolicy.get_action">[docs]</a>
-</span><span id="line-66">    <span class="k">def</span><span class="w"> </span><span class="nf">get_action</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obs</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-</span><span id="line-67">        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">env</span><span class="o">.</span><span class="n">action_space</span><span class="o">.</span><span class="n">sample</span><span class="p">()</span></div>
+</span><span id="line-68">    <span class="k">def</span><span class="w"> </span><span class="nf">get_action</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obs</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+</span><span id="line-69">        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">env</span><span class="o">.</span><span class="n">action_space</span><span class="o">.</span><span class="n">sample</span><span class="p">()</span></div>
 
-</span><span id="line-68">
+</span><span id="line-70">
 <div class="viewcode-block" id="RandomPolicy.set_seed">
 <a class="viewcode-back" href="../../../stable_worldmodel/#stable_worldmodel.policy.RandomPolicy.set_seed">[docs]</a>
-</span><span id="line-69">    <span class="k">def</span><span class="w"> </span><span class="nf">set_seed</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">seed</span><span class="p">):</span>
-</span><span id="line-70">        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">env</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-</span><span id="line-71">            <span class="bp">self</span><span class="o">.</span><span class="n">env</span><span class="o">.</span><span class="n">action_space</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="n">seed</span><span class="p">)</span></div>
+</span><span id="line-71">    <span class="k">def</span><span class="w"> </span><span class="nf">set_seed</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">seed</span><span class="p">):</span>
+</span><span id="line-72">        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">env</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+</span><span id="line-73">            <span class="bp">self</span><span class="o">.</span><span class="n">env</span><span class="o">.</span><span class="n">action_space</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="n">seed</span><span class="p">)</span></div>
 </div>
 
-</span><span id="line-72">
-</span><span id="line-73">
+</span><span id="line-74">
+</span><span id="line-75">
 <div class="viewcode-block" id="ExpertPolicy">
 <a class="viewcode-back" href="../../../stable_worldmodel/#stable_worldmodel.policy.ExpertPolicy">[docs]</a>
-</span><span id="line-74"><span class="k">class</span><span class="w"> </span><span class="nc">ExpertPolicy</span><span class="p">(</span><span class="n">BasePolicy</span><span class="p">):</span>
-</span><span id="line-75"><span class="w">    </span><span class="sd">&quot;&quot;&quot;Expert Policy.&quot;&quot;&quot;</span>
-</span><span id="line-76">
-</span><span id="line-77">    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-</span><span id="line-78">        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-</span><span id="line-79">        <span class="bp">self</span><span class="o">.</span><span class="n">type</span> <span class="o">=</span> <span class="s2">&quot;expert&quot;</span>
-</span><span id="line-80">
+</span><span id="line-76"><span class="k">class</span><span class="w"> </span><span class="nc">ExpertPolicy</span><span class="p">(</span><span class="n">BasePolicy</span><span class="p">):</span>
+</span><span id="line-77"><span class="w">    </span><span class="sd">&quot;&quot;&quot;Expert Policy.&quot;&quot;&quot;</span>
+</span><span id="line-78">
+</span><span id="line-79">    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+</span><span id="line-80">        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+</span><span id="line-81">        <span class="bp">self</span><span class="o">.</span><span class="n">type</span> <span class="o">=</span> <span class="s2">&quot;expert&quot;</span>
+</span><span id="line-82">
 <div class="viewcode-block" id="ExpertPolicy.get_action">
 <a class="viewcode-back" href="../../../stable_worldmodel/#stable_worldmodel.policy.ExpertPolicy.get_action">[docs]</a>
-</span><span id="line-81">    <span class="k">def</span><span class="w"> </span><span class="nf">get_action</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obs</span><span class="p">,</span> <span class="n">goal_obs</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-</span><span id="line-82">        <span class="c1"># Implement expert policy logic here</span>
-</span><span id="line-83">        <span class="k">pass</span></div>
+</span><span id="line-83">    <span class="k">def</span><span class="w"> </span><span class="nf">get_action</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obs</span><span class="p">,</span> <span class="n">goal_obs</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+</span><span id="line-84">        <span class="c1"># Implement expert policy logic here</span>
+</span><span id="line-85">        <span class="k">pass</span></div>
 </div>
 
-</span><span id="line-84">
-</span><span id="line-85">
+</span><span id="line-86">
+</span><span id="line-87">
 <div class="viewcode-block" id="WorldModelPolicy">
 <a class="viewcode-back" href="../../../stable_worldmodel/#stable_worldmodel.policy.WorldModelPolicy">[docs]</a>
-</span><span id="line-86"><span class="k">class</span><span class="w"> </span><span class="nc">WorldModelPolicy</span><span class="p">(</span><span class="n">BasePolicy</span><span class="p">):</span>
-</span><span id="line-87"><span class="w">    </span><span class="sd">&quot;&quot;&quot;World Model Policy using a planning solver.&quot;&quot;&quot;</span>
-</span><span id="line-88">
-</span><span id="line-89">    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
-</span><span id="line-90">        <span class="bp">self</span><span class="p">,</span>
-</span><span id="line-91">        <span class="n">solver</span><span class="p">:</span> <span class="n">Solver</span><span class="p">,</span>
-</span><span id="line-92">        <span class="n">config</span><span class="p">:</span> <span class="n">PlanConfig</span><span class="p">,</span>
-</span><span id="line-93">        <span class="n">process</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Transformable</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-</span><span id="line-94">        <span class="n">transform</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">callable</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-</span><span id="line-95">        <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
-</span><span id="line-96">    <span class="p">):</span>
-</span><span id="line-97">        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-</span><span id="line-98">
-</span><span id="line-99">        <span class="bp">self</span><span class="o">.</span><span class="n">type</span> <span class="o">=</span> <span class="s2">&quot;world_model&quot;</span>
-</span><span id="line-100">        <span class="bp">self</span><span class="o">.</span><span class="n">cfg</span> <span class="o">=</span> <span class="n">config</span>
-</span><span id="line-101">        <span class="bp">self</span><span class="o">.</span><span class="n">solver</span> <span class="o">=</span> <span class="n">solver</span>
-</span><span id="line-102">        <span class="bp">self</span><span class="o">.</span><span class="n">action_buffer</span> <span class="o">=</span> <span class="n">deque</span><span class="p">(</span><span class="n">maxlen</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">flatten_receding_horizon</span><span class="p">)</span>
-</span><span id="line-103">        <span class="bp">self</span><span class="o">.</span><span class="n">process</span> <span class="o">=</span> <span class="n">process</span> <span class="ow">or</span> <span class="p">{}</span>
-</span><span id="line-104">        <span class="bp">self</span><span class="o">.</span><span class="n">transform</span> <span class="o">=</span> <span class="n">transform</span> <span class="ow">or</span> <span class="p">{}</span>
-</span><span id="line-105">        <span class="bp">self</span><span class="o">.</span><span class="n">_action_buffer</span> <span class="o">=</span> <span class="kc">None</span>
-</span><span id="line-106">        <span class="bp">self</span><span class="o">.</span><span class="n">_next_init</span> <span class="o">=</span> <span class="kc">None</span>
-</span><span id="line-107">
-</span><span id="line-108">    <span class="nd">@property</span>
-</span><span id="line-109">    <span class="k">def</span><span class="w"> </span><span class="nf">flatten_receding_horizon</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-</span><span id="line-110">        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="o">.</span><span class="n">receding_horizon</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="o">.</span><span class="n">action_block</span>
-</span><span id="line-111">
+</span><span id="line-88"><span class="k">class</span><span class="w"> </span><span class="nc">WorldModelPolicy</span><span class="p">(</span><span class="n">BasePolicy</span><span class="p">):</span>
+</span><span id="line-89"><span class="w">    </span><span class="sd">&quot;&quot;&quot;World Model Policy using a planning solver.&quot;&quot;&quot;</span>
+</span><span id="line-90">
+</span><span id="line-91">    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+</span><span id="line-92">        <span class="bp">self</span><span class="p">,</span>
+</span><span id="line-93">        <span class="n">solver</span><span class="p">:</span> <span class="n">Solver</span><span class="p">,</span>
+</span><span id="line-94">        <span class="n">config</span><span class="p">:</span> <span class="n">PlanConfig</span><span class="p">,</span>
+</span><span id="line-95">        <span class="n">process</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Transformable</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+</span><span id="line-96">        <span class="n">transform</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">callable</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+</span><span id="line-97">        <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+</span><span id="line-98">    <span class="p">):</span>
+</span><span id="line-99">        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+</span><span id="line-100">
+</span><span id="line-101">        <span class="bp">self</span><span class="o">.</span><span class="n">type</span> <span class="o">=</span> <span class="s2">&quot;world_model&quot;</span>
+</span><span id="line-102">        <span class="bp">self</span><span class="o">.</span><span class="n">cfg</span> <span class="o">=</span> <span class="n">config</span>
+</span><span id="line-103">        <span class="bp">self</span><span class="o">.</span><span class="n">solver</span> <span class="o">=</span> <span class="n">solver</span>
+</span><span id="line-104">        <span class="bp">self</span><span class="o">.</span><span class="n">action_buffer</span> <span class="o">=</span> <span class="n">deque</span><span class="p">(</span><span class="n">maxlen</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">flatten_receding_horizon</span><span class="p">)</span>
+</span><span id="line-105">        <span class="bp">self</span><span class="o">.</span><span class="n">process</span> <span class="o">=</span> <span class="n">process</span> <span class="ow">or</span> <span class="p">{}</span>
+</span><span id="line-106">        <span class="bp">self</span><span class="o">.</span><span class="n">transform</span> <span class="o">=</span> <span class="n">transform</span> <span class="ow">or</span> <span class="p">{}</span>
+</span><span id="line-107">        <span class="bp">self</span><span class="o">.</span><span class="n">_action_buffer</span> <span class="o">=</span> <span class="kc">None</span>
+</span><span id="line-108">        <span class="bp">self</span><span class="o">.</span><span class="n">_next_init</span> <span class="o">=</span> <span class="kc">None</span>
+</span><span id="line-109">
+</span><span id="line-110">    <span class="nd">@property</span>
+</span><span id="line-111">    <span class="k">def</span><span class="w"> </span><span class="nf">flatten_receding_horizon</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+</span><span id="line-112">        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="o">.</span><span class="n">receding_horizon</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="o">.</span><span class="n">action_block</span>
+</span><span id="line-113">
 <div class="viewcode-block" id="WorldModelPolicy.set_env">
 <a class="viewcode-back" href="../../../stable_worldmodel/#stable_worldmodel.policy.WorldModelPolicy.set_env">[docs]</a>
-</span><span id="line-112">    <span class="k">def</span><span class="w"> </span><span class="nf">set_env</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">env</span><span class="p">):</span>
-</span><span id="line-113">        <span class="bp">self</span><span class="o">.</span><span class="n">env</span> <span class="o">=</span> <span class="n">env</span>
-</span><span id="line-114">        <span class="n">n_envs</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">env</span><span class="p">,</span> <span class="s2">&quot;num_envs&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
-</span><span id="line-115">        <span class="bp">self</span><span class="o">.</span><span class="n">solver</span><span class="o">.</span><span class="n">configure</span><span class="p">(</span><span class="n">action_space</span><span class="o">=</span><span class="n">env</span><span class="o">.</span><span class="n">action_space</span><span class="p">,</span> <span class="n">n_envs</span><span class="o">=</span><span class="n">n_envs</span><span class="p">,</span> <span class="n">config</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="p">)</span>
-</span><span id="line-116">        <span class="bp">self</span><span class="o">.</span><span class="n">_action_buffer</span> <span class="o">=</span> <span class="n">deque</span><span class="p">(</span><span class="n">maxlen</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">flatten_receding_horizon</span><span class="p">)</span>
-</span><span id="line-117">
-</span><span id="line-118">        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">solver</span><span class="p">,</span> <span class="n">Solver</span><span class="p">),</span> <span class="s2">&quot;Solver must implement the Solver protocol&quot;</span></div>
-
+</span><span id="line-114">    <span class="k">def</span><span class="w"> </span><span class="nf">set_env</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">env</span><span class="p">):</span>
+</span><span id="line-115">        <span class="bp">self</span><span class="o">.</span><span class="n">env</span> <span class="o">=</span> <span class="n">env</span>
+</span><span id="line-116">        <span class="n">n_envs</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">env</span><span class="p">,</span> <span class="s2">&quot;num_envs&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+</span><span id="line-117">        <span class="bp">self</span><span class="o">.</span><span class="n">solver</span><span class="o">.</span><span class="n">configure</span><span class="p">(</span><span class="n">action_space</span><span class="o">=</span><span class="n">env</span><span class="o">.</span><span class="n">action_space</span><span class="p">,</span> <span class="n">n_envs</span><span class="o">=</span><span class="n">n_envs</span><span class="p">,</span> <span class="n">config</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="p">)</span>
+</span><span id="line-118">        <span class="bp">self</span><span class="o">.</span><span class="n">_action_buffer</span> <span class="o">=</span> <span class="n">deque</span><span class="p">(</span><span class="n">maxlen</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">flatten_receding_horizon</span><span class="p">)</span>
 </span><span id="line-119">
-</span><span id="line-120">    <span class="k">def</span><span class="w"> </span><span class="nf">_prepare_info</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">info_dict</span><span class="p">):</span>
-</span><span id="line-121">        <span class="c1"># pre-process and transform observations</span>
-</span><span id="line-122">        <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">info_dict</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-</span><span id="line-123">            <span class="n">is_numpy</span> <span class="o">=</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">|</span> <span class="n">np</span><span class="o">.</span><span class="n">generic</span><span class="p">))</span>
-</span><span id="line-124">
-</span><span id="line-125">            <span class="k">if</span> <span class="n">k</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">process</span><span class="p">:</span>
-</span><span id="line-126">                <span class="k">if</span> <span class="ow">not</span> <span class="n">is_numpy</span><span class="p">:</span>
-</span><span id="line-127">                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Expected numpy array for key &#39;</span><span class="si">{</span><span class="n">k</span><span class="si">}</span><span class="s2">&#39; in process, got </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">v</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-</span><span id="line-128">
-</span><span id="line-129">                <span class="c1"># flatten extra dimensions if needed</span>
-</span><span id="line-130">                <span class="n">shape</span> <span class="o">=</span> <span class="n">v</span><span class="o">.</span><span class="n">shape</span>
-</span><span id="line-131">                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">shape</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">2</span><span class="p">:</span>
-</span><span id="line-132">                    <span class="n">v</span> <span class="o">=</span> <span class="n">v</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">*</span><span class="n">shape</span><span class="p">[</span><span class="mi">2</span><span class="p">:])</span>
-</span><span id="line-133">
-</span><span id="line-134">                <span class="c1"># process and reshape back</span>
-</span><span id="line-135">                <span class="n">v</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">process</span><span class="p">[</span><span class="n">k</span><span class="p">]</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">v</span><span class="p">)</span>
-</span><span id="line-136">                <span class="n">v</span> <span class="o">=</span> <span class="n">v</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">shape</span><span class="p">)</span>
-</span><span id="line-137">
-</span><span id="line-138">            <span class="c1"># collapse env and time dimensions for transform (e, t, ...) -&gt; (e * t, ...)</span>
-</span><span id="line-139">            <span class="c1"># then restore after transform</span>
-</span><span id="line-140">            <span class="k">if</span> <span class="n">k</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">transform</span><span class="p">:</span>
-</span><span id="line-141">                <span class="n">shape</span> <span class="o">=</span> <span class="kc">None</span>
-</span><span id="line-142">                <span class="k">if</span> <span class="n">is_numpy</span> <span class="ow">or</span> <span class="n">torch</span><span class="o">.</span><span class="n">is_tensor</span><span class="p">(</span><span class="n">v</span><span class="p">):</span>
-</span><span id="line-143">                    <span class="k">if</span> <span class="n">v</span><span class="o">.</span><span class="n">ndim</span> <span class="o">&gt;</span> <span class="mi">2</span><span class="p">:</span>
-</span><span id="line-144">                        <span class="n">shape</span> <span class="o">=</span> <span class="n">v</span><span class="o">.</span><span class="n">shape</span>
-</span><span id="line-145">                        <span class="n">v</span> <span class="o">=</span> <span class="n">v</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">*</span><span class="n">shape</span><span class="p">[</span><span class="mi">2</span><span class="p">:])</span>
-</span><span id="line-146">
-</span><span id="line-147">                <span class="n">v</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">stack</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">transform</span><span class="p">[</span><span class="n">k</span><span class="p">](</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">v</span><span class="p">])</span>
-</span><span id="line-148">                <span class="n">is_numpy</span> <span class="o">=</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">|</span> <span class="n">np</span><span class="o">.</span><span class="n">generic</span><span class="p">))</span>
-</span><span id="line-149">
-</span><span id="line-150">                <span class="k">if</span> <span class="n">shape</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-</span><span id="line-151">                    <span class="n">v</span> <span class="o">=</span> <span class="n">v</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">*</span><span class="n">shape</span><span class="p">[:</span><span class="mi">2</span><span class="p">],</span> <span class="o">*</span><span class="n">v</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">:])</span>
-</span><span id="line-152">
-</span><span id="line-153">            <span class="k">if</span> <span class="n">is_numpy</span> <span class="ow">and</span> <span class="n">v</span><span class="o">.</span><span class="n">dtype</span> <span class="o">!=</span> <span class="nb">object</span><span class="p">:</span>
-</span><span id="line-154">                <span class="n">v</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">from_numpy</span><span class="p">(</span><span class="n">v</span><span class="p">)</span>
-</span><span id="line-155">
-</span><span id="line-156">            <span class="n">info_dict</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">v</span>
-</span><span id="line-157">
-</span><span id="line-158">        <span class="k">return</span> <span class="n">info_dict</span>
+</span><span id="line-120">        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">solver</span><span class="p">,</span> <span class="n">Solver</span><span class="p">),</span> <span class="s2">&quot;Solver must implement the Solver protocol&quot;</span></div>
+
+</span><span id="line-121">
+</span><span id="line-122">    <span class="k">def</span><span class="w"> </span><span class="nf">_prepare_info</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">info_dict</span><span class="p">):</span>
+</span><span id="line-123">        <span class="c1"># pre-process and transform observations</span>
+</span><span id="line-124">        <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">info_dict</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+</span><span id="line-125">            <span class="n">is_numpy</span> <span class="o">=</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">|</span> <span class="n">np</span><span class="o">.</span><span class="n">generic</span><span class="p">))</span>
+</span><span id="line-126">
+</span><span id="line-127">            <span class="k">if</span> <span class="n">k</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">process</span><span class="p">:</span>
+</span><span id="line-128">                <span class="k">if</span> <span class="ow">not</span> <span class="n">is_numpy</span><span class="p">:</span>
+</span><span id="line-129">                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Expected numpy array for key &#39;</span><span class="si">{</span><span class="n">k</span><span class="si">}</span><span class="s2">&#39; in process, got </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">v</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</span><span id="line-130">
+</span><span id="line-131">                <span class="c1"># flatten extra dimensions if needed</span>
+</span><span id="line-132">                <span class="n">shape</span> <span class="o">=</span> <span class="n">v</span><span class="o">.</span><span class="n">shape</span>
+</span><span id="line-133">                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">shape</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">2</span><span class="p">:</span>
+</span><span id="line-134">                    <span class="n">v</span> <span class="o">=</span> <span class="n">v</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">*</span><span class="n">shape</span><span class="p">[</span><span class="mi">2</span><span class="p">:])</span>
+</span><span id="line-135">
+</span><span id="line-136">                <span class="c1"># process and reshape back</span>
+</span><span id="line-137">                <span class="n">v</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">process</span><span class="p">[</span><span class="n">k</span><span class="p">]</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">v</span><span class="p">)</span>
+</span><span id="line-138">                <span class="n">v</span> <span class="o">=</span> <span class="n">v</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">shape</span><span class="p">)</span>
+</span><span id="line-139">
+</span><span id="line-140">            <span class="c1"># collapse env and time dimensions for transform (e, t, ...) -&gt; (e * t, ...)</span>
+</span><span id="line-141">            <span class="c1"># then restore after transform</span>
+</span><span id="line-142">            <span class="k">if</span> <span class="n">k</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">transform</span><span class="p">:</span>
+</span><span id="line-143">                <span class="n">shape</span> <span class="o">=</span> <span class="kc">None</span>
+</span><span id="line-144">                <span class="k">if</span> <span class="n">is_numpy</span> <span class="ow">or</span> <span class="n">torch</span><span class="o">.</span><span class="n">is_tensor</span><span class="p">(</span><span class="n">v</span><span class="p">):</span>
+</span><span id="line-145">                    <span class="k">if</span> <span class="n">v</span><span class="o">.</span><span class="n">ndim</span> <span class="o">&gt;</span> <span class="mi">2</span><span class="p">:</span>
+</span><span id="line-146">                        <span class="n">shape</span> <span class="o">=</span> <span class="n">v</span><span class="o">.</span><span class="n">shape</span>
+</span><span id="line-147">                        <span class="n">v</span> <span class="o">=</span> <span class="n">v</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">*</span><span class="n">shape</span><span class="p">[</span><span class="mi">2</span><span class="p">:])</span>
+</span><span id="line-148">                <span class="k">if</span> <span class="n">k</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;pixels&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="n">k</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;goal&quot;</span><span class="p">):</span>
+</span><span id="line-149">                    <span class="c1"># permute channel first for transform</span>
+</span><span id="line-150">                    <span class="k">if</span> <span class="n">is_numpy</span><span class="p">:</span>
+</span><span id="line-151">                        <span class="n">v</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span>
+</span><span id="line-152">                    <span class="k">else</span><span class="p">:</span>
+</span><span id="line-153">                        <span class="n">v</span> <span class="o">=</span> <span class="n">v</span><span class="o">.</span><span class="n">permute</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+</span><span id="line-154">                <span class="n">v</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">stack</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">transform</span><span class="p">[</span><span class="n">k</span><span class="p">](</span><span class="n">tv_tensors</span><span class="o">.</span><span class="n">Image</span><span class="p">(</span><span class="n">x</span><span class="p">))</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">v</span><span class="p">])</span>
+</span><span id="line-155">                <span class="n">is_numpy</span> <span class="o">=</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">|</span> <span class="n">np</span><span class="o">.</span><span class="n">generic</span><span class="p">))</span>
+</span><span id="line-156">
+</span><span id="line-157">                <span class="k">if</span> <span class="n">shape</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+</span><span id="line-158">                    <span class="n">v</span> <span class="o">=</span> <span class="n">v</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">*</span><span class="n">shape</span><span class="p">[:</span><span class="mi">2</span><span class="p">],</span> <span class="o">*</span><span class="n">v</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">:])</span>
 </span><span id="line-159">
+</span><span id="line-160">            <span class="k">if</span> <span class="n">is_numpy</span> <span class="ow">and</span> <span class="n">v</span><span class="o">.</span><span class="n">dtype</span><span class="o">.</span><span class="n">kind</span> <span class="ow">not</span> <span class="ow">in</span> <span class="s2">&quot;USO&quot;</span><span class="p">:</span>
+</span><span id="line-161">                <span class="n">v</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">from_numpy</span><span class="p">(</span><span class="n">v</span><span class="p">)</span>
+</span><span id="line-162">
+</span><span id="line-163">            <span class="n">info_dict</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">v</span>
+</span><span id="line-164">
+</span><span id="line-165">        <span class="k">return</span> <span class="n">info_dict</span>
+</span><span id="line-166">
 <div class="viewcode-block" id="WorldModelPolicy.get_action">
 <a class="viewcode-back" href="../../../stable_worldmodel/#stable_worldmodel.policy.WorldModelPolicy.get_action">[docs]</a>
-</span><span id="line-160">    <span class="k">def</span><span class="w"> </span><span class="nf">get_action</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">info_dict</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-</span><span id="line-161">        <span class="k">assert</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;env&quot;</span><span class="p">),</span> <span class="s2">&quot;Environment not set for the policy&quot;</span>
-</span><span id="line-162">        <span class="k">assert</span> <span class="s2">&quot;pixels&quot;</span> <span class="ow">in</span> <span class="n">info_dict</span><span class="p">,</span> <span class="s2">&quot;&#39;pixels&#39; must be provided in info_dict&quot;</span>
-</span><span id="line-163">        <span class="k">assert</span> <span class="s2">&quot;goal&quot;</span> <span class="ow">in</span> <span class="n">info_dict</span><span class="p">,</span> <span class="s2">&quot;&#39;goal&#39; must be provided in info_dict&quot;</span>
-</span><span id="line-164">
-</span><span id="line-165">        <span class="n">info_dict</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_prepare_info</span><span class="p">(</span><span class="n">info_dict</span><span class="p">)</span>
-</span><span id="line-166">
-</span><span id="line-167">        <span class="c1"># need to replan if action buffer is empty</span>
-</span><span id="line-168">        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_action_buffer</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-</span><span id="line-169">            <span class="n">outputs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">solver</span><span class="p">(</span><span class="n">info_dict</span><span class="p">,</span> <span class="n">init_action</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_next_init</span><span class="p">)</span>
-</span><span id="line-170">
-</span><span id="line-171">            <span class="n">actions</span> <span class="o">=</span> <span class="n">outputs</span><span class="p">[</span><span class="s2">&quot;actions&quot;</span><span class="p">]</span>  <span class="c1"># (num_envs, horizon, action_dim)</span>
-</span><span id="line-172">            <span class="n">keep_horizon</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="o">.</span><span class="n">receding_horizon</span>
-</span><span id="line-173">            <span class="n">plan</span> <span class="o">=</span> <span class="n">actions</span><span class="p">[:,</span> <span class="p">:</span><span class="n">keep_horizon</span><span class="p">]</span>
-</span><span id="line-174">            <span class="n">rest</span> <span class="o">=</span> <span class="n">actions</span><span class="p">[:,</span> <span class="n">keep_horizon</span><span class="p">:]</span>
-</span><span id="line-175">            <span class="bp">self</span><span class="o">.</span><span class="n">_next_init</span> <span class="o">=</span> <span class="n">rest</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="o">.</span><span class="n">warm_start</span> <span class="k">else</span> <span class="kc">None</span>
-</span><span id="line-176">
-</span><span id="line-177">            <span class="c1"># frameskip back to timestep</span>
-</span><span id="line-178">            <span class="n">plan</span> <span class="o">=</span> <span class="n">plan</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">env</span><span class="o">.</span><span class="n">num_envs</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">flatten_receding_horizon</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
-</span><span id="line-179">
-</span><span id="line-180">            <span class="bp">self</span><span class="o">.</span><span class="n">_action_buffer</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">plan</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
-</span><span id="line-181">
-</span><span id="line-182">        <span class="n">action</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_action_buffer</span><span class="o">.</span><span class="n">popleft</span><span class="p">()</span>
-</span><span id="line-183">        <span class="n">action</span> <span class="o">=</span> <span class="n">action</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">env</span><span class="o">.</span><span class="n">action_space</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
-</span><span id="line-184">        <span class="n">action</span> <span class="o">=</span> <span class="n">action</span><span class="o">.</span><span class="n">numpy</span><span class="p">()</span>
-</span><span id="line-185">
-</span><span id="line-186">        <span class="c1"># post-process action</span>
-</span><span id="line-187">        <span class="k">if</span> <span class="s2">&quot;action&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">process</span><span class="p">:</span>
-</span><span id="line-188">            <span class="n">action</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">process</span><span class="p">[</span><span class="s2">&quot;action&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">inverse_transform</span><span class="p">(</span><span class="n">action</span><span class="p">)</span>
-</span><span id="line-189">
-</span><span id="line-190">        <span class="k">return</span> <span class="n">action</span>  <span class="c1"># (num_envs, action_dim)</span></div>
+</span><span id="line-167">    <span class="k">def</span><span class="w"> </span><span class="nf">get_action</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">info_dict</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+</span><span id="line-168">        <span class="k">assert</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;env&quot;</span><span class="p">),</span> <span class="s2">&quot;Environment not set for the policy&quot;</span>
+</span><span id="line-169">        <span class="k">assert</span> <span class="s2">&quot;pixels&quot;</span> <span class="ow">in</span> <span class="n">info_dict</span><span class="p">,</span> <span class="s2">&quot;&#39;pixels&#39; must be provided in info_dict&quot;</span>
+</span><span id="line-170">        <span class="k">assert</span> <span class="s2">&quot;goal&quot;</span> <span class="ow">in</span> <span class="n">info_dict</span><span class="p">,</span> <span class="s2">&quot;&#39;goal&#39; must be provided in info_dict&quot;</span>
+</span><span id="line-171">
+</span><span id="line-172">        <span class="n">info_dict</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_prepare_info</span><span class="p">(</span><span class="n">info_dict</span><span class="p">)</span>
+</span><span id="line-173">
+</span><span id="line-174">        <span class="c1"># need to replan if action buffer is empty</span>
+</span><span id="line-175">        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_action_buffer</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+</span><span id="line-176">            <span class="n">outputs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">solver</span><span class="p">(</span><span class="n">info_dict</span><span class="p">,</span> <span class="n">init_action</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_next_init</span><span class="p">)</span>
+</span><span id="line-177">
+</span><span id="line-178">            <span class="n">actions</span> <span class="o">=</span> <span class="n">outputs</span><span class="p">[</span><span class="s2">&quot;actions&quot;</span><span class="p">]</span>  <span class="c1"># (num_envs, horizon, action_dim)</span>
+</span><span id="line-179">            <span class="n">keep_horizon</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="o">.</span><span class="n">receding_horizon</span>
+</span><span id="line-180">            <span class="n">plan</span> <span class="o">=</span> <span class="n">actions</span><span class="p">[:,</span> <span class="p">:</span><span class="n">keep_horizon</span><span class="p">]</span>
+</span><span id="line-181">            <span class="n">rest</span> <span class="o">=</span> <span class="n">actions</span><span class="p">[:,</span> <span class="n">keep_horizon</span><span class="p">:]</span>
+</span><span id="line-182">            <span class="bp">self</span><span class="o">.</span><span class="n">_next_init</span> <span class="o">=</span> <span class="n">rest</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="o">.</span><span class="n">warm_start</span> <span class="k">else</span> <span class="kc">None</span>
+</span><span id="line-183">
+</span><span id="line-184">            <span class="c1"># frameskip back to timestep</span>
+</span><span id="line-185">            <span class="n">plan</span> <span class="o">=</span> <span class="n">plan</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">env</span><span class="o">.</span><span class="n">num_envs</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">flatten_receding_horizon</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+</span><span id="line-186">
+</span><span id="line-187">            <span class="bp">self</span><span class="o">.</span><span class="n">_action_buffer</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">plan</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+</span><span id="line-188">
+</span><span id="line-189">        <span class="n">action</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_action_buffer</span><span class="o">.</span><span class="n">popleft</span><span class="p">()</span>
+</span><span id="line-190">        <span class="n">action</span> <span class="o">=</span> <span class="n">action</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">env</span><span class="o">.</span><span class="n">action_space</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+</span><span id="line-191">        <span class="n">action</span> <span class="o">=</span> <span class="n">action</span><span class="o">.</span><span class="n">numpy</span><span class="p">()</span>
+</span><span id="line-192">
+</span><span id="line-193">        <span class="c1"># post-process action</span>
+</span><span id="line-194">        <span class="k">if</span> <span class="s2">&quot;action&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">process</span><span class="p">:</span>
+</span><span id="line-195">            <span class="n">action</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">process</span><span class="p">[</span><span class="s2">&quot;action&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">inverse_transform</span><span class="p">(</span><span class="n">action</span><span class="p">)</span>
+</span><span id="line-196">
+</span><span id="line-197">        <span class="k">return</span> <span class="n">action</span>  <span class="c1"># (num_envs, action_dim)</span></div>
 </div>
 
-</span><span id="line-191">
-</span><span id="line-192">
+</span><span id="line-198">
+</span><span id="line-199">
 <div class="viewcode-block" id="AutoCostModel">
 <a class="viewcode-back" href="../../../stable_worldmodel/#stable_worldmodel.policy.AutoCostModel">[docs]</a>
-</span><span id="line-193"><span class="k">def</span><span class="w"> </span><span class="nf">AutoCostModel</span><span class="p">(</span><span class="n">model_name</span><span class="p">,</span> <span class="n">cache_dir</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-</span><span id="line-194">    <span class="n">cache_dir</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">cache_dir</span> <span class="ow">or</span> <span class="n">swm</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">get_cache_dir</span><span class="p">())</span>
-</span><span id="line-195">    <span class="n">path</span> <span class="o">=</span> <span class="n">cache_dir</span> <span class="o">/</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">model_name</span><span class="si">}</span><span class="s2">_object.ckpt&quot;</span>
-</span><span id="line-196">    <span class="k">assert</span> <span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(),</span> <span class="sa">f</span><span class="s2">&quot;World model named </span><span class="si">{</span><span class="n">model_name</span><span class="si">}</span><span class="s2"> not found. Should launch pretraining first.&quot;</span>
-</span><span id="line-197">
-</span><span id="line-198">    <span class="n">spt_module</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">weights_only</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
-</span><span id="line-199">
-</span><span id="line-200">    <span class="k">def</span><span class="w"> </span><span class="nf">scan_module</span><span class="p">(</span><span class="n">module</span><span class="p">):</span>
-</span><span id="line-201">        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">module</span><span class="p">,</span> <span class="s2">&quot;get_cost&quot;</span><span class="p">):</span>
-</span><span id="line-202">            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">module</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
-</span><span id="line-203">                <span class="n">module</span> <span class="o">=</span> <span class="n">module</span><span class="o">.</span><span class="n">eval</span><span class="p">()</span>
-</span><span id="line-204">            <span class="k">return</span> <span class="n">module</span>
-</span><span id="line-205">        <span class="k">for</span> <span class="n">child</span> <span class="ow">in</span> <span class="n">module</span><span class="o">.</span><span class="n">children</span><span class="p">():</span>
-</span><span id="line-206">            <span class="n">result</span> <span class="o">=</span> <span class="n">scan_module</span><span class="p">(</span><span class="n">child</span><span class="p">)</span>
-</span><span id="line-207">            <span class="k">if</span> <span class="n">result</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-</span><span id="line-208">                <span class="k">return</span> <span class="n">result</span>
-</span><span id="line-209">        <span class="k">return</span> <span class="kc">None</span>
-</span><span id="line-210">
-</span><span id="line-211">    <span class="n">result</span> <span class="o">=</span> <span class="n">scan_module</span><span class="p">(</span><span class="n">spt_module</span><span class="p">)</span>
-</span><span id="line-212">    <span class="k">if</span> <span class="n">result</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-</span><span id="line-213">        <span class="k">return</span> <span class="n">result</span>
+</span><span id="line-200"><span class="k">def</span><span class="w"> </span><span class="nf">AutoCostModel</span><span class="p">(</span><span class="n">run_name</span><span class="p">,</span> <span class="n">cache_dir</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+</span><span id="line-201">    <span class="k">if</span> <span class="n">Path</span><span class="p">(</span><span class="n">run_name</span><span class="p">)</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+</span><span id="line-202">        <span class="n">run_path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">run_name</span><span class="p">)</span>
+</span><span id="line-203">    <span class="k">else</span><span class="p">:</span>
+</span><span id="line-204">        <span class="n">run_path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">cache_dir</span> <span class="ow">or</span> <span class="n">swm</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">get_cache_dir</span><span class="p">(),</span> <span class="n">run_name</span><span class="p">)</span>
+</span><span id="line-205">
+</span><span id="line-206">    <span class="k">if</span> <span class="n">run_path</span><span class="o">.</span><span class="n">is_dir</span><span class="p">():</span>
+</span><span id="line-207">        <span class="n">ckpt_files</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">run_path</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="s2">&quot;*_object.ckpt&quot;</span><span class="p">))</span>
+</span><span id="line-208">        <span class="n">ckpt_files</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="o">.</span><span class="n">stat</span><span class="p">()</span><span class="o">.</span><span class="n">st_ctime</span><span class="p">,</span> <span class="n">reverse</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</span><span id="line-209">        <span class="n">path</span> <span class="o">=</span> <span class="n">ckpt_files</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+</span><span id="line-210">        <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Loading model from checkpoint: </span><span class="si">{</span><span class="n">path</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</span><span id="line-211">    <span class="k">else</span><span class="p">:</span>
+</span><span id="line-212">        <span class="n">path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">run_path</span><span class="si">}</span><span class="s2">_object.ckpt&quot;</span><span class="p">)</span>
+</span><span id="line-213">        <span class="k">assert</span> <span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(),</span> <span class="s2">&quot;Checkpoint path does not exist: </span><span class="si">{path}</span><span class="s2">. Launch pretraining first.&quot;</span>
 </span><span id="line-214">
-</span><span id="line-215">    <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;No cost model found in the loaded world model.&quot;</span><span class="p">)</span></div>
+</span><span id="line-215">    <span class="n">spt_module</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">weights_only</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">map_location</span><span class="o">=</span><span class="s2">&quot;cpu&quot;</span><span class="p">)</span>
+</span><span id="line-216">
+</span><span id="line-217">    <span class="k">def</span><span class="w"> </span><span class="nf">scan_module</span><span class="p">(</span><span class="n">module</span><span class="p">):</span>
+</span><span id="line-218">        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">module</span><span class="p">,</span> <span class="s2">&quot;get_cost&quot;</span><span class="p">):</span>
+</span><span id="line-219">            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">module</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
+</span><span id="line-220">                <span class="n">module</span> <span class="o">=</span> <span class="n">module</span><span class="o">.</span><span class="n">eval</span><span class="p">()</span>
+</span><span id="line-221">            <span class="k">return</span> <span class="n">module</span>
+</span><span id="line-222">        <span class="k">for</span> <span class="n">child</span> <span class="ow">in</span> <span class="n">module</span><span class="o">.</span><span class="n">children</span><span class="p">():</span>
+</span><span id="line-223">            <span class="n">result</span> <span class="o">=</span> <span class="n">scan_module</span><span class="p">(</span><span class="n">child</span><span class="p">)</span>
+</span><span id="line-224">            <span class="k">if</span> <span class="n">result</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+</span><span id="line-225">                <span class="k">return</span> <span class="n">result</span>
+</span><span id="line-226">        <span class="k">return</span> <span class="kc">None</span>
+</span><span id="line-227">
+</span><span id="line-228">    <span class="n">result</span> <span class="o">=</span> <span class="n">scan_module</span><span class="p">(</span><span class="n">spt_module</span><span class="p">)</span>
+</span><span id="line-229">    <span class="k">if</span> <span class="n">result</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+</span><span id="line-230">        <span class="k">return</span> <span class="n">result</span>
+</span><span id="line-231">
+</span><span id="line-232">    <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;No cost model found in the loaded world model.&quot;</span><span class="p">)</span></div>
 
 </span></code></pre></div>
     </div></div>
@@ -486,9 +502,9 @@
     </div><footer class="py-6 border-t border-border md:py-0">
     <div class="container flex flex-col items-center justify-between gap-4 md:h-24 md:flex-row">
       <div class="flex flex-col items-center gap-4 px-8 md:flex-row md:gap-2 md:px-0">
-        <p class="text-sm leading-loose text-center text-muted-foreground md:text-left">© 2025&nbsp;Built with <a class="font-medium underline underline-offset-4"
+        <p class="text-sm leading-loose text-center text-muted-foreground md:text-left">© 2026&nbsp;Built with <a class="font-medium underline underline-offset-4"
     href="https://www.sphinx-doc.org"
-    rel="noreferrer">Sphinx 8.2.3</a></p>
+    rel="noreferrer">Sphinx 8.1.3</a></p>
 </div>
 </div>
 </footer>

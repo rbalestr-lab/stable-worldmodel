@@ -132,7 +132,6 @@
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../../../api/solver/">Solver</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="../../../api/generated/stable_worldmodel.solver.GDSolver/">GDSolver</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../api/generated/stable_worldmodel.solver.CEMSolver/">CEMSolver</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../api/generated/stable_worldmodel.solver.MPPISolver/">MPPISolver</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../api/generated/stable_worldmodel.solver.NevergradSolver/">NevergradSolver</a></li>
@@ -427,453 +426,454 @@
 </span><span id="line-178">        <span class="k">if</span> <span class="s2">&quot;variation&quot;</span> <span class="ow">in</span> <span class="n">options</span><span class="p">:</span>
 </span><span id="line-179">            <span class="n">var_opt</span> <span class="o">=</span> <span class="n">options</span><span class="p">[</span><span class="s2">&quot;variation&quot;</span><span class="p">]</span>
 </span><span id="line-180">            <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">options</span><span class="p">[</span><span class="s2">&quot;variation&quot;</span><span class="p">],</span> <span class="nb">list</span> <span class="o">|</span> <span class="nb">tuple</span><span class="p">),</span> <span class="p">(</span>
-</span><span id="line-181">                <span class="s2">&quot;variation option must be a list or tuple containing variation names to sample&quot;</span>
-</span><span id="line-182">            <span class="p">)</span>
-</span><span id="line-183">            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">var_opt</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span> <span class="ow">and</span> <span class="n">var_opt</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;all&quot;</span><span class="p">:</span>
-</span><span id="line-184">                <span class="bp">self</span><span class="o">.</span><span class="n">_variations_watch</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">env</span><span class="o">.</span><span class="n">unwrapped</span><span class="o">.</span><span class="n">variation_space</span><span class="o">.</span><span class="n">names</span><span class="p">()</span>
-</span><span id="line-185">            <span class="k">else</span><span class="p">:</span>
-</span><span id="line-186">                <span class="bp">self</span><span class="o">.</span><span class="n">_variations_watch</span> <span class="o">=</span> <span class="n">var_opt</span>
-</span><span id="line-187">
-</span><span id="line-188">        <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_variations_watch</span><span class="p">:</span>
-</span><span id="line-189">            <span class="n">var_key</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;variation.</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2">&quot;</span>
-</span><span id="line-190">            <span class="k">assert</span> <span class="n">var_key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">info</span>
-</span><span id="line-191">            <span class="n">subvar_space</span> <span class="o">=</span> <span class="n">get_in</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">env</span><span class="o">.</span><span class="n">unwrapped</span><span class="o">.</span><span class="n">variation_space</span><span class="p">,</span> <span class="n">key</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">))</span>
-</span><span id="line-192">            <span class="n">info</span><span class="p">[</span><span class="n">var_key</span><span class="p">]</span> <span class="o">=</span> <span class="n">subvar_space</span><span class="o">.</span><span class="n">value</span>
-</span><span id="line-193">
-</span><span id="line-194">        <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">info</span><span class="p">[</span><span class="s2">&quot;action&quot;</span><span class="p">])</span> <span class="ow">is</span> <span class="nb">dict</span><span class="p">:</span>
-</span><span id="line-195">            <span class="k">raise</span> <span class="ne">NotImplementedError</span>
-</span><span id="line-196">        <span class="k">else</span><span class="p">:</span>
-</span><span id="line-197">            <span class="n">info</span><span class="p">[</span><span class="s2">&quot;action&quot;</span><span class="p">]</span> <span class="o">*=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
-</span><span id="line-198">        <span class="k">return</span> <span class="n">obs</span><span class="p">,</span> <span class="n">info</span></div>
+</span><span id="line-181">                <span class="s2">&quot;variation option must be a list or tuple containing variation names to sample, found: &quot;</span>
+</span><span id="line-182">                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">options</span><span class="p">[</span><span class="s1">&#39;variation&#39;</span><span class="p">])</span><span class="si">}</span><span class="s2">&quot;</span>
+</span><span id="line-183">            <span class="p">)</span>
+</span><span id="line-184">            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">var_opt</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span> <span class="ow">and</span> <span class="n">var_opt</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;all&quot;</span><span class="p">:</span>
+</span><span id="line-185">                <span class="bp">self</span><span class="o">.</span><span class="n">_variations_watch</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">env</span><span class="o">.</span><span class="n">unwrapped</span><span class="o">.</span><span class="n">variation_space</span><span class="o">.</span><span class="n">names</span><span class="p">()</span>
+</span><span id="line-186">            <span class="k">else</span><span class="p">:</span>
+</span><span id="line-187">                <span class="bp">self</span><span class="o">.</span><span class="n">_variations_watch</span> <span class="o">=</span> <span class="n">var_opt</span>
+</span><span id="line-188">
+</span><span id="line-189">        <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_variations_watch</span><span class="p">:</span>
+</span><span id="line-190">            <span class="n">var_key</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;variation.</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2">&quot;</span>
+</span><span id="line-191">            <span class="k">assert</span> <span class="n">var_key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">info</span>
+</span><span id="line-192">            <span class="n">subvar_space</span> <span class="o">=</span> <span class="n">get_in</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">env</span><span class="o">.</span><span class="n">unwrapped</span><span class="o">.</span><span class="n">variation_space</span><span class="p">,</span> <span class="n">key</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">))</span>
+</span><span id="line-193">            <span class="n">info</span><span class="p">[</span><span class="n">var_key</span><span class="p">]</span> <span class="o">=</span> <span class="n">subvar_space</span><span class="o">.</span><span class="n">value</span>
+</span><span id="line-194">
+</span><span id="line-195">        <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">info</span><span class="p">[</span><span class="s2">&quot;action&quot;</span><span class="p">])</span> <span class="ow">is</span> <span class="nb">dict</span><span class="p">:</span>
+</span><span id="line-196">            <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+</span><span id="line-197">        <span class="k">else</span><span class="p">:</span>
+</span><span id="line-198">            <span class="n">info</span><span class="p">[</span><span class="s2">&quot;action&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">full_like</span><span class="p">(</span><span class="n">info</span><span class="p">[</span><span class="s2">&quot;action&quot;</span><span class="p">],</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">)</span>
+</span><span id="line-199">        <span class="k">return</span> <span class="n">obs</span><span class="p">,</span> <span class="n">info</span></div>
 
-</span><span id="line-199">
+</span><span id="line-200">
 <div class="viewcode-block" id="EverythingToInfoWrapper.step">
 <a class="viewcode-back" href="../../../stable_worldmodel/#stable_worldmodel.wrappers.EverythingToInfoWrapper.step">[docs]</a>
-</span><span id="line-200">    <span class="k">def</span><span class="w"> </span><span class="nf">step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">action</span><span class="p">):</span>
-</span><span id="line-201">        <span class="n">obs</span><span class="p">,</span> <span class="n">reward</span><span class="p">,</span> <span class="n">terminated</span><span class="p">,</span> <span class="n">truncated</span><span class="p">,</span> <span class="n">info</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">env</span><span class="o">.</span><span class="n">step</span><span class="p">(</span><span class="n">action</span><span class="p">)</span>
-</span><span id="line-202">        <span class="bp">self</span><span class="o">.</span><span class="n">_step_counter</span> <span class="o">+=</span> <span class="mi">1</span>
-</span><span id="line-203">        <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">obs</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="nb">dict</span><span class="p">:</span>
-</span><span id="line-204">            <span class="n">_obs</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;observation&quot;</span><span class="p">:</span> <span class="n">obs</span><span class="p">}</span>
-</span><span id="line-205">        <span class="k">else</span><span class="p">:</span>
-</span><span id="line-206">            <span class="n">_obs</span> <span class="o">=</span> <span class="n">obs</span>
-</span><span id="line-207">        <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">_obs</span><span class="p">:</span>
-</span><span id="line-208">            <span class="k">assert</span> <span class="n">key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">info</span>
-</span><span id="line-209">            <span class="n">info</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">_obs</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
-</span><span id="line-210">        <span class="k">assert</span> <span class="s2">&quot;reward&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">info</span>
-</span><span id="line-211">        <span class="n">info</span><span class="p">[</span><span class="s2">&quot;reward&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">reward</span>
-</span><span id="line-212">        <span class="k">assert</span> <span class="s2">&quot;terminated&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">info</span>
-</span><span id="line-213">        <span class="n">info</span><span class="p">[</span><span class="s2">&quot;terminated&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">bool</span><span class="p">(</span><span class="n">terminated</span><span class="p">)</span>
-</span><span id="line-214">        <span class="k">assert</span> <span class="s2">&quot;truncated&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">info</span>
-</span><span id="line-215">        <span class="n">info</span><span class="p">[</span><span class="s2">&quot;truncated&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">bool</span><span class="p">(</span><span class="n">truncated</span><span class="p">)</span>
-</span><span id="line-216">        <span class="k">assert</span> <span class="s2">&quot;action&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">info</span>
-</span><span id="line-217">        <span class="n">info</span><span class="p">[</span><span class="s2">&quot;action&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">action</span>
-</span><span id="line-218">        <span class="k">assert</span> <span class="s2">&quot;step_idx&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">info</span>
-</span><span id="line-219">        <span class="n">info</span><span class="p">[</span><span class="s2">&quot;step_idx&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_step_counter</span>
-</span><span id="line-220">        <span class="k">assert</span> <span class="s2">&quot;id&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">info</span>
-</span><span id="line-221">        <span class="n">info</span><span class="p">[</span><span class="s2">&quot;id&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_id</span>
-</span><span id="line-222">
-</span><span id="line-223">        <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_variations_watch</span><span class="p">:</span>
-</span><span id="line-224">            <span class="n">var_key</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;variation.</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2">&quot;</span>
-</span><span id="line-225">            <span class="k">assert</span> <span class="n">var_key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">info</span>
-</span><span id="line-226">            <span class="n">subvar_space</span> <span class="o">=</span> <span class="n">get_in</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">env</span><span class="o">.</span><span class="n">unwrapped</span><span class="o">.</span><span class="n">variation_space</span><span class="p">,</span> <span class="n">key</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">))</span>
-</span><span id="line-227">            <span class="n">info</span><span class="p">[</span><span class="n">var_key</span><span class="p">]</span> <span class="o">=</span> <span class="n">subvar_space</span><span class="o">.</span><span class="n">value</span>
-</span><span id="line-228">
-</span><span id="line-229">        <span class="k">return</span> <span class="n">obs</span><span class="p">,</span> <span class="n">reward</span><span class="p">,</span> <span class="n">terminated</span><span class="p">,</span> <span class="n">truncated</span><span class="p">,</span> <span class="n">info</span></div>
+</span><span id="line-201">    <span class="k">def</span><span class="w"> </span><span class="nf">step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">action</span><span class="p">):</span>
+</span><span id="line-202">        <span class="n">obs</span><span class="p">,</span> <span class="n">reward</span><span class="p">,</span> <span class="n">terminated</span><span class="p">,</span> <span class="n">truncated</span><span class="p">,</span> <span class="n">info</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">env</span><span class="o">.</span><span class="n">step</span><span class="p">(</span><span class="n">action</span><span class="p">)</span>
+</span><span id="line-203">        <span class="bp">self</span><span class="o">.</span><span class="n">_step_counter</span> <span class="o">+=</span> <span class="mi">1</span>
+</span><span id="line-204">        <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">obs</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="nb">dict</span><span class="p">:</span>
+</span><span id="line-205">            <span class="n">_obs</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;observation&quot;</span><span class="p">:</span> <span class="n">obs</span><span class="p">}</span>
+</span><span id="line-206">        <span class="k">else</span><span class="p">:</span>
+</span><span id="line-207">            <span class="n">_obs</span> <span class="o">=</span> <span class="n">obs</span>
+</span><span id="line-208">        <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">_obs</span><span class="p">:</span>
+</span><span id="line-209">            <span class="k">assert</span> <span class="n">key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">info</span>
+</span><span id="line-210">            <span class="n">info</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">_obs</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
+</span><span id="line-211">        <span class="k">assert</span> <span class="s2">&quot;reward&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">info</span>
+</span><span id="line-212">        <span class="n">info</span><span class="p">[</span><span class="s2">&quot;reward&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">reward</span>
+</span><span id="line-213">        <span class="k">assert</span> <span class="s2">&quot;terminated&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">info</span>
+</span><span id="line-214">        <span class="n">info</span><span class="p">[</span><span class="s2">&quot;terminated&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">bool</span><span class="p">(</span><span class="n">terminated</span><span class="p">)</span>
+</span><span id="line-215">        <span class="k">assert</span> <span class="s2">&quot;truncated&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">info</span>
+</span><span id="line-216">        <span class="n">info</span><span class="p">[</span><span class="s2">&quot;truncated&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">bool</span><span class="p">(</span><span class="n">truncated</span><span class="p">)</span>
+</span><span id="line-217">        <span class="k">assert</span> <span class="s2">&quot;action&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">info</span>
+</span><span id="line-218">        <span class="n">info</span><span class="p">[</span><span class="s2">&quot;action&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">action</span>
+</span><span id="line-219">        <span class="k">assert</span> <span class="s2">&quot;step_idx&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">info</span>
+</span><span id="line-220">        <span class="n">info</span><span class="p">[</span><span class="s2">&quot;step_idx&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_step_counter</span>
+</span><span id="line-221">        <span class="k">assert</span> <span class="s2">&quot;id&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">info</span>
+</span><span id="line-222">        <span class="n">info</span><span class="p">[</span><span class="s2">&quot;id&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_id</span>
+</span><span id="line-223">
+</span><span id="line-224">        <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_variations_watch</span><span class="p">:</span>
+</span><span id="line-225">            <span class="n">var_key</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;variation.</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2">&quot;</span>
+</span><span id="line-226">            <span class="k">assert</span> <span class="n">var_key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">info</span>
+</span><span id="line-227">            <span class="n">subvar_space</span> <span class="o">=</span> <span class="n">get_in</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">env</span><span class="o">.</span><span class="n">unwrapped</span><span class="o">.</span><span class="n">variation_space</span><span class="p">,</span> <span class="n">key</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">))</span>
+</span><span id="line-228">            <span class="n">info</span><span class="p">[</span><span class="n">var_key</span><span class="p">]</span> <span class="o">=</span> <span class="n">subvar_space</span><span class="o">.</span><span class="n">value</span>
+</span><span id="line-229">
+</span><span id="line-230">        <span class="k">return</span> <span class="n">obs</span><span class="p">,</span> <span class="n">reward</span><span class="p">,</span> <span class="n">terminated</span><span class="p">,</span> <span class="n">truncated</span><span class="p">,</span> <span class="n">info</span></div>
 </div>
 
-</span><span id="line-230">
 </span><span id="line-231">
+</span><span id="line-232">
 <div class="viewcode-block" id="AddPixelsWrapper">
 <a class="viewcode-back" href="../../../stable_worldmodel/#stable_worldmodel.wrappers.AddPixelsWrapper">[docs]</a>
-</span><span id="line-232"><span class="k">class</span><span class="w"> </span><span class="nc">AddPixelsWrapper</span><span class="p">(</span><span class="n">gym</span><span class="o">.</span><span class="n">Wrapper</span><span class="p">):</span>
-</span><span id="line-233"><span class="w">    </span><span class="sd">&quot;&quot;&quot;Adds rendered environment pixels to info dict with optional resizing and transforms.</span>
-</span><span id="line-234">
-</span><span id="line-235"><span class="sd">    Supports single images, dictionaries of images (multiview), or lists of images.</span>
-</span><span id="line-236"><span class="sd">    Uses PIL for resizing and optional torchvision transforms.</span>
-</span><span id="line-237">
-</span><span id="line-238"><span class="sd">    Args:</span>
-</span><span id="line-239"><span class="sd">        env: The Gymnasium environment to wrap.</span>
-</span><span id="line-240"><span class="sd">        pixels_shape: Target (height, width) for resized images. Defaults to (84, 84).</span>
-</span><span id="line-241"><span class="sd">        torchvision_transform: Optional transform to apply to PIL images.</span>
-</span><span id="line-242">
-</span><span id="line-243"><span class="sd">    Info Keys Added:</span>
-</span><span id="line-244"><span class="sd">        - pixels: Rendered image (single view).</span>
-</span><span id="line-245"><span class="sd">        - pixels.{key}: Individual images (multiview dict).</span>
-</span><span id="line-246"><span class="sd">        - pixels.{idx}: Individual images (multiview list).</span>
-</span><span id="line-247"><span class="sd">        - render_time: Time taken to render in seconds.</span>
-</span><span id="line-248"><span class="sd">    &quot;&quot;&quot;</span>
-</span><span id="line-249">
-</span><span id="line-250">    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
-</span><span id="line-251">        <span class="bp">self</span><span class="p">,</span>
-</span><span id="line-252">        <span class="n">env</span><span class="p">,</span>
-</span><span id="line-253">        <span class="n">pixels_shape</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="mi">84</span><span class="p">,</span> <span class="mi">84</span><span class="p">),</span>  <span class="c1"># (height, width)</span>
-</span><span id="line-254">        <span class="n">torchvision_transform</span><span class="p">:</span> <span class="n">Callable</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-</span><span id="line-255">    <span class="p">):</span>
-</span><span id="line-256">        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">env</span><span class="p">)</span>
-</span><span id="line-257">        <span class="bp">self</span><span class="o">.</span><span class="n">pixels_shape</span> <span class="o">=</span> <span class="n">pixels_shape</span>
-</span><span id="line-258">        <span class="bp">self</span><span class="o">.</span><span class="n">torchvision_transform</span> <span class="o">=</span> <span class="n">torchvision_transform</span>
-</span><span id="line-259">        <span class="c1"># For resizing, use PIL (required for torchvision transforms)</span>
-</span><span id="line-260">        <span class="kn">from</span><span class="w"> </span><span class="nn">PIL</span><span class="w"> </span><span class="kn">import</span> <span class="n">Image</span>
-</span><span id="line-261">
-</span><span id="line-262">        <span class="bp">self</span><span class="o">.</span><span class="n">Image</span> <span class="o">=</span> <span class="n">Image</span>
-</span><span id="line-263">
-</span><span id="line-264">    <span class="k">def</span><span class="w"> </span><span class="nf">_get_pixels</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-</span><span id="line-265">        <span class="c1"># Render the environment as an RGB array</span>
-</span><span id="line-266">        <span class="n">render</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">env</span><span class="o">.</span><span class="n">unwrapped</span><span class="p">,</span> <span class="s2">&quot;render_multiview&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
-</span><span id="line-267">        <span class="n">render</span> <span class="o">=</span> <span class="n">render</span> <span class="k">if</span> <span class="nb">callable</span><span class="p">(</span><span class="n">render</span><span class="p">)</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">env</span><span class="o">.</span><span class="n">render</span>
-</span><span id="line-268">
-</span><span id="line-269">        <span class="n">t0</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
-</span><span id="line-270">        <span class="n">img</span> <span class="o">=</span> <span class="n">render</span><span class="p">()</span>
-</span><span id="line-271">        <span class="n">t1</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
-</span><span id="line-272">
-</span><span id="line-273">        <span class="k">def</span><span class="w"> </span><span class="nf">_process_img</span><span class="p">(</span><span class="n">img_array</span><span class="p">):</span>
-</span><span id="line-274">            <span class="c1"># Convert to PIL Image for resizing</span>
-</span><span id="line-275">            <span class="n">pil_img</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Image</span><span class="o">.</span><span class="n">fromarray</span><span class="p">(</span><span class="n">img_array</span><span class="p">)</span>
-</span><span id="line-276">            <span class="n">height</span><span class="p">,</span> <span class="n">width</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pixels_shape</span>
-</span><span id="line-277">            <span class="n">pil_img</span> <span class="o">=</span> <span class="n">pil_img</span><span class="o">.</span><span class="n">resize</span><span class="p">((</span><span class="n">width</span><span class="p">,</span> <span class="n">height</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">Image</span><span class="o">.</span><span class="n">BILINEAR</span><span class="p">)</span>
-</span><span id="line-278">            <span class="c1"># Optionally apply torchvision transform</span>
-</span><span id="line-279">            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">torchvision_transform</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-</span><span id="line-280">                <span class="n">pixels</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">torchvision_transform</span><span class="p">(</span><span class="n">pil_img</span><span class="p">)</span>
-</span><span id="line-281">            <span class="k">else</span><span class="p">:</span>
-</span><span id="line-282">                <span class="n">pixels</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">pil_img</span><span class="p">)</span>
-</span><span id="line-283">            <span class="k">return</span> <span class="n">pixels</span>
-</span><span id="line-284">
-</span><span id="line-285">        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">img</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
-</span><span id="line-286">            <span class="n">pixels</span> <span class="o">=</span> <span class="p">{</span><span class="sa">f</span><span class="s2">&quot;pixels.</span><span class="si">{</span><span class="n">k</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">:</span> <span class="n">_process_img</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">img</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
-</span><span id="line-287">        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">img</span><span class="p">,</span> <span class="p">(</span><span class="nb">list</span> <span class="o">|</span> <span class="nb">tuple</span><span class="p">)):</span>
-</span><span id="line-288">            <span class="n">pixels</span> <span class="o">=</span> <span class="p">{</span><span class="sa">f</span><span class="s2">&quot;pixels.</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">:</span> <span class="n">_process_img</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">img</span><span class="p">)}</span>
-</span><span id="line-289">        <span class="k">else</span><span class="p">:</span>
-</span><span id="line-290">            <span class="n">pixels</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;pixels&quot;</span><span class="p">:</span> <span class="n">_process_img</span><span class="p">(</span><span class="n">img</span><span class="p">)}</span>
-</span><span id="line-291">
-</span><span id="line-292">        <span class="k">return</span> <span class="n">pixels</span><span class="p">,</span> <span class="n">t1</span> <span class="o">-</span> <span class="n">t0</span>
-</span><span id="line-293">
+</span><span id="line-233"><span class="k">class</span><span class="w"> </span><span class="nc">AddPixelsWrapper</span><span class="p">(</span><span class="n">gym</span><span class="o">.</span><span class="n">Wrapper</span><span class="p">):</span>
+</span><span id="line-234"><span class="w">    </span><span class="sd">&quot;&quot;&quot;Adds rendered environment pixels to info dict with optional resizing and transforms.</span>
+</span><span id="line-235">
+</span><span id="line-236"><span class="sd">    Supports single images, dictionaries of images (multiview), or lists of images.</span>
+</span><span id="line-237"><span class="sd">    Uses PIL for resizing and optional torchvision transforms.</span>
+</span><span id="line-238">
+</span><span id="line-239"><span class="sd">    Args:</span>
+</span><span id="line-240"><span class="sd">        env: The Gymnasium environment to wrap.</span>
+</span><span id="line-241"><span class="sd">        pixels_shape: Target (height, width) for resized images. Defaults to (84, 84).</span>
+</span><span id="line-242"><span class="sd">        torchvision_transform: Optional transform to apply to PIL images.</span>
+</span><span id="line-243">
+</span><span id="line-244"><span class="sd">    Info Keys Added:</span>
+</span><span id="line-245"><span class="sd">        - pixels: Rendered image (single view).</span>
+</span><span id="line-246"><span class="sd">        - pixels.{key}: Individual images (multiview dict).</span>
+</span><span id="line-247"><span class="sd">        - pixels.{idx}: Individual images (multiview list).</span>
+</span><span id="line-248"><span class="sd">        - render_time: Time taken to render in seconds.</span>
+</span><span id="line-249"><span class="sd">    &quot;&quot;&quot;</span>
+</span><span id="line-250">
+</span><span id="line-251">    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+</span><span id="line-252">        <span class="bp">self</span><span class="p">,</span>
+</span><span id="line-253">        <span class="n">env</span><span class="p">,</span>
+</span><span id="line-254">        <span class="n">pixels_shape</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="mi">84</span><span class="p">,</span> <span class="mi">84</span><span class="p">),</span>  <span class="c1"># (height, width)</span>
+</span><span id="line-255">        <span class="n">torchvision_transform</span><span class="p">:</span> <span class="n">Callable</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+</span><span id="line-256">    <span class="p">):</span>
+</span><span id="line-257">        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">env</span><span class="p">)</span>
+</span><span id="line-258">        <span class="bp">self</span><span class="o">.</span><span class="n">pixels_shape</span> <span class="o">=</span> <span class="n">pixels_shape</span>
+</span><span id="line-259">        <span class="bp">self</span><span class="o">.</span><span class="n">torchvision_transform</span> <span class="o">=</span> <span class="n">torchvision_transform</span>
+</span><span id="line-260">        <span class="c1"># For resizing, use PIL (required for torchvision transforms)</span>
+</span><span id="line-261">        <span class="kn">from</span><span class="w"> </span><span class="nn">PIL</span><span class="w"> </span><span class="kn">import</span> <span class="n">Image</span>
+</span><span id="line-262">
+</span><span id="line-263">        <span class="bp">self</span><span class="o">.</span><span class="n">Image</span> <span class="o">=</span> <span class="n">Image</span>
+</span><span id="line-264">
+</span><span id="line-265">    <span class="k">def</span><span class="w"> </span><span class="nf">_get_pixels</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+</span><span id="line-266">        <span class="c1"># Render the environment as an RGB array</span>
+</span><span id="line-267">        <span class="n">render</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">env</span><span class="o">.</span><span class="n">unwrapped</span><span class="p">,</span> <span class="s2">&quot;render_multiview&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+</span><span id="line-268">        <span class="n">render</span> <span class="o">=</span> <span class="n">render</span> <span class="k">if</span> <span class="nb">callable</span><span class="p">(</span><span class="n">render</span><span class="p">)</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">env</span><span class="o">.</span><span class="n">render</span>
+</span><span id="line-269">
+</span><span id="line-270">        <span class="n">t0</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+</span><span id="line-271">        <span class="n">img</span> <span class="o">=</span> <span class="n">render</span><span class="p">()</span>
+</span><span id="line-272">        <span class="n">t1</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+</span><span id="line-273">
+</span><span id="line-274">        <span class="k">def</span><span class="w"> </span><span class="nf">_process_img</span><span class="p">(</span><span class="n">img_array</span><span class="p">):</span>
+</span><span id="line-275">            <span class="c1"># Convert to PIL Image for resizing</span>
+</span><span id="line-276">            <span class="n">pil_img</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Image</span><span class="o">.</span><span class="n">fromarray</span><span class="p">(</span><span class="n">img_array</span><span class="p">)</span>
+</span><span id="line-277">            <span class="n">height</span><span class="p">,</span> <span class="n">width</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pixels_shape</span>
+</span><span id="line-278">            <span class="n">pil_img</span> <span class="o">=</span> <span class="n">pil_img</span><span class="o">.</span><span class="n">resize</span><span class="p">((</span><span class="n">width</span><span class="p">,</span> <span class="n">height</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">Image</span><span class="o">.</span><span class="n">BILINEAR</span><span class="p">)</span>
+</span><span id="line-279">            <span class="c1"># Optionally apply torchvision transform</span>
+</span><span id="line-280">            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">torchvision_transform</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+</span><span id="line-281">                <span class="n">pixels</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">torchvision_transform</span><span class="p">(</span><span class="n">pil_img</span><span class="p">)</span>
+</span><span id="line-282">            <span class="k">else</span><span class="p">:</span>
+</span><span id="line-283">                <span class="n">pixels</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">pil_img</span><span class="p">)</span>
+</span><span id="line-284">            <span class="k">return</span> <span class="n">pixels</span>
+</span><span id="line-285">
+</span><span id="line-286">        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">img</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+</span><span id="line-287">            <span class="n">pixels</span> <span class="o">=</span> <span class="p">{</span><span class="sa">f</span><span class="s2">&quot;pixels.</span><span class="si">{</span><span class="n">k</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">:</span> <span class="n">_process_img</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">img</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
+</span><span id="line-288">        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">img</span><span class="p">,</span> <span class="p">(</span><span class="nb">list</span> <span class="o">|</span> <span class="nb">tuple</span><span class="p">)):</span>
+</span><span id="line-289">            <span class="n">pixels</span> <span class="o">=</span> <span class="p">{</span><span class="sa">f</span><span class="s2">&quot;pixels.</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">:</span> <span class="n">_process_img</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">img</span><span class="p">)}</span>
+</span><span id="line-290">        <span class="k">else</span><span class="p">:</span>
+</span><span id="line-291">            <span class="n">pixels</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;pixels&quot;</span><span class="p">:</span> <span class="n">_process_img</span><span class="p">(</span><span class="n">img</span><span class="p">)}</span>
+</span><span id="line-292">
+</span><span id="line-293">        <span class="k">return</span> <span class="n">pixels</span><span class="p">,</span> <span class="n">t1</span> <span class="o">-</span> <span class="n">t0</span>
+</span><span id="line-294">
 <div class="viewcode-block" id="AddPixelsWrapper.reset">
 <a class="viewcode-back" href="../../../stable_worldmodel/#stable_worldmodel.wrappers.AddPixelsWrapper.reset">[docs]</a>
-</span><span id="line-294">    <span class="k">def</span><span class="w"> </span><span class="nf">reset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-</span><span id="line-295">        <span class="n">obs</span><span class="p">,</span> <span class="n">info</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">env</span><span class="o">.</span><span class="n">reset</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-</span><span id="line-296">        <span class="n">pixels</span><span class="p">,</span> <span class="n">info</span><span class="p">[</span><span class="s2">&quot;render_time&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_pixels</span><span class="p">()</span>
-</span><span id="line-297">        <span class="n">info</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">pixels</span><span class="p">)</span>
-</span><span id="line-298">        <span class="k">return</span> <span class="n">obs</span><span class="p">,</span> <span class="n">info</span></div>
+</span><span id="line-295">    <span class="k">def</span><span class="w"> </span><span class="nf">reset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+</span><span id="line-296">        <span class="n">obs</span><span class="p">,</span> <span class="n">info</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">env</span><span class="o">.</span><span class="n">reset</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+</span><span id="line-297">        <span class="n">pixels</span><span class="p">,</span> <span class="n">info</span><span class="p">[</span><span class="s2">&quot;render_time&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_pixels</span><span class="p">()</span>
+</span><span id="line-298">        <span class="n">info</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">pixels</span><span class="p">)</span>
+</span><span id="line-299">        <span class="k">return</span> <span class="n">obs</span><span class="p">,</span> <span class="n">info</span></div>
 
-</span><span id="line-299">
+</span><span id="line-300">
 <div class="viewcode-block" id="AddPixelsWrapper.step">
 <a class="viewcode-back" href="../../../stable_worldmodel/#stable_worldmodel.wrappers.AddPixelsWrapper.step">[docs]</a>
-</span><span id="line-300">    <span class="k">def</span><span class="w"> </span><span class="nf">step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">action</span><span class="p">):</span>
-</span><span id="line-301">        <span class="n">obs</span><span class="p">,</span> <span class="n">reward</span><span class="p">,</span> <span class="n">terminated</span><span class="p">,</span> <span class="n">truncated</span><span class="p">,</span> <span class="n">info</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">env</span><span class="o">.</span><span class="n">step</span><span class="p">(</span><span class="n">action</span><span class="p">)</span>
-</span><span id="line-302">        <span class="n">pixels</span><span class="p">,</span> <span class="n">info</span><span class="p">[</span><span class="s2">&quot;render_time&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_pixels</span><span class="p">()</span>
-</span><span id="line-303">        <span class="n">info</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">pixels</span><span class="p">)</span>
-</span><span id="line-304">        <span class="k">return</span> <span class="n">obs</span><span class="p">,</span> <span class="n">reward</span><span class="p">,</span> <span class="n">terminated</span><span class="p">,</span> <span class="n">truncated</span><span class="p">,</span> <span class="n">info</span></div>
+</span><span id="line-301">    <span class="k">def</span><span class="w"> </span><span class="nf">step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">action</span><span class="p">):</span>
+</span><span id="line-302">        <span class="n">obs</span><span class="p">,</span> <span class="n">reward</span><span class="p">,</span> <span class="n">terminated</span><span class="p">,</span> <span class="n">truncated</span><span class="p">,</span> <span class="n">info</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">env</span><span class="o">.</span><span class="n">step</span><span class="p">(</span><span class="n">action</span><span class="p">)</span>
+</span><span id="line-303">        <span class="n">pixels</span><span class="p">,</span> <span class="n">info</span><span class="p">[</span><span class="s2">&quot;render_time&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_pixels</span><span class="p">()</span>
+</span><span id="line-304">        <span class="n">info</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">pixels</span><span class="p">)</span>
+</span><span id="line-305">        <span class="k">return</span> <span class="n">obs</span><span class="p">,</span> <span class="n">reward</span><span class="p">,</span> <span class="n">terminated</span><span class="p">,</span> <span class="n">truncated</span><span class="p">,</span> <span class="n">info</span></div>
 </div>
 
-</span><span id="line-305">
 </span><span id="line-306">
+</span><span id="line-307">
 <div class="viewcode-block" id="ResizeGoalWrapper">
 <a class="viewcode-back" href="../../../stable_worldmodel/#stable_worldmodel.wrappers.ResizeGoalWrapper">[docs]</a>
-</span><span id="line-307"><span class="k">class</span><span class="w"> </span><span class="nc">ResizeGoalWrapper</span><span class="p">(</span><span class="n">gym</span><span class="o">.</span><span class="n">Wrapper</span><span class="p">):</span>
-</span><span id="line-308"><span class="w">    </span><span class="sd">&quot;&quot;&quot;Resizes goal images in info dict with optional transforms.</span>
-</span><span id="line-309">
-</span><span id="line-310"><span class="sd">    Applies PIL-based resizing and optional torchvision transforms to the &#39;goal&#39;</span>
-</span><span id="line-311"><span class="sd">    image in info dict during both reset and step.</span>
-</span><span id="line-312">
-</span><span id="line-313"><span class="sd">    Args:</span>
-</span><span id="line-314"><span class="sd">        env: The Gymnasium environment to wrap.</span>
-</span><span id="line-315"><span class="sd">        pixels_shape: Target (height, width) for resized goal images. Defaults to (84, 84).</span>
-</span><span id="line-316"><span class="sd">        torchvision_transform: Optional transform to apply to PIL goal images.</span>
-</span><span id="line-317"><span class="sd">    &quot;&quot;&quot;</span>
-</span><span id="line-318">
-</span><span id="line-319">    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
-</span><span id="line-320">        <span class="bp">self</span><span class="p">,</span>
-</span><span id="line-321">        <span class="n">env</span><span class="p">,</span>
-</span><span id="line-322">        <span class="n">pixels_shape</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="mi">84</span><span class="p">,</span> <span class="mi">84</span><span class="p">),</span>  <span class="c1"># (height, width)</span>
-</span><span id="line-323">        <span class="n">torchvision_transform</span><span class="p">:</span> <span class="n">Callable</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-</span><span id="line-324">    <span class="p">):</span>
-</span><span id="line-325">        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">env</span><span class="p">)</span>
-</span><span id="line-326">        <span class="bp">self</span><span class="o">.</span><span class="n">pixels_shape</span> <span class="o">=</span> <span class="n">pixels_shape</span>
-</span><span id="line-327">        <span class="bp">self</span><span class="o">.</span><span class="n">torchvision_transform</span> <span class="o">=</span> <span class="n">torchvision_transform</span>
-</span><span id="line-328">        <span class="c1"># For resizing, use PIL (required for torchvision transforms)</span>
-</span><span id="line-329">        <span class="kn">from</span><span class="w"> </span><span class="nn">PIL</span><span class="w"> </span><span class="kn">import</span> <span class="n">Image</span>
-</span><span id="line-330">
-</span><span id="line-331">        <span class="bp">self</span><span class="o">.</span><span class="n">Image</span> <span class="o">=</span> <span class="n">Image</span>
-</span><span id="line-332">
-</span><span id="line-333">    <span class="k">def</span><span class="w"> </span><span class="nf">_format</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">img</span><span class="p">):</span>
-</span><span id="line-334">        <span class="c1"># Convert to PIL Image for resizing</span>
-</span><span id="line-335">        <span class="n">pil_img</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Image</span><span class="o">.</span><span class="n">fromarray</span><span class="p">(</span><span class="n">img</span><span class="p">)</span>
-</span><span id="line-336">        <span class="n">height</span><span class="p">,</span> <span class="n">width</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pixels_shape</span>
-</span><span id="line-337">        <span class="n">pil_img</span> <span class="o">=</span> <span class="n">pil_img</span><span class="o">.</span><span class="n">resize</span><span class="p">((</span><span class="n">width</span><span class="p">,</span> <span class="n">height</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">Image</span><span class="o">.</span><span class="n">BILINEAR</span><span class="p">)</span>
-</span><span id="line-338">        <span class="c1"># Optionally apply torchvision transform</span>
-</span><span id="line-339">        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">torchvision_transform</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-</span><span id="line-340">            <span class="n">pixels</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">torchvision_transform</span><span class="p">(</span><span class="n">pil_img</span><span class="p">)</span>
-</span><span id="line-341">        <span class="k">else</span><span class="p">:</span>
-</span><span id="line-342">            <span class="n">pixels</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">pil_img</span><span class="p">)</span>
-</span><span id="line-343">        <span class="k">return</span> <span class="n">pixels</span>
-</span><span id="line-344">
+</span><span id="line-308"><span class="k">class</span><span class="w"> </span><span class="nc">ResizeGoalWrapper</span><span class="p">(</span><span class="n">gym</span><span class="o">.</span><span class="n">Wrapper</span><span class="p">):</span>
+</span><span id="line-309"><span class="w">    </span><span class="sd">&quot;&quot;&quot;Resizes goal images in info dict with optional transforms.</span>
+</span><span id="line-310">
+</span><span id="line-311"><span class="sd">    Applies PIL-based resizing and optional torchvision transforms to the &#39;goal&#39;</span>
+</span><span id="line-312"><span class="sd">    image in info dict during both reset and step.</span>
+</span><span id="line-313">
+</span><span id="line-314"><span class="sd">    Args:</span>
+</span><span id="line-315"><span class="sd">        env: The Gymnasium environment to wrap.</span>
+</span><span id="line-316"><span class="sd">        pixels_shape: Target (height, width) for resized goal images. Defaults to (84, 84).</span>
+</span><span id="line-317"><span class="sd">        torchvision_transform: Optional transform to apply to PIL goal images.</span>
+</span><span id="line-318"><span class="sd">    &quot;&quot;&quot;</span>
+</span><span id="line-319">
+</span><span id="line-320">    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+</span><span id="line-321">        <span class="bp">self</span><span class="p">,</span>
+</span><span id="line-322">        <span class="n">env</span><span class="p">,</span>
+</span><span id="line-323">        <span class="n">pixels_shape</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="mi">84</span><span class="p">,</span> <span class="mi">84</span><span class="p">),</span>  <span class="c1"># (height, width)</span>
+</span><span id="line-324">        <span class="n">torchvision_transform</span><span class="p">:</span> <span class="n">Callable</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+</span><span id="line-325">    <span class="p">):</span>
+</span><span id="line-326">        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">env</span><span class="p">)</span>
+</span><span id="line-327">        <span class="bp">self</span><span class="o">.</span><span class="n">pixels_shape</span> <span class="o">=</span> <span class="n">pixels_shape</span>
+</span><span id="line-328">        <span class="bp">self</span><span class="o">.</span><span class="n">torchvision_transform</span> <span class="o">=</span> <span class="n">torchvision_transform</span>
+</span><span id="line-329">        <span class="c1"># For resizing, use PIL (required for torchvision transforms)</span>
+</span><span id="line-330">        <span class="kn">from</span><span class="w"> </span><span class="nn">PIL</span><span class="w"> </span><span class="kn">import</span> <span class="n">Image</span>
+</span><span id="line-331">
+</span><span id="line-332">        <span class="bp">self</span><span class="o">.</span><span class="n">Image</span> <span class="o">=</span> <span class="n">Image</span>
+</span><span id="line-333">
+</span><span id="line-334">    <span class="k">def</span><span class="w"> </span><span class="nf">_format</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">img</span><span class="p">):</span>
+</span><span id="line-335">        <span class="c1"># Convert to PIL Image for resizing</span>
+</span><span id="line-336">        <span class="n">pil_img</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Image</span><span class="o">.</span><span class="n">fromarray</span><span class="p">(</span><span class="n">img</span><span class="p">)</span>
+</span><span id="line-337">        <span class="n">height</span><span class="p">,</span> <span class="n">width</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pixels_shape</span>
+</span><span id="line-338">        <span class="n">pil_img</span> <span class="o">=</span> <span class="n">pil_img</span><span class="o">.</span><span class="n">resize</span><span class="p">((</span><span class="n">width</span><span class="p">,</span> <span class="n">height</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">Image</span><span class="o">.</span><span class="n">BILINEAR</span><span class="p">)</span>
+</span><span id="line-339">        <span class="c1"># Optionally apply torchvision transform</span>
+</span><span id="line-340">        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">torchvision_transform</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+</span><span id="line-341">            <span class="n">pixels</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">torchvision_transform</span><span class="p">(</span><span class="n">pil_img</span><span class="p">)</span>
+</span><span id="line-342">        <span class="k">else</span><span class="p">:</span>
+</span><span id="line-343">            <span class="n">pixels</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">pil_img</span><span class="p">)</span>
+</span><span id="line-344">        <span class="k">return</span> <span class="n">pixels</span>
+</span><span id="line-345">
 <div class="viewcode-block" id="ResizeGoalWrapper.reset">
 <a class="viewcode-back" href="../../../stable_worldmodel/#stable_worldmodel.wrappers.ResizeGoalWrapper.reset">[docs]</a>
-</span><span id="line-345">    <span class="k">def</span><span class="w"> </span><span class="nf">reset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-</span><span id="line-346">        <span class="n">obs</span><span class="p">,</span> <span class="n">info</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">env</span><span class="o">.</span><span class="n">reset</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-</span><span id="line-347">        <span class="n">info</span><span class="p">[</span><span class="s2">&quot;goal&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_format</span><span class="p">(</span><span class="n">info</span><span class="p">[</span><span class="s2">&quot;goal&quot;</span><span class="p">])</span>
-</span><span id="line-348">        <span class="k">return</span> <span class="n">obs</span><span class="p">,</span> <span class="n">info</span></div>
+</span><span id="line-346">    <span class="k">def</span><span class="w"> </span><span class="nf">reset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+</span><span id="line-347">        <span class="n">obs</span><span class="p">,</span> <span class="n">info</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">env</span><span class="o">.</span><span class="n">reset</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+</span><span id="line-348">        <span class="n">info</span><span class="p">[</span><span class="s2">&quot;goal&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_format</span><span class="p">(</span><span class="n">info</span><span class="p">[</span><span class="s2">&quot;goal&quot;</span><span class="p">])</span>
+</span><span id="line-349">        <span class="k">return</span> <span class="n">obs</span><span class="p">,</span> <span class="n">info</span></div>
 
-</span><span id="line-349">
+</span><span id="line-350">
 <div class="viewcode-block" id="ResizeGoalWrapper.step">
 <a class="viewcode-back" href="../../../stable_worldmodel/#stable_worldmodel.wrappers.ResizeGoalWrapper.step">[docs]</a>
-</span><span id="line-350">    <span class="k">def</span><span class="w"> </span><span class="nf">step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">action</span><span class="p">):</span>
-</span><span id="line-351">        <span class="n">obs</span><span class="p">,</span> <span class="n">reward</span><span class="p">,</span> <span class="n">terminated</span><span class="p">,</span> <span class="n">truncated</span><span class="p">,</span> <span class="n">info</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">env</span><span class="o">.</span><span class="n">step</span><span class="p">(</span><span class="n">action</span><span class="p">)</span>
-</span><span id="line-352">        <span class="n">info</span><span class="p">[</span><span class="s2">&quot;goal&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_format</span><span class="p">(</span><span class="n">info</span><span class="p">[</span><span class="s2">&quot;goal&quot;</span><span class="p">])</span>
-</span><span id="line-353">        <span class="k">return</span> <span class="n">obs</span><span class="p">,</span> <span class="n">reward</span><span class="p">,</span> <span class="n">terminated</span><span class="p">,</span> <span class="n">truncated</span><span class="p">,</span> <span class="n">info</span></div>
+</span><span id="line-351">    <span class="k">def</span><span class="w"> </span><span class="nf">step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">action</span><span class="p">):</span>
+</span><span id="line-352">        <span class="n">obs</span><span class="p">,</span> <span class="n">reward</span><span class="p">,</span> <span class="n">terminated</span><span class="p">,</span> <span class="n">truncated</span><span class="p">,</span> <span class="n">info</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">env</span><span class="o">.</span><span class="n">step</span><span class="p">(</span><span class="n">action</span><span class="p">)</span>
+</span><span id="line-353">        <span class="n">info</span><span class="p">[</span><span class="s2">&quot;goal&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_format</span><span class="p">(</span><span class="n">info</span><span class="p">[</span><span class="s2">&quot;goal&quot;</span><span class="p">])</span>
+</span><span id="line-354">        <span class="k">return</span> <span class="n">obs</span><span class="p">,</span> <span class="n">reward</span><span class="p">,</span> <span class="n">terminated</span><span class="p">,</span> <span class="n">truncated</span><span class="p">,</span> <span class="n">info</span></div>
 </div>
 
-</span><span id="line-354">
 </span><span id="line-355">
+</span><span id="line-356">
 <div class="viewcode-block" id="StackedWrapper">
 <a class="viewcode-back" href="../../../stable_worldmodel/#stable_worldmodel.wrappers.StackedWrapper">[docs]</a>
-</span><span id="line-356"><span class="k">class</span><span class="w"> </span><span class="nc">StackedWrapper</span><span class="p">(</span><span class="n">gym</span><span class="o">.</span><span class="n">Wrapper</span><span class="p">):</span>
-</span><span id="line-357"><span class="w">    </span><span class="sd">&quot;&quot;&quot;Stacks specified key(s) in the info dict over the last k steps.</span>
-</span><span id="line-358">
-</span><span id="line-359"><span class="sd">    The initial reset will fill the stack(s) with the initial value(s).</span>
-</span><span id="line-360">
-</span><span id="line-361"><span class="sd">    Note:</span>
-</span><span id="line-362"><span class="sd">        Stacked values are combined into a tensor/array along a new first</span>
-</span><span id="line-363"><span class="sd">        dimension if the data type is a torch.Tensor or np.ndarray.</span>
-</span><span id="line-364">
-</span><span id="line-365"><span class="sd">    Args:</span>
-</span><span id="line-366"><span class="sd">        env: The Gymnasium environment to wrap.</span>
-</span><span id="line-367"><span class="sd">        key: The key or list of keys in the info dict to stack.</span>
-</span><span id="line-368"><span class="sd">        frameskip: Number of frames to skip between stacked entries.</span>
-</span><span id="line-369"><span class="sd">        history_size: Number of past entries to stack.</span>
-</span><span id="line-370"><span class="sd">    &quot;&quot;&quot;</span>
-</span><span id="line-371">
-</span><span id="line-372">    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
-</span><span id="line-373">        <span class="bp">self</span><span class="p">,</span>
-</span><span id="line-374">        <span class="n">env</span><span class="p">:</span> <span class="n">gym</span><span class="o">.</span><span class="n">Env</span><span class="p">,</span>
-</span><span id="line-375">        <span class="n">key</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
-</span><span id="line-376">        <span class="n">history_size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
-</span><span id="line-377">        <span class="n">frameskip</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
-</span><span id="line-378">    <span class="p">):</span>
-</span><span id="line-379">        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">env</span><span class="p">)</span>
-</span><span id="line-380">        <span class="bp">self</span><span class="o">.</span><span class="n">keys</span> <span class="o">=</span> <span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="k">else</span> <span class="n">key</span>
-</span><span id="line-381">        <span class="bp">self</span><span class="o">.</span><span class="n">history_size</span> <span class="o">=</span> <span class="n">history_size</span>
-</span><span id="line-382">        <span class="bp">self</span><span class="o">.</span><span class="n">frameskip</span> <span class="o">=</span> <span class="n">frameskip</span>
-</span><span id="line-383">        <span class="bp">self</span><span class="o">.</span><span class="n">buffers</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">deque</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">deque</span><span class="p">([],</span> <span class="n">maxlen</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">capacity</span><span class="p">)</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">keys</span><span class="p">}</span>
-</span><span id="line-384">
-</span><span id="line-385">    <span class="nd">@property</span>
-</span><span id="line-386">    <span class="k">def</span><span class="w"> </span><span class="nf">capacity</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-</span><span id="line-387">        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">history_size</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">frameskip</span>
-</span><span id="line-388">
+</span><span id="line-357"><span class="k">class</span><span class="w"> </span><span class="nc">StackedWrapper</span><span class="p">(</span><span class="n">gym</span><span class="o">.</span><span class="n">Wrapper</span><span class="p">):</span>
+</span><span id="line-358"><span class="w">    </span><span class="sd">&quot;&quot;&quot;Stacks specified key(s) in the info dict over the last k steps.</span>
+</span><span id="line-359">
+</span><span id="line-360"><span class="sd">    The initial reset will fill the stack(s) with the initial value(s).</span>
+</span><span id="line-361">
+</span><span id="line-362"><span class="sd">    Note:</span>
+</span><span id="line-363"><span class="sd">        Stacked values are combined into a tensor/array along a new first</span>
+</span><span id="line-364"><span class="sd">        dimension if the data type is a torch.Tensor or np.ndarray.</span>
+</span><span id="line-365">
+</span><span id="line-366"><span class="sd">    Args:</span>
+</span><span id="line-367"><span class="sd">        env: The Gymnasium environment to wrap.</span>
+</span><span id="line-368"><span class="sd">        key: The key or list of keys in the info dict to stack.</span>
+</span><span id="line-369"><span class="sd">        frameskip: Number of frames to skip between stacked entries.</span>
+</span><span id="line-370"><span class="sd">        history_size: Number of past entries to stack.</span>
+</span><span id="line-371"><span class="sd">    &quot;&quot;&quot;</span>
+</span><span id="line-372">
+</span><span id="line-373">    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+</span><span id="line-374">        <span class="bp">self</span><span class="p">,</span>
+</span><span id="line-375">        <span class="n">env</span><span class="p">:</span> <span class="n">gym</span><span class="o">.</span><span class="n">Env</span><span class="p">,</span>
+</span><span id="line-376">        <span class="n">key</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
+</span><span id="line-377">        <span class="n">history_size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
+</span><span id="line-378">        <span class="n">frameskip</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
+</span><span id="line-379">    <span class="p">):</span>
+</span><span id="line-380">        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">env</span><span class="p">)</span>
+</span><span id="line-381">        <span class="bp">self</span><span class="o">.</span><span class="n">keys</span> <span class="o">=</span> <span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="k">else</span> <span class="n">key</span>
+</span><span id="line-382">        <span class="bp">self</span><span class="o">.</span><span class="n">history_size</span> <span class="o">=</span> <span class="n">history_size</span>
+</span><span id="line-383">        <span class="bp">self</span><span class="o">.</span><span class="n">frameskip</span> <span class="o">=</span> <span class="n">frameskip</span>
+</span><span id="line-384">        <span class="bp">self</span><span class="o">.</span><span class="n">buffers</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">deque</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">deque</span><span class="p">([],</span> <span class="n">maxlen</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">capacity</span><span class="p">)</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">keys</span><span class="p">}</span>
+</span><span id="line-385">
+</span><span id="line-386">    <span class="nd">@property</span>
+</span><span id="line-387">    <span class="k">def</span><span class="w"> </span><span class="nf">capacity</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+</span><span id="line-388">        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">history_size</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">frameskip</span>
+</span><span id="line-389">
 <div class="viewcode-block" id="StackedWrapper.get_buffer_data">
 <a class="viewcode-back" href="../../../stable_worldmodel/#stable_worldmodel.wrappers.StackedWrapper.get_buffer_data">[docs]</a>
-</span><span id="line-389">    <span class="k">def</span><span class="w"> </span><span class="nf">get_buffer_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
-</span><span id="line-390">        <span class="n">buffer</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">buffers</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
-</span><span id="line-391">        <span class="k">if</span> <span class="ow">not</span> <span class="n">buffer</span><span class="p">:</span>
-</span><span id="line-392">            <span class="k">return</span> <span class="p">[]</span>
-</span><span id="line-393">
-</span><span id="line-394">        <span class="n">new_info</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">buffer</span><span class="p">)[::</span> <span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">frameskip</span><span class="p">][::</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
-</span><span id="line-395">        <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">new_info</span><span class="p">)</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">history_size</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;Buffer for key </span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2"> has incorrect length.&quot;</span>
-</span><span id="line-396">
-</span><span id="line-397">        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_stack_elements</span><span class="p">(</span><span class="n">new_info</span><span class="p">)</span></div>
+</span><span id="line-390">    <span class="k">def</span><span class="w"> </span><span class="nf">get_buffer_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+</span><span id="line-391">        <span class="n">buffer</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">buffers</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
+</span><span id="line-392">        <span class="k">if</span> <span class="ow">not</span> <span class="n">buffer</span><span class="p">:</span>
+</span><span id="line-393">            <span class="k">return</span> <span class="p">[]</span>
+</span><span id="line-394">
+</span><span id="line-395">        <span class="n">new_info</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">buffer</span><span class="p">)[::</span> <span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">frameskip</span><span class="p">][::</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+</span><span id="line-396">        <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">new_info</span><span class="p">)</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">history_size</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;Buffer for key </span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2"> has incorrect length.&quot;</span>
+</span><span id="line-397">
+</span><span id="line-398">        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_stack_elements</span><span class="p">(</span><span class="n">new_info</span><span class="p">)</span></div>
 
-</span><span id="line-398">
-</span><span id="line-399">    <span class="k">def</span><span class="w"> </span><span class="nf">_stack_elements</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">elements</span><span class="p">:</span> <span class="nb">list</span><span class="p">):</span>
-</span><span id="line-400"><span class="w">        </span><span class="sd">&quot;&quot;&quot;Stack elements based on their type.&quot;&quot;&quot;</span>
-</span><span id="line-401">        <span class="k">if</span> <span class="ow">not</span> <span class="n">elements</span><span class="p">:</span>
-</span><span id="line-402">            <span class="k">return</span> <span class="n">elements</span>
-</span><span id="line-403">
-</span><span id="line-404">        <span class="n">first_elem</span> <span class="o">=</span> <span class="n">elements</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-</span><span id="line-405">
-</span><span id="line-406">        <span class="k">if</span> <span class="n">torch</span><span class="o">.</span><span class="n">is_tensor</span><span class="p">(</span><span class="n">first_elem</span><span class="p">):</span>
-</span><span id="line-407">            <span class="k">return</span> <span class="n">torch</span><span class="o">.</span><span class="n">stack</span><span class="p">(</span><span class="n">elements</span><span class="p">)</span>
-</span><span id="line-408">        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">first_elem</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
-</span><span id="line-409">            <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">stack</span><span class="p">(</span><span class="n">elements</span><span class="p">)</span>
-</span><span id="line-410">        <span class="k">elif</span> <span class="nb">type</span><span class="p">(</span><span class="n">first_elem</span><span class="p">)</span> <span class="ow">in</span> <span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">bool</span><span class="p">]</span> <span class="ow">or</span> <span class="nb">issubclass</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">first_elem</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">number</span><span class="p">):</span>
-</span><span id="line-411">            <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">elements</span><span class="p">)</span>
-</span><span id="line-412">        <span class="k">else</span><span class="p">:</span>
-</span><span id="line-413">            <span class="k">return</span> <span class="n">elements</span>
-</span><span id="line-414">
+</span><span id="line-399">
+</span><span id="line-400">    <span class="k">def</span><span class="w"> </span><span class="nf">_stack_elements</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">elements</span><span class="p">:</span> <span class="nb">list</span><span class="p">):</span>
+</span><span id="line-401"><span class="w">        </span><span class="sd">&quot;&quot;&quot;Stack elements based on their type.&quot;&quot;&quot;</span>
+</span><span id="line-402">        <span class="k">if</span> <span class="ow">not</span> <span class="n">elements</span><span class="p">:</span>
+</span><span id="line-403">            <span class="k">return</span> <span class="n">elements</span>
+</span><span id="line-404">
+</span><span id="line-405">        <span class="n">first_elem</span> <span class="o">=</span> <span class="n">elements</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+</span><span id="line-406">
+</span><span id="line-407">        <span class="k">if</span> <span class="n">torch</span><span class="o">.</span><span class="n">is_tensor</span><span class="p">(</span><span class="n">first_elem</span><span class="p">):</span>
+</span><span id="line-408">            <span class="k">return</span> <span class="n">torch</span><span class="o">.</span><span class="n">stack</span><span class="p">(</span><span class="n">elements</span><span class="p">)</span>
+</span><span id="line-409">        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">first_elem</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
+</span><span id="line-410">            <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">stack</span><span class="p">(</span><span class="n">elements</span><span class="p">)</span>
+</span><span id="line-411">        <span class="k">elif</span> <span class="nb">type</span><span class="p">(</span><span class="n">first_elem</span><span class="p">)</span> <span class="ow">in</span> <span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">bool</span><span class="p">]</span> <span class="ow">or</span> <span class="nb">issubclass</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">first_elem</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">number</span><span class="p">):</span>
+</span><span id="line-412">            <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">elements</span><span class="p">)</span>
+</span><span id="line-413">        <span class="k">else</span><span class="p">:</span>
+</span><span id="line-414">            <span class="k">return</span> <span class="n">elements</span>
+</span><span id="line-415">
 <div class="viewcode-block" id="StackedWrapper.init_buffer">
 <a class="viewcode-back" href="../../../stable_worldmodel/#stable_worldmodel.wrappers.StackedWrapper.init_buffer">[docs]</a>
-</span><span id="line-415">    <span class="k">def</span><span class="w"> </span><span class="nf">init_buffer</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">info</span><span class="p">:</span> <span class="nb">dict</span><span class="p">):</span>
-</span><span id="line-416">        <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">keys</span><span class="p">:</span>
-</span><span id="line-417">            <span class="k">assert</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">info</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;Key </span><span class="si">{</span><span class="n">k</span><span class="si">}</span><span class="s2"> not found in info dict during buffer initialization.&quot;</span>
-</span><span id="line-418">            <span class="n">data</span> <span class="o">=</span> <span class="n">info</span><span class="p">[</span><span class="n">k</span><span class="p">]</span>
-</span><span id="line-419">            <span class="n">buffer</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">buffers</span><span class="p">[</span><span class="n">k</span><span class="p">]</span>
-</span><span id="line-420">            <span class="n">buffer</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
-</span><span id="line-421">            <span class="n">buffer</span><span class="o">.</span><span class="n">extend</span><span class="p">([</span><span class="n">data</span><span class="p">]</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">capacity</span><span class="p">)</span>
-</span><span id="line-422">            <span class="n">info</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_buffer_data</span><span class="p">(</span><span class="n">k</span><span class="p">)</span>
-</span><span id="line-423">        <span class="k">return</span> <span class="n">info</span></div>
+</span><span id="line-416">    <span class="k">def</span><span class="w"> </span><span class="nf">init_buffer</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">info</span><span class="p">:</span> <span class="nb">dict</span><span class="p">):</span>
+</span><span id="line-417">        <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">keys</span><span class="p">:</span>
+</span><span id="line-418">            <span class="k">assert</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">info</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;Key </span><span class="si">{</span><span class="n">k</span><span class="si">}</span><span class="s2"> not found in info dict during buffer initialization.&quot;</span>
+</span><span id="line-419">            <span class="n">data</span> <span class="o">=</span> <span class="n">info</span><span class="p">[</span><span class="n">k</span><span class="p">]</span>
+</span><span id="line-420">            <span class="n">buffer</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">buffers</span><span class="p">[</span><span class="n">k</span><span class="p">]</span>
+</span><span id="line-421">            <span class="n">buffer</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+</span><span id="line-422">            <span class="n">buffer</span><span class="o">.</span><span class="n">extend</span><span class="p">([</span><span class="n">data</span><span class="p">]</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">capacity</span><span class="p">)</span>
+</span><span id="line-423">            <span class="n">info</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_buffer_data</span><span class="p">(</span><span class="n">k</span><span class="p">)</span>
+</span><span id="line-424">        <span class="k">return</span> <span class="n">info</span></div>
 
-</span><span id="line-424">
+</span><span id="line-425">
 <div class="viewcode-block" id="StackedWrapper.reset">
 <a class="viewcode-back" href="../../../stable_worldmodel/#stable_worldmodel.wrappers.StackedWrapper.reset">[docs]</a>
-</span><span id="line-425">    <span class="k">def</span><span class="w"> </span><span class="nf">reset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-</span><span id="line-426">        <span class="n">obs</span><span class="p">,</span> <span class="n">info</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">env</span><span class="o">.</span><span class="n">reset</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-</span><span id="line-427">        <span class="n">info</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">init_buffer</span><span class="p">(</span><span class="n">info</span><span class="p">)</span>
-</span><span id="line-428">        <span class="k">return</span> <span class="n">obs</span><span class="p">,</span> <span class="n">info</span></div>
+</span><span id="line-426">    <span class="k">def</span><span class="w"> </span><span class="nf">reset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+</span><span id="line-427">        <span class="n">obs</span><span class="p">,</span> <span class="n">info</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">env</span><span class="o">.</span><span class="n">reset</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+</span><span id="line-428">        <span class="n">info</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">init_buffer</span><span class="p">(</span><span class="n">info</span><span class="p">)</span>
+</span><span id="line-429">        <span class="k">return</span> <span class="n">obs</span><span class="p">,</span> <span class="n">info</span></div>
 
-</span><span id="line-429">
+</span><span id="line-430">
 <div class="viewcode-block" id="StackedWrapper.step">
 <a class="viewcode-back" href="../../../stable_worldmodel/#stable_worldmodel.wrappers.StackedWrapper.step">[docs]</a>
-</span><span id="line-430">    <span class="k">def</span><span class="w"> </span><span class="nf">step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">action</span><span class="p">):</span>
-</span><span id="line-431">        <span class="n">obs</span><span class="p">,</span> <span class="n">reward</span><span class="p">,</span> <span class="n">terminated</span><span class="p">,</span> <span class="n">truncated</span><span class="p">,</span> <span class="n">info</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">env</span><span class="o">.</span><span class="n">step</span><span class="p">(</span><span class="n">action</span><span class="p">)</span>
-</span><span id="line-432">        <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">keys</span><span class="p">:</span>
-</span><span id="line-433">            <span class="k">assert</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">info</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;Key </span><span class="si">{</span><span class="n">k</span><span class="si">}</span><span class="s2"> not found in info dict during step.&quot;</span>
-</span><span id="line-434">            <span class="bp">self</span><span class="o">.</span><span class="n">buffers</span><span class="p">[</span><span class="n">k</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">info</span><span class="p">[</span><span class="n">k</span><span class="p">])</span>
-</span><span id="line-435">            <span class="n">info</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_buffer_data</span><span class="p">(</span><span class="n">k</span><span class="p">)</span>
-</span><span id="line-436">        <span class="k">return</span> <span class="n">obs</span><span class="p">,</span> <span class="n">reward</span><span class="p">,</span> <span class="n">terminated</span><span class="p">,</span> <span class="n">truncated</span><span class="p">,</span> <span class="n">info</span></div>
+</span><span id="line-431">    <span class="k">def</span><span class="w"> </span><span class="nf">step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">action</span><span class="p">):</span>
+</span><span id="line-432">        <span class="n">obs</span><span class="p">,</span> <span class="n">reward</span><span class="p">,</span> <span class="n">terminated</span><span class="p">,</span> <span class="n">truncated</span><span class="p">,</span> <span class="n">info</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">env</span><span class="o">.</span><span class="n">step</span><span class="p">(</span><span class="n">action</span><span class="p">)</span>
+</span><span id="line-433">        <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">keys</span><span class="p">:</span>
+</span><span id="line-434">            <span class="k">assert</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">info</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;Key </span><span class="si">{</span><span class="n">k</span><span class="si">}</span><span class="s2"> not found in info dict during step.&quot;</span>
+</span><span id="line-435">            <span class="bp">self</span><span class="o">.</span><span class="n">buffers</span><span class="p">[</span><span class="n">k</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">info</span><span class="p">[</span><span class="n">k</span><span class="p">])</span>
+</span><span id="line-436">            <span class="n">info</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_buffer_data</span><span class="p">(</span><span class="n">k</span><span class="p">)</span>
+</span><span id="line-437">        <span class="k">return</span> <span class="n">obs</span><span class="p">,</span> <span class="n">reward</span><span class="p">,</span> <span class="n">terminated</span><span class="p">,</span> <span class="n">truncated</span><span class="p">,</span> <span class="n">info</span></div>
 </div>
 
-</span><span id="line-437">
 </span><span id="line-438">
+</span><span id="line-439">
 <div class="viewcode-block" id="MegaWrapper">
 <a class="viewcode-back" href="../../../stable_worldmodel/#stable_worldmodel.wrappers.MegaWrapper">[docs]</a>
-</span><span id="line-439"><span class="k">class</span><span class="w"> </span><span class="nc">MegaWrapper</span><span class="p">(</span><span class="n">gym</span><span class="o">.</span><span class="n">Wrapper</span><span class="p">):</span>
-</span><span id="line-440"><span class="w">    </span><span class="sd">&quot;&quot;&quot;Combines multiple wrappers for comprehensive environment preprocessing.</span>
-</span><span id="line-441">
-</span><span id="line-442"><span class="sd">    Applies in sequence:</span>
-</span><span id="line-443"><span class="sd">        AddPixelsWrapper → EverythingToInfoWrapper → EnsureInfoKeysWrapper →</span>
-</span><span id="line-444"><span class="sd">        EnsureGoalInfoWrapper → ResizeGoalWrapper → StackedWrapper</span>
-</span><span id="line-445">
-</span><span id="line-446"><span class="sd">    This provides a complete preprocessing pipeline with rendered pixels, unified</span>
-</span><span id="line-447"><span class="sd">    info dict, key validation, goal checking, goal resizing, and temporal stacking.</span>
-</span><span id="line-448">
-</span><span id="line-449"><span class="sd">    Args:</span>
-</span><span id="line-450"><span class="sd">        env: The Gymnasium environment to wrap.</span>
-</span><span id="line-451"><span class="sd">        image_shape: Target (height, width) for pixels and goal. Defaults to (84, 84).</span>
-</span><span id="line-452"><span class="sd">        pixels_transform: Optional torchvision transform for rendered pixels.</span>
-</span><span id="line-453"><span class="sd">        goal_transform: Optional torchvision transform for goal images.</span>
-</span><span id="line-454"><span class="sd">        required_keys: Additional regex patterns for keys that must be in info.</span>
-</span><span id="line-455"><span class="sd">            Pattern ``^pixels(?:\\..*)?$`` is always added.</span>
-</span><span id="line-456"><span class="sd">        separate_goal: If True, validates &#39;goal&#39; is present in info. Defaults to True.</span>
-</span><span id="line-457"><span class="sd">        n_stacks: Number of steps to stack (passed to StackedWrapper).</span>
-</span><span id="line-458"><span class="sd">    &quot;&quot;&quot;</span>
-</span><span id="line-459">
-</span><span id="line-460">    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
-</span><span id="line-461">        <span class="bp">self</span><span class="p">,</span>
-</span><span id="line-462">        <span class="n">env</span><span class="p">,</span>
-</span><span id="line-463">        <span class="n">image_shape</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="mi">84</span><span class="p">,</span> <span class="mi">84</span><span class="p">),</span>
-</span><span id="line-464">        <span class="n">pixels_transform</span><span class="p">:</span> <span class="n">Callable</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-</span><span id="line-465">        <span class="n">goal_transform</span><span class="p">:</span> <span class="n">Callable</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-</span><span id="line-466">        <span class="n">required_keys</span><span class="p">:</span> <span class="n">Iterable</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-</span><span id="line-467">        <span class="n">separate_goal</span><span class="p">:</span> <span class="n">Iterable</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
-</span><span id="line-468">        <span class="n">history_size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
-</span><span id="line-469">        <span class="n">frame_skip</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
-</span><span id="line-470">    <span class="p">):</span>
-</span><span id="line-471">        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">env</span><span class="p">)</span>
-</span><span id="line-472">
-</span><span id="line-473">        <span class="k">if</span> <span class="n">required_keys</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-</span><span id="line-474">            <span class="n">required_keys</span> <span class="o">=</span> <span class="p">[]</span>
-</span><span id="line-475">        <span class="n">required_keys</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;^pixels(?:\..*)?$&quot;</span><span class="p">)</span>
-</span><span id="line-476">
-</span><span id="line-477">        <span class="c1"># Build pipeline</span>
-</span><span id="line-478">        <span class="c1"># this adds `pixels` key to info with optional transform</span>
-</span><span id="line-479">        <span class="n">env</span> <span class="o">=</span> <span class="n">AddPixelsWrapper</span><span class="p">(</span><span class="n">env</span><span class="p">,</span> <span class="n">image_shape</span><span class="p">,</span> <span class="n">pixels_transform</span><span class="p">)</span>
-</span><span id="line-480">        <span class="c1"># this removes the info output, everything is in observation!</span>
-</span><span id="line-481">        <span class="n">env</span> <span class="o">=</span> <span class="n">EverythingToInfoWrapper</span><span class="p">(</span><span class="n">env</span><span class="p">)</span>
-</span><span id="line-482">        <span class="c1"># check that necessary keys are in the observation</span>
-</span><span id="line-483">        <span class="n">env</span> <span class="o">=</span> <span class="n">EnsureInfoKeysWrapper</span><span class="p">(</span><span class="n">env</span><span class="p">,</span> <span class="n">required_keys</span><span class="p">)</span>
-</span><span id="line-484">        <span class="c1"># check goal is provided</span>
-</span><span id="line-485">        <span class="n">env</span> <span class="o">=</span> <span class="n">EnsureGoalInfoWrapper</span><span class="p">(</span><span class="n">env</span><span class="p">,</span> <span class="n">check_reset</span><span class="o">=</span><span class="n">separate_goal</span><span class="p">,</span> <span class="n">check_step</span><span class="o">=</span><span class="n">separate_goal</span><span class="p">)</span>
-</span><span id="line-486">        <span class="n">env</span> <span class="o">=</span> <span class="n">ResizeGoalWrapper</span><span class="p">(</span><span class="n">env</span><span class="p">,</span> <span class="n">image_shape</span><span class="p">,</span> <span class="n">goal_transform</span><span class="p">)</span>
-</span><span id="line-487">
-</span><span id="line-488">        <span class="c1"># We will wrap with StackedWrapper dynamically after we know the keys</span>
-</span><span id="line-489">        <span class="bp">self</span><span class="o">.</span><span class="n">env</span> <span class="o">=</span> <span class="n">env</span>
-</span><span id="line-490">        <span class="bp">self</span><span class="o">.</span><span class="n">_history_size</span> <span class="o">=</span> <span class="n">history_size</span>
-</span><span id="line-491">        <span class="bp">self</span><span class="o">.</span><span class="n">_frameskip</span> <span class="o">=</span> <span class="n">frame_skip</span>
-</span><span id="line-492">        <span class="bp">self</span><span class="o">.</span><span class="n">_stack_initialized</span> <span class="o">=</span> <span class="kc">False</span>
-</span><span id="line-493">
-</span><span id="line-494">    <span class="k">def</span><span class="w"> </span><span class="nf">_init_stack</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">info</span><span class="p">):</span>
-</span><span id="line-495"><span class="w">        </span><span class="sd">&quot;&quot;&quot;Attach a StackedWrapper around self.env dynamically.&quot;&quot;&quot;</span>
-</span><span id="line-496">        <span class="n">keys</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">info</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
-</span><span id="line-497">        <span class="bp">self</span><span class="o">.</span><span class="n">env</span> <span class="o">=</span> <span class="n">StackedWrapper</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">env</span><span class="p">,</span> <span class="n">keys</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_history_size</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_frameskip</span><span class="p">)</span>
-</span><span id="line-498">        <span class="bp">self</span><span class="o">.</span><span class="n">_stack_initialized</span> <span class="o">=</span> <span class="kc">True</span>
-</span><span id="line-499">        <span class="bp">self</span><span class="o">.</span><span class="n">env</span><span class="o">.</span><span class="n">init_buffer</span><span class="p">(</span><span class="n">info</span><span class="p">)</span>
-</span><span id="line-500">        <span class="k">return</span>
-</span><span id="line-501">
+</span><span id="line-440"><span class="k">class</span><span class="w"> </span><span class="nc">MegaWrapper</span><span class="p">(</span><span class="n">gym</span><span class="o">.</span><span class="n">Wrapper</span><span class="p">):</span>
+</span><span id="line-441"><span class="w">    </span><span class="sd">&quot;&quot;&quot;Combines multiple wrappers for comprehensive environment preprocessing.</span>
+</span><span id="line-442">
+</span><span id="line-443"><span class="sd">    Applies in sequence:</span>
+</span><span id="line-444"><span class="sd">        AddPixelsWrapper → EverythingToInfoWrapper → EnsureInfoKeysWrapper →</span>
+</span><span id="line-445"><span class="sd">        EnsureGoalInfoWrapper → ResizeGoalWrapper → StackedWrapper</span>
+</span><span id="line-446">
+</span><span id="line-447"><span class="sd">    This provides a complete preprocessing pipeline with rendered pixels, unified</span>
+</span><span id="line-448"><span class="sd">    info dict, key validation, goal checking, goal resizing, and temporal stacking.</span>
+</span><span id="line-449">
+</span><span id="line-450"><span class="sd">    Args:</span>
+</span><span id="line-451"><span class="sd">        env: The Gymnasium environment to wrap.</span>
+</span><span id="line-452"><span class="sd">        image_shape: Target (height, width) for pixels and goal. Defaults to (84, 84).</span>
+</span><span id="line-453"><span class="sd">        pixels_transform: Optional torchvision transform for rendered pixels.</span>
+</span><span id="line-454"><span class="sd">        goal_transform: Optional torchvision transform for goal images.</span>
+</span><span id="line-455"><span class="sd">        required_keys: Additional regex patterns for keys that must be in info.</span>
+</span><span id="line-456"><span class="sd">            Pattern ``^pixels(?:\\..*)?$`` is always added.</span>
+</span><span id="line-457"><span class="sd">        separate_goal: If True, validates &#39;goal&#39; is present in info. Defaults to True.</span>
+</span><span id="line-458"><span class="sd">        n_stacks: Number of steps to stack (passed to StackedWrapper).</span>
+</span><span id="line-459"><span class="sd">    &quot;&quot;&quot;</span>
+</span><span id="line-460">
+</span><span id="line-461">    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+</span><span id="line-462">        <span class="bp">self</span><span class="p">,</span>
+</span><span id="line-463">        <span class="n">env</span><span class="p">,</span>
+</span><span id="line-464">        <span class="n">image_shape</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="mi">84</span><span class="p">,</span> <span class="mi">84</span><span class="p">),</span>
+</span><span id="line-465">        <span class="n">pixels_transform</span><span class="p">:</span> <span class="n">Callable</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+</span><span id="line-466">        <span class="n">goal_transform</span><span class="p">:</span> <span class="n">Callable</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+</span><span id="line-467">        <span class="n">required_keys</span><span class="p">:</span> <span class="n">Iterable</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+</span><span id="line-468">        <span class="n">separate_goal</span><span class="p">:</span> <span class="n">Iterable</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+</span><span id="line-469">        <span class="n">history_size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
+</span><span id="line-470">        <span class="n">frame_skip</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
+</span><span id="line-471">    <span class="p">):</span>
+</span><span id="line-472">        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">env</span><span class="p">)</span>
+</span><span id="line-473">
+</span><span id="line-474">        <span class="k">if</span> <span class="n">required_keys</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+</span><span id="line-475">            <span class="n">required_keys</span> <span class="o">=</span> <span class="p">[]</span>
+</span><span id="line-476">        <span class="n">required_keys</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;^pixels(?:\..*)?$&quot;</span><span class="p">)</span>
+</span><span id="line-477">
+</span><span id="line-478">        <span class="c1"># Build pipeline</span>
+</span><span id="line-479">        <span class="c1"># this adds `pixels` key to info with optional transform</span>
+</span><span id="line-480">        <span class="n">env</span> <span class="o">=</span> <span class="n">AddPixelsWrapper</span><span class="p">(</span><span class="n">env</span><span class="p">,</span> <span class="n">image_shape</span><span class="p">,</span> <span class="n">pixels_transform</span><span class="p">)</span>
+</span><span id="line-481">        <span class="c1"># this removes the info output, everything is in observation!</span>
+</span><span id="line-482">        <span class="n">env</span> <span class="o">=</span> <span class="n">EverythingToInfoWrapper</span><span class="p">(</span><span class="n">env</span><span class="p">)</span>
+</span><span id="line-483">        <span class="c1"># check that necessary keys are in the observation</span>
+</span><span id="line-484">        <span class="n">env</span> <span class="o">=</span> <span class="n">EnsureInfoKeysWrapper</span><span class="p">(</span><span class="n">env</span><span class="p">,</span> <span class="n">required_keys</span><span class="p">)</span>
+</span><span id="line-485">        <span class="c1"># check goal is provided</span>
+</span><span id="line-486">        <span class="n">env</span> <span class="o">=</span> <span class="n">EnsureGoalInfoWrapper</span><span class="p">(</span><span class="n">env</span><span class="p">,</span> <span class="n">check_reset</span><span class="o">=</span><span class="n">separate_goal</span><span class="p">,</span> <span class="n">check_step</span><span class="o">=</span><span class="n">separate_goal</span><span class="p">)</span>
+</span><span id="line-487">        <span class="n">env</span> <span class="o">=</span> <span class="n">ResizeGoalWrapper</span><span class="p">(</span><span class="n">env</span><span class="p">,</span> <span class="n">image_shape</span><span class="p">,</span> <span class="n">goal_transform</span><span class="p">)</span>
+</span><span id="line-488">
+</span><span id="line-489">        <span class="c1"># We will wrap with StackedWrapper dynamically after we know the keys</span>
+</span><span id="line-490">        <span class="bp">self</span><span class="o">.</span><span class="n">env</span> <span class="o">=</span> <span class="n">env</span>
+</span><span id="line-491">        <span class="bp">self</span><span class="o">.</span><span class="n">_history_size</span> <span class="o">=</span> <span class="n">history_size</span>
+</span><span id="line-492">        <span class="bp">self</span><span class="o">.</span><span class="n">_frameskip</span> <span class="o">=</span> <span class="n">frame_skip</span>
+</span><span id="line-493">        <span class="bp">self</span><span class="o">.</span><span class="n">_stack_initialized</span> <span class="o">=</span> <span class="kc">False</span>
+</span><span id="line-494">
+</span><span id="line-495">    <span class="k">def</span><span class="w"> </span><span class="nf">_init_stack</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">info</span><span class="p">):</span>
+</span><span id="line-496"><span class="w">        </span><span class="sd">&quot;&quot;&quot;Attach a StackedWrapper around self.env dynamically.&quot;&quot;&quot;</span>
+</span><span id="line-497">        <span class="n">keys</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">info</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+</span><span id="line-498">        <span class="bp">self</span><span class="o">.</span><span class="n">env</span> <span class="o">=</span> <span class="n">StackedWrapper</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">env</span><span class="p">,</span> <span class="n">keys</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_history_size</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_frameskip</span><span class="p">)</span>
+</span><span id="line-499">        <span class="bp">self</span><span class="o">.</span><span class="n">_stack_initialized</span> <span class="o">=</span> <span class="kc">True</span>
+</span><span id="line-500">        <span class="bp">self</span><span class="o">.</span><span class="n">env</span><span class="o">.</span><span class="n">init_buffer</span><span class="p">(</span><span class="n">info</span><span class="p">)</span>
+</span><span id="line-501">        <span class="k">return</span>
+</span><span id="line-502">
 <div class="viewcode-block" id="MegaWrapper.reset">
 <a class="viewcode-back" href="../../../stable_worldmodel/#stable_worldmodel.wrappers.MegaWrapper.reset">[docs]</a>
-</span><span id="line-502">    <span class="k">def</span><span class="w"> </span><span class="nf">reset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-</span><span id="line-503">        <span class="n">obs</span><span class="p">,</span> <span class="n">info</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">env</span><span class="o">.</span><span class="n">reset</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-</span><span id="line-504">
-</span><span id="line-505">        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_stack_initialized</span><span class="p">:</span>
-</span><span id="line-506">            <span class="bp">self</span><span class="o">.</span><span class="n">_init_stack</span><span class="p">(</span><span class="n">info</span><span class="p">)</span>
-</span><span id="line-507">
-</span><span id="line-508">        <span class="k">return</span> <span class="n">obs</span><span class="p">,</span> <span class="n">info</span></div>
+</span><span id="line-503">    <span class="k">def</span><span class="w"> </span><span class="nf">reset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+</span><span id="line-504">        <span class="n">obs</span><span class="p">,</span> <span class="n">info</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">env</span><span class="o">.</span><span class="n">reset</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+</span><span id="line-505">
+</span><span id="line-506">        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_stack_initialized</span><span class="p">:</span>
+</span><span id="line-507">            <span class="bp">self</span><span class="o">.</span><span class="n">_init_stack</span><span class="p">(</span><span class="n">info</span><span class="p">)</span>
+</span><span id="line-508">
+</span><span id="line-509">        <span class="k">return</span> <span class="n">obs</span><span class="p">,</span> <span class="n">info</span></div>
 
-</span><span id="line-509">
+</span><span id="line-510">
 <div class="viewcode-block" id="MegaWrapper.step">
 <a class="viewcode-back" href="../../../stable_worldmodel/#stable_worldmodel.wrappers.MegaWrapper.step">[docs]</a>
-</span><span id="line-510">    <span class="k">def</span><span class="w"> </span><span class="nf">step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">action</span><span class="p">):</span>
-</span><span id="line-511">        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_stack_initialized</span><span class="p">:</span>
-</span><span id="line-512">            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;StackedWrapper not yet initialized — call reset() first.&quot;</span><span class="p">)</span>
-</span><span id="line-513">        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">env</span><span class="o">.</span><span class="n">step</span><span class="p">(</span><span class="n">action</span><span class="p">)</span></div>
+</span><span id="line-511">    <span class="k">def</span><span class="w"> </span><span class="nf">step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">action</span><span class="p">):</span>
+</span><span id="line-512">        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_stack_initialized</span><span class="p">:</span>
+</span><span id="line-513">            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;StackedWrapper not yet initialized — call reset() first.&quot;</span><span class="p">)</span>
+</span><span id="line-514">        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">env</span><span class="o">.</span><span class="n">step</span><span class="p">(</span><span class="n">action</span><span class="p">)</span></div>
 </div>
 
-</span><span id="line-514">
 </span><span id="line-515">
+</span><span id="line-516">
 <div class="viewcode-block" id="VariationWrapper">
 <a class="viewcode-back" href="../../../stable_worldmodel/#stable_worldmodel.wrappers.VariationWrapper">[docs]</a>
-</span><span id="line-516"><span class="k">class</span><span class="w"> </span><span class="nc">VariationWrapper</span><span class="p">(</span><span class="n">VectorWrapper</span><span class="p">):</span>
-</span><span id="line-517"><span class="w">    </span><span class="sd">&quot;&quot;&quot;Manages variation spaces for vectorized environments.</span>
-</span><span id="line-518">
-</span><span id="line-519"><span class="sd">    Handles batching of variation spaces across multiple environments, supporting</span>
-</span><span id="line-520"><span class="sd">    either shared variations (same) or independent variations (different).</span>
-</span><span id="line-521">
-</span><span id="line-522"><span class="sd">    Args:</span>
-</span><span id="line-523"><span class="sd">        env: The vectorized Gymnasium environment to wrap.</span>
-</span><span id="line-524"><span class="sd">        variation_mode: Mode for handling variations across environments:</span>
-</span><span id="line-525"><span class="sd">            - &quot;same&quot;: All environments share the same variation space (batched).</span>
-</span><span id="line-526"><span class="sd">            - &quot;different&quot;: Each environment has independent variation spaces.</span>
-</span><span id="line-527">
-</span><span id="line-528"><span class="sd">    Raises:</span>
-</span><span id="line-529"><span class="sd">        ValueError: If variation_mode is invalid or sub-environment spaces don&#39;t match.</span>
-</span><span id="line-530">
-</span><span id="line-531"><span class="sd">    Note:</span>
-</span><span id="line-532"><span class="sd">        Base environment must have a ``variation_space`` attribute. If missing,</span>
-</span><span id="line-533"><span class="sd">        variation spaces are set to None.</span>
-</span><span id="line-534"><span class="sd">    &quot;&quot;&quot;</span>
-</span><span id="line-535">
-</span><span id="line-536">    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
-</span><span id="line-537">        <span class="bp">self</span><span class="p">,</span>
-</span><span id="line-538">        <span class="n">env</span><span class="p">,</span>
-</span><span id="line-539">        <span class="n">variation_mode</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">gym</span><span class="o">.</span><span class="n">Space</span> <span class="o">=</span> <span class="s2">&quot;same&quot;</span><span class="p">,</span>
-</span><span id="line-540">    <span class="p">):</span>
-</span><span id="line-541">        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">env</span><span class="p">)</span>
-</span><span id="line-542">
-</span><span id="line-543">        <span class="n">base_env</span> <span class="o">=</span> <span class="n">env</span><span class="o">.</span><span class="n">envs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">unwrapped</span>
-</span><span id="line-544">
-</span><span id="line-545">        <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">base_env</span><span class="p">,</span> <span class="s2">&quot;variation_space&quot;</span><span class="p">):</span>
-</span><span id="line-546">            <span class="bp">self</span><span class="o">.</span><span class="n">single_variation_space</span> <span class="o">=</span> <span class="kc">None</span>
-</span><span id="line-547">            <span class="bp">self</span><span class="o">.</span><span class="n">variation_space</span> <span class="o">=</span> <span class="kc">None</span>
-</span><span id="line-548">            <span class="k">return</span>
-</span><span id="line-549">
-</span><span id="line-550">        <span class="k">if</span> <span class="n">variation_mode</span> <span class="o">==</span> <span class="s2">&quot;same&quot;</span><span class="p">:</span>
-</span><span id="line-551">            <span class="bp">self</span><span class="o">.</span><span class="n">single_variation_space</span> <span class="o">=</span> <span class="n">base_env</span><span class="o">.</span><span class="n">variation_space</span>
-</span><span id="line-552">            <span class="bp">self</span><span class="o">.</span><span class="n">variation_space</span> <span class="o">=</span> <span class="n">batch_space</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">single_variation_space</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_envs</span><span class="p">)</span>
-</span><span id="line-553">
-</span><span id="line-554">        <span class="k">elif</span> <span class="n">variation_mode</span> <span class="o">==</span> <span class="s2">&quot;different&quot;</span><span class="p">:</span>
-</span><span id="line-555">            <span class="bp">self</span><span class="o">.</span><span class="n">single_variation_space</span> <span class="o">=</span> <span class="n">base_env</span><span class="o">.</span><span class="n">variation_space</span>
-</span><span id="line-556">            <span class="bp">self</span><span class="o">.</span><span class="n">variation_space</span> <span class="o">=</span> <span class="n">batch_differing_spaces</span><span class="p">([</span><span class="n">sub_env</span><span class="o">.</span><span class="n">unwrapped</span><span class="o">.</span><span class="n">variation_space</span> <span class="k">for</span> <span class="n">sub_env</span> <span class="ow">in</span> <span class="n">env</span><span class="o">.</span><span class="n">envs</span><span class="p">])</span>
-</span><span id="line-557">
-</span><span id="line-558">        <span class="k">else</span><span class="p">:</span>
-</span><span id="line-559">            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-</span><span id="line-560">                <span class="sa">f</span><span class="s2">&quot;Invalid `variation_mode`, expected: &#39;same&#39; or &#39;different&#39; or tuple of single and batch variation space, actual got </span><span class="si">{</span><span class="n">variation_mode</span><span class="si">}</span><span class="s2">&quot;</span>
-</span><span id="line-561">            <span class="p">)</span>
-</span><span id="line-562">
-</span><span id="line-563">        <span class="c1"># check sub-environment obs and action spaces</span>
-</span><span id="line-564">        <span class="k">for</span> <span class="n">sub_env</span> <span class="ow">in</span> <span class="n">env</span><span class="o">.</span><span class="n">envs</span><span class="p">:</span>
-</span><span id="line-565">            <span class="k">if</span> <span class="n">variation_mode</span> <span class="o">==</span> <span class="s2">&quot;same&quot;</span><span class="p">:</span>
-</span><span id="line-566">                <span class="k">if</span> <span class="ow">not</span> <span class="n">is_space_dtype_shape_equiv</span><span class="p">(</span><span class="n">sub_env</span><span class="o">.</span><span class="n">unwrapped</span><span class="o">.</span><span class="n">observation_space</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">single_observation_space</span><span class="p">):</span>
-</span><span id="line-567">                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-</span><span id="line-568">                        <span class="sa">f</span><span class="s2">&quot;VariationWrapper(..., variation_mode=&#39;same&#39;) however the sub-environments observation spaces do not share a common shape and dtype, single_observation_space=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">single_observation_space</span><span class="si">}</span><span class="s2">, sub-environment observation_space=</span><span class="si">{</span><span class="n">sub_env</span><span class="o">.</span><span class="n">observation_space</span><span class="si">}</span><span class="s2">&quot;</span>
-</span><span id="line-569">                    <span class="p">)</span>
-</span><span id="line-570">            <span class="k">else</span><span class="p">:</span>
-</span><span id="line-571">                <span class="k">if</span> <span class="ow">not</span> <span class="n">is_space_dtype_shape_equiv</span><span class="p">(</span><span class="n">sub_env</span><span class="o">.</span><span class="n">unwrapped</span><span class="o">.</span><span class="n">observation_space</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">single_observation_space</span><span class="p">):</span>
-</span><span id="line-572">                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-</span><span id="line-573">                        <span class="sa">f</span><span class="s2">&quot;VariationWrapper(..., variation_mode=&#39;different&#39; or custom space) however the sub-environments observation spaces do not share a common shape and dtype, single_observation_space=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">single_observation_space</span><span class="si">}</span><span class="s2">, sub-environment observation_space=</span><span class="si">{</span><span class="n">sub_env</span><span class="o">.</span><span class="n">observation_space</span><span class="si">}</span><span class="s2">&quot;</span>
-</span><span id="line-574">                    <span class="p">)</span>
-</span><span id="line-575">
-</span><span id="line-576">    <span class="nd">@property</span>
-</span><span id="line-577">    <span class="k">def</span><span class="w"> </span><span class="nf">envs</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-</span><span id="line-578">        <span class="k">return</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">env</span><span class="p">,</span> <span class="s2">&quot;envs&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span></div>
+</span><span id="line-517"><span class="k">class</span><span class="w"> </span><span class="nc">VariationWrapper</span><span class="p">(</span><span class="n">VectorWrapper</span><span class="p">):</span>
+</span><span id="line-518"><span class="w">    </span><span class="sd">&quot;&quot;&quot;Manages variation spaces for vectorized environments.</span>
+</span><span id="line-519">
+</span><span id="line-520"><span class="sd">    Handles batching of variation spaces across multiple environments, supporting</span>
+</span><span id="line-521"><span class="sd">    either shared variations (same) or independent variations (different).</span>
+</span><span id="line-522">
+</span><span id="line-523"><span class="sd">    Args:</span>
+</span><span id="line-524"><span class="sd">        env: The vectorized Gymnasium environment to wrap.</span>
+</span><span id="line-525"><span class="sd">        variation_mode: Mode for handling variations across environments:</span>
+</span><span id="line-526"><span class="sd">            - &quot;same&quot;: All environments share the same variation space (batched).</span>
+</span><span id="line-527"><span class="sd">            - &quot;different&quot;: Each environment has independent variation spaces.</span>
+</span><span id="line-528">
+</span><span id="line-529"><span class="sd">    Raises:</span>
+</span><span id="line-530"><span class="sd">        ValueError: If variation_mode is invalid or sub-environment spaces don&#39;t match.</span>
+</span><span id="line-531">
+</span><span id="line-532"><span class="sd">    Note:</span>
+</span><span id="line-533"><span class="sd">        Base environment must have a ``variation_space`` attribute. If missing,</span>
+</span><span id="line-534"><span class="sd">        variation spaces are set to None.</span>
+</span><span id="line-535"><span class="sd">    &quot;&quot;&quot;</span>
+</span><span id="line-536">
+</span><span id="line-537">    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+</span><span id="line-538">        <span class="bp">self</span><span class="p">,</span>
+</span><span id="line-539">        <span class="n">env</span><span class="p">,</span>
+</span><span id="line-540">        <span class="n">variation_mode</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">gym</span><span class="o">.</span><span class="n">Space</span> <span class="o">=</span> <span class="s2">&quot;same&quot;</span><span class="p">,</span>
+</span><span id="line-541">    <span class="p">):</span>
+</span><span id="line-542">        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">env</span><span class="p">)</span>
+</span><span id="line-543">
+</span><span id="line-544">        <span class="n">base_env</span> <span class="o">=</span> <span class="n">env</span><span class="o">.</span><span class="n">envs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">unwrapped</span>
+</span><span id="line-545">
+</span><span id="line-546">        <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">base_env</span><span class="p">,</span> <span class="s2">&quot;variation_space&quot;</span><span class="p">):</span>
+</span><span id="line-547">            <span class="bp">self</span><span class="o">.</span><span class="n">single_variation_space</span> <span class="o">=</span> <span class="kc">None</span>
+</span><span id="line-548">            <span class="bp">self</span><span class="o">.</span><span class="n">variation_space</span> <span class="o">=</span> <span class="kc">None</span>
+</span><span id="line-549">            <span class="k">return</span>
+</span><span id="line-550">
+</span><span id="line-551">        <span class="k">if</span> <span class="n">variation_mode</span> <span class="o">==</span> <span class="s2">&quot;same&quot;</span><span class="p">:</span>
+</span><span id="line-552">            <span class="bp">self</span><span class="o">.</span><span class="n">single_variation_space</span> <span class="o">=</span> <span class="n">base_env</span><span class="o">.</span><span class="n">variation_space</span>
+</span><span id="line-553">            <span class="bp">self</span><span class="o">.</span><span class="n">variation_space</span> <span class="o">=</span> <span class="n">batch_space</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">single_variation_space</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_envs</span><span class="p">)</span>
+</span><span id="line-554">
+</span><span id="line-555">        <span class="k">elif</span> <span class="n">variation_mode</span> <span class="o">==</span> <span class="s2">&quot;different&quot;</span><span class="p">:</span>
+</span><span id="line-556">            <span class="bp">self</span><span class="o">.</span><span class="n">single_variation_space</span> <span class="o">=</span> <span class="n">base_env</span><span class="o">.</span><span class="n">variation_space</span>
+</span><span id="line-557">            <span class="bp">self</span><span class="o">.</span><span class="n">variation_space</span> <span class="o">=</span> <span class="n">batch_differing_spaces</span><span class="p">([</span><span class="n">sub_env</span><span class="o">.</span><span class="n">unwrapped</span><span class="o">.</span><span class="n">variation_space</span> <span class="k">for</span> <span class="n">sub_env</span> <span class="ow">in</span> <span class="n">env</span><span class="o">.</span><span class="n">envs</span><span class="p">])</span>
+</span><span id="line-558">
+</span><span id="line-559">        <span class="k">else</span><span class="p">:</span>
+</span><span id="line-560">            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+</span><span id="line-561">                <span class="sa">f</span><span class="s2">&quot;Invalid `variation_mode`, expected: &#39;same&#39; or &#39;different&#39; or tuple of single and batch variation space, actual got </span><span class="si">{</span><span class="n">variation_mode</span><span class="si">}</span><span class="s2">&quot;</span>
+</span><span id="line-562">            <span class="p">)</span>
+</span><span id="line-563">
+</span><span id="line-564">        <span class="c1"># check sub-environment obs and action spaces</span>
+</span><span id="line-565">        <span class="k">for</span> <span class="n">sub_env</span> <span class="ow">in</span> <span class="n">env</span><span class="o">.</span><span class="n">envs</span><span class="p">:</span>
+</span><span id="line-566">            <span class="k">if</span> <span class="n">variation_mode</span> <span class="o">==</span> <span class="s2">&quot;same&quot;</span><span class="p">:</span>
+</span><span id="line-567">                <span class="k">if</span> <span class="ow">not</span> <span class="n">is_space_dtype_shape_equiv</span><span class="p">(</span><span class="n">sub_env</span><span class="o">.</span><span class="n">unwrapped</span><span class="o">.</span><span class="n">observation_space</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">single_observation_space</span><span class="p">):</span>
+</span><span id="line-568">                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+</span><span id="line-569">                        <span class="sa">f</span><span class="s2">&quot;VariationWrapper(..., variation_mode=&#39;same&#39;) however the sub-environments observation spaces do not share a common shape and dtype, single_observation_space=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">single_observation_space</span><span class="si">}</span><span class="s2">, sub-environment observation_space=</span><span class="si">{</span><span class="n">sub_env</span><span class="o">.</span><span class="n">observation_space</span><span class="si">}</span><span class="s2">&quot;</span>
+</span><span id="line-570">                    <span class="p">)</span>
+</span><span id="line-571">            <span class="k">else</span><span class="p">:</span>
+</span><span id="line-572">                <span class="k">if</span> <span class="ow">not</span> <span class="n">is_space_dtype_shape_equiv</span><span class="p">(</span><span class="n">sub_env</span><span class="o">.</span><span class="n">unwrapped</span><span class="o">.</span><span class="n">observation_space</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">single_observation_space</span><span class="p">):</span>
+</span><span id="line-573">                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+</span><span id="line-574">                        <span class="sa">f</span><span class="s2">&quot;VariationWrapper(..., variation_mode=&#39;different&#39; or custom space) however the sub-environments observation spaces do not share a common shape and dtype, single_observation_space=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">single_observation_space</span><span class="si">}</span><span class="s2">, sub-environment observation_space=</span><span class="si">{</span><span class="n">sub_env</span><span class="o">.</span><span class="n">observation_space</span><span class="si">}</span><span class="s2">&quot;</span>
+</span><span id="line-575">                    <span class="p">)</span>
+</span><span id="line-576">
+</span><span id="line-577">    <span class="nd">@property</span>
+</span><span id="line-578">    <span class="k">def</span><span class="w"> </span><span class="nf">envs</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+</span><span id="line-579">        <span class="k">return</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">env</span><span class="p">,</span> <span class="s2">&quot;envs&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span></div>
 
 </span></code></pre></div>
     </div></div>
@@ -882,9 +882,9 @@
     </div><footer class="py-6 border-t border-border md:py-0">
     <div class="container flex flex-col items-center justify-between gap-4 md:h-24 md:flex-row">
       <div class="flex flex-col items-center gap-4 px-8 md:flex-row md:gap-2 md:px-0">
-        <p class="text-sm leading-loose text-center text-muted-foreground md:text-left">© 2025&nbsp;Built with <a class="font-medium underline underline-offset-4"
+        <p class="text-sm leading-loose text-center text-muted-foreground md:text-left">© 2026&nbsp;Built with <a class="font-medium underline underline-offset-4"
     href="https://www.sphinx-doc.org"
-    rel="noreferrer">Sphinx 8.2.3</a></p>
+    rel="noreferrer">Sphinx 8.1.3</a></p>
 </div>
 </div>
 </footer>

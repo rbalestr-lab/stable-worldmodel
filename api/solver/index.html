@@ -21,7 +21,7 @@
 <link href="../../_static/favicon.ico" rel="icon"/>
 <link href="../../search/" rel="search" title="Search"/>
 <link href="../../genindex/" rel="index" title="Index"/>
-<link href="../generated/stable_worldmodel.solver.GDSolver/" rel="next" title="GDSolver"/>
+<link href="../generated/stable_worldmodel.solver.CEMSolver/" rel="next" title="CEMSolver"/>
 <link href="../generated/stable_worldmodel.policy.WorldModelPolicy/" rel="prev" title="WorldModelPolicy"/>
 <script>
     <!-- Prevent Flash of wrong theme -->
@@ -99,7 +99,6 @@
 </ul>
 </li>
 <li class="toctree-l1 current" x-data="{ expanded: $el.classList.contains('current') ? true : false }"><a :class="{ 'expanded' : expanded }" @click="expanded = !expanded" class="current reference internal expandable" href="#">Solver<button @click.prevent.stop="expanded = !expanded" type="button"><span class="sr-only"></span><svg fill="currentColor" height="18px" stroke="none" viewbox="0 0 24 24" width="18px" xmlns="http://www.w3.org/2000/svg"><path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"></path></svg></button></a><ul x-show="expanded">
-<li class="toctree-l2"><a class="reference internal" href="../generated/stable_worldmodel.solver.GDSolver/">GDSolver</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../generated/stable_worldmodel.solver.CEMSolver/">CEMSolver</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../generated/stable_worldmodel.solver.MPPISolver/">MPPISolver</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../generated/stable_worldmodel.solver.NevergradSolver/">NevergradSolver</a></li>
@@ -167,26 +166,23 @@
 <h1>Solver<a class="headerlink" href="#solver" title="Link to this heading"><svg height="1em" viewbox="0 0 24 24" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"></path></svg></a></h1>
 <table class="autosummary longtable docutils align-default">
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="../../stable_worldmodel.solver/#stable_worldmodel.solver.GDSolver" title="stable_worldmodel.solver.GDSolver"><code class="xref py py-obj docutils literal notranslate"><span class="pre">GDSolver</span></code></a></p></td>
-<td><p>Gradient Descent Solver.</p></td>
-</tr>
-<tr class="row-even"><td><p><a class="reference internal" href="../../stable_worldmodel.solver/#stable_worldmodel.solver.CEMSolver" title="stable_worldmodel.solver.CEMSolver"><code class="xref py py-obj docutils literal notranslate"><span class="pre">CEMSolver</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="../../stable_worldmodel.solver/#stable_worldmodel.solver.CEMSolver" title="stable_worldmodel.solver.CEMSolver"><code class="xref py py-obj docutils literal notranslate"><span class="pre">CEMSolver</span></code></a></p></td>
 <td><p>Cross Entropy Method Solver.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="../../stable_worldmodel.solver/#stable_worldmodel.solver.MPPISolver" title="stable_worldmodel.solver.MPPISolver"><code class="xref py py-obj docutils literal notranslate"><span class="pre">MPPISolver</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="../../stable_worldmodel.solver/#stable_worldmodel.solver.MPPISolver" title="stable_worldmodel.solver.MPPISolver"><code class="xref py py-obj docutils literal notranslate"><span class="pre">MPPISolver</span></code></a></p></td>
 <td><p>Model Predictive Path Integral Solver.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="../../stable_worldmodel.solver/#stable_worldmodel.solver.NevergradSolver" title="stable_worldmodel.solver.NevergradSolver"><code class="xref py py-obj docutils literal notranslate"><span class="pre">NevergradSolver</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="../../stable_worldmodel.solver/#stable_worldmodel.solver.NevergradSolver" title="stable_worldmodel.solver.NevergradSolver"><code class="xref py py-obj docutils literal notranslate"><span class="pre">NevergradSolver</span></code></a></p></td>
 <td><p>Nevergrad Solver.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="../../stable_worldmodel.solver/#stable_worldmodel.solver.RandomSolver" title="stable_worldmodel.solver.RandomSolver"><code class="xref py py-obj docutils literal notranslate"><span class="pre">RandomSolver</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="../../stable_worldmodel.solver/#stable_worldmodel.solver.RandomSolver" title="stable_worldmodel.solver.RandomSolver"><code class="xref py py-obj docutils literal notranslate"><span class="pre">RandomSolver</span></code></a></p></td>
 <td><p>Random action sampling solver for model-based planning.</p></td>
 </tr>
 </tbody>
 </table>
 <dl class="py class" id="module-stable_worldmodel.solver.solver">
 <dt class="sig sig-object py" id="stable_worldmodel.solver.solver.Costable">
-<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Costable</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/stable_worldmodel/solver/solver/#Costable"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.solver.solver.Costable" title="Link to this definition" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#stable_worldmodel.solver.solver.Costable'"><svg height="1em" viewbox="0 0 24 24" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"></path></svg></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Costable</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/stable_worldmodel/solver/solver/#Costable"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.solver.solver.Costable" title="Link to this definition" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#stable_worldmodel.solver.solver.Costable'"><svg height="1em" viewbox="0 0 24 24" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"></path></svg></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Protocol</span></code></p>
 <p>Protocol for world model cost functions.</p>
 <p>This protocol defines the interface for models that can compute costs
@@ -200,9 +196,27 @@ evaluate the quality of action sequences in a given environment state.</p>
 </span></code></pre></div>
 </div>
 <dl class="py method">
+<dt class="sig sig-object py" id="stable_worldmodel.solver.solver.Costable.criterion">
+<span class="sig-name descname"><span class="pre">criterion</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">info_dict</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">action_candidates</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">→</span> <span class="sig-return-typehint"><span class="pre">Tensor</span></span></span><a class="reference internal" href="../../_modules/stable_worldmodel/solver/solver/#Costable.criterion"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.solver.solver.Costable.criterion" title="Link to this definition" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#stable_worldmodel.solver.solver.Costable.criterion'"><svg height="1em" viewbox="0 0 24 24" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"></path></svg></a></dt>
+<dd><p>Criterion used by get_cost to compute the cost. This method can be overridden to easily define a custom cost function.
+:param info_dict: Dictionary containing environment state information. Typically contains info such as the goal and the results of rollouts.
+:param action_candidates: Tensor of shape (B, N, horizon, action_dim)</p>
+<blockquote>
+<div><p>containing action sequences to evaluate. B is the number of trajectories,
+N is the number of samples (action candidates).</p>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Tensor of shape (n_envs,) containing the cost of each environment action sequence.
+Lower costs indicate better action sequences.</p>
+</dd>
+</dl>
+</dd></dl>
+<dl class="py method">
 <dt class="sig sig-object py" id="stable_worldmodel.solver.solver.Costable.get_cost">
 <span class="sig-name descname"><span class="pre">get_cost</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">action_candidates</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">→</span> <span class="sig-return-typehint"><span class="pre">Tensor</span></span></span><a class="reference internal" href="../../_modules/stable_worldmodel/solver/solver/#Costable.get_cost"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.solver.solver.Costable.get_cost" title="Link to this definition" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#stable_worldmodel.solver.solver.Costable.get_cost'"><svg height="1em" viewbox="0 0 24 24" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"></path></svg></a></dt>
-<dd><p>Compute cost for given action candidates based on info dictionary.</p>
+<dd><p>Compute cost for given action candidates based on info dictionary. Typically get_cost performs rollouts
+using the world model and then computes costs using the criterion.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -230,7 +244,7 @@ action_candidates to enable gradient-based planning methods.</p>
 </dd></dl>
 <dl class="py class">
 <dt class="sig sig-object py" id="stable_worldmodel.solver.solver.Solver">
-<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Solver</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/stable_worldmodel/solver/solver/#Solver"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.solver.solver.Solver" title="Link to this definition" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#stable_worldmodel.solver.solver.Solver'"><svg height="1em" viewbox="0 0 24 24" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"></path></svg></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Solver</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/stable_worldmodel/solver/solver/#Solver"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.solver.solver.Solver" title="Link to this definition" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#stable_worldmodel.solver.solver.Solver'"><svg height="1em" viewbox="0 0 24 24" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"></path></svg></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Protocol</span></code></p>
 <p>Protocol for model-based planning solvers.</p>
 <p>This protocol defines the interface for optimization algorithms that plan
@@ -246,7 +260,7 @@ and output optimal action sequences that achieve desired behaviors.</p>
 </ol>
 </dd>
 <dt>The protocol supports various optimization methods including:</dt><dd><ul class="simple">
-<li><p>Gradient-based: GDSolver (gradient descent)</p></li>
+<li><p>Gradient-based: GradientSolver (gradient descent)</p></li>
 <li><p>Sampling-based: CEMSolver (cross-entropy method), MPPISolver</p></li>
 <li><p>Random: RandomSolver (baseline)</p></li>
 </ul>
@@ -276,7 +290,7 @@ Formula: base_action_dim * action_block</p></li>
 </span><span id="line-3"><span class="gp">&gt;&gt;&gt; </span><span class="n">plan_config</span> <span class="o">=</span> <span class="n">PlanConfig</span><span class="p">(</span><span class="n">horizon</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">receding_horizon</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">action_block</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
 </span><span id="line-4"><span class="gp">&gt;&gt;&gt;</span>
 </span><span id="line-5"><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Create and configure solver</span>
-</span><span id="line-6"><span class="gp">&gt;&gt;&gt; </span><span class="n">solver</span> <span class="o">=</span> <span class="n">GDSolver</span><span class="p">(</span><span class="n">world_model</span><span class="p">,</span> <span class="n">n_steps</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="s2">"cuda"</span><span class="p">)</span>
+</span><span id="line-6"><span class="gp">&gt;&gt;&gt; </span><span class="n">solver</span> <span class="o">=</span> <span class="n">GradientSolver</span><span class="p">(</span><span class="n">world_model</span><span class="p">,</span> <span class="n">n_steps</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="s2">"cuda"</span><span class="p">)</span>
 </span><span id="line-7"><span class="gp">&gt;&gt;&gt; </span><span class="n">solver</span><span class="o">.</span><span class="n">configure</span><span class="p">(</span>
 </span><span id="line-8"><span class="gp">... </span>    <span class="n">action_space</span><span class="o">=</span><span class="n">env</span><span class="o">.</span><span class="n">action_space</span><span class="p">,</span>
 </span><span id="line-9"><span class="gp">... </span>    <span class="n">n_envs</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span>
@@ -297,12 +311,12 @@ Formula: base_action_dim * action_block</p></li>
 <ul class="simple">
 <li><p>Costable: Protocol defining the world model cost interface</p></li>
 <li><p>PlanConfig: Configuration dataclass for planning parameters</p></li>
-<li><p>GDSolver, CEMSolver, MPPISolver: Concrete solver implementations</p></li>
+<li><p>GradientSolver, CEMSolver, MPPISolver: Concrete solver implementations</p></li>
 </ul>
 </div>
 <dl class="py property">
 <dt class="sig sig-object py" id="stable_worldmodel.solver.solver.Solver.action_dim">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">action_dim</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#stable_worldmodel.solver.solver.Solver.action_dim" title="Link to this definition" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#stable_worldmodel.solver.solver.Solver.action_dim'"><svg height="1em" viewbox="0 0 24 24" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"></path></svg></a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">action_dim</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#stable_worldmodel.solver.solver.Solver.action_dim" title="Link to this definition" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#stable_worldmodel.solver.solver.Solver.action_dim'"><svg height="1em" viewbox="0 0 24 24" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"></path></svg></a></dt>
 <dd><p>Flattened action dimension including action_block grouping.</p>
 <p>This is the total size of actions per timestep, computed as:
 base_action_dim * action_block</p>
@@ -323,7 +337,7 @@ then action_dim=10 (the 2 action dimensions grouped 5 times).</p>
 </dd></dl>
 <dl class="py method">
 <dt class="sig sig-object py" id="stable_worldmodel.solver.solver.Solver.configure">
-<span class="sig-name descname"><span class="pre">configure</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">action_space</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Space</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_envs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">config</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">→</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../../_modules/stable_worldmodel/solver/solver/#Solver.configure"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.solver.solver.Solver.configure" title="Link to this definition" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#stable_worldmodel.solver.solver.Solver.configure'"><svg height="1em" viewbox="0 0 24 24" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"></path></svg></a></dt>
+<span class="sig-name descname"><span class="pre">configure</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">action_space</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Space</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_envs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">config</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">→</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../../_modules/stable_worldmodel/solver/solver/#Solver.configure"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stable_worldmodel.solver.solver.Solver.configure" title="Link to this definition" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#stable_worldmodel.solver.solver.Solver.configure'"><svg height="1em" viewbox="0 0 24 24" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"></path></svg></a></dt>
 <dd><p>Configure the solver with environment and planning specifications.</p>
 <p>This method initializes the solver’s internal state based on the
 environment’s action space and planning configuration. Must be called
@@ -357,7 +371,7 @@ solver caches the configuration internally for use in solve().</p>
 </dd></dl>
 <dl class="py property">
 <dt class="sig sig-object py" id="stable_worldmodel.solver.solver.Solver.horizon">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">horizon</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#stable_worldmodel.solver.solver.Solver.horizon" title="Link to this definition" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#stable_worldmodel.solver.solver.Solver.horizon'"><svg height="1em" viewbox="0 0 24 24" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"></path></svg></a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">horizon</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#stable_worldmodel.solver.solver.Solver.horizon" title="Link to this definition" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#stable_worldmodel.solver.solver.Solver.horizon'"><svg height="1em" viewbox="0 0 24 24" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"></path></svg></a></dt>
 <dd><p>Planning horizon length in timesteps.</p>
 <p>This is the number of future timesteps the solver plans ahead.
 Note that this may differ from receding_horizon (the number of
@@ -376,7 +390,7 @@ actions actually executed before replanning).</p>
 </dd></dl>
 <dl class="py property">
 <dt class="sig sig-object py" id="stable_worldmodel.solver.solver.Solver.n_envs">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">n_envs</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#stable_worldmodel.solver.solver.Solver.n_envs" title="Link to this definition" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#stable_worldmodel.solver.solver.Solver.n_envs'"><svg height="1em" viewbox="0 0 24 24" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"></path></svg></a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">n_envs</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#stable_worldmodel.solver.solver.Solver.n_envs" title="Link to this definition" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#stable_worldmodel.solver.solver.Solver.n_envs'"><svg height="1em" viewbox="0 0 24 24" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"></path></svg></a></dt>
 <dd><p>Number of parallel environments being planned for.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
@@ -461,6 +475,7 @@ environment. The WorldModelPolicy handles this transformation.</p>
 <div class="sticky top-16 -mt-10 max-h-[calc(100vh-5rem)] overflow-y-auto pt-6 space-y-2"><p class="font-medium">On this page</p>
 <ul>
 <li><a :data-current="activeSection === '#stable_worldmodel.solver.solver.Costable'" class="reference internal" href="#stable_worldmodel.solver.solver.Costable"><code class="docutils literal notranslate"><span class="pre">Costable</span></code></a><ul>
+<li><a :data-current="activeSection === '#stable_worldmodel.solver.solver.Costable.criterion'" class="reference internal" href="#stable_worldmodel.solver.solver.Costable.criterion"><code class="docutils literal notranslate"><span class="pre">Costable.criterion()</span></code></a></li>
 <li><a :data-current="activeSection === '#stable_worldmodel.solver.solver.Costable.get_cost'" class="reference internal" href="#stable_worldmodel.solver.solver.Costable.get_cost"><code class="docutils literal notranslate"><span class="pre">Costable.get_cost()</span></code></a></li>
 </ul>
 </li>
@@ -480,7 +495,7 @@ environment. The WorldModelPolicy handles this transformation.</p>
 </div><footer class="py-6 border-t border-border md:py-0">
 <div class="container flex flex-col items-center justify-between gap-4 md:h-24 md:flex-row">
 <div class="flex flex-col items-center gap-4 px-8 md:flex-row md:gap-2 md:px-0">
-<p class="text-sm leading-loose text-center text-muted-foreground md:text-left">© 2025 Built with <a class="font-medium underline underline-offset-4" href="https://www.sphinx-doc.org" rel="noreferrer">Sphinx 8.2.3</a></p>
+<p class="text-sm leading-loose text-center text-muted-foreground md:text-left">© 2026 Built with <a class="font-medium underline underline-offset-4" href="https://www.sphinx-doc.org" rel="noreferrer">Sphinx 8.1.3</a></p>
 </div>
 </div>
 </footer>

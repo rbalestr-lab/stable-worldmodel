@@ -132,7 +132,6 @@
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../api/solver/">Solver</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="../../../../api/generated/stable_worldmodel.solver.GDSolver/">GDSolver</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../api/generated/stable_worldmodel.solver.CEMSolver/">CEMSolver</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../api/generated/stable_worldmodel.solver.MPPISolver/">MPPISolver</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../api/generated/stable_worldmodel.solver.NevergradSolver/">NevergradSolver</a></li>
@@ -216,184 +215,212 @@
 
     <div id="content" role="main">
       <h1>Source code for stable_worldmodel.solver.mppi</h1><div class="highlight"><pre>
-<span></span><code><span id="line-1"><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
-</span><span id="line-2"><span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
-</span><span id="line-3"><span class="kn">from</span><span class="w"> </span><span class="nn">gymnasium.spaces</span><span class="w"> </span><span class="kn">import</span> <span class="n">Box</span>
-</span><span id="line-4"><span class="kn">from</span><span class="w"> </span><span class="nn">loguru</span><span class="w"> </span><span class="kn">import</span> <span class="n">logger</span> <span class="k">as</span> <span class="n">logging</span>
-</span><span id="line-5">
-</span><span id="line-6"><span class="kn">from</span><span class="w"> </span><span class="nn">.solver</span><span class="w"> </span><span class="kn">import</span> <span class="n">Costable</span>
+<span></span><code><span id="line-1"><span class="kn">import</span><span class="w"> </span><span class="nn">time</span>
+</span><span id="line-2">
+</span><span id="line-3"><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+</span><span id="line-4"><span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
+</span><span id="line-5"><span class="kn">from</span><span class="w"> </span><span class="nn">gymnasium.spaces</span><span class="w"> </span><span class="kn">import</span> <span class="n">Box</span>
+</span><span id="line-6"><span class="kn">from</span><span class="w"> </span><span class="nn">loguru</span><span class="w"> </span><span class="kn">import</span> <span class="n">logger</span> <span class="k">as</span> <span class="n">logging</span>
 </span><span id="line-7">
-</span><span id="line-8">
+</span><span id="line-8"><span class="kn">from</span><span class="w"> </span><span class="nn">.solver</span><span class="w"> </span><span class="kn">import</span> <span class="n">Costable</span>
+</span><span id="line-9">
+</span><span id="line-10">
 <div class="viewcode-block" id="MPPISolver">
 <a class="viewcode-back" href="../../../../stable_worldmodel.solver/#stable_worldmodel.solver.MPPISolver">[docs]</a>
-</span><span id="line-9"><span class="k">class</span><span class="w"> </span><span class="nc">MPPISolver</span><span class="p">:</span>
-</span><span id="line-10"><span class="w">    </span><span class="sd">&quot;&quot;&quot;Model Predictive Path Integral Solver.</span>
-</span><span id="line-11">
-</span><span id="line-12"><span class="sd">    proposed in https://arxiv.org/abs/1509.01149</span>
-</span><span id="line-13"><span class="sd">    algorithm from: https://acdslab.github.io/mppi-generic-website/docs/mppi.html</span>
-</span><span id="line-14">
-</span><span id="line-15"><span class="sd">    Note:</span>
-</span><span id="line-16"><span class="sd">        The original MPPI compute the cost as a summation of costs along the trajectory.</span>
-</span><span id="line-17"><span class="sd">        Here, we use the final cost only, which should be updated in future updates.</span>
-</span><span id="line-18"><span class="sd">    &quot;&quot;&quot;</span>
-</span><span id="line-19">
-</span><span id="line-20">    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
-</span><span id="line-21">        <span class="bp">self</span><span class="p">,</span>
-</span><span id="line-22">        <span class="n">model</span><span class="p">:</span> <span class="n">Costable</span><span class="p">,</span>
-</span><span id="line-23">        <span class="n">num_samples</span><span class="p">,</span>
-</span><span id="line-24">        <span class="n">num_elites</span><span class="p">,</span>
-</span><span id="line-25">        <span class="n">var_scale</span><span class="p">,</span>
-</span><span id="line-26">        <span class="n">n_steps</span><span class="p">,</span>
-</span><span id="line-27">        <span class="n">use_elites</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-</span><span id="line-28">        <span class="n">temperature</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span>
-</span><span id="line-29">        <span class="n">device</span><span class="o">=</span><span class="s2">&quot;cpu&quot;</span><span class="p">,</span>
-</span><span id="line-30">    <span class="p">):</span>
-</span><span id="line-31">        <span class="bp">self</span><span class="o">.</span><span class="n">model</span> <span class="o">=</span> <span class="n">model</span>
-</span><span id="line-32">        <span class="bp">self</span><span class="o">.</span><span class="n">var_scale</span> <span class="o">=</span> <span class="n">var_scale</span>
-</span><span id="line-33">        <span class="bp">self</span><span class="o">.</span><span class="n">use_elites</span> <span class="o">=</span> <span class="n">use_elites</span>
-</span><span id="line-34">        <span class="bp">self</span><span class="o">.</span><span class="n">num_samples</span> <span class="o">=</span> <span class="n">num_samples</span>
-</span><span id="line-35">        <span class="bp">self</span><span class="o">.</span><span class="n">num_elites</span> <span class="o">=</span> <span class="n">num_elites</span>
-</span><span id="line-36">        <span class="bp">self</span><span class="o">.</span><span class="n">temperature</span> <span class="o">=</span> <span class="n">temperature</span>
-</span><span id="line-37">        <span class="bp">self</span><span class="o">.</span><span class="n">n_steps</span> <span class="o">=</span> <span class="n">n_steps</span>
-</span><span id="line-38">        <span class="bp">self</span><span class="o">.</span><span class="n">device</span> <span class="o">=</span> <span class="n">device</span>
-</span><span id="line-39">
+</span><span id="line-11"><span class="k">class</span><span class="w"> </span><span class="nc">MPPISolver</span><span class="p">:</span>
+</span><span id="line-12"><span class="w">    </span><span class="sd">&quot;&quot;&quot;Model Predictive Path Integral Solver.</span>
+</span><span id="line-13">
+</span><span id="line-14"><span class="sd">    proposed in https://arxiv.org/abs/1509.01149</span>
+</span><span id="line-15"><span class="sd">    algorithm from: https://acdslab.github.io/mppi-generic-website/docs/mppi.html</span>
+</span><span id="line-16">
+</span><span id="line-17"><span class="sd">    Note:</span>
+</span><span id="line-18"><span class="sd">        The original MPPI compute the cost as a summation of costs along the trajectory.</span>
+</span><span id="line-19"><span class="sd">        Here, we use the final cost only, which should be updated in future updates.</span>
+</span><span id="line-20"><span class="sd">    &quot;&quot;&quot;</span>
+</span><span id="line-21">
+</span><span id="line-22">    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+</span><span id="line-23">        <span class="bp">self</span><span class="p">,</span>
+</span><span id="line-24">        <span class="n">model</span><span class="p">:</span> <span class="n">Costable</span><span class="p">,</span>
+</span><span id="line-25">        <span class="n">batch_size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
+</span><span id="line-26">        <span class="n">num_samples</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">300</span><span class="p">,</span>
+</span><span id="line-27">        <span class="n">var_scale</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span>
+</span><span id="line-28">        <span class="n">n_steps</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">30</span><span class="p">,</span>
+</span><span id="line-29">        <span class="n">topk</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">30</span><span class="p">,</span>
+</span><span id="line-30">        <span class="n">temperature</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.5</span><span class="p">,</span>
+</span><span id="line-31">        <span class="n">device</span><span class="o">=</span><span class="s2">&quot;cpu&quot;</span><span class="p">,</span>
+</span><span id="line-32">        <span class="n">seed</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1234</span><span class="p">,</span>
+</span><span id="line-33">    <span class="p">):</span>
+</span><span id="line-34">        <span class="bp">self</span><span class="o">.</span><span class="n">model</span> <span class="o">=</span> <span class="n">model</span>
+</span><span id="line-35">        <span class="bp">self</span><span class="o">.</span><span class="n">batch_size</span> <span class="o">=</span> <span class="n">batch_size</span>
+</span><span id="line-36">        <span class="bp">self</span><span class="o">.</span><span class="n">num_samples</span> <span class="o">=</span> <span class="n">num_samples</span>
+</span><span id="line-37">        <span class="bp">self</span><span class="o">.</span><span class="n">topk</span> <span class="o">=</span> <span class="n">topk</span>
+</span><span id="line-38">        <span class="bp">self</span><span class="o">.</span><span class="n">var_scale</span> <span class="o">=</span> <span class="n">var_scale</span>
+</span><span id="line-39">        <span class="bp">self</span><span class="o">.</span><span class="n">n_steps</span> <span class="o">=</span> <span class="n">n_steps</span>
+</span><span id="line-40">        <span class="bp">self</span><span class="o">.</span><span class="n">temperature</span> <span class="o">=</span> <span class="n">temperature</span>
+</span><span id="line-41">        <span class="bp">self</span><span class="o">.</span><span class="n">device</span> <span class="o">=</span> <span class="n">device</span>
+</span><span id="line-42">        <span class="bp">self</span><span class="o">.</span><span class="n">torch_gen</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">Generator</span><span class="p">(</span><span class="n">device</span><span class="o">=</span><span class="n">device</span><span class="p">)</span><span class="o">.</span><span class="n">manual_seed</span><span class="p">(</span><span class="n">seed</span><span class="p">)</span>
+</span><span id="line-43">
 <div class="viewcode-block" id="MPPISolver.configure">
 <a class="viewcode-back" href="../../../../stable_worldmodel.solver/#stable_worldmodel.solver.MPPISolver.configure">[docs]</a>
-</span><span id="line-40">    <span class="k">def</span><span class="w"> </span><span class="nf">configure</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">action_space</span><span class="p">,</span> <span class="n">n_envs</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">config</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-</span><span id="line-41">        <span class="bp">self</span><span class="o">.</span><span class="n">_action_space</span> <span class="o">=</span> <span class="n">action_space</span>
-</span><span id="line-42">        <span class="bp">self</span><span class="o">.</span><span class="n">_n_envs</span> <span class="o">=</span> <span class="n">n_envs</span>
-</span><span id="line-43">        <span class="bp">self</span><span class="o">.</span><span class="n">_config</span> <span class="o">=</span> <span class="n">config</span>
-</span><span id="line-44">        <span class="bp">self</span><span class="o">.</span><span class="n">_action_dim</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">prod</span><span class="p">(</span><span class="n">action_space</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">:]))</span>
-</span><span id="line-45">        <span class="bp">self</span><span class="o">.</span><span class="n">_configured</span> <span class="o">=</span> <span class="kc">True</span>
-</span><span id="line-46">
-</span><span id="line-47">        <span class="c1"># warning if action space is discrete</span>
-</span><span id="line-48">        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">action_space</span><span class="p">,</span> <span class="n">Box</span><span class="p">):</span>
-</span><span id="line-49">            <span class="n">logging</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Action space is discrete, got </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">action_space</span><span class="p">)</span><span class="si">}</span><span class="s2">. GDSolver may not work as expected.&quot;</span><span class="p">)</span></div>
-
+</span><span id="line-44">    <span class="k">def</span><span class="w"> </span><span class="nf">configure</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">action_space</span><span class="p">,</span> <span class="n">n_envs</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">config</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+</span><span id="line-45">        <span class="bp">self</span><span class="o">.</span><span class="n">_action_space</span> <span class="o">=</span> <span class="n">action_space</span>
+</span><span id="line-46">        <span class="bp">self</span><span class="o">.</span><span class="n">_n_envs</span> <span class="o">=</span> <span class="n">n_envs</span>
+</span><span id="line-47">        <span class="bp">self</span><span class="o">.</span><span class="n">_config</span> <span class="o">=</span> <span class="n">config</span>
+</span><span id="line-48">        <span class="bp">self</span><span class="o">.</span><span class="n">_action_dim</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">prod</span><span class="p">(</span><span class="n">action_space</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">:]))</span>
+</span><span id="line-49">        <span class="bp">self</span><span class="o">.</span><span class="n">_configured</span> <span class="o">=</span> <span class="kc">True</span>
 </span><span id="line-50">
-</span><span id="line-51">    <span class="nd">@property</span>
-</span><span id="line-52">    <span class="k">def</span><span class="w"> </span><span class="nf">n_envs</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
-</span><span id="line-53">        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_n_envs</span>
-</span><span id="line-54">
-</span><span id="line-55">    <span class="nd">@property</span>
-</span><span id="line-56">    <span class="k">def</span><span class="w"> </span><span class="nf">action_dim</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
-</span><span id="line-57">        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_action_dim</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">_config</span><span class="o">.</span><span class="n">action_block</span>
-</span><span id="line-58">
-</span><span id="line-59">    <span class="nd">@property</span>
-</span><span id="line-60">    <span class="k">def</span><span class="w"> </span><span class="nf">horizon</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
-</span><span id="line-61">        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_config</span><span class="o">.</span><span class="n">horizon</span>
-</span><span id="line-62">
-</span><span id="line-63">    <span class="k">def</span><span class="w"> </span><span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
-</span><span id="line-64">        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">solve</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-</span><span id="line-65">
+</span><span id="line-51">        <span class="c1"># warning if action space is discrete</span>
+</span><span id="line-52">        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">action_space</span><span class="p">,</span> <span class="n">Box</span><span class="p">):</span>
+</span><span id="line-53">            <span class="n">logging</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+</span><span id="line-54">                <span class="sa">f</span><span class="s2">&quot;Action space is discrete, got </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">action_space</span><span class="p">)</span><span class="si">}</span><span class="s2">. MPPISolver may not work as expected.&quot;</span>
+</span><span id="line-55">            <span class="p">)</span></div>
+
+</span><span id="line-56">
+</span><span id="line-57">    <span class="nd">@property</span>
+</span><span id="line-58">    <span class="k">def</span><span class="w"> </span><span class="nf">n_envs</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+</span><span id="line-59">        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_n_envs</span>
+</span><span id="line-60">
+</span><span id="line-61">    <span class="nd">@property</span>
+</span><span id="line-62">    <span class="k">def</span><span class="w"> </span><span class="nf">action_dim</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+</span><span id="line-63">        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_action_dim</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">_config</span><span class="o">.</span><span class="n">action_block</span>
+</span><span id="line-64">
+</span><span id="line-65">    <span class="nd">@property</span>
+</span><span id="line-66">    <span class="k">def</span><span class="w"> </span><span class="nf">horizon</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+</span><span id="line-67">        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_config</span><span class="o">.</span><span class="n">horizon</span>
+</span><span id="line-68">
+</span><span id="line-69">    <span class="k">def</span><span class="w"> </span><span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
+</span><span id="line-70">        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">solve</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+</span><span id="line-71">
 <div class="viewcode-block" id="MPPISolver.init_action_distrib">
 <a class="viewcode-back" href="../../../../stable_worldmodel.solver/#stable_worldmodel.solver.MPPISolver.init_action_distrib">[docs]</a>
-</span><span id="line-66">    <span class="k">def</span><span class="w"> </span><span class="nf">init_action_distrib</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">actions</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-</span><span id="line-67"><span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialize the action distribution params (mu, sigma) given the initial condition.</span>
-</span><span id="line-68">
-</span><span id="line-69"><span class="sd">        Args:</span>
-</span><span id="line-70"><span class="sd">            actions (n_envs, T, action_dim): initial actions, T &lt;= horizon</span>
-</span><span id="line-71"><span class="sd">        &quot;&quot;&quot;</span>
-</span><span id="line-72">        <span class="n">var</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">var_scale</span> <span class="o">*</span> <span class="n">torch</span><span class="o">.</span><span class="n">ones</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">n_envs</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">horizon</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">action_dim</span><span class="p">])</span>
-</span><span id="line-73">
-</span><span id="line-74">        <span class="n">mean</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">zeros</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">n_envs</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">action_dim</span><span class="p">])</span> <span class="k">if</span> <span class="n">actions</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">actions</span>
-</span><span id="line-75">
-</span><span id="line-76">        <span class="c1"># -- fill remaining actions with random sample</span>
-</span><span id="line-77">        <span class="n">remaining</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">horizon</span> <span class="o">-</span> <span class="n">mean</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
-</span><span id="line-78">
-</span><span id="line-79">        <span class="k">if</span> <span class="n">remaining</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-</span><span id="line-80">            <span class="n">device</span> <span class="o">=</span> <span class="n">mean</span><span class="o">.</span><span class="n">device</span>
-</span><span id="line-81">            <span class="n">new_mean</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">zeros</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">n_envs</span><span class="p">,</span> <span class="n">remaining</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">action_dim</span><span class="p">])</span>
-</span><span id="line-82">            <span class="n">mean</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">cat</span><span class="p">([</span><span class="n">mean</span><span class="p">,</span> <span class="n">new_mean</span><span class="p">],</span> <span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">device</span><span class="p">)</span>
-</span><span id="line-83">
-</span><span id="line-84">        <span class="k">return</span> <span class="n">mean</span><span class="p">,</span> <span class="n">var</span></div>
+</span><span id="line-72">    <span class="k">def</span><span class="w"> </span><span class="nf">init_action_distrib</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">actions</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+</span><span id="line-73"><span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialize the action distribution params (mu, sigma) given the initial condition.</span>
+</span><span id="line-74">
+</span><span id="line-75"><span class="sd">        Args:</span>
+</span><span id="line-76"><span class="sd">            actions (n_envs, T, action_dim): initial actions, T &lt;= horizon</span>
+</span><span id="line-77"><span class="sd">        &quot;&quot;&quot;</span>
+</span><span id="line-78">        <span class="n">var</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">var_scale</span> <span class="o">*</span> <span class="n">torch</span><span class="o">.</span><span class="n">ones</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">n_envs</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">horizon</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">action_dim</span><span class="p">])</span>
+</span><span id="line-79">        <span class="n">mean</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">zeros</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">n_envs</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">action_dim</span><span class="p">])</span> <span class="k">if</span> <span class="n">actions</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">actions</span>
+</span><span id="line-80">
+</span><span id="line-81">        <span class="c1"># -- fill remaining actions with random sample</span>
+</span><span id="line-82">        <span class="n">remaining</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">horizon</span> <span class="o">-</span> <span class="n">mean</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+</span><span id="line-83">        <span class="k">if</span> <span class="n">remaining</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+</span><span id="line-84">            <span class="n">device</span> <span class="o">=</span> <span class="n">mean</span><span class="o">.</span><span class="n">device</span>
+</span><span id="line-85">            <span class="n">new_mean</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">zeros</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">n_envs</span><span class="p">,</span> <span class="n">remaining</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">action_dim</span><span class="p">])</span>
+</span><span id="line-86">            <span class="n">mean</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">cat</span><span class="p">([</span><span class="n">mean</span><span class="p">,</span> <span class="n">new_mean</span><span class="p">],</span> <span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">device</span><span class="p">)</span>
+</span><span id="line-87">
+</span><span id="line-88">        <span class="k">return</span> <span class="n">mean</span><span class="p">,</span> <span class="n">var</span></div>
 
-</span><span id="line-85">
-<div class="viewcode-block" id="MPPISolver.compute_trajectory_weights">
-<a class="viewcode-back" href="../../../../stable_worldmodel.solver/#stable_worldmodel.solver.MPPISolver.compute_trajectory_weights">[docs]</a>
-</span><span id="line-86">    <span class="k">def</span><span class="w"> </span><span class="nf">compute_trajectory_weights</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">costs</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
-</span><span id="line-87"><span class="w">        </span><span class="sd">&quot;&quot;&quot;Compute trajectory weights from costs using softmin with temperature.</span>
-</span><span id="line-88">
-</span><span id="line-89"><span class="sd">        Args:</span>
-</span><span id="line-90"><span class="sd">            costs (num_samples,): Tensor of trajectory costs.</span>
-</span><span id="line-91">
-</span><span id="line-92"><span class="sd">        Returns:</span>
-</span><span id="line-93"><span class="sd">            Tensor of trajectory weights.</span>
-</span><span id="line-94"><span class="sd">        &quot;&quot;&quot;</span>
-</span><span id="line-95">        <span class="n">stable_costs</span> <span class="o">=</span> <span class="n">costs</span> <span class="o">-</span> <span class="n">costs</span><span class="o">.</span><span class="n">min</span><span class="p">()</span>
-</span><span id="line-96">        <span class="n">weights</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">softmax</span><span class="p">(</span><span class="o">-</span><span class="n">stable_costs</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">temperature</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
-</span><span id="line-97">        <span class="k">return</span> <span class="n">weights</span></div>
-
-</span><span id="line-98">
+</span><span id="line-89">
 <div class="viewcode-block" id="MPPISolver.solve">
 <a class="viewcode-back" href="../../../../stable_worldmodel.solver/#stable_worldmodel.solver.MPPISolver.solve">[docs]</a>
-</span><span id="line-99">    <span class="nd">@torch</span><span class="o">.</span><span class="n">inference_mode</span><span class="p">()</span>
-</span><span id="line-100">    <span class="k">def</span><span class="w"> </span><span class="nf">solve</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">info_dict</span><span class="p">,</span> <span class="n">init_action</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-</span><span id="line-101">        <span class="n">outputs</span> <span class="o">=</span> <span class="p">{</span>
-</span><span id="line-102">            <span class="s2">&quot;costs&quot;</span><span class="p">:</span> <span class="p">[],</span>
-</span><span id="line-103">            <span class="s2">&quot;mean&quot;</span><span class="p">:</span> <span class="p">[],</span>
-</span><span id="line-104">            <span class="s2">&quot;var&quot;</span><span class="p">:</span> <span class="p">[],</span>
-</span><span id="line-105">        <span class="p">}</span>
-</span><span id="line-106">
-</span><span id="line-107">        <span class="c1"># -- initialize the action distribution</span>
-</span><span id="line-108">        <span class="n">mean</span><span class="p">,</span> <span class="n">var</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">init_action_distrib</span><span class="p">(</span><span class="n">init_action</span><span class="p">)</span>
-</span><span id="line-109">        <span class="n">mean</span> <span class="o">=</span> <span class="n">mean</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">device</span><span class="p">)</span>
-</span><span id="line-110">        <span class="n">var</span> <span class="o">=</span> <span class="n">var</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">device</span><span class="p">)</span>
-</span><span id="line-111">        <span class="n">n_envs</span> <span class="o">=</span> <span class="n">mean</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-</span><span id="line-112">
-</span><span id="line-113">        <span class="c1"># -- optimization loop</span>
-</span><span id="line-114">        <span class="k">for</span> <span class="n">step</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_steps</span><span class="p">):</span>
-</span><span id="line-115">            <span class="n">costs</span> <span class="o">=</span> <span class="p">[]</span>
-</span><span id="line-116">
-</span><span id="line-117">            <span class="c1"># TODO: could flatten the batch dimension and process all samples together</span>
-</span><span id="line-118">            <span class="c1"># rem: need many memory and split before computing top k</span>
-</span><span id="line-119">
-</span><span id="line-120">            <span class="k">for</span> <span class="n">traj</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_envs</span><span class="p">):</span>
-</span><span id="line-121">                <span class="n">expanded_infos</span> <span class="o">=</span> <span class="p">{}</span>
-</span><span id="line-122">
-</span><span id="line-123">                <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">info_dict</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-</span><span id="line-124">                    <span class="n">v_traj</span> <span class="o">=</span> <span class="n">v</span><span class="p">[</span><span class="n">traj</span><span class="p">]</span>
-</span><span id="line-125">                    <span class="k">if</span> <span class="n">torch</span><span class="o">.</span><span class="n">is_tensor</span><span class="p">(</span><span class="n">v</span><span class="p">):</span>
-</span><span id="line-126">                        <span class="n">v_traj</span> <span class="o">=</span> <span class="n">v_traj</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">repeat_interleave</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">num_samples</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
-</span><span id="line-127">                    <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
-</span><span id="line-128">                        <span class="n">v_traj</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">repeat</span><span class="p">(</span><span class="n">v_traj</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="o">...</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_samples</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
-</span><span id="line-129">
-</span><span id="line-130">                    <span class="n">expanded_infos</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">v_traj</span>
-</span><span id="line-131">
-</span><span id="line-132">                <span class="c1"># sample noisy actions sequences</span>
-</span><span id="line-133">                <span class="n">candidates</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">num_samples</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">horizon</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">action_dim</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">device</span><span class="p">)</span>
-</span><span id="line-134">                <span class="n">candidates</span> <span class="o">=</span> <span class="n">candidates</span> <span class="o">*</span> <span class="n">var</span><span class="p">[</span><span class="n">traj</span><span class="p">]</span> <span class="o">+</span> <span class="n">mean</span><span class="p">[</span><span class="n">traj</span><span class="p">]</span>
-</span><span id="line-135">
-</span><span id="line-136">                <span class="c1"># make the first action seq being mean</span>
-</span><span id="line-137">                <span class="n">candidates</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">mean</span><span class="p">[</span><span class="n">traj</span><span class="p">]</span>
-</span><span id="line-138">
-</span><span id="line-139">                <span class="c1"># get the costs</span>
-</span><span id="line-140">                <span class="n">cost</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">get_cost</span><span class="p">(</span><span class="n">expanded_infos</span><span class="p">,</span> <span class="n">candidates</span><span class="p">)</span>
+</span><span id="line-90">    <span class="nd">@torch</span><span class="o">.</span><span class="n">inference_mode</span><span class="p">()</span>
+</span><span id="line-91">    <span class="k">def</span><span class="w"> </span><span class="nf">solve</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">info_dict</span><span class="p">,</span> <span class="n">init_action</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+</span><span id="line-92">        <span class="n">start_time</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+</span><span id="line-93">        <span class="n">outputs</span> <span class="o">=</span> <span class="p">{</span>
+</span><span id="line-94">            <span class="s2">&quot;costs&quot;</span><span class="p">:</span> <span class="p">[],</span>
+</span><span id="line-95">            <span class="s2">&quot;mean&quot;</span><span class="p">:</span> <span class="p">[],</span>
+</span><span id="line-96">            <span class="s2">&quot;var&quot;</span><span class="p">:</span> <span class="p">[],</span>
+</span><span id="line-97">        <span class="p">}</span>
+</span><span id="line-98">
+</span><span id="line-99">        <span class="c1"># -- initialize the action distribution globally</span>
+</span><span id="line-100">        <span class="n">mean</span><span class="p">,</span> <span class="n">var</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">init_action_distrib</span><span class="p">(</span><span class="n">init_action</span><span class="p">)</span>
+</span><span id="line-101">        <span class="n">mean</span> <span class="o">=</span> <span class="n">mean</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">device</span><span class="p">)</span>
+</span><span id="line-102">        <span class="n">var</span> <span class="o">=</span> <span class="n">var</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">device</span><span class="p">)</span>
+</span><span id="line-103">
+</span><span id="line-104">        <span class="n">total_envs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_envs</span>
+</span><span id="line-105">
+</span><span id="line-106">        <span class="c1"># --- Iterate over batches ---</span>
+</span><span id="line-107">        <span class="k">for</span> <span class="n">start_idx</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">total_envs</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">batch_size</span><span class="p">):</span>
+</span><span id="line-108">            <span class="n">end_idx</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">start_idx</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">batch_size</span><span class="p">,</span> <span class="n">total_envs</span><span class="p">)</span>
+</span><span id="line-109">            <span class="n">current_bs</span> <span class="o">=</span> <span class="n">end_idx</span> <span class="o">-</span> <span class="n">start_idx</span>
+</span><span id="line-110">
+</span><span id="line-111">            <span class="c1"># Slice Distribution Parameters for current batch</span>
+</span><span id="line-112">            <span class="n">batch_mean</span> <span class="o">=</span> <span class="n">mean</span><span class="p">[</span><span class="n">start_idx</span><span class="p">:</span><span class="n">end_idx</span><span class="p">]</span>
+</span><span id="line-113">            <span class="n">batch_var</span> <span class="o">=</span> <span class="n">var</span><span class="p">[</span><span class="n">start_idx</span><span class="p">:</span><span class="n">end_idx</span><span class="p">]</span>
+</span><span id="line-114">
+</span><span id="line-115">            <span class="c1"># Expand Info Dict for current batch (Same as CEM)</span>
+</span><span id="line-116">            <span class="n">expanded_infos</span> <span class="o">=</span> <span class="p">{}</span>
+</span><span id="line-117">            <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">info_dict</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+</span><span id="line-118">                <span class="n">v_batch</span> <span class="o">=</span> <span class="n">v</span><span class="p">[</span><span class="n">start_idx</span><span class="p">:</span><span class="n">end_idx</span><span class="p">]</span>
+</span><span id="line-119">                <span class="k">if</span> <span class="n">torch</span><span class="o">.</span><span class="n">is_tensor</span><span class="p">(</span><span class="n">v</span><span class="p">):</span>
+</span><span id="line-120">                    <span class="c1"># Add sample dim: (batch, 1, ...)</span>
+</span><span id="line-121">                    <span class="n">v_batch</span> <span class="o">=</span> <span class="n">v_batch</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+</span><span id="line-122">                    <span class="c1"># Expand: (batch, num_samples, ...)</span>
+</span><span id="line-123">                    <span class="n">v_batch</span> <span class="o">=</span> <span class="n">v_batch</span><span class="o">.</span><span class="n">expand</span><span class="p">(</span><span class="n">current_bs</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_samples</span><span class="p">,</span> <span class="o">*</span><span class="n">v_batch</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">2</span><span class="p">:])</span>
+</span><span id="line-124">                <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
+</span><span id="line-125">                    <span class="n">v_batch</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">repeat</span><span class="p">(</span><span class="n">v_batch</span><span class="p">[:,</span> <span class="kc">None</span><span class="p">,</span> <span class="o">...</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_samples</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+</span><span id="line-126">                <span class="n">expanded_infos</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">v_batch</span>
+</span><span id="line-127">
+</span><span id="line-128">            <span class="c1"># Optimization Loop</span>
+</span><span id="line-129">            <span class="n">final_batch_cost</span> <span class="o">=</span> <span class="kc">None</span>
+</span><span id="line-130">
+</span><span id="line-131">            <span class="k">for</span> <span class="n">step</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_steps</span><span class="p">):</span>
+</span><span id="line-132">                <span class="c1"># Sample noise: (Batch, Num_Samples, Horizon, Dim)</span>
+</span><span id="line-133">                <span class="n">noise</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span>
+</span><span id="line-134">                    <span class="n">current_bs</span><span class="p">,</span>
+</span><span id="line-135">                    <span class="bp">self</span><span class="o">.</span><span class="n">num_samples</span><span class="p">,</span>
+</span><span id="line-136">                    <span class="bp">self</span><span class="o">.</span><span class="n">horizon</span><span class="p">,</span>
+</span><span id="line-137">                    <span class="bp">self</span><span class="o">.</span><span class="n">action_dim</span><span class="p">,</span>
+</span><span id="line-138">                    <span class="n">generator</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">torch_gen</span><span class="p">,</span>
+</span><span id="line-139">                    <span class="n">device</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">device</span><span class="p">,</span>
+</span><span id="line-140">                <span class="p">)</span>
 </span><span id="line-141">
-</span><span id="line-142">                <span class="k">assert</span> <span class="nb">type</span><span class="p">(</span><span class="n">cost</span><span class="p">)</span> <span class="ow">is</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;Expected cost to be a torch.Tensor, got </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">cost</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
-</span><span id="line-143">                <span class="k">assert</span> <span class="n">cost</span><span class="o">.</span><span class="n">ndim</span> <span class="o">==</span> <span class="mi">1</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">cost</span><span class="p">)</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_samples</span><span class="p">,</span> <span class="p">(</span>
-</span><span id="line-144">                    <span class="sa">f</span><span class="s2">&quot;Expected cost to be of shape num_samples (</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">num_samples</span><span class="si">}</span><span class="s2">,), got </span><span class="si">{</span><span class="n">cost</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s2">&quot;</span>
-</span><span id="line-145">                <span class="p">)</span>
-</span><span id="line-146">
-</span><span id="line-147">                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">use_elites</span><span class="p">:</span>
-</span><span id="line-148">                    <span class="n">elite_idx</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">argsort</span><span class="p">(</span><span class="n">cost</span><span class="p">)[:</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_elites</span><span class="p">]</span>
-</span><span id="line-149">                    <span class="n">candidates</span> <span class="o">=</span> <span class="n">candidates</span><span class="p">[</span><span class="n">elite_idx</span><span class="p">]</span>
-</span><span id="line-150">                    <span class="n">cost</span> <span class="o">=</span> <span class="n">cost</span><span class="p">[</span><span class="n">elite_idx</span><span class="p">]</span>
-</span><span id="line-151">
-</span><span id="line-152">                <span class="n">costs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cost</span><span class="o">.</span><span class="n">max</span><span class="p">()</span><span class="o">.</span><span class="n">item</span><span class="p">())</span>
-</span><span id="line-153">
-</span><span id="line-154">                <span class="c1"># update nominal sequence with weighted candidates</span>
-</span><span id="line-155">                <span class="n">weights</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">compute_trajectory_weights</span><span class="p">(</span><span class="n">cost</span><span class="p">)</span>
-</span><span id="line-156">                <span class="n">mean</span><span class="p">[</span><span class="n">traj</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">weights</span> <span class="o">*</span> <span class="n">candidates</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">dim</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
-</span><span id="line-157">
-</span><span id="line-158">            <span class="n">outputs</span><span class="p">[</span><span class="s2">&quot;costs&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">costs</span><span class="p">))</span>
-</span><span id="line-159">            <span class="n">outputs</span><span class="p">[</span><span class="s2">&quot;nominal_action&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">mean</span><span class="o">.</span><span class="n">detach</span><span class="p">()</span><span class="o">.</span><span class="n">cpu</span><span class="p">()</span><span class="o">.</span><span class="n">clone</span><span class="p">())</span>
+</span><span id="line-142">                <span class="c1"># MPPI Logic: candidates = mean + noise * sigma</span>
+</span><span id="line-143">                <span class="n">candidates</span> <span class="o">=</span> <span class="n">batch_mean</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="o">+</span> <span class="n">noise</span> <span class="o">*</span> <span class="n">batch_var</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+</span><span id="line-144">
+</span><span id="line-145">                <span class="c1"># Force the first sample to be the current mean (Zero noise)</span>
+</span><span id="line-146">                <span class="n">candidates</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">batch_mean</span>
+</span><span id="line-147">
+</span><span id="line-148">                <span class="c1"># Evaluate candidates</span>
+</span><span id="line-149">                <span class="n">costs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">get_cost</span><span class="p">(</span><span class="n">expanded_infos</span><span class="p">,</span> <span class="n">candidates</span><span class="p">)</span>
+</span><span id="line-150">
+</span><span id="line-151">                <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">costs</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">),</span> <span class="sa">f</span><span class="s2">&quot;Expected cost to be a torch.Tensor, got </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">costs</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
+</span><span id="line-152">                <span class="k">assert</span> <span class="n">costs</span><span class="o">.</span><span class="n">ndim</span> <span class="o">==</span> <span class="mi">2</span> <span class="ow">and</span> <span class="n">costs</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">current_bs</span> <span class="ow">and</span> <span class="n">costs</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_samples</span><span class="p">,</span> <span class="p">(</span>
+</span><span id="line-153">                    <span class="sa">f</span><span class="s2">&quot;Expected cost to be of shape (</span><span class="si">{</span><span class="n">current_bs</span><span class="si">}</span><span class="s2">, </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">num_samples</span><span class="si">}</span><span class="s2">), got </span><span class="si">{</span><span class="n">costs</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s2">&quot;</span>
+</span><span id="line-154">                <span class="p">)</span>
+</span><span id="line-155">
+</span><span id="line-156">                <span class="c1"># Select Elites (Optional, based on topk)</span>
+</span><span id="line-157">                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">topk</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">topk</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_samples</span><span class="p">:</span>
+</span><span id="line-158">                    <span class="c1"># topk_vals: (Batch, K), topk_inds: (Batch, K)</span>
+</span><span id="line-159">                    <span class="n">topk_vals</span><span class="p">,</span> <span class="n">topk_inds</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">topk</span><span class="p">(</span><span class="n">costs</span><span class="p">,</span> <span class="n">k</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">topk</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">largest</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 </span><span id="line-160">
-</span><span id="line-161">            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;MMPI step </span><span class="si">{</span><span class="n">step</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">n_steps</span><span class="si">}</span><span class="s2">, cost: </span><span class="si">{</span><span class="n">outputs</span><span class="p">[</span><span class="s1">&#39;costs&#39;</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-</span><span id="line-162">
-</span><span id="line-163">        <span class="n">outputs</span><span class="p">[</span><span class="s2">&quot;actions&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">mean</span><span class="o">.</span><span class="n">detach</span><span class="p">()</span><span class="o">.</span><span class="n">cpu</span><span class="p">()</span>
-</span><span id="line-164">
-</span><span id="line-165">        <span class="k">return</span> <span class="n">outputs</span></div>
+</span><span id="line-161">                    <span class="c1"># Gather Top-K Candidates</span>
+</span><span id="line-162">                    <span class="n">batch_indices</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">current_bs</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">device</span><span class="p">)</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">expand</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">topk</span><span class="p">)</span>
+</span><span id="line-163">                    <span class="c1"># (Batch, K, Horizon, Dim)</span>
+</span><span id="line-164">                    <span class="n">relevant_candidates</span> <span class="o">=</span> <span class="n">candidates</span><span class="p">[</span><span class="n">batch_indices</span><span class="p">,</span> <span class="n">topk_inds</span><span class="p">]</span>
+</span><span id="line-165">                    <span class="n">relevant_costs</span> <span class="o">=</span> <span class="n">topk_vals</span>
+</span><span id="line-166">                <span class="k">else</span><span class="p">:</span>
+</span><span id="line-167">                    <span class="n">relevant_candidates</span> <span class="o">=</span> <span class="n">candidates</span>
+</span><span id="line-168">                    <span class="n">relevant_costs</span> <span class="o">=</span> <span class="n">costs</span>
+</span><span id="line-169">
+</span><span id="line-170">                <span class="c1"># MPPI Weighting: Softmax(-cost / temperature)</span>
+</span><span id="line-171">                <span class="c1"># Stabilize softmax by subtracting min cost</span>
+</span><span id="line-172">                <span class="n">min_cost</span> <span class="o">=</span> <span class="n">relevant_costs</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">keepdim</span><span class="o">=</span><span class="kc">True</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+</span><span id="line-173">                <span class="n">scaled_costs</span> <span class="o">=</span> <span class="n">relevant_costs</span> <span class="o">-</span> <span class="n">min_cost</span>
+</span><span id="line-174">                <span class="n">weights</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">softmax</span><span class="p">(</span><span class="o">-</span><span class="n">scaled_costs</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">temperature</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>  <span class="c1"># (Batch, K)</span>
+</span><span id="line-175">
+</span><span id="line-176">                <span class="c1"># Update Mean: weighted sum of candidates</span>
+</span><span id="line-177">                <span class="c1"># Reshape weights for broadcasting: (Batch, K, 1, 1)</span>
+</span><span id="line-178">                <span class="n">weights_expanded</span> <span class="o">=</span> <span class="n">weights</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+</span><span id="line-179">                <span class="n">batch_mean</span> <span class="o">=</span> <span class="p">(</span><span class="n">weights_expanded</span> <span class="o">*</span> <span class="n">relevant_candidates</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+</span><span id="line-180">
+</span><span id="line-181">                <span class="c1"># Store average cost of the utilized samples for logging</span>
+</span><span id="line-182">                <span class="n">final_batch_cost</span> <span class="o">=</span> <span class="n">relevant_costs</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">cpu</span><span class="p">()</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+</span><span id="line-183">
+</span><span id="line-184">            <span class="c1"># Write results back to global storage</span>
+</span><span id="line-185">            <span class="n">mean</span><span class="p">[</span><span class="n">start_idx</span><span class="p">:</span><span class="n">end_idx</span><span class="p">]</span> <span class="o">=</span> <span class="n">batch_mean</span>
+</span><span id="line-186">            <span class="c1"># We do not update var in standard MPPI</span>
+</span><span id="line-187">
+</span><span id="line-188">            <span class="c1"># Store history/metadata</span>
+</span><span id="line-189">            <span class="n">outputs</span><span class="p">[</span><span class="s2">&quot;costs&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">final_batch_cost</span><span class="p">)</span>
+</span><span id="line-190">
+</span><span id="line-191">        <span class="n">outputs</span><span class="p">[</span><span class="s2">&quot;actions&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">mean</span><span class="o">.</span><span class="n">detach</span><span class="p">()</span><span class="o">.</span><span class="n">cpu</span><span class="p">()</span>
+</span><span id="line-192">        <span class="n">outputs</span><span class="p">[</span><span class="s2">&quot;mean&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">mean</span><span class="o">.</span><span class="n">detach</span><span class="p">()</span><span class="o">.</span><span class="n">cpu</span><span class="p">()]</span>
+</span><span id="line-193">        <span class="n">outputs</span><span class="p">[</span><span class="s2">&quot;var&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">var</span><span class="o">.</span><span class="n">detach</span><span class="p">()</span><span class="o">.</span><span class="n">cpu</span><span class="p">()]</span>
+</span><span id="line-194">
+</span><span id="line-195">        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;MPPI solve time: </span><span class="si">{</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">start_time</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2"> seconds&quot;</span><span class="p">)</span>
+</span><span id="line-196">        <span class="k">return</span> <span class="n">outputs</span></div>
 </div>
 
 </span></code></pre></div>
@@ -403,9 +430,9 @@
     </div><footer class="py-6 border-t border-border md:py-0">
     <div class="container flex flex-col items-center justify-between gap-4 md:h-24 md:flex-row">
       <div class="flex flex-col items-center gap-4 px-8 md:flex-row md:gap-2 md:px-0">
-        <p class="text-sm leading-loose text-center text-muted-foreground md:text-left">© 2025&nbsp;Built with <a class="font-medium underline underline-offset-4"
+        <p class="text-sm leading-loose text-center text-muted-foreground md:text-left">© 2026&nbsp;Built with <a class="font-medium underline underline-offset-4"
     href="https://www.sphinx-doc.org"
-    rel="noreferrer">Sphinx 8.2.3</a></p>
+    rel="noreferrer">Sphinx 8.1.3</a></p>
 </div>
 </div>
 </footer>

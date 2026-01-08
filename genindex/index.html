@@ -132,7 +132,6 @@
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../api/solver/">Solver</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="../api/generated/stable_worldmodel.solver.GDSolver/">GDSolver</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../api/generated/stable_worldmodel.solver.CEMSolver/">CEMSolver</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../api/generated/stable_worldmodel.solver.MPPISolver/">MPPISolver</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../api/generated/stable_worldmodel.solver.NevergradSolver/">NevergradSolver</a></li>
@@ -220,7 +219,7 @@
       <li><a href="../api/generated/stable_worldmodel.spaces.Box/#stable_worldmodel.spaces.Box.__init__">__init__() (Box method)</a>, <a href="../stable_worldmodel/#stable_worldmodel.spaces.Box.__init__">[1]</a>
 
       <ul style="list-style-type:none">
-        <li><a href="../stable_worldmodel.envs/#stable_worldmodel.envs.ogbench_cube.CubeEnv.__init__">(CubeEnv method)</a>
+        <li><a href="../stable_worldmodel.envs.ogbench_manip/#stable_worldmodel.envs.ogbench_manip.CubeEnv.__init__">(CubeEnv method)</a>, <a href="../stable_worldmodel.envs.ogbench_manip/#stable_worldmodel.envs.ogbench_manip.cube_env.CubeEnv.__init__">[1]</a>
 </li>
         <li><a href="../api/generated/stable_worldmodel.spaces.Dict/#stable_worldmodel.spaces.Dict.__init__">(Dict method)</a>, <a href="../stable_worldmodel/#stable_worldmodel.spaces.Dict.__init__">[1]</a>
 </li>
@@ -228,13 +227,21 @@
 </li>
         <li><a href="../stable_worldmodel.envs/#stable_worldmodel.envs.utils.DrawOptions.__init__">(DrawOptions method)</a>
 </li>
+        <li><a href="../stable_worldmodel.envs.ogbench_manip/#stable_worldmodel.envs.ogbench_manip.ExpertPolicy.__init__">(ExpertPolicy method)</a>, <a href="../stable_worldmodel.envs.ogbench_manip/#stable_worldmodel.envs.ogbench_manip.expert_policy.ExpertPolicy.__init__">[1]</a>
+</li>
+        <li><a href="../stable_worldmodel.solver/#stable_worldmodel.solver.GradientSolver.__init__">(GradientSolver method)</a>, <a href="../stable_worldmodel.solver/#stable_worldmodel.solver.gd.GradientSolver.__init__">[1]</a>
+</li>
         <li><a href="../api/generated/stable_worldmodel.spaces.MultiDiscrete/#stable_worldmodel.spaces.MultiDiscrete.__init__">(MultiDiscrete method)</a>, <a href="../stable_worldmodel/#stable_worldmodel.spaces.MultiDiscrete.__init__">[1]</a>
+</li>
+        <li><a href="../stable_worldmodel.solver/#stable_worldmodel.solver.discrete_solvers.PGDSolver.__init__">(PGDSolver method)</a>
 </li>
         <li><a href="../api/generated/stable_worldmodel.solver.RandomSolver/#stable_worldmodel.solver.RandomSolver.__init__">(RandomSolver method)</a>, <a href="../stable_worldmodel.solver/#stable_worldmodel.solver.RandomSolver.__init__">[1]</a>, <a href="../stable_worldmodel.solver/#stable_worldmodel.solver.random.RandomSolver.__init__">[2]</a>
 </li>
-        <li><a href="../stable_worldmodel.envs/#stable_worldmodel.envs.ogbench_scene.SceneEnv.__init__">(SceneEnv method)</a>
+        <li><a href="../stable_worldmodel.envs.ogbench_manip/#stable_worldmodel.envs.ogbench_manip.SceneEnv.__init__">(SceneEnv method)</a>, <a href="../stable_worldmodel.envs.ogbench_manip/#stable_worldmodel.envs.ogbench_manip.scene_env.SceneEnv.__init__">[1]</a>
 </li>
-        <li><a href="../api/data/#stable_worldmodel.data.StepsDataset.__init__">(StepsDataset method)</a>, <a href="../stable_worldmodel/#stable_worldmodel.data.StepsDataset.__init__">[1]</a>
+        <li><a href="../stable_worldmodel.envs.simple_nav/#stable_worldmodel.envs.simple_nav.SimpleNavigationEnv.__init__">(SimpleNavigationEnv method)</a>, <a href="../stable_worldmodel.envs.simple_nav/#stable_worldmodel.envs.simple_nav.env.SimpleNavigationEnv.__init__">[1]</a>
+</li>
+        <li><a href="../stable_worldmodel.envs.pusht/#stable_worldmodel.envs.pusht.WeakPolicy.__init__">(WeakPolicy method)</a>, <a href="../stable_worldmodel.envs.pusht/#stable_worldmodel.envs.pusht.expert_policy.WeakPolicy.__init__">[1]</a>
 </li>
         <li><a href="../api/world/#stable_worldmodel.world.World.__init__">(World method)</a>, <a href="../stable_worldmodel/#stable_worldmodel.World.__init__">[1]</a>, <a href="../stable_worldmodel/#stable_worldmodel.world.World.__init__">[2]</a>
 </li>
@@ -253,67 +260,87 @@
       <li><a href="../api/generated/stable_worldmodel.solver.CEMSolver/#stable_worldmodel.solver.CEMSolver.action_dim">action_dim (CEMSolver property)</a>, <a href="../stable_worldmodel.solver/#stable_worldmodel.solver.CEMSolver.action_dim">[1]</a>, <a href="../stable_worldmodel.solver/#stable_worldmodel.solver.cem.CEMSolver.action_dim">[2]</a>
 
       <ul style="list-style-type:none">
-        <li><a href="../api/generated/stable_worldmodel.solver.GDSolver/#stable_worldmodel.solver.GDSolver.action_dim">(GDSolver property)</a>, <a href="../stable_worldmodel.solver/#stable_worldmodel.solver.GDSolver.action_dim">[1]</a>, <a href="../stable_worldmodel.solver/#stable_worldmodel.solver.gd.GDSolver.action_dim">[2]</a>
+        <li><a href="../stable_worldmodel.solver/#stable_worldmodel.solver.GradientSolver.action_dim">(GradientSolver property)</a>, <a href="../stable_worldmodel.solver/#stable_worldmodel.solver.gd.GradientSolver.action_dim">[1]</a>
 </li>
         <li><a href="../api/generated/stable_worldmodel.solver.MPPISolver/#stable_worldmodel.solver.MPPISolver.action_dim">(MPPISolver property)</a>, <a href="../stable_worldmodel.solver/#stable_worldmodel.solver.MPPISolver.action_dim">[1]</a>, <a href="../stable_worldmodel.solver/#stable_worldmodel.solver.mppi.MPPISolver.action_dim">[2]</a>
 </li>
         <li><a href="../api/generated/stable_worldmodel.solver.NevergradSolver/#stable_worldmodel.solver.NevergradSolver.action_dim">(NevergradSolver property)</a>, <a href="../stable_worldmodel.solver/#stable_worldmodel.solver.NevergradSolver.action_dim">[1]</a>, <a href="../stable_worldmodel.solver/#stable_worldmodel.solver.nevergrad.NevergradSolver.action_dim">[2]</a>
+</li>
+        <li><a href="../stable_worldmodel.solver/#stable_worldmodel.solver.discrete_solvers.PGDSolver.action_dim">(PGDSolver property)</a>
 </li>
         <li><a href="../api/generated/stable_worldmodel.solver.RandomSolver/#stable_worldmodel.solver.RandomSolver.action_dim">(RandomSolver property)</a>, <a href="../stable_worldmodel.solver/#stable_worldmodel.solver.RandomSolver.action_dim">[1]</a>, <a href="../stable_worldmodel.solver/#stable_worldmodel.solver.random.RandomSolver.action_dim">[2]</a>
 </li>
         <li><a href="../api/solver/#stable_worldmodel.solver.solver.Solver.action_dim">(Solver property)</a>, <a href="../stable_worldmodel.solver/#stable_worldmodel.solver.Solver.action_dim">[1]</a>, <a href="../stable_worldmodel.solver/#stable_worldmodel.solver.solver.Solver.action_dim">[2]</a>
 </li>
       </ul></li>
-      <li><a href="../api/world/#stable_worldmodel.world.World.action_space">action_space (World property)</a>, <a href="../stable_worldmodel/#stable_worldmodel.World.action_space">[1]</a>, <a href="../stable_worldmodel/#stable_worldmodel.world.World.action_space">[2]</a>
+      <li><a href="../stable_worldmodel.envs/#stable_worldmodel.envs.quantizer.PolarQuantizer.action_shape">action_shape (PolarQuantizer property)</a>
 
       <ul style="list-style-type:none">
-        <li><a href="../stable_worldmodel/#stable_worldmodel.data.WorldInfo.action_space">(WorldInfo attribute)</a>
+        <li><a href="../stable_worldmodel.envs/#stable_worldmodel.envs.quantizer.Quantizable.action_shape">(Quantizable property)</a>
 </li>
       </ul></li>
-      <li><a href="../stable_worldmodel.envs/#stable_worldmodel.envs.pusht.PushT.add_box">add_box() (PushT method)</a>
+      <li><a href="../stable_worldmodel.solver/#stable_worldmodel.solver.discrete_solvers.PGDSolver.action_simplex_dim">action_simplex_dim (PGDSolver property)</a>
 </li>
-      <li><a href="../stable_worldmodel.envs/#stable_worldmodel.envs.pusht.PushT.add_circle">add_circle() (PushT method)</a>
+      <li><a href="../stable_worldmodel.envs.pusht/#stable_worldmodel.envs.pusht.PushT.action_space">action_space (PushT attribute)</a>
 
       <ul style="list-style-type:none">
-        <li><a href="../stable_worldmodel.envs/#stable_worldmodel.envs.two_room.TwoRoomEnv.add_circle">(TwoRoomEnv method)</a>
+        <li><a href="../stable_worldmodel.envs.pusht/#stable_worldmodel.envs.pusht.PushTDiscrete.action_space">(PushTDiscrete attribute)</a>
+</li>
+        <li><a href="../stable_worldmodel.envs.two_room/#stable_worldmodel.envs.two_room.TwoRoomEnv.action_space">(TwoRoomEnv attribute)</a>
+</li>
+        <li><a href="../api/world/#stable_worldmodel.world.World.action_space">(World property)</a>, <a href="../stable_worldmodel/#stable_worldmodel.World.action_space">[1]</a>, <a href="../stable_worldmodel/#stable_worldmodel.world.World.action_space">[2]</a>
+</li>
+        <li><a href="../stable_worldmodel.data/#stable_worldmodel.data.utils.WorldInfo.action_space">(WorldInfo attribute)</a>
 </li>
       </ul></li>
-      <li><a href="../stable_worldmodel.envs/#stable_worldmodel.envs.pusht.PushT.add_I">add_I() (PushT method)</a>
+      <li><a href="../stable_worldmodel.envs.pusht/#stable_worldmodel.envs.pusht.PushT.add_box">add_box() (PushT method)</a>, <a href="../stable_worldmodel.envs.pusht/#stable_worldmodel.envs.pusht.env.PushT.add_box">[1]</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul style="margin-left:0;list-style-type:none">
-      <li><a href="../stable_worldmodel.envs/#stable_worldmodel.envs.pusht.PushT.add_L">add_L() (PushT method)</a>
-</li>
-      <li><a href="../stable_worldmodel.envs/#stable_worldmodel.envs.ogbench_cube.CubeEnv.add_object_info">add_object_info() (CubeEnv method)</a>
+      <li><a href="../stable_worldmodel.envs.pusht/#stable_worldmodel.envs.pusht.PushT.add_circle">add_circle() (PushT method)</a>, <a href="../stable_worldmodel.envs.pusht/#stable_worldmodel.envs.pusht.env.PushT.add_circle">[1]</a>
 
       <ul style="list-style-type:none">
-        <li><a href="../stable_worldmodel.envs/#stable_worldmodel.envs.ogbench_scene.SceneEnv.add_object_info">(SceneEnv method)</a>
+        <li><a href="../stable_worldmodel.envs.two_room/#stable_worldmodel.envs.two_room.TwoRoomEnv.add_circle">(TwoRoomEnv method)</a>, <a href="../stable_worldmodel.envs.two_room/#stable_worldmodel.envs.two_room.env.TwoRoomEnv.add_circle">[1]</a>
 </li>
       </ul></li>
-      <li><a href="../stable_worldmodel.envs/#stable_worldmodel.envs.ogbench_cube.CubeEnv.add_objects">add_objects() (CubeEnv method)</a>
+      <li><a href="../stable_worldmodel.envs.pusht/#stable_worldmodel.envs.pusht.PushT.add_I">add_I() (PushT method)</a>, <a href="../stable_worldmodel.envs.pusht/#stable_worldmodel.envs.pusht.env.PushT.add_I">[1]</a>
+</li>
+      <li><a href="../stable_worldmodel.envs.pusht/#stable_worldmodel.envs.pusht.PushT.add_L">add_L() (PushT method)</a>, <a href="../stable_worldmodel.envs.pusht/#stable_worldmodel.envs.pusht.env.PushT.add_L">[1]</a>
+</li>
+      <li><a href="../stable_worldmodel.envs.ogbench_manip/#stable_worldmodel.envs.ogbench_manip.CubeEnv.add_object_info">add_object_info() (CubeEnv method)</a>, <a href="../stable_worldmodel.envs.ogbench_manip/#stable_worldmodel.envs.ogbench_manip.cube_env.CubeEnv.add_object_info">[1]</a>
 
       <ul style="list-style-type:none">
-        <li><a href="../stable_worldmodel.envs/#stable_worldmodel.envs.ogbench_scene.SceneEnv.add_objects">(SceneEnv method)</a>
+        <li><a href="../stable_worldmodel.envs.ogbench_manip/#stable_worldmodel.envs.ogbench_manip.SceneEnv.add_object_info">(SceneEnv method)</a>, <a href="../stable_worldmodel.envs.ogbench_manip/#stable_worldmodel.envs.ogbench_manip.scene_env.SceneEnv.add_object_info">[1]</a>
 </li>
       </ul></li>
-      <li><a href="../stable_worldmodel.envs/#stable_worldmodel.envs.pusht.PushT.add_plus">add_plus() (PushT method)</a>
+      <li><a href="../stable_worldmodel.envs.ogbench_manip/#stable_worldmodel.envs.ogbench_manip.CubeEnv.add_objects">add_objects() (CubeEnv method)</a>, <a href="../stable_worldmodel.envs.ogbench_manip/#stable_worldmodel.envs.ogbench_manip.cube_env.CubeEnv.add_objects">[1]</a>
+
+      <ul style="list-style-type:none">
+        <li><a href="../stable_worldmodel.envs.ogbench_manip/#stable_worldmodel.envs.ogbench_manip.SceneEnv.add_objects">(SceneEnv method)</a>, <a href="../stable_worldmodel.envs.ogbench_manip/#stable_worldmodel.envs.ogbench_manip.scene_env.SceneEnv.add_objects">[1]</a>
 </li>
-      <li><a href="../stable_worldmodel.envs/#stable_worldmodel.envs.pusht.PushT.add_shape">add_shape() (PushT method)</a>
+      </ul></li>
+      <li><a href="../stable_worldmodel.envs.pusht/#stable_worldmodel.envs.pusht.PushT.add_plus">add_plus() (PushT method)</a>, <a href="../stable_worldmodel.envs.pusht/#stable_worldmodel.envs.pusht.env.PushT.add_plus">[1]</a>
 </li>
-      <li><a href="../stable_worldmodel.envs/#stable_worldmodel.envs.pusht.PushT.add_small_tee">add_small_tee() (PushT method)</a>
+      <li><a href="../stable_worldmodel.envs.pusht/#stable_worldmodel.envs.pusht.PushT.add_shape">add_shape() (PushT method)</a>, <a href="../stable_worldmodel.envs.pusht/#stable_worldmodel.envs.pusht.env.PushT.add_shape">[1]</a>
 </li>
-      <li><a href="../stable_worldmodel.envs/#stable_worldmodel.envs.pusht.PushT.add_square">add_square() (PushT method)</a>
+      <li><a href="../stable_worldmodel.envs.pusht/#stable_worldmodel.envs.pusht.PushT.add_small_tee">add_small_tee() (PushT method)</a>, <a href="../stable_worldmodel.envs.pusht/#stable_worldmodel.envs.pusht.env.PushT.add_small_tee">[1]</a>
 </li>
-      <li><a href="../stable_worldmodel.envs/#stable_worldmodel.envs.pusht.PushT.add_tee">add_tee() (PushT method)</a>
+      <li><a href="../stable_worldmodel.envs.pusht/#stable_worldmodel.envs.pusht.PushT.add_square">add_square() (PushT method)</a>, <a href="../stable_worldmodel.envs.pusht/#stable_worldmodel.envs.pusht.env.PushT.add_square">[1]</a>
 </li>
-      <li><a href="../stable_worldmodel.envs/#stable_worldmodel.envs.pusht.PushT.add_Z">add_Z() (PushT method)</a>
+      <li><a href="../stable_worldmodel.envs.pusht/#stable_worldmodel.envs.pusht.PushT.add_tee">add_tee() (PushT method)</a>, <a href="../stable_worldmodel.envs.pusht/#stable_worldmodel.envs.pusht.env.PushT.add_tee">[1]</a>
+</li>
+      <li><a href="../stable_worldmodel.envs.pusht/#stable_worldmodel.envs.pusht.PushT.add_Z">add_Z() (PushT method)</a>, <a href="../stable_worldmodel.envs.pusht/#stable_worldmodel.envs.pusht.env.PushT.add_Z">[1]</a>
 </li>
       <li><a href="../api/generated/stable_worldmodel.wrappers.AddPixelsWrapper/#stable_worldmodel.wrappers.AddPixelsWrapper">AddPixelsWrapper (class in stable_worldmodel.wrappers)</a>, <a href="../stable_worldmodel/#stable_worldmodel.wrappers.AddPixelsWrapper">[1]</a>
 </li>
       <li><a href="../stable_worldmodel.wm/#stable_worldmodel.wm.dinowm.all_reduce">all_reduce() (in module stable_worldmodel.wm.dinowm)</a>
 </li>
       <li><a href="../stable_worldmodel.wm/#stable_worldmodel.wm.dinowm.Attention">Attention (class in stable_worldmodel.wm.dinowm)</a>
+
+      <ul style="list-style-type:none">
+        <li><a href="../stable_worldmodel.wm/#stable_worldmodel.wm.pyro.Attention">(class in stable_worldmodel.wm.pyro)</a>
 </li>
+      </ul></li>
       <li><a href="../stable_worldmodel/#stable_worldmodel.policy.AutoCostModel">AutoCostModel() (in module stable_worldmodel.policy)</a>
 </li>
   </ul></td>
@@ -329,6 +356,8 @@
   <td style="width: 33%; vertical-align: top;"><ul style="margin-left:0;list-style-type:none">
       <li><a href="../api/generated/stable_worldmodel.spaces.Box/#stable_worldmodel.spaces.Box">Box (class in stable_worldmodel.spaces)</a>, <a href="../stable_worldmodel/#stable_worldmodel.spaces.Box">[1]</a>
 </li>
+      <li><a href="../stable_worldmodel.data/#stable_worldmodel.data.dataset.build_dataset_from_shards">build_dataset_from_shards() (in module stable_worldmodel.data.dataset)</a>
+</li>
   </ul></td>
   </tr>
       </table>
@@ -339,7 +368,11 @@
       <li><a href="../stable_worldmodel/#stable_worldmodel.wrappers.StackedWrapper.capacity">capacity (StackedWrapper property)</a>
 </li>
       <li><a href="../stable_worldmodel.wm/#stable_worldmodel.wm.dinowm.CausalPredictor">CausalPredictor (class in stable_worldmodel.wm.dinowm)</a>
+
+      <ul style="list-style-type:none">
+        <li><a href="../stable_worldmodel.wm/#stable_worldmodel.wm.pyro.CausalPredictor">(class in stable_worldmodel.wm.pyro)</a>
 </li>
+      </ul></li>
       <li><a href="../api/generated/stable_worldmodel.solver.CEMSolver/#stable_worldmodel.solver.CEMSolver">CEMSolver (class in stable_worldmodel.solver)</a>, <a href="../stable_worldmodel.solver/#stable_worldmodel.solver.CEMSolver">[1]</a>
 
       <ul style="list-style-type:none">
@@ -356,64 +389,72 @@
         <li><a href="../api/generated/stable_worldmodel.spaces.MultiDiscrete/#stable_worldmodel.spaces.MultiDiscrete.check">(MultiDiscrete method)</a>, <a href="../stable_worldmodel/#stable_worldmodel.spaces.MultiDiscrete.check">[1]</a>
 </li>
       </ul></li>
-      <li><a href="../stable_worldmodel.envs/#stable_worldmodel.envs.two_room.TwoRoomEnv.check_collide">check_collide() (TwoRoomEnv method)</a>
+      <li><a href="../stable_worldmodel.envs.two_room/#stable_worldmodel.envs.two_room.TwoRoomEnv.check_collide">check_collide() (TwoRoomEnv method)</a>, <a href="../stable_worldmodel.envs.two_room/#stable_worldmodel.envs.two_room.env.TwoRoomEnv.check_collide">[1]</a>
+</li>
+      <li><a href="../stable_worldmodel.data/#stable_worldmodel.data.InjectedDataset.check_consistency">check_consistency() (InjectedDataset method)</a>, <a href="../stable_worldmodel.data/#stable_worldmodel.data.dataset.InjectedDataset.check_consistency">[1]</a>
 </li>
       <li><a href="../stable_worldmodel.envs/#stable_worldmodel.envs.voidrun.VoidRunEnv.check_location">check_location() (VoidRunEnv method)</a>
 </li>
-      <li><a href="../stable_worldmodel.envs/#stable_worldmodel.envs.two_room.TwoRoomEnv.check_one_door_fit">check_one_door_fit() (TwoRoomEnv method)</a>
+      <li><a href="../stable_worldmodel.envs.two_room/#stable_worldmodel.envs.two_room.TwoRoomEnv.check_one_door_fit">check_one_door_fit() (TwoRoomEnv method)</a>, <a href="../stable_worldmodel.envs.two_room/#stable_worldmodel.envs.two_room.env.TwoRoomEnv.check_one_door_fit">[1]</a>
 </li>
-      <li><a href="../stable_worldmodel.envs/#stable_worldmodel.envs.two_room.TwoRoomEnv.check_other_room">check_other_room() (TwoRoomEnv method)</a>
+      <li><a href="../stable_worldmodel.envs.two_room/#stable_worldmodel.envs.two_room.TwoRoomEnv.check_other_room">check_other_room() (TwoRoomEnv method)</a>, <a href="../stable_worldmodel.envs.two_room/#stable_worldmodel.envs.two_room.env.TwoRoomEnv.check_other_room">[1]</a>
 </li>
       <li><a href="../stable_worldmodel.envs/#stable_worldmodel.envs.voidrun.VoidRunEnv.check_termination">check_termination() (VoidRunEnv method)</a>
 </li>
       <li><a href="../stable_worldmodel.envs/#stable_worldmodel.envs.image_positioning.ImagePositioning.close">close() (ImagePositioning method)</a>
 
       <ul style="list-style-type:none">
-        <li><a href="../stable_worldmodel.envs/#stable_worldmodel.envs.pusht.PushT.close">(PushT method)</a>
+        <li><a href="../stable_worldmodel.envs.pusht/#stable_worldmodel.envs.pusht.PushT.close">(PushT method)</a>, <a href="../stable_worldmodel.envs.pusht/#stable_worldmodel.envs.pusht.env.PushT.close">[1]</a>
 </li>
         <li><a href="../stable_worldmodel.envs/#stable_worldmodel.envs.simple_point_maze.SimplePointMazeEnv.close">(SimplePointMazeEnv method)</a>
 </li>
-        <li><a href="../stable_worldmodel.envs/#stable_worldmodel.envs.two_room.TwoRoomEnv.close">(TwoRoomEnv method)</a>
+        <li><a href="../stable_worldmodel.envs.two_room/#stable_worldmodel.envs.two_room.TwoRoomEnv.close">(TwoRoomEnv method)</a>, <a href="../stable_worldmodel.envs.two_room/#stable_worldmodel.envs.two_room.env.TwoRoomEnv.close">[1]</a>
 </li>
         <li><a href="../stable_worldmodel.envs/#stable_worldmodel.envs.voidrun.VoidRunEnv.close">(VoidRunEnv method)</a>
 </li>
         <li><a href="../api/world/#stable_worldmodel.world.World.close">(World method)</a>, <a href="../stable_worldmodel/#stable_worldmodel.World.close">[1]</a>, <a href="../stable_worldmodel/#stable_worldmodel.world.World.close">[2]</a>
 </li>
       </ul></li>
-      <li><a href="../stable_worldmodel/#stable_worldmodel.cli.common">common() (in module stable_worldmodel.cli)</a>
+      <li><a href="../stable_worldmodel.data/#stable_worldmodel.data.dataset.Dataset.column_names">column_names (Dataset property)</a>
+
+      <ul style="list-style-type:none">
+        <li><a href="../stable_worldmodel.data/#stable_worldmodel.data.InjectedDataset.column_names">(InjectedDataset property)</a>, <a href="../stable_worldmodel.data/#stable_worldmodel.data.dataset.InjectedDataset.column_names">[1]</a>
 </li>
+      </ul></li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul style="margin-left:0;list-style-type:none">
-      <li><a href="../stable_worldmodel.envs/#stable_worldmodel.envs.ogbench_cube.CubeEnv.compute_observation">compute_observation() (CubeEnv method)</a>
+      <li><a href="../stable_worldmodel/#stable_worldmodel.cli.common">common() (in module stable_worldmodel.cli)</a>
+</li>
+      <li><a href="../stable_worldmodel.envs.ogbench_manip/#stable_worldmodel.envs.ogbench_manip.CubeEnv.compute_observation">compute_observation() (CubeEnv method)</a>, <a href="../stable_worldmodel.envs.ogbench_manip/#stable_worldmodel.envs.ogbench_manip.cube_env.CubeEnv.compute_observation">[1]</a>
 
       <ul style="list-style-type:none">
-        <li><a href="../stable_worldmodel.envs/#stable_worldmodel.envs.ogbench_scene.SceneEnv.compute_observation">(SceneEnv method)</a>
+        <li><a href="../stable_worldmodel.envs.ogbench_manip/#stable_worldmodel.envs.ogbench_manip.SceneEnv.compute_observation">(SceneEnv method)</a>, <a href="../stable_worldmodel.envs.ogbench_manip/#stable_worldmodel.envs.ogbench_manip.scene_env.SceneEnv.compute_observation">[1]</a>
 </li>
       </ul></li>
-      <li><a href="../stable_worldmodel.envs/#stable_worldmodel.envs.ogbench_cube.CubeEnv.compute_oracle_observation">compute_oracle_observation() (CubeEnv method)</a>
+      <li><a href="../stable_worldmodel.envs.ogbench_manip/#stable_worldmodel.envs.ogbench_manip.CubeEnv.compute_oracle_observation">compute_oracle_observation() (CubeEnv method)</a>, <a href="../stable_worldmodel.envs.ogbench_manip/#stable_worldmodel.envs.ogbench_manip.cube_env.CubeEnv.compute_oracle_observation">[1]</a>
 
       <ul style="list-style-type:none">
-        <li><a href="../stable_worldmodel.envs/#stable_worldmodel.envs.ogbench_scene.SceneEnv.compute_oracle_observation">(SceneEnv method)</a>
+        <li><a href="../stable_worldmodel.envs.ogbench_manip/#stable_worldmodel.envs.ogbench_manip.SceneEnv.compute_oracle_observation">(SceneEnv method)</a>, <a href="../stable_worldmodel.envs.ogbench_manip/#stable_worldmodel.envs.ogbench_manip.scene_env.SceneEnv.compute_oracle_observation">[1]</a>
 </li>
       </ul></li>
-      <li><a href="../stable_worldmodel.envs/#stable_worldmodel.envs.ogbench_cube.CubeEnv.compute_reward">compute_reward() (CubeEnv method)</a>
+      <li><a href="../stable_worldmodel.envs.ogbench_manip/#stable_worldmodel.envs.ogbench_manip.CubeEnv.compute_reward">compute_reward() (CubeEnv method)</a>, <a href="../stable_worldmodel.envs.ogbench_manip/#stable_worldmodel.envs.ogbench_manip.cube_env.CubeEnv.compute_reward">[1]</a>
 
       <ul style="list-style-type:none">
-        <li><a href="../stable_worldmodel.envs/#stable_worldmodel.envs.ogbench_scene.SceneEnv.compute_reward">(SceneEnv method)</a>
+        <li><a href="../stable_worldmodel.envs.ogbench_manip/#stable_worldmodel.envs.ogbench_manip.SceneEnv.compute_reward">(SceneEnv method)</a>, <a href="../stable_worldmodel.envs.ogbench_manip/#stable_worldmodel.envs.ogbench_manip.scene_env.SceneEnv.compute_reward">[1]</a>
 </li>
       </ul></li>
-      <li><a href="../api/generated/stable_worldmodel.solver.MPPISolver/#stable_worldmodel.solver.MPPISolver.compute_trajectory_weights">compute_trajectory_weights() (MPPISolver method)</a>, <a href="../stable_worldmodel.solver/#stable_worldmodel.solver.MPPISolver.compute_trajectory_weights">[1]</a>, <a href="../stable_worldmodel.solver/#stable_worldmodel.solver.mppi.MPPISolver.compute_trajectory_weights">[2]</a>
-</li>
-      <li><a href="../stable_worldmodel/#stable_worldmodel.data.WorldInfo.config">config (WorldInfo attribute)</a>
+      <li><a href="../stable_worldmodel.data/#stable_worldmodel.data.utils.WorldInfo.config">config (WorldInfo attribute)</a>
 </li>
       <li><a href="../api/generated/stable_worldmodel.solver.CEMSolver/#stable_worldmodel.solver.CEMSolver.configure">configure() (CEMSolver method)</a>, <a href="../stable_worldmodel.solver/#stable_worldmodel.solver.CEMSolver.configure">[1]</a>, <a href="../stable_worldmodel.solver/#stable_worldmodel.solver.cem.CEMSolver.configure">[2]</a>
 
       <ul style="list-style-type:none">
-        <li><a href="../api/generated/stable_worldmodel.solver.GDSolver/#stable_worldmodel.solver.GDSolver.configure">(GDSolver method)</a>, <a href="../stable_worldmodel.solver/#stable_worldmodel.solver.GDSolver.configure">[1]</a>, <a href="../stable_worldmodel.solver/#stable_worldmodel.solver.gd.GDSolver.configure">[2]</a>
+        <li><a href="../stable_worldmodel.solver/#stable_worldmodel.solver.GradientSolver.configure">(GradientSolver method)</a>, <a href="../stable_worldmodel.solver/#stable_worldmodel.solver.gd.GradientSolver.configure">[1]</a>
 </li>
         <li><a href="../api/generated/stable_worldmodel.solver.MPPISolver/#stable_worldmodel.solver.MPPISolver.configure">(MPPISolver method)</a>, <a href="../stable_worldmodel.solver/#stable_worldmodel.solver.MPPISolver.configure">[1]</a>, <a href="../stable_worldmodel.solver/#stable_worldmodel.solver.mppi.MPPISolver.configure">[2]</a>
 </li>
         <li><a href="../api/generated/stable_worldmodel.solver.NevergradSolver/#stable_worldmodel.solver.NevergradSolver.configure">(NevergradSolver method)</a>, <a href="../stable_worldmodel.solver/#stable_worldmodel.solver.NevergradSolver.configure">[1]</a>, <a href="../stable_worldmodel.solver/#stable_worldmodel.solver.nevergrad.NevergradSolver.configure">[2]</a>
+</li>
+        <li><a href="../stable_worldmodel.solver/#stable_worldmodel.solver.discrete_solvers.PGDSolver.configure">(PGDSolver method)</a>
 </li>
         <li><a href="../api/generated/stable_worldmodel.solver.RandomSolver/#stable_worldmodel.solver.RandomSolver.configure">(RandomSolver method)</a>, <a href="../stable_worldmodel.solver/#stable_worldmodel.solver.RandomSolver.configure">[1]</a>, <a href="../stable_worldmodel.solver/#stable_worldmodel.solver.random.RandomSolver.configure">[2]</a>
 </li>
@@ -432,8 +473,18 @@
       </ul></li>
       <li><a href="../api/solver/#stable_worldmodel.solver.solver.Costable">Costable (class in stable_worldmodel.solver.solver)</a>, <a href="../stable_worldmodel.solver/#stable_worldmodel.solver.solver.Costable">[1]</a>
 </li>
-      <li><a href="../stable_worldmodel.envs/#stable_worldmodel.envs.ogbench_cube.CubeEnv">CubeEnv (class in stable_worldmodel.envs.ogbench_cube)</a>
+      <li><a href="../api/solver/#stable_worldmodel.solver.solver.Costable.criterion">criterion() (Costable method)</a>, <a href="../stable_worldmodel.solver/#stable_worldmodel.solver.solver.Costable.criterion">[1]</a>
+
+      <ul style="list-style-type:none">
+        <li><a href="../stable_worldmodel.wm/#stable_worldmodel.wm.PYRO.criterion">(PYRO method)</a>, <a href="../stable_worldmodel.wm/#stable_worldmodel.wm.pyro.PYRO.criterion">[1]</a>
 </li>
+      </ul></li>
+      <li><a href="../stable_worldmodel.envs.ogbench_manip/#stable_worldmodel.envs.ogbench_manip.CubeEnv">CubeEnv (class in stable_worldmodel.envs.ogbench_manip)</a>
+
+      <ul style="list-style-type:none">
+        <li><a href="../stable_worldmodel.envs.ogbench_manip/#stable_worldmodel.envs.ogbench_manip.cube_env.CubeEnv">(class in stable_worldmodel.envs.ogbench_manip.cube_env)</a>
+</li>
+      </ul></li>
   </ul></td>
   </tr>
       </table>
@@ -441,11 +492,21 @@
   <h2 id="D">D</h2>
   <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul style="margin-left:0;list-style-type:none">
-      <li><a href="../stable_worldmodel/#stable_worldmodel.data.dataset_info">dataset_info() (in module stable_worldmodel.data)</a>
+      <li><a href="../stable_worldmodel.data/#stable_worldmodel.data.dataset.Dataset">Dataset (class in stable_worldmodel.data.dataset)</a>
 </li>
-      <li><a href="../stable_worldmodel.wm/#stable_worldmodel.wm.DINOWM.decode">decode() (DINOWM method)</a>, <a href="../stable_worldmodel.wm/#stable_worldmodel.wm.dinowm.DINOWM.decode">[1]</a>
+      <li><a href="../stable_worldmodel.data/#stable_worldmodel.data.utils.dataset_info">dataset_info() (in module stable_worldmodel.data.utils)</a>
+</li>
+      <li><a href="../stable_worldmodel.data/#stable_worldmodel.data.dataset.Dataset.decode">decode() (Dataset method)</a>
 
       <ul style="list-style-type:none">
+        <li><a href="../stable_worldmodel.wm/#stable_worldmodel.wm.DINOWM.decode">(DINOWM method)</a>, <a href="../stable_worldmodel.wm/#stable_worldmodel.wm.dinowm.DINOWM.decode">[1]</a>
+</li>
+        <li><a href="../stable_worldmodel.data/#stable_worldmodel.data.FrameDataset.decode">(FrameDataset method)</a>, <a href="../stable_worldmodel.data/#stable_worldmodel.data.dataset.FrameDataset.decode">[1]</a>
+</li>
+        <li><a href="../stable_worldmodel.wm/#stable_worldmodel.wm.PYRO.decode">(PYRO method)</a>, <a href="../stable_worldmodel.wm/#stable_worldmodel.wm.pyro.PYRO.decode">[1]</a>
+</li>
+        <li><a href="../stable_worldmodel.data/#stable_worldmodel.data.VideoDataset.decode">(VideoDataset method)</a>, <a href="../stable_worldmodel.data/#stable_worldmodel.data.dataset.VideoDataset.decode">[1]</a>
+</li>
         <li><a href="../stable_worldmodel.wm/#stable_worldmodel.wm.dinowm.VQVAE.decode">(VQVAE method)</a>
 </li>
       </ul></li>
@@ -455,9 +516,21 @@
 </li>
       <li><a href="../stable_worldmodel/#stable_worldmodel.cli.delete">delete() (in module stable_worldmodel.cli)</a>
 </li>
-      <li><a href="../stable_worldmodel/#stable_worldmodel.data.delete_dataset">delete_dataset() (in module stable_worldmodel.data)</a>
+      <li><a href="../stable_worldmodel.data/#stable_worldmodel.data.utils.delete_dataset">delete_dataset() (in module stable_worldmodel.data.utils)</a>
 </li>
-      <li><a href="../stable_worldmodel/#stable_worldmodel.data.delete_model">delete_model() (in module stable_worldmodel.data)</a>
+      <li><a href="../stable_worldmodel.data/#stable_worldmodel.data.utils.delete_model">delete_model() (in module stable_worldmodel.data.utils)</a>
+</li>
+      <li><a href="../stable_worldmodel.envs/#stable_worldmodel.envs.quantizer.PolarQuantizer.dequantize">dequantize() (PolarQuantizer method)</a>
+
+      <ul style="list-style-type:none">
+        <li><a href="../stable_worldmodel.envs/#stable_worldmodel.envs.quantizer.Quantizable.dequantize">(Quantizable method)</a>
+</li>
+      </ul></li>
+      <li><a href="../stable_worldmodel.data/#stable_worldmodel.data.FrameDataset.determine_img_columns">determine_img_columns() (FrameDataset method)</a>, <a href="../stable_worldmodel.data/#stable_worldmodel.data.dataset.FrameDataset.determine_img_columns">[1]</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul style="margin-left:0;list-style-type:none">
+      <li><a href="../stable_worldmodel.data/#stable_worldmodel.data.VideoDataset.determine_video_columns">determine_video_columns() (VideoDataset method)</a>, <a href="../stable_worldmodel.data/#stable_worldmodel.data.dataset.VideoDataset.determine_video_columns">[1]</a>
 </li>
       <li><a href="../api/generated/stable_worldmodel.spaces.Dict/#stable_worldmodel.spaces.Dict">Dict (class in stable_worldmodel.spaces)</a>, <a href="../stable_worldmodel/#stable_worldmodel.spaces.Dict">[1]</a>
 </li>
@@ -469,8 +542,6 @@
       </ul></li>
       <li><a href="../api/generated/stable_worldmodel.spaces.Discrete/#stable_worldmodel.spaces.Discrete">Discrete (class in stable_worldmodel.spaces)</a>, <a href="../stable_worldmodel/#stable_worldmodel.spaces.Discrete">[1]</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul style="margin-left:0;list-style-type:none">
       <li><a href="../stable_worldmodel/#stable_worldmodel.cli.display_dataset_info">display_dataset_info() (in module stable_worldmodel.cli)</a>
 </li>
       <li><a href="../stable_worldmodel/#stable_worldmodel.cli.display_world_info">display_world_info() (in module stable_worldmodel.cli)</a>
@@ -489,7 +560,7 @@
 </li>
       <li><a href="../stable_worldmodel.envs/#stable_worldmodel.envs.utils.DrawOptions">DrawOptions (class in stable_worldmodel.envs.utils)</a>
 </li>
-      <li><a href="../stable_worldmodel/#stable_worldmodel.data.SpaceInfo.dtype">dtype (SpaceInfo attribute)</a>
+      <li><a href="../stable_worldmodel.data/#stable_worldmodel.data.utils.SpaceInfo.dtype">dtype (SpaceInfo attribute)</a>
 </li>
       <li><a href="../stable_worldmodel.wm/#stable_worldmodel.wm.DummyWorldModel">DummyWorldModel (class in stable_worldmodel.wm)</a>
 
@@ -504,14 +575,22 @@
   <h2 id="E">E</h2>
   <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul style="margin-left:0;list-style-type:none">
+      <li><a href="../stable_worldmodel.envs.simple_nav/#stable_worldmodel.envs.simple_nav.env.ellers_maze">ellers_maze() (in module stable_worldmodel.envs.simple_nav.env)</a>
+</li>
       <li><a href="../stable_worldmodel.wm/#stable_worldmodel.wm.dinowm.Quantize.embed_code">embed_code() (Quantize method)</a>
 </li>
       <li><a href="../stable_worldmodel.wm/#stable_worldmodel.wm.dinowm.Embedder">Embedder (class in stable_worldmodel.wm.dinowm)</a>
+
+      <ul style="list-style-type:none">
+        <li><a href="../stable_worldmodel.wm/#stable_worldmodel.wm.pyro.Embedder">(class in stable_worldmodel.wm.pyro)</a>
 </li>
+      </ul></li>
       <li><a href="../stable_worldmodel.wm/#stable_worldmodel.wm.DINOWM.encode">encode() (DINOWM method)</a>, <a href="../stable_worldmodel.wm/#stable_worldmodel.wm.dinowm.DINOWM.encode">[1]</a>
 
       <ul style="list-style-type:none">
         <li><a href="../stable_worldmodel.wm/#stable_worldmodel.wm.DummyWorldModel.encode">(DummyWorldModel method)</a>, <a href="../stable_worldmodel.wm/#stable_worldmodel.wm.dummy.DummyWorldModel.encode">[1]</a>
+</li>
+        <li><a href="../stable_worldmodel.wm/#stable_worldmodel.wm.PYRO.encode">(PYRO method)</a>, <a href="../stable_worldmodel.wm/#stable_worldmodel.wm.pyro.PYRO.encode">[1]</a>
 </li>
       </ul></li>
       <li><a href="../stable_worldmodel.wm/#stable_worldmodel.wm.dinowm.Encoder">Encoder (class in stable_worldmodel.wm.dinowm)</a>
@@ -520,22 +599,40 @@
 </li>
       <li><a href="../api/generated/stable_worldmodel.wrappers.EnsureImageShape/#stable_worldmodel.wrappers.EnsureImageShape">EnsureImageShape (class in stable_worldmodel.wrappers)</a>, <a href="../stable_worldmodel/#stable_worldmodel.wrappers.EnsureImageShape">[1]</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul style="margin-left:0;list-style-type:none">
       <li><a href="../api/generated/stable_worldmodel.wrappers.EnsureInfoKeysWrapper/#stable_worldmodel.wrappers.EnsureInfoKeysWrapper">EnsureInfoKeysWrapper (class in stable_worldmodel.wrappers)</a>, <a href="../stable_worldmodel/#stable_worldmodel.wrappers.EnsureInfoKeysWrapper">[1]</a>
 </li>
       <li><a href="../api/generated/stable_worldmodel.wrappers.VariationWrapper/#stable_worldmodel.wrappers.VariationWrapper.envs">envs (VariationWrapper property)</a>, <a href="../stable_worldmodel/#stable_worldmodel.wrappers.VariationWrapper.envs">[1]</a>
 </li>
-      <li><a href="../stable_worldmodel.envs/#stable_worldmodel.envs.pusht.PushT.eval_state">eval_state() (PushT method)</a>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul style="margin-left:0;list-style-type:none">
+      <li><a href="../stable_worldmodel.envs.pusht/#stable_worldmodel.envs.pusht.PushT.eval_state">eval_state() (PushT method)</a>, <a href="../stable_worldmodel.envs.pusht/#stable_worldmodel.envs.pusht.env.PushT.eval_state">[1]</a>
+
+      <ul style="list-style-type:none">
+        <li><a href="../stable_worldmodel.envs.simple_nav/#stable_worldmodel.envs.simple_nav.SimpleNavigationEnv.eval_state">(SimpleNavigationEnv method)</a>, <a href="../stable_worldmodel.envs.simple_nav/#stable_worldmodel.envs.simple_nav.env.SimpleNavigationEnv.eval_state">[1]</a>
 </li>
+      </ul></li>
       <li><a href="../api/world/#stable_worldmodel.world.World.evaluate">evaluate() (World method)</a>, <a href="../stable_worldmodel/#stable_worldmodel.World.evaluate">[1]</a>, <a href="../stable_worldmodel/#stable_worldmodel.world.World.evaluate">[2]</a>
 </li>
       <li><a href="../api/world/#stable_worldmodel.world.World.evaluate_from_dataset">evaluate_from_dataset() (World method)</a>, <a href="../stable_worldmodel/#stable_worldmodel.World.evaluate_from_dataset">[1]</a>, <a href="../stable_worldmodel/#stable_worldmodel.world.World.evaluate_from_dataset">[2]</a>
 </li>
       <li><a href="../api/generated/stable_worldmodel.wrappers.EverythingToInfoWrapper/#stable_worldmodel.wrappers.EverythingToInfoWrapper">EverythingToInfoWrapper (class in stable_worldmodel.wrappers)</a>, <a href="../stable_worldmodel/#stable_worldmodel.wrappers.EverythingToInfoWrapper">[1]</a>
 </li>
-      <li><a href="../api/generated/stable_worldmodel.policy.ExpertPolicy/#stable_worldmodel.policy.ExpertPolicy">ExpertPolicy (class in stable_worldmodel.policy)</a>, <a href="../stable_worldmodel/#stable_worldmodel.policy.ExpertPolicy">[1]</a>
+      <li><a href="../stable_worldmodel.envs.ogbench_manip/#stable_worldmodel.envs.ogbench_manip.ExpertPolicy">ExpertPolicy (class in stable_worldmodel.envs.ogbench_manip)</a>
+
+      <ul style="list-style-type:none">
+        <li><a href="../stable_worldmodel.envs.ogbench_manip/#stable_worldmodel.envs.ogbench_manip.expert_policy.ExpertPolicy">(class in stable_worldmodel.envs.ogbench_manip.expert_policy)</a>
 </li>
+        <li><a href="../stable_worldmodel.envs.simple_nav/#stable_worldmodel.envs.simple_nav.ExpertPolicy">(class in stable_worldmodel.envs.simple_nav)</a>
+</li>
+        <li><a href="../stable_worldmodel.envs.simple_nav/#stable_worldmodel.envs.simple_nav.expert_policy.ExpertPolicy">(class in stable_worldmodel.envs.simple_nav.expert_policy)</a>
+</li>
+        <li><a href="../stable_worldmodel.envs.two_room/#stable_worldmodel.envs.two_room.ExpertPolicy">(class in stable_worldmodel.envs.two_room)</a>
+</li>
+        <li><a href="../stable_worldmodel.envs.two_room/#stable_worldmodel.envs.two_room.expert_policy.ExpertPolicy">(class in stable_worldmodel.envs.two_room.expert_policy)</a>
+</li>
+        <li><a href="../api/generated/stable_worldmodel.policy.ExpertPolicy/#stable_worldmodel.policy.ExpertPolicy">(class in stable_worldmodel.policy)</a>, <a href="../stable_worldmodel/#stable_worldmodel.policy.ExpertPolicy">[1]</a>
+</li>
+      </ul></li>
   </ul></td>
   </tr>
       </table>
@@ -544,37 +641,47 @@
   <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul style="margin-left:0;list-style-type:none">
       <li><a href="../stable_worldmodel.wm/#stable_worldmodel.wm.dinowm.FeedForward">FeedForward (class in stable_worldmodel.wm.dinowm)</a>
+
+      <ul style="list-style-type:none">
+        <li><a href="../stable_worldmodel.wm/#stable_worldmodel.wm.pyro.FeedForward">(class in stable_worldmodel.wm.pyro)</a>
 </li>
-      <li><a href="../stable_worldmodel.envs/#stable_worldmodel.envs.pusht.PushT.fix_action_sample">fix_action_sample() (PushT method)</a>
+      </ul></li>
+      <li><a href="../stable_worldmodel.data/#stable_worldmodel.data.dataset.find_shard_dirs">find_shard_dirs() (in module stable_worldmodel.data.dataset)</a>
 </li>
       <li><a href="../stable_worldmodel/#stable_worldmodel.utils.flatten_dict">flatten_dict() (in module stable_worldmodel.utils)</a>
 </li>
       <li><a href="../api/generated/stable_worldmodel.policy.WorldModelPolicy/#stable_worldmodel.policy.WorldModelPolicy.flatten_receding_horizon">flatten_receding_horizon (WorldModelPolicy property)</a>, <a href="../stable_worldmodel/#stable_worldmodel.policy.WorldModelPolicy.flatten_receding_horizon">[1]</a>
 </li>
-      <li><a href="../stable_worldmodel.wm/#stable_worldmodel.wm.dinowm.Attention.forward">forward() (Attention method)</a>
+      <li><a href="../stable_worldmodel.wm/#stable_worldmodel.wm.dinowm.Attention.forward">forward() (Attention method)</a>, <a href="../stable_worldmodel.wm/#stable_worldmodel.wm.pyro.Attention.forward">[1]</a>
 
       <ul style="list-style-type:none">
-        <li><a href="../stable_worldmodel.wm/#stable_worldmodel.wm.dinowm.CausalPredictor.forward">(CausalPredictor method)</a>
+        <li><a href="../stable_worldmodel.wm/#stable_worldmodel.wm.dinowm.CausalPredictor.forward">(CausalPredictor method)</a>, <a href="../stable_worldmodel.wm/#stable_worldmodel.wm.pyro.CausalPredictor.forward">[1]</a>
 </li>
         <li><a href="../stable_worldmodel.wm/#stable_worldmodel.wm.dinowm.Decoder.forward">(Decoder method)</a>
 </li>
-        <li><a href="../stable_worldmodel.wm/#stable_worldmodel.wm.dinowm.Embedder.forward">(Embedder method)</a>
+        <li><a href="../stable_worldmodel.wm/#stable_worldmodel.wm.dinowm.Embedder.forward">(Embedder method)</a>, <a href="../stable_worldmodel.wm/#stable_worldmodel.wm.pyro.Embedder.forward">[1]</a>
 </li>
         <li><a href="../stable_worldmodel.wm/#stable_worldmodel.wm.dinowm.Encoder.forward">(Encoder method)</a>
 </li>
-        <li><a href="../stable_worldmodel.wm/#stable_worldmodel.wm.dinowm.FeedForward.forward">(FeedForward method)</a>
+        <li><a href="../stable_worldmodel.wm/#stable_worldmodel.wm.dinowm.FeedForward.forward">(FeedForward method)</a>, <a href="../stable_worldmodel.wm/#stable_worldmodel.wm.pyro.FeedForward.forward">[1]</a>
 </li>
         <li><a href="../stable_worldmodel.wm/#stable_worldmodel.wm.dinowm.Quantize.forward">(Quantize method)</a>
 </li>
         <li><a href="../stable_worldmodel.wm/#stable_worldmodel.wm.dinowm.ResBlock.forward">(ResBlock method)</a>
 </li>
-        <li><a href="../stable_worldmodel.wm/#stable_worldmodel.wm.dinowm.Transformer.forward">(Transformer method)</a>
+        <li><a href="../stable_worldmodel.wm/#stable_worldmodel.wm.dinowm.Transformer.forward">(Transformer method)</a>, <a href="../stable_worldmodel.wm/#stable_worldmodel.wm.pyro.Transformer.forward">[1]</a>
 </li>
         <li><a href="../stable_worldmodel.wm/#stable_worldmodel.wm.dinowm.VQVAE.forward">(VQVAE method)</a>
 </li>
       </ul></li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul style="margin-left:0;list-style-type:none">
+      <li><a href="../stable_worldmodel.data/#stable_worldmodel.data.FrameDataset">FrameDataset (class in stable_worldmodel.data)</a>
+
+      <ul style="list-style-type:none">
+        <li><a href="../stable_worldmodel.data/#stable_worldmodel.data.dataset.FrameDataset">(class in stable_worldmodel.data.dataset)</a>
+</li>
+      </ul></li>
       <li><a href="../stable_worldmodel.envs/#stable_worldmodel.envs.utils.from_pygame">from_pygame() (in module stable_worldmodel.envs.utils)</a>
 </li>
   </ul></td>
@@ -584,34 +691,28 @@
   <h2 id="G">G</h2>
   <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul style="margin-left:0;list-style-type:none">
-      <li><a href="../api/generated/stable_worldmodel.solver.GDSolver/#stable_worldmodel.solver.GDSolver">GDSolver (class in stable_worldmodel.solver)</a>, <a href="../stable_worldmodel.solver/#stable_worldmodel.solver.GDSolver">[1]</a>
-
-      <ul style="list-style-type:none">
-        <li><a href="../stable_worldmodel.solver/#stable_worldmodel.solver.gd.GDSolver">(class in stable_worldmodel.solver.gd)</a>
-</li>
-      </ul></li>
       <li><a href="../stable_worldmodel.envs/#stable_worldmodel.envs.voidrun.VoidRunEnv.generate_board">generate_board() (VoidRunEnv method)</a>
 </li>
       <li><a href="../stable_worldmodel.envs/#stable_worldmodel.envs.voidrun.VoidRunEnv.generate_goal">generate_goal() (VoidRunEnv method)</a>
 </li>
-      <li><a href="../stable_worldmodel.wm/#stable_worldmodel.wm.dinowm.Attention.generate_mask_matrix">generate_mask_matrix() (Attention method)</a>
+      <li><a href="../stable_worldmodel.wm/#stable_worldmodel.wm.dinowm.Attention.generate_mask_matrix">generate_mask_matrix() (Attention method)</a>, <a href="../stable_worldmodel.wm/#stable_worldmodel.wm.pyro.Attention.generate_mask_matrix">[1]</a>
 </li>
       <li><a href="../api/generated/stable_worldmodel.policy.BasePolicy/#stable_worldmodel.policy.BasePolicy.get_action">get_action() (BasePolicy method)</a>, <a href="../stable_worldmodel/#stable_worldmodel.policy.BasePolicy.get_action">[1]</a>
 
       <ul style="list-style-type:none">
-        <li><a href="../api/generated/stable_worldmodel.policy.ExpertPolicy/#stable_worldmodel.policy.ExpertPolicy.get_action">(ExpertPolicy method)</a>, <a href="../stable_worldmodel/#stable_worldmodel.policy.ExpertPolicy.get_action">[1]</a>
+        <li><a href="../api/generated/stable_worldmodel.policy.ExpertPolicy/#stable_worldmodel.policy.ExpertPolicy.get_action">(ExpertPolicy method)</a>, <a href="../stable_worldmodel.envs.ogbench_manip/#stable_worldmodel.envs.ogbench_manip.ExpertPolicy.get_action">[1]</a>, <a href="../stable_worldmodel.envs.ogbench_manip/#stable_worldmodel.envs.ogbench_manip.expert_policy.ExpertPolicy.get_action">[2]</a>, <a href="../stable_worldmodel.envs.simple_nav/#stable_worldmodel.envs.simple_nav.ExpertPolicy.get_action">[3]</a>, <a href="../stable_worldmodel.envs.simple_nav/#stable_worldmodel.envs.simple_nav.expert_policy.ExpertPolicy.get_action">[4]</a>, <a href="../stable_worldmodel.envs.two_room/#stable_worldmodel.envs.two_room.ExpertPolicy.get_action">[5]</a>, <a href="../stable_worldmodel.envs.two_room/#stable_worldmodel.envs.two_room.expert_policy.ExpertPolicy.get_action">[6]</a>, <a href="../stable_worldmodel/#stable_worldmodel.policy.ExpertPolicy.get_action">[7]</a>
 </li>
         <li><a href="../api/generated/stable_worldmodel.policy.RandomPolicy/#stable_worldmodel.policy.RandomPolicy.get_action">(RandomPolicy method)</a>, <a href="../stable_worldmodel/#stable_worldmodel.policy.RandomPolicy.get_action">[1]</a>
+</li>
+        <li><a href="../stable_worldmodel.envs.pusht/#stable_worldmodel.envs.pusht.WeakPolicy.get_action">(WeakPolicy method)</a>, <a href="../stable_worldmodel.envs.pusht/#stable_worldmodel.envs.pusht.expert_policy.WeakPolicy.get_action">[1]</a>
 </li>
         <li><a href="../api/generated/stable_worldmodel.policy.WorldModelPolicy/#stable_worldmodel.policy.WorldModelPolicy.get_action">(WorldModelPolicy method)</a>, <a href="../stable_worldmodel/#stable_worldmodel.policy.WorldModelPolicy.get_action">[1]</a>
 </li>
       </ul></li>
       <li><a href="../stable_worldmodel/#stable_worldmodel.wrappers.StackedWrapper.get_buffer_data">get_buffer_data() (StackedWrapper method)</a>
 </li>
-      <li><a href="../stable_worldmodel/#stable_worldmodel.data.get_cache_dir">get_cache_dir() (in module stable_worldmodel.data)</a>
+      <li><a href="../stable_worldmodel.data/#stable_worldmodel.data.utils.get_cache_dir">get_cache_dir() (in module stable_worldmodel.data.utils)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul style="margin-left:0;list-style-type:none">
       <li><a href="../api/solver/#stable_worldmodel.solver.solver.Costable.get_cost">get_cost() (Costable method)</a>, <a href="../stable_worldmodel.solver/#stable_worldmodel.solver.solver.Costable.get_cost">[1]</a>
 
       <ul style="list-style-type:none">
@@ -619,27 +720,35 @@
 </li>
         <li><a href="../stable_worldmodel.wm/#stable_worldmodel.wm.DummyWorldModel.get_cost">(DummyWorldModel method)</a>, <a href="../stable_worldmodel.wm/#stable_worldmodel.wm.dummy.DummyWorldModel.get_cost">[1]</a>
 </li>
-      </ul></li>
-      <li><a href="../api/data/#stable_worldmodel.data.StepsDataset.get_episode_slice">get_episode_slice() (StepsDataset method)</a>, <a href="../stable_worldmodel/#stable_worldmodel.data.StepsDataset.get_episode_slice">[1]</a>
+        <li><a href="../stable_worldmodel.wm/#stable_worldmodel.wm.PYRO.get_cost">(PYRO method)</a>, <a href="../stable_worldmodel.wm/#stable_worldmodel.wm.pyro.PYRO.get_cost">[1]</a>
 </li>
+      </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul style="margin-left:0;list-style-type:none">
       <li><a href="../stable_worldmodel/#stable_worldmodel.utils.get_in">get_in() (in module stable_worldmodel.utils)</a>
 </li>
       <li><a href="../stable_worldmodel.envs/#stable_worldmodel.envs.utils.get_mouse_pos">get_mouse_pos() (in module stable_worldmodel.envs.utils)</a>
 </li>
-      <li><a href="../stable_worldmodel.envs/#stable_worldmodel.envs.ogbench_cube.CubeEnv.get_reset_info">get_reset_info() (CubeEnv method)</a>
+      <li><a href="../stable_worldmodel.envs.ogbench_manip/#stable_worldmodel.envs.ogbench_manip.CubeEnv.get_reset_info">get_reset_info() (CubeEnv method)</a>, <a href="../stable_worldmodel.envs.ogbench_manip/#stable_worldmodel.envs.ogbench_manip.cube_env.CubeEnv.get_reset_info">[1]</a>
 
       <ul style="list-style-type:none">
-        <li><a href="../stable_worldmodel.envs/#stable_worldmodel.envs.ogbench_scene.SceneEnv.get_reset_info">(SceneEnv method)</a>
+        <li><a href="../stable_worldmodel.envs.ogbench_manip/#stable_worldmodel.envs.ogbench_manip.SceneEnv.get_reset_info">(SceneEnv method)</a>, <a href="../stable_worldmodel.envs.ogbench_manip/#stable_worldmodel.envs.ogbench_manip.scene_env.SceneEnv.get_reset_info">[1]</a>
 </li>
       </ul></li>
-      <li><a href="../stable_worldmodel.envs/#stable_worldmodel.envs.ogbench_cube.CubeEnv.get_step_info">get_step_info() (CubeEnv method)</a>
+      <li><a href="../stable_worldmodel.envs.ogbench_manip/#stable_worldmodel.envs.ogbench_manip.CubeEnv.get_step_info">get_step_info() (CubeEnv method)</a>, <a href="../stable_worldmodel.envs.ogbench_manip/#stable_worldmodel.envs.ogbench_manip.cube_env.CubeEnv.get_step_info">[1]</a>
 
       <ul style="list-style-type:none">
-        <li><a href="../stable_worldmodel.envs/#stable_worldmodel.envs.ogbench_scene.SceneEnv.get_step_info">(SceneEnv method)</a>
+        <li><a href="../stable_worldmodel.envs.ogbench_manip/#stable_worldmodel.envs.ogbench_manip.SceneEnv.get_step_info">(SceneEnv method)</a>, <a href="../stable_worldmodel.envs.ogbench_manip/#stable_worldmodel.envs.ogbench_manip.scene_env.SceneEnv.get_step_info">[1]</a>
 </li>
       </ul></li>
       <li><a href="../stable_worldmodel.wm/#stable_worldmodel.wm.dinowm.get_world_size">get_world_size() (in module stable_worldmodel.wm.dinowm)</a>
 </li>
+      <li><a href="../stable_worldmodel.solver/#stable_worldmodel.solver.GradientSolver">GradientSolver (class in stable_worldmodel.solver)</a>
+
+      <ul style="list-style-type:none">
+        <li><a href="../stable_worldmodel.solver/#stable_worldmodel.solver.gd.GradientSolver">(class in stable_worldmodel.solver.gd)</a>
+</li>
+      </ul></li>
   </ul></td>
   </tr>
       </table>
@@ -647,20 +756,22 @@
   <h2 id="H">H</h2>
   <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul style="margin-left:0;list-style-type:none">
-      <li><a href="../stable_worldmodel/#stable_worldmodel.data.VariationInfo.has_variation">has_variation (VariationInfo attribute)</a>
+      <li><a href="../stable_worldmodel.data/#stable_worldmodel.data.utils.VariationInfo.has_variation">has_variation (VariationInfo attribute)</a>
 </li>
-      <li><a href="../stable_worldmodel/#stable_worldmodel.data.SpaceInfo.high">high (SpaceInfo attribute)</a>
+      <li><a href="../stable_worldmodel.data/#stable_worldmodel.data.utils.SpaceInfo.high">high (SpaceInfo attribute)</a>
 </li>
       <li><a href="../api/generated/stable_worldmodel.policy.PlanConfig/#stable_worldmodel.policy.PlanConfig.history_len">history_len (PlanConfig attribute)</a>, <a href="../stable_worldmodel/#stable_worldmodel.PlanConfig.history_len">[1]</a>, <a href="../stable_worldmodel/#stable_worldmodel.policy.PlanConfig.history_len">[2]</a>
 </li>
       <li><a href="../api/generated/stable_worldmodel.solver.CEMSolver/#stable_worldmodel.solver.CEMSolver.horizon">horizon (CEMSolver property)</a>, <a href="../stable_worldmodel.solver/#stable_worldmodel.solver.CEMSolver.horizon">[1]</a>, <a href="../stable_worldmodel.solver/#stable_worldmodel.solver.cem.CEMSolver.horizon">[2]</a>
 
       <ul style="list-style-type:none">
-        <li><a href="../api/generated/stable_worldmodel.solver.GDSolver/#stable_worldmodel.solver.GDSolver.horizon">(GDSolver property)</a>, <a href="../stable_worldmodel.solver/#stable_worldmodel.solver.GDSolver.horizon">[1]</a>, <a href="../stable_worldmodel.solver/#stable_worldmodel.solver.gd.GDSolver.horizon">[2]</a>
+        <li><a href="../stable_worldmodel.solver/#stable_worldmodel.solver.GradientSolver.horizon">(GradientSolver property)</a>, <a href="../stable_worldmodel.solver/#stable_worldmodel.solver.gd.GradientSolver.horizon">[1]</a>
 </li>
         <li><a href="../api/generated/stable_worldmodel.solver.MPPISolver/#stable_worldmodel.solver.MPPISolver.horizon">(MPPISolver property)</a>, <a href="../stable_worldmodel.solver/#stable_worldmodel.solver.MPPISolver.horizon">[1]</a>, <a href="../stable_worldmodel.solver/#stable_worldmodel.solver.mppi.MPPISolver.horizon">[2]</a>
 </li>
         <li><a href="../api/generated/stable_worldmodel.solver.NevergradSolver/#stable_worldmodel.solver.NevergradSolver.horizon">(NevergradSolver property)</a>, <a href="../stable_worldmodel.solver/#stable_worldmodel.solver.NevergradSolver.horizon">[1]</a>, <a href="../stable_worldmodel.solver/#stable_worldmodel.solver.nevergrad.NevergradSolver.horizon">[2]</a>
+</li>
+        <li><a href="../stable_worldmodel.solver/#stable_worldmodel.solver.discrete_solvers.PGDSolver.horizon">(PGDSolver property)</a>
 </li>
         <li><a href="../api/generated/stable_worldmodel.policy.PlanConfig/#stable_worldmodel.policy.PlanConfig.horizon">(PlanConfig attribute)</a>, <a href="../stable_worldmodel/#stable_worldmodel.PlanConfig.horizon">[1]</a>, <a href="../stable_worldmodel/#stable_worldmodel.policy.PlanConfig.horizon">[2]</a>
 </li>
@@ -678,10 +789,12 @@
   <td style="width: 33%; vertical-align: top;"><ul style="margin-left:0;list-style-type:none">
       <li><a href="../stable_worldmodel.envs/#stable_worldmodel.envs.image_positioning.ImagePositioning">ImagePositioning (class in stable_worldmodel.envs.image_positioning)</a>
 </li>
-      <li><a href="../api/data/#stable_worldmodel.data.StepsDataset.infer_img_path_columns">infer_img_path_columns() (StepsDataset method)</a>, <a href="../stable_worldmodel/#stable_worldmodel.data.StepsDataset.infer_img_path_columns">[1]</a>
+      <li><a href="../stable_worldmodel.solver/#stable_worldmodel.solver.GradientSolver.init_action">init_action() (GradientSolver method)</a>, <a href="../stable_worldmodel.solver/#stable_worldmodel.solver.gd.GradientSolver.init_action">[1]</a>
+
+      <ul style="list-style-type:none">
+        <li><a href="../stable_worldmodel.solver/#stable_worldmodel.solver.discrete_solvers.PGDSolver.init_action">(PGDSolver method)</a>
 </li>
-      <li><a href="../api/generated/stable_worldmodel.solver.GDSolver/#stable_worldmodel.solver.GDSolver.init_action">init_action() (GDSolver method)</a>, <a href="../stable_worldmodel.solver/#stable_worldmodel.solver.GDSolver.init_action">[1]</a>, <a href="../stable_worldmodel.solver/#stable_worldmodel.solver.gd.GDSolver.init_action">[2]</a>
-</li>
+      </ul></li>
       <li><a href="../api/generated/stable_worldmodel.solver.CEMSolver/#stable_worldmodel.solver.CEMSolver.init_action_distrib">init_action_distrib() (CEMSolver method)</a>, <a href="../stable_worldmodel.solver/#stable_worldmodel.solver.CEMSolver.init_action_distrib">[1]</a>, <a href="../stable_worldmodel.solver/#stable_worldmodel.solver.cem.CEMSolver.init_action_distrib">[2]</a>
 
       <ul style="list-style-type:none">
@@ -702,15 +815,21 @@
       </ul></li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul style="margin-left:0;list-style-type:none">
-      <li><a href="../stable_worldmodel.envs/#stable_worldmodel.envs.ogbench_cube.CubeEnv.initialize_episode">initialize_episode() (CubeEnv method)</a>
+      <li><a href="../stable_worldmodel.envs.ogbench_manip/#stable_worldmodel.envs.ogbench_manip.CubeEnv.initialize_episode">initialize_episode() (CubeEnv method)</a>, <a href="../stable_worldmodel.envs.ogbench_manip/#stable_worldmodel.envs.ogbench_manip.cube_env.CubeEnv.initialize_episode">[1]</a>
 
       <ul style="list-style-type:none">
-        <li><a href="../stable_worldmodel.envs/#stable_worldmodel.envs.ogbench_scene.SceneEnv.initialize_episode">(SceneEnv method)</a>
+        <li><a href="../stable_worldmodel.envs.ogbench_manip/#stable_worldmodel.envs.ogbench_manip.SceneEnv.initialize_episode">(SceneEnv method)</a>, <a href="../stable_worldmodel.envs.ogbench_manip/#stable_worldmodel.envs.ogbench_manip.scene_env.SceneEnv.initialize_episode">[1]</a>
+</li>
+      </ul></li>
+      <li><a href="../stable_worldmodel.data/#stable_worldmodel.data.InjectedDataset">InjectedDataset (class in stable_worldmodel.data)</a>
+
+      <ul style="list-style-type:none">
+        <li><a href="../stable_worldmodel.data/#stable_worldmodel.data.dataset.InjectedDataset">(class in stable_worldmodel.data.dataset)</a>
 </li>
       </ul></li>
       <li><a href="../stable_worldmodel/#stable_worldmodel.policy.Transformable.inverse_transform">inverse_transform() (Transformable method)</a>
 </li>
-      <li><a href="../stable_worldmodel/#stable_worldmodel.data.is_image">is_image() (in module stable_worldmodel.data)</a>
+      <li><a href="../stable_worldmodel.data/#stable_worldmodel.data.utils.is_image">is_image() (in module stable_worldmodel.data.utils)</a>
 </li>
   </ul></td>
   </tr>
@@ -725,15 +844,17 @@
 </li>
       <li><a href="../stable_worldmodel/#stable_worldmodel.cli.list_cmd">list_cmd() (in module stable_worldmodel.cli)</a>
 </li>
+      <li><a href="../stable_worldmodel.data/#stable_worldmodel.data.utils.list_datasets">list_datasets() (in module stable_worldmodel.data.utils)</a>
+</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul style="margin-left:0;list-style-type:none">
-      <li><a href="../stable_worldmodel/#stable_worldmodel.data.list_datasets">list_datasets() (in module stable_worldmodel.data)</a>
+      <li><a href="../stable_worldmodel.data/#stable_worldmodel.data.utils.list_models">list_models() (in module stable_worldmodel.data.utils)</a>
 </li>
-      <li><a href="../stable_worldmodel/#stable_worldmodel.data.list_models">list_models() (in module stable_worldmodel.data)</a>
+      <li><a href="../stable_worldmodel.data/#stable_worldmodel.data.utils.list_worlds">list_worlds() (in module stable_worldmodel.data.utils)</a>
 </li>
-      <li><a href="../stable_worldmodel/#stable_worldmodel.data.list_worlds">list_worlds() (in module stable_worldmodel.data)</a>
+      <li><a href="../stable_worldmodel.data/#stable_worldmodel.data.dataset.Dataset.load_chunk">load_chunk() (Dataset method)</a>
 </li>
-      <li><a href="../stable_worldmodel/#stable_worldmodel.data.SpaceInfo.low">low (SpaceInfo attribute)</a>
+      <li><a href="../stable_worldmodel.data/#stable_worldmodel.data.utils.SpaceInfo.low">low (SpaceInfo attribute)</a>
 </li>
   </ul></td>
   </tr>
@@ -747,19 +868,21 @@
       <li><a href="../stable_worldmodel.envs/#stable_worldmodel.envs.image_positioning.ImagePositioning.metadata">metadata (ImagePositioning attribute)</a>
 
       <ul style="list-style-type:none">
-        <li><a href="../stable_worldmodel.envs/#stable_worldmodel.envs.pusht.PushT.metadata">(PushT attribute)</a>
+        <li><a href="../stable_worldmodel.envs.pusht/#stable_worldmodel.envs.pusht.PushT.metadata">(PushT attribute)</a>, <a href="../stable_worldmodel.envs.pusht/#stable_worldmodel.envs.pusht.env.PushT.metadata">[1]</a>
+</li>
+        <li><a href="../stable_worldmodel.envs.pusht/#stable_worldmodel.envs.pusht.PushTDiscrete.metadata">(PushTDiscrete attribute)</a>, <a href="../stable_worldmodel.envs.pusht/#stable_worldmodel.envs.pusht.env_discrete.PushTDiscrete.metadata">[1]</a>
 </li>
         <li><a href="../stable_worldmodel.envs/#stable_worldmodel.envs.simple_point_maze.SimplePointMazeEnv.metadata">(SimplePointMazeEnv attribute)</a>
 </li>
-        <li><a href="../stable_worldmodel.envs/#stable_worldmodel.envs.two_room.TwoRoomEnv.metadata">(TwoRoomEnv attribute)</a>
+        <li><a href="../stable_worldmodel.envs.two_room/#stable_worldmodel.envs.two_room.TwoRoomEnv.metadata">(TwoRoomEnv attribute)</a>, <a href="../stable_worldmodel.envs.two_room/#stable_worldmodel.envs.two_room.env.TwoRoomEnv.metadata">[1]</a>
 </li>
         <li><a href="../stable_worldmodel.envs/#stable_worldmodel.envs.voidrun.VoidRunEnv.metadata">(VoidRunEnv attribute)</a>
 </li>
       </ul></li>
-      <li><a href="../stable_worldmodel.envs/#stable_worldmodel.envs.ogbench_cube.CubeEnv.modify_mjcf_model">modify_mjcf_model() (CubeEnv method)</a>
+      <li><a href="../stable_worldmodel.envs.ogbench_manip/#stable_worldmodel.envs.ogbench_manip.CubeEnv.modify_mjcf_model">modify_mjcf_model() (CubeEnv method)</a>, <a href="../stable_worldmodel.envs.ogbench_manip/#stable_worldmodel.envs.ogbench_manip.cube_env.CubeEnv.modify_mjcf_model">[1]</a>
 
       <ul style="list-style-type:none">
-        <li><a href="../stable_worldmodel.envs/#stable_worldmodel.envs.ogbench_scene.SceneEnv.modify_mjcf_model">(SceneEnv method)</a>
+        <li><a href="../stable_worldmodel.envs.ogbench_manip/#stable_worldmodel.envs.ogbench_manip.SceneEnv.modify_mjcf_model">(SceneEnv method)</a>, <a href="../stable_worldmodel.envs.ogbench_manip/#stable_worldmodel.envs.ogbench_manip.scene_env.SceneEnv.modify_mjcf_model">[1]</a>
 </li>
       </ul></li>
       <li>
@@ -770,21 +893,47 @@
 </li>
         <li><a href="../stable_worldmodel/#module-stable_worldmodel.cli">stable_worldmodel.cli</a>
 </li>
-        <li><a href="../stable_worldmodel/#module-stable_worldmodel.data">stable_worldmodel.data</a>
+        <li><a href="../stable_worldmodel.data/#module-stable_worldmodel.data">stable_worldmodel.data</a>
+</li>
+        <li><a href="../stable_worldmodel.data/#module-stable_worldmodel.data.dataset">stable_worldmodel.data.dataset</a>
+</li>
+        <li><a href="../stable_worldmodel.data/#module-stable_worldmodel.data.utils">stable_worldmodel.data.utils</a>
 </li>
         <li><a href="../stable_worldmodel.envs/#module-stable_worldmodel.envs">stable_worldmodel.envs</a>
 </li>
         <li><a href="../stable_worldmodel.envs/#module-stable_worldmodel.envs.image_positioning">stable_worldmodel.envs.image_positioning</a>
 </li>
-        <li><a href="../stable_worldmodel.envs/#module-stable_worldmodel.envs.ogbench_cube">stable_worldmodel.envs.ogbench_cube</a>
+        <li><a href="../stable_worldmodel.envs.ogbench_manip/#module-stable_worldmodel.envs.ogbench_manip">stable_worldmodel.envs.ogbench_manip</a>
 </li>
-        <li><a href="../stable_worldmodel.envs/#module-stable_worldmodel.envs.ogbench_scene">stable_worldmodel.envs.ogbench_scene</a>
+        <li><a href="../stable_worldmodel.envs.ogbench_manip/#module-stable_worldmodel.envs.ogbench_manip.cube_env">stable_worldmodel.envs.ogbench_manip.cube_env</a>
 </li>
-        <li><a href="../stable_worldmodel.envs/#module-stable_worldmodel.envs.pusht">stable_worldmodel.envs.pusht</a>
+        <li><a href="../stable_worldmodel.envs.ogbench_manip/#module-stable_worldmodel.envs.ogbench_manip.expert_policy">stable_worldmodel.envs.ogbench_manip.expert_policy</a>
+</li>
+        <li><a href="../stable_worldmodel.envs.ogbench_manip/#module-stable_worldmodel.envs.ogbench_manip.scene_env">stable_worldmodel.envs.ogbench_manip.scene_env</a>
+</li>
+        <li><a href="../stable_worldmodel.envs.pusht/#module-stable_worldmodel.envs.pusht">stable_worldmodel.envs.pusht</a>
+</li>
+        <li><a href="../stable_worldmodel.envs.pusht/#module-stable_worldmodel.envs.pusht.env">stable_worldmodel.envs.pusht.env</a>
+</li>
+        <li><a href="../stable_worldmodel.envs.pusht/#module-stable_worldmodel.envs.pusht.env_discrete">stable_worldmodel.envs.pusht.env_discrete</a>
+</li>
+        <li><a href="../stable_worldmodel.envs.pusht/#module-stable_worldmodel.envs.pusht.expert_policy">stable_worldmodel.envs.pusht.expert_policy</a>
+</li>
+        <li><a href="../stable_worldmodel.envs/#module-stable_worldmodel.envs.quantizer">stable_worldmodel.envs.quantizer</a>
+</li>
+        <li><a href="../stable_worldmodel.envs.simple_nav/#module-stable_worldmodel.envs.simple_nav">stable_worldmodel.envs.simple_nav</a>
+</li>
+        <li><a href="../stable_worldmodel.envs.simple_nav/#module-stable_worldmodel.envs.simple_nav.env">stable_worldmodel.envs.simple_nav.env</a>
+</li>
+        <li><a href="../stable_worldmodel.envs.simple_nav/#module-stable_worldmodel.envs.simple_nav.expert_policy">stable_worldmodel.envs.simple_nav.expert_policy</a>
 </li>
         <li><a href="../stable_worldmodel.envs/#module-stable_worldmodel.envs.simple_point_maze">stable_worldmodel.envs.simple_point_maze</a>
 </li>
-        <li><a href="../stable_worldmodel.envs/#module-stable_worldmodel.envs.two_room">stable_worldmodel.envs.two_room</a>
+        <li><a href="../stable_worldmodel.envs.two_room/#module-stable_worldmodel.envs.two_room">stable_worldmodel.envs.two_room</a>
+</li>
+        <li><a href="../stable_worldmodel.envs.two_room/#module-stable_worldmodel.envs.two_room.env">stable_worldmodel.envs.two_room.env</a>
+</li>
+        <li><a href="../stable_worldmodel.envs.two_room/#module-stable_worldmodel.envs.two_room.expert_policy">stable_worldmodel.envs.two_room.expert_policy</a>
 </li>
         <li><a href="../stable_worldmodel.envs/#module-stable_worldmodel.envs.utils">stable_worldmodel.envs.utils</a>
 </li>
@@ -795,6 +944,8 @@
         <li><a href="../stable_worldmodel.solver/#module-stable_worldmodel.solver">stable_worldmodel.solver</a>
 </li>
         <li><a href="../stable_worldmodel.solver/#module-stable_worldmodel.solver.cem">stable_worldmodel.solver.cem</a>
+</li>
+        <li><a href="../stable_worldmodel.solver/#module-stable_worldmodel.solver.discrete_solvers">stable_worldmodel.solver.discrete_solvers</a>
 </li>
         <li><a href="../stable_worldmodel.solver/#module-stable_worldmodel.solver.gd">stable_worldmodel.solver.gd</a>
 </li>
@@ -820,6 +971,8 @@
 </li>
         <li><a href="../stable_worldmodel.wm/#module-stable_worldmodel.wm.frame">stable_worldmodel.wm.frame</a>
 </li>
+        <li><a href="../stable_worldmodel.wm/#module-stable_worldmodel.wm.pyro">stable_worldmodel.wm.pyro</a>
+</li>
         <li><a href="../stable_worldmodel.wm/#module-stable_worldmodel.wm.tdmpc">stable_worldmodel.wm.tdmpc</a>
 </li>
         <li><a href="../stable_worldmodel/#module-stable_worldmodel.world">stable_worldmodel.world</a>
@@ -844,16 +997,18 @@
   <h2 id="N">N</h2>
   <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul style="margin-left:0;list-style-type:none">
-      <li><a href="../stable_worldmodel/#stable_worldmodel.data.SpaceInfo.n">n (SpaceInfo attribute)</a>
+      <li><a href="../stable_worldmodel.data/#stable_worldmodel.data.utils.SpaceInfo.n">n (SpaceInfo attribute)</a>
 </li>
       <li><a href="../api/generated/stable_worldmodel.solver.CEMSolver/#stable_worldmodel.solver.CEMSolver.n_envs">n_envs (CEMSolver property)</a>, <a href="../stable_worldmodel.solver/#stable_worldmodel.solver.CEMSolver.n_envs">[1]</a>, <a href="../stable_worldmodel.solver/#stable_worldmodel.solver.cem.CEMSolver.n_envs">[2]</a>
 
       <ul style="list-style-type:none">
-        <li><a href="../api/generated/stable_worldmodel.solver.GDSolver/#stable_worldmodel.solver.GDSolver.n_envs">(GDSolver property)</a>, <a href="../stable_worldmodel.solver/#stable_worldmodel.solver.GDSolver.n_envs">[1]</a>, <a href="../stable_worldmodel.solver/#stable_worldmodel.solver.gd.GDSolver.n_envs">[2]</a>
+        <li><a href="../stable_worldmodel.solver/#stable_worldmodel.solver.GradientSolver.n_envs">(GradientSolver property)</a>, <a href="../stable_worldmodel.solver/#stable_worldmodel.solver.gd.GradientSolver.n_envs">[1]</a>
 </li>
         <li><a href="../api/generated/stable_worldmodel.solver.MPPISolver/#stable_worldmodel.solver.MPPISolver.n_envs">(MPPISolver property)</a>, <a href="../stable_worldmodel.solver/#stable_worldmodel.solver.MPPISolver.n_envs">[1]</a>, <a href="../stable_worldmodel.solver/#stable_worldmodel.solver.mppi.MPPISolver.n_envs">[2]</a>
 </li>
         <li><a href="../api/generated/stable_worldmodel.solver.NevergradSolver/#stable_worldmodel.solver.NevergradSolver.n_envs">(NevergradSolver property)</a>, <a href="../stable_worldmodel.solver/#stable_worldmodel.solver.NevergradSolver.n_envs">[1]</a>, <a href="../stable_worldmodel.solver/#stable_worldmodel.solver.nevergrad.NevergradSolver.n_envs">[2]</a>
+</li>
+        <li><a href="../stable_worldmodel.solver/#stable_worldmodel.solver.discrete_solvers.PGDSolver.n_envs">(PGDSolver property)</a>
 </li>
         <li><a href="../api/generated/stable_worldmodel.solver.RandomSolver/#stable_worldmodel.solver.RandomSolver.n_envs">(RandomSolver property)</a>, <a href="../stable_worldmodel.solver/#stable_worldmodel.solver.RandomSolver.n_envs">[1]</a>, <a href="../stable_worldmodel.solver/#stable_worldmodel.solver.random.RandomSolver.n_envs">[2]</a>
 </li>
@@ -862,9 +1017,9 @@
       </ul></li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul style="margin-left:0;list-style-type:none">
-      <li><a href="../stable_worldmodel/#stable_worldmodel.data.WorldInfo.name">name (WorldInfo attribute)</a>
+      <li><a href="../stable_worldmodel.data/#stable_worldmodel.data.utils.WorldInfo.name">name (WorldInfo attribute)</a>
 </li>
-      <li><a href="../stable_worldmodel/#stable_worldmodel.data.VariationInfo.names">names (VariationInfo attribute)</a>
+      <li><a href="../stable_worldmodel.data/#stable_worldmodel.data.utils.VariationInfo.names">names (VariationInfo attribute)</a>
 </li>
       <li><a href="../api/generated/stable_worldmodel.spaces.Dict/#stable_worldmodel.spaces.Dict.names">names() (Dict method)</a>, <a href="../stable_worldmodel/#stable_worldmodel.spaces.Dict.names">[1]</a>
 </li>
@@ -883,10 +1038,16 @@
   <h2 id="O">O</h2>
   <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul style="margin-left:0;list-style-type:none">
-      <li><a href="../api/world/#stable_worldmodel.world.World.observation_space">observation_space (World property)</a>, <a href="../stable_worldmodel/#stable_worldmodel.World.observation_space">[1]</a>, <a href="../stable_worldmodel/#stable_worldmodel.world.World.observation_space">[2]</a>
+      <li><a href="../stable_worldmodel.envs.pusht/#stable_worldmodel.envs.pusht.PushT.observation_space">observation_space (PushT attribute)</a>
 
       <ul style="list-style-type:none">
-        <li><a href="../stable_worldmodel/#stable_worldmodel.data.WorldInfo.observation_space">(WorldInfo attribute)</a>
+        <li><a href="../stable_worldmodel.envs.pusht/#stable_worldmodel.envs.pusht.PushTDiscrete.observation_space">(PushTDiscrete attribute)</a>
+</li>
+        <li><a href="../stable_worldmodel.envs.two_room/#stable_worldmodel.envs.two_room.TwoRoomEnv.observation_space">(TwoRoomEnv attribute)</a>
+</li>
+        <li><a href="../api/world/#stable_worldmodel.world.World.observation_space">(World property)</a>, <a href="../stable_worldmodel/#stable_worldmodel.World.observation_space">[1]</a>, <a href="../stable_worldmodel/#stable_worldmodel.world.World.observation_space">[2]</a>
+</li>
+        <li><a href="../stable_worldmodel.data/#stable_worldmodel.data.utils.WorldInfo.observation_space">(WorldInfo attribute)</a>
 </li>
       </ul></li>
   </ul></td>
@@ -898,6 +1059,8 @@
   <td style="width: 33%; vertical-align: top;"><ul style="margin-left:0;list-style-type:none">
       <li><a href="../stable_worldmodel.envs/#stable_worldmodel.envs.utils.perturb_camera_angle">perturb_camera_angle() (in module stable_worldmodel.envs.utils)</a>
 </li>
+      <li><a href="../stable_worldmodel.solver/#stable_worldmodel.solver.discrete_solvers.PGDSolver">PGDSolver (class in stable_worldmodel.solver.discrete_solvers)</a>
+</li>
       <li><a href="../api/generated/stable_worldmodel.policy.PlanConfig/#stable_worldmodel.policy.PlanConfig.plan_len">plan_len (PlanConfig property)</a>, <a href="../stable_worldmodel/#stable_worldmodel.PlanConfig.plan_len">[1]</a>, <a href="../stable_worldmodel/#stable_worldmodel.policy.PlanConfig.plan_len">[2]</a>
 </li>
       <li><a href="../stable_worldmodel/#stable_worldmodel.PlanConfig">PlanConfig (class in stable_worldmodel)</a>
@@ -906,26 +1069,30 @@
         <li><a href="../api/generated/stable_worldmodel.policy.PlanConfig/#stable_worldmodel.policy.PlanConfig">(class in stable_worldmodel.policy)</a>, <a href="../stable_worldmodel/#stable_worldmodel.policy.PlanConfig">[1]</a>
 </li>
       </ul></li>
-      <li><a href="../stable_worldmodel.envs/#stable_worldmodel.envs.ogbench_cube.CubeEnv.post_compilation_objects">post_compilation_objects() (CubeEnv method)</a>
+      <li><a href="../stable_worldmodel.envs/#stable_worldmodel.envs.quantizer.PolarQuantizer">PolarQuantizer (class in stable_worldmodel.envs.quantizer)</a>
+</li>
+      <li><a href="../stable_worldmodel.envs.ogbench_manip/#stable_worldmodel.envs.ogbench_manip.CubeEnv.post_compilation_objects">post_compilation_objects() (CubeEnv method)</a>, <a href="../stable_worldmodel.envs.ogbench_manip/#stable_worldmodel.envs.ogbench_manip.cube_env.CubeEnv.post_compilation_objects">[1]</a>
 
       <ul style="list-style-type:none">
-        <li><a href="../stable_worldmodel.envs/#stable_worldmodel.envs.ogbench_scene.SceneEnv.post_compilation_objects">(SceneEnv method)</a>
+        <li><a href="../stable_worldmodel.envs.ogbench_manip/#stable_worldmodel.envs.ogbench_manip.SceneEnv.post_compilation_objects">(SceneEnv method)</a>, <a href="../stable_worldmodel.envs.ogbench_manip/#stable_worldmodel.envs.ogbench_manip.scene_env.SceneEnv.post_compilation_objects">[1]</a>
 </li>
       </ul></li>
-      <li><a href="../stable_worldmodel.envs/#stable_worldmodel.envs.ogbench_cube.CubeEnv.post_step">post_step() (CubeEnv method)</a>
+      <li><a href="../stable_worldmodel.envs.ogbench_manip/#stable_worldmodel.envs.ogbench_manip.CubeEnv.post_step">post_step() (CubeEnv method)</a>, <a href="../stable_worldmodel.envs.ogbench_manip/#stable_worldmodel.envs.ogbench_manip.cube_env.CubeEnv.post_step">[1]</a>
 
       <ul style="list-style-type:none">
-        <li><a href="../stable_worldmodel.envs/#stable_worldmodel.envs.ogbench_scene.SceneEnv.post_step">(SceneEnv method)</a>
+        <li><a href="../stable_worldmodel.envs.ogbench_manip/#stable_worldmodel.envs.ogbench_manip.SceneEnv.post_step">(SceneEnv method)</a>, <a href="../stable_worldmodel.envs.ogbench_manip/#stable_worldmodel.envs.ogbench_manip.scene_env.SceneEnv.post_step">[1]</a>
 </li>
       </ul></li>
+      <li><a href="../stable_worldmodel.envs.ogbench_manip/#stable_worldmodel.envs.ogbench_manip.SceneEnv.pre_step">pre_step() (SceneEnv method)</a>, <a href="../stable_worldmodel.envs.ogbench_manip/#stable_worldmodel.envs.ogbench_manip.scene_env.SceneEnv.pre_step">[1]</a>
+</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul style="margin-left:0;list-style-type:none">
-      <li><a href="../stable_worldmodel.envs/#stable_worldmodel.envs.ogbench_scene.SceneEnv.pre_step">pre_step() (SceneEnv method)</a>
-</li>
       <li><a href="../stable_worldmodel.wm/#stable_worldmodel.wm.DINOWM.predict">predict() (DINOWM method)</a>, <a href="../stable_worldmodel.wm/#stable_worldmodel.wm.dinowm.DINOWM.predict">[1]</a>
 
       <ul style="list-style-type:none">
         <li><a href="../stable_worldmodel.wm/#stable_worldmodel.wm.DummyWorldModel.predict">(DummyWorldModel method)</a>, <a href="../stable_worldmodel.wm/#stable_worldmodel.wm.dummy.DummyWorldModel.predict">[1]</a>
+</li>
+        <li><a href="../stable_worldmodel.wm/#stable_worldmodel.wm.PYRO.predict">(PYRO method)</a>, <a href="../stable_worldmodel.wm/#stable_worldmodel.wm.pyro.PYRO.predict">[1]</a>
 </li>
       </ul></li>
       <li><a href="../stable_worldmodel/#stable_worldmodel.pretraining">pretraining() (in module stable_worldmodel)</a>
@@ -934,10 +1101,26 @@
         <li><a href="../stable_worldmodel/#stable_worldmodel.utils.pretraining">(in module stable_worldmodel.utils)</a>
 </li>
       </ul></li>
-      <li><a href="../stable_worldmodel.envs/#stable_worldmodel.envs.pusht.PushT">PushT (class in stable_worldmodel.envs.pusht)</a>
+      <li><a href="../stable_worldmodel.envs.pusht/#stable_worldmodel.envs.pusht.PushT">PushT (class in stable_worldmodel.envs.pusht)</a>
+
+      <ul style="list-style-type:none">
+        <li><a href="../stable_worldmodel.envs.pusht/#stable_worldmodel.envs.pusht.env.PushT">(class in stable_worldmodel.envs.pusht.env)</a>
 </li>
+      </ul></li>
+      <li><a href="../stable_worldmodel.envs.pusht/#stable_worldmodel.envs.pusht.PushTDiscrete">PushTDiscrete (class in stable_worldmodel.envs.pusht)</a>
+
+      <ul style="list-style-type:none">
+        <li><a href="../stable_worldmodel.envs.pusht/#stable_worldmodel.envs.pusht.env_discrete.PushTDiscrete">(class in stable_worldmodel.envs.pusht.env_discrete)</a>
+</li>
+      </ul></li>
       <li><a href="../stable_worldmodel.envs/#stable_worldmodel.envs.utils.pymunk_to_shapely">pymunk_to_shapely() (in module stable_worldmodel.envs.utils)</a>
 </li>
+      <li><a href="../stable_worldmodel.wm/#stable_worldmodel.wm.PYRO">PYRO (class in stable_worldmodel.wm)</a>
+
+      <ul style="list-style-type:none">
+        <li><a href="../stable_worldmodel.wm/#stable_worldmodel.wm.pyro.PYRO">(class in stable_worldmodel.wm.pyro)</a>
+</li>
+      </ul></li>
   </ul></td>
   </tr>
       </table>
@@ -945,8 +1128,18 @@
   <h2 id="Q">Q</h2>
   <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul style="margin-left:0;list-style-type:none">
+      <li><a href="../stable_worldmodel.envs/#stable_worldmodel.envs.quantizer.Quantizable">Quantizable (class in stable_worldmodel.envs.quantizer)</a>
+</li>
       <li><a href="../stable_worldmodel.wm/#stable_worldmodel.wm.dinowm.Quantize">Quantize (class in stable_worldmodel.wm.dinowm)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul style="margin-left:0;list-style-type:none">
+      <li><a href="../stable_worldmodel.envs/#stable_worldmodel.envs.quantizer.PolarQuantizer.quantize">quantize() (PolarQuantizer method)</a>
+
+      <ul style="list-style-type:none">
+        <li><a href="../stable_worldmodel.envs/#stable_worldmodel.envs.quantizer.Quantizable.quantize">(Quantizable method)</a>
+</li>
+      </ul></li>
   </ul></td>
   </tr>
       </table>
@@ -972,28 +1165,38 @@
 </li>
       <li><a href="../stable_worldmodel.envs/#stable_worldmodel.envs.register">register() (in module stable_worldmodel.envs)</a>
 </li>
-      <li><a href="../stable_worldmodel.envs/#stable_worldmodel.envs.ogbench_cube.CubeEnv.render">render() (CubeEnv method)</a>
+      <li><a href="../stable_worldmodel.envs.ogbench_manip/#stable_worldmodel.envs.ogbench_manip.CubeEnv.render">render() (CubeEnv method)</a>, <a href="../stable_worldmodel.envs.ogbench_manip/#stable_worldmodel.envs.ogbench_manip.cube_env.CubeEnv.render">[1]</a>
 
       <ul style="list-style-type:none">
         <li><a href="../stable_worldmodel.envs/#stable_worldmodel.envs.image_positioning.ImagePositioning.render">(ImagePositioning method)</a>
 </li>
-        <li><a href="../stable_worldmodel.envs/#stable_worldmodel.envs.pusht.PushT.render">(PushT method)</a>
+        <li><a href="../stable_worldmodel.envs.pusht/#stable_worldmodel.envs.pusht.PushT.render">(PushT method)</a>, <a href="../stable_worldmodel.envs.pusht/#stable_worldmodel.envs.pusht.env.PushT.render">[1]</a>
 </li>
-        <li><a href="../stable_worldmodel.envs/#stable_worldmodel.envs.ogbench_scene.SceneEnv.render">(SceneEnv method)</a>
+        <li><a href="../stable_worldmodel.envs.ogbench_manip/#stable_worldmodel.envs.ogbench_manip.SceneEnv.render">(SceneEnv method)</a>, <a href="../stable_worldmodel.envs.ogbench_manip/#stable_worldmodel.envs.ogbench_manip.scene_env.SceneEnv.render">[1]</a>
+</li>
+        <li><a href="../stable_worldmodel.envs.simple_nav/#stable_worldmodel.envs.simple_nav.SimpleNavigationEnv.render">(SimpleNavigationEnv method)</a>, <a href="../stable_worldmodel.envs.simple_nav/#stable_worldmodel.envs.simple_nav.env.SimpleNavigationEnv.render">[1]</a>
 </li>
         <li><a href="../stable_worldmodel.envs/#stable_worldmodel.envs.simple_point_maze.SimplePointMazeEnv.render">(SimplePointMazeEnv method)</a>
 </li>
-        <li><a href="../stable_worldmodel.envs/#stable_worldmodel.envs.two_room.TwoRoomEnv.render">(TwoRoomEnv method)</a>
+        <li><a href="../stable_worldmodel.envs.two_room/#stable_worldmodel.envs.two_room.TwoRoomEnv.render">(TwoRoomEnv method)</a>, <a href="../stable_worldmodel.envs.two_room/#stable_worldmodel.envs.two_room.env.TwoRoomEnv.render">[1]</a>
 </li>
         <li><a href="../stable_worldmodel.envs/#stable_worldmodel.envs.voidrun.VoidRunEnv.render">(VoidRunEnv method)</a>
 </li>
       </ul></li>
       <li><a href="../stable_worldmodel.envs/#stable_worldmodel.envs.voidrun.VoidRunEnv.render_board">render_board() (VoidRunEnv method)</a>
 </li>
-      <li><a href="../stable_worldmodel.envs/#stable_worldmodel.envs.ogbench_cube.CubeEnv.render_multiview">render_multiview() (CubeEnv method)</a>
+      <li><a href="../stable_worldmodel.envs.ogbench_manip/#stable_worldmodel.envs.ogbench_manip.CubeEnv.render_multiview">render_multiview() (CubeEnv method)</a>, <a href="../stable_worldmodel.envs.ogbench_manip/#stable_worldmodel.envs.ogbench_manip.cube_env.CubeEnv.render_multiview">[1]</a>
+
+      <ul style="list-style-type:none">
+        <li><a href="../stable_worldmodel.envs.ogbench_manip/#stable_worldmodel.envs.ogbench_manip.SceneEnv.render_multiview">(SceneEnv method)</a>, <a href="../stable_worldmodel.envs.ogbench_manip/#stable_worldmodel.envs.ogbench_manip.scene_env.SceneEnv.render_multiview">[1]</a>
 </li>
+      </ul></li>
       <li><a href="../stable_worldmodel.wm/#stable_worldmodel.wm.DINOWM.replace_action_in_embedding">replace_action_in_embedding() (DINOWM method)</a>, <a href="../stable_worldmodel.wm/#stable_worldmodel.wm.dinowm.DINOWM.replace_action_in_embedding">[1]</a>
+
+      <ul style="list-style-type:none">
+        <li><a href="../stable_worldmodel.wm/#stable_worldmodel.wm.PYRO.replace_action_in_embedding">(PYRO method)</a>, <a href="../stable_worldmodel.wm/#stable_worldmodel.wm.pyro.PYRO.replace_action_in_embedding">[1]</a>
 </li>
+      </ul></li>
       <li><a href="../stable_worldmodel.wm/#stable_worldmodel.wm.dinowm.ResBlock">ResBlock (class in stable_worldmodel.wm.dinowm)</a>
 </li>
       <li><a href="../api/generated/stable_worldmodel.wrappers.AddPixelsWrapper/#stable_worldmodel.wrappers.AddPixelsWrapper.reset">reset() (AddPixelsWrapper method)</a>, <a href="../stable_worldmodel/#stable_worldmodel.wrappers.AddPixelsWrapper.reset">[1]</a>
@@ -1001,7 +1204,7 @@
       <ul style="list-style-type:none">
         <li><a href="../api/generated/stable_worldmodel.spaces.Box/#stable_worldmodel.spaces.Box.reset">(Box method)</a>, <a href="../stable_worldmodel/#stable_worldmodel.spaces.Box.reset">[1]</a>
 </li>
-        <li><a href="../stable_worldmodel.envs/#stable_worldmodel.envs.ogbench_cube.CubeEnv.reset">(CubeEnv method)</a>
+        <li><a href="../stable_worldmodel.envs.ogbench_manip/#stable_worldmodel.envs.ogbench_manip.CubeEnv.reset">(CubeEnv method)</a>, <a href="../stable_worldmodel.envs.ogbench_manip/#stable_worldmodel.envs.ogbench_manip.cube_env.CubeEnv.reset">[1]</a>
 </li>
         <li><a href="../api/generated/stable_worldmodel.spaces.Dict/#stable_worldmodel.spaces.Dict.reset">(Dict method)</a>, <a href="../stable_worldmodel/#stable_worldmodel.spaces.Dict.reset">[1]</a>
 </li>
@@ -1021,17 +1224,19 @@
 </li>
         <li><a href="../api/generated/stable_worldmodel.spaces.MultiDiscrete/#stable_worldmodel.spaces.MultiDiscrete.reset">(MultiDiscrete method)</a>, <a href="../stable_worldmodel/#stable_worldmodel.spaces.MultiDiscrete.reset">[1]</a>
 </li>
-        <li><a href="../stable_worldmodel.envs/#stable_worldmodel.envs.pusht.PushT.reset">(PushT method)</a>
+        <li><a href="../stable_worldmodel.envs.pusht/#stable_worldmodel.envs.pusht.PushT.reset">(PushT method)</a>, <a href="../stable_worldmodel.envs.pusht/#stable_worldmodel.envs.pusht.env.PushT.reset">[1]</a>
 </li>
         <li><a href="../api/generated/stable_worldmodel.wrappers.ResizeGoalWrapper/#stable_worldmodel.wrappers.ResizeGoalWrapper.reset">(ResizeGoalWrapper method)</a>, <a href="../stable_worldmodel/#stable_worldmodel.wrappers.ResizeGoalWrapper.reset">[1]</a>
 </li>
-        <li><a href="../stable_worldmodel.envs/#stable_worldmodel.envs.ogbench_scene.SceneEnv.reset">(SceneEnv method)</a>
+        <li><a href="../stable_worldmodel.envs.ogbench_manip/#stable_worldmodel.envs.ogbench_manip.SceneEnv.reset">(SceneEnv method)</a>, <a href="../stable_worldmodel.envs.ogbench_manip/#stable_worldmodel.envs.ogbench_manip.scene_env.SceneEnv.reset">[1]</a>
+</li>
+        <li><a href="../stable_worldmodel.envs.simple_nav/#stable_worldmodel.envs.simple_nav.SimpleNavigationEnv.reset">(SimpleNavigationEnv method)</a>, <a href="../stable_worldmodel.envs.simple_nav/#stable_worldmodel.envs.simple_nav.env.SimpleNavigationEnv.reset">[1]</a>
 </li>
         <li><a href="../stable_worldmodel.envs/#stable_worldmodel.envs.simple_point_maze.SimplePointMazeEnv.reset">(SimplePointMazeEnv method)</a>
 </li>
         <li><a href="../stable_worldmodel/#stable_worldmodel.wrappers.StackedWrapper.reset">(StackedWrapper method)</a>
 </li>
-        <li><a href="../stable_worldmodel.envs/#stable_worldmodel.envs.two_room.TwoRoomEnv.reset">(TwoRoomEnv method)</a>
+        <li><a href="../stable_worldmodel.envs.two_room/#stable_worldmodel.envs.two_room.TwoRoomEnv.reset">(TwoRoomEnv method)</a>, <a href="../stable_worldmodel.envs.two_room/#stable_worldmodel.envs.two_room.env.TwoRoomEnv.reset">[1]</a>
 </li>
         <li><a href="../stable_worldmodel.envs/#stable_worldmodel.envs.voidrun.VoidRunEnv.reset">(VoidRunEnv method)</a>
 </li>
@@ -1042,14 +1247,22 @@
   <td style="width: 33%; vertical-align: top;"><ul style="margin-left:0;list-style-type:none">
       <li><a href="../api/generated/stable_worldmodel.wrappers.ResizeGoalWrapper/#stable_worldmodel.wrappers.ResizeGoalWrapper">ResizeGoalWrapper (class in stable_worldmodel.wrappers)</a>, <a href="../stable_worldmodel/#stable_worldmodel.wrappers.ResizeGoalWrapper">[1]</a>
 </li>
-      <li><a href="../stable_worldmodel.envs/#stable_worldmodel.envs.pusht.PushT.reward_range">reward_range (PushT attribute)</a>
+      <li><a href="../stable_worldmodel.envs.pusht/#stable_worldmodel.envs.pusht.PushT.reward_range">reward_range (PushT attribute)</a>, <a href="../stable_worldmodel.envs.pusht/#stable_worldmodel.envs.pusht.env.PushT.reward_range">[1]</a>
+
+      <ul style="list-style-type:none">
+        <li><a href="../stable_worldmodel.envs.pusht/#stable_worldmodel.envs.pusht.PushTDiscrete.reward_range">(PushTDiscrete attribute)</a>, <a href="../stable_worldmodel.envs.pusht/#stable_worldmodel.envs.pusht.env_discrete.PushTDiscrete.reward_range">[1]</a>
 </li>
+      </ul></li>
       <li><a href="../api/generated/stable_worldmodel.spaces.RGBBox/#stable_worldmodel.spaces.RGBBox">RGBBox (class in stable_worldmodel.spaces)</a>, <a href="../stable_worldmodel/#stable_worldmodel.spaces.RGBBox">[1]</a>
 </li>
       <li><a href="../stable_worldmodel.envs/#stable_worldmodel.envs.voidrun.Action.RIGHT">RIGHT (Action attribute)</a>
 </li>
       <li><a href="../stable_worldmodel.wm/#stable_worldmodel.wm.DINOWM.rollout">rollout() (DINOWM method)</a>, <a href="../stable_worldmodel.wm/#stable_worldmodel.wm.dinowm.DINOWM.rollout">[1]</a>
+
+      <ul style="list-style-type:none">
+        <li><a href="../stable_worldmodel.wm/#stable_worldmodel.wm.PYRO.rollout">(PYRO method)</a>, <a href="../stable_worldmodel.wm/#stable_worldmodel.wm.pyro.PYRO.rollout">[1]</a>
 </li>
+      </ul></li>
   </ul></td>
   </tr>
       </table>
@@ -1069,42 +1282,86 @@
       </ul></li>
       <li><a href="../api/generated/stable_worldmodel.spaces.Dict/#stable_worldmodel.spaces.Dict.sampling_order">sampling_order (Dict property)</a>, <a href="../stable_worldmodel/#stable_worldmodel.spaces.Dict.sampling_order">[1]</a>
 </li>
-      <li><a href="../stable_worldmodel.envs/#stable_worldmodel.envs.ogbench_scene.SceneEnv">SceneEnv (class in stable_worldmodel.envs.ogbench_scene)</a>
+      <li><a href="../stable_worldmodel.envs.ogbench_manip/#stable_worldmodel.envs.ogbench_manip.SceneEnv">SceneEnv (class in stable_worldmodel.envs.ogbench_manip)</a>
+
+      <ul style="list-style-type:none">
+        <li><a href="../stable_worldmodel.envs.ogbench_manip/#stable_worldmodel.envs.ogbench_manip.scene_env.SceneEnv">(class in stable_worldmodel.envs.ogbench_manip.scene_env)</a>
 </li>
-      <li><a href="../stable_worldmodel.envs/#stable_worldmodel.envs.two_room.TwoRoomEnv.seed">seed() (TwoRoomEnv method)</a>
+      </ul></li>
+      <li><a href="../stable_worldmodel.envs.two_room/#stable_worldmodel.envs.two_room.TwoRoomEnv.seed">seed() (TwoRoomEnv method)</a>, <a href="../stable_worldmodel.envs.two_room/#stable_worldmodel.envs.two_room.env.TwoRoomEnv.seed">[1]</a>
+</li>
+      <li><a href="../stable_worldmodel.envs.ogbench_manip/#stable_worldmodel.envs.ogbench_manip.SceneEnv.set_cube_target_pos">set_cube_target_pos() (SceneEnv method)</a>, <a href="../stable_worldmodel.envs.ogbench_manip/#stable_worldmodel.envs.ogbench_manip.scene_env.SceneEnv.set_cube_target_pos">[1]</a>
 </li>
       <li><a href="../api/generated/stable_worldmodel.policy.BasePolicy/#stable_worldmodel.policy.BasePolicy.set_env">set_env() (BasePolicy method)</a>, <a href="../stable_worldmodel/#stable_worldmodel.policy.BasePolicy.set_env">[1]</a>
 
       <ul style="list-style-type:none">
+        <li><a href="../stable_worldmodel.envs.ogbench_manip/#stable_worldmodel.envs.ogbench_manip.ExpertPolicy.set_env">(ExpertPolicy method)</a>, <a href="../stable_worldmodel.envs.ogbench_manip/#stable_worldmodel.envs.ogbench_manip.expert_policy.ExpertPolicy.set_env">[1]</a>, <a href="../stable_worldmodel.envs.simple_nav/#stable_worldmodel.envs.simple_nav.ExpertPolicy.set_env">[2]</a>, <a href="../stable_worldmodel.envs.simple_nav/#stable_worldmodel.envs.simple_nav.expert_policy.ExpertPolicy.set_env">[3]</a>, <a href="../stable_worldmodel.envs.two_room/#stable_worldmodel.envs.two_room.ExpertPolicy.set_env">[4]</a>, <a href="../stable_worldmodel.envs.two_room/#stable_worldmodel.envs.two_room.expert_policy.ExpertPolicy.set_env">[5]</a>
+</li>
+        <li><a href="../stable_worldmodel.envs.pusht/#stable_worldmodel.envs.pusht.WeakPolicy.set_env">(WeakPolicy method)</a>, <a href="../stable_worldmodel.envs.pusht/#stable_worldmodel.envs.pusht.expert_policy.WeakPolicy.set_env">[1]</a>
+</li>
         <li><a href="../api/generated/stable_worldmodel.policy.WorldModelPolicy/#stable_worldmodel.policy.WorldModelPolicy.set_env">(WorldModelPolicy method)</a>, <a href="../stable_worldmodel/#stable_worldmodel.policy.WorldModelPolicy.set_env">[1]</a>
 </li>
       </ul></li>
-      <li><a href="../stable_worldmodel.envs/#stable_worldmodel.envs.ogbench_cube.CubeEnv.set_new_target">set_new_target() (CubeEnv method)</a>
+      <li><a href="../api/generated/stable_worldmodel.spaces.Box/#stable_worldmodel.spaces.Box.set_init_value">set_init_value() (Box method)</a>, <a href="../stable_worldmodel/#stable_worldmodel.spaces.Box.set_init_value">[1]</a>
 
       <ul style="list-style-type:none">
-        <li><a href="../stable_worldmodel.envs/#stable_worldmodel.envs.ogbench_scene.SceneEnv.set_new_target">(SceneEnv method)</a>
+        <li><a href="../api/generated/stable_worldmodel.spaces.Dict/#stable_worldmodel.spaces.Dict.set_init_value">(Dict method)</a>, <a href="../stable_worldmodel/#stable_worldmodel.spaces.Dict.set_init_value">[1]</a>
+</li>
+        <li><a href="../api/generated/stable_worldmodel.spaces.Discrete/#stable_worldmodel.spaces.Discrete.set_init_value">(Discrete method)</a>, <a href="../stable_worldmodel/#stable_worldmodel.spaces.Discrete.set_init_value">[1]</a>
+</li>
+        <li><a href="../api/generated/stable_worldmodel.spaces.MultiDiscrete/#stable_worldmodel.spaces.MultiDiscrete.set_init_value">(MultiDiscrete method)</a>, <a href="../stable_worldmodel/#stable_worldmodel.spaces.MultiDiscrete.set_init_value">[1]</a>
+</li>
+      </ul></li>
+      <li><a href="../stable_worldmodel.envs.ogbench_manip/#stable_worldmodel.envs.ogbench_manip.CubeEnv.set_new_target">set_new_target() (CubeEnv method)</a>, <a href="../stable_worldmodel.envs.ogbench_manip/#stable_worldmodel.envs.ogbench_manip.cube_env.CubeEnv.set_new_target">[1]</a>
+
+      <ul style="list-style-type:none">
+        <li><a href="../stable_worldmodel.envs.ogbench_manip/#stable_worldmodel.envs.ogbench_manip.SceneEnv.set_new_target">(SceneEnv method)</a>, <a href="../stable_worldmodel.envs.ogbench_manip/#stable_worldmodel.envs.ogbench_manip.scene_env.SceneEnv.set_new_target">[1]</a>
 </li>
       </ul></li>
       <li><a href="../api/world/#stable_worldmodel.world.World.set_policy">set_policy() (World method)</a>, <a href="../stable_worldmodel/#stable_worldmodel.World.set_policy">[1]</a>, <a href="../stable_worldmodel/#stable_worldmodel.world.World.set_policy">[2]</a>
 </li>
       <li><a href="../api/generated/stable_worldmodel.policy.RandomPolicy/#stable_worldmodel.policy.RandomPolicy.set_seed">set_seed() (RandomPolicy method)</a>, <a href="../stable_worldmodel/#stable_worldmodel.policy.RandomPolicy.set_seed">[1]</a>
 </li>
-      <li><a href="../stable_worldmodel.envs/#stable_worldmodel.envs.ogbench_scene.SceneEnv.set_state">set_state() (SceneEnv method)</a>
+      <li><a href="../stable_worldmodel.envs.ogbench_manip/#stable_worldmodel.envs.ogbench_manip.SceneEnv.set_state">set_state() (SceneEnv method)</a>, <a href="../stable_worldmodel.envs.ogbench_manip/#stable_worldmodel.envs.ogbench_manip.scene_env.SceneEnv.set_state">[1]</a>
 
       <ul style="list-style-type:none">
         <li><a href="../stable_worldmodel.envs/#stable_worldmodel.envs.voidrun.VoidRunEnv.set_state">(VoidRunEnv method)</a>
 </li>
       </ul></li>
-      <li><a href="../stable_worldmodel.envs/#stable_worldmodel.envs.ogbench_cube.CubeEnv.set_tasks">set_tasks() (CubeEnv method)</a>
+      <li><a href="../stable_worldmodel.envs.ogbench_manip/#stable_worldmodel.envs.ogbench_manip.SceneEnv.set_target_button_state">set_target_button_state() (SceneEnv method)</a>, <a href="../stable_worldmodel.envs.ogbench_manip/#stable_worldmodel.envs.ogbench_manip.scene_env.SceneEnv.set_target_button_state">[1]</a>
+</li>
+      <li><a href="../stable_worldmodel.envs.ogbench_manip/#stable_worldmodel.envs.ogbench_manip.SceneEnv.set_target_drawer_pos">set_target_drawer_pos() (SceneEnv method)</a>, <a href="../stable_worldmodel.envs.ogbench_manip/#stable_worldmodel.envs.ogbench_manip.scene_env.SceneEnv.set_target_drawer_pos">[1]</a>
+</li>
+      <li><a href="../stable_worldmodel.envs.ogbench_manip/#stable_worldmodel.envs.ogbench_manip.CubeEnv.set_target_pos">set_target_pos() (CubeEnv method)</a>, <a href="../stable_worldmodel.envs.ogbench_manip/#stable_worldmodel.envs.ogbench_manip.cube_env.CubeEnv.set_target_pos">[1]</a>
+</li>
+      <li><a href="../stable_worldmodel.envs.ogbench_manip/#stable_worldmodel.envs.ogbench_manip.SceneEnv.set_target_window_pos">set_target_window_pos() (SceneEnv method)</a>, <a href="../stable_worldmodel.envs.ogbench_manip/#stable_worldmodel.envs.ogbench_manip.scene_env.SceneEnv.set_target_window_pos">[1]</a>
+</li>
+      <li><a href="../stable_worldmodel.envs.ogbench_manip/#stable_worldmodel.envs.ogbench_manip.CubeEnv.set_tasks">set_tasks() (CubeEnv method)</a>, <a href="../stable_worldmodel.envs.ogbench_manip/#stable_worldmodel.envs.ogbench_manip.cube_env.CubeEnv.set_tasks">[1]</a>
 
       <ul style="list-style-type:none">
-        <li><a href="../stable_worldmodel.envs/#stable_worldmodel.envs.ogbench_scene.SceneEnv.set_tasks">(SceneEnv method)</a>
+        <li><a href="../stable_worldmodel.envs.ogbench_manip/#stable_worldmodel.envs.ogbench_manip.SceneEnv.set_tasks">(SceneEnv method)</a>, <a href="../stable_worldmodel.envs.ogbench_manip/#stable_worldmodel.envs.ogbench_manip.scene_env.SceneEnv.set_tasks">[1]</a>
 </li>
       </ul></li>
-      <li><a href="../stable_worldmodel/#stable_worldmodel.data.SpaceInfo.shape">shape (SpaceInfo attribute)</a>
+      <li><a href="../api/generated/stable_worldmodel.spaces.Box/#stable_worldmodel.spaces.Box.set_value">set_value() (Box method)</a>, <a href="../stable_worldmodel/#stable_worldmodel.spaces.Box.set_value">[1]</a>
+
+      <ul style="list-style-type:none">
+        <li><a href="../api/generated/stable_worldmodel.spaces.Dict/#stable_worldmodel.spaces.Dict.set_value">(Dict method)</a>, <a href="../stable_worldmodel/#stable_worldmodel.spaces.Dict.set_value">[1]</a>
+</li>
+        <li><a href="../api/generated/stable_worldmodel.spaces.Discrete/#stable_worldmodel.spaces.Discrete.set_value">(Discrete method)</a>, <a href="../stable_worldmodel/#stable_worldmodel.spaces.Discrete.set_value">[1]</a>
+</li>
+        <li><a href="../api/generated/stable_worldmodel.spaces.MultiDiscrete/#stable_worldmodel.spaces.MultiDiscrete.set_value">(MultiDiscrete method)</a>, <a href="../stable_worldmodel/#stable_worldmodel.spaces.MultiDiscrete.set_value">[1]</a>
+</li>
+      </ul></li>
+      <li><a href="../stable_worldmodel.data/#stable_worldmodel.data.utils.SpaceInfo.shape">shape (SpaceInfo attribute)</a>
 </li>
       <li><a href="../stable_worldmodel/#stable_worldmodel.cli.show">show() (in module stable_worldmodel.cli)</a>
 </li>
+      <li><a href="../stable_worldmodel.envs.simple_nav/#stable_worldmodel.envs.simple_nav.SimpleNavigationEnv">SimpleNavigationEnv (class in stable_worldmodel.envs.simple_nav)</a>
+
+      <ul style="list-style-type:none">
+        <li><a href="../stable_worldmodel.envs.simple_nav/#stable_worldmodel.envs.simple_nav.env.SimpleNavigationEnv">(class in stable_worldmodel.envs.simple_nav.env)</a>
+</li>
+      </ul></li>
       <li><a href="../stable_worldmodel.envs/#stable_worldmodel.envs.simple_point_maze.SimplePointMazeEnv">SimplePointMazeEnv (class in stable_worldmodel.envs.simple_point_maze)</a>
 </li>
       <li><a href="../api/world/#stable_worldmodel.world.World.single_action_space">single_action_space (World property)</a>, <a href="../stable_worldmodel/#stable_worldmodel.World.single_action_space">[1]</a>, <a href="../stable_worldmodel/#stable_worldmodel.world.World.single_action_space">[2]</a>
@@ -1116,11 +1373,13 @@
       <li><a href="../api/generated/stable_worldmodel.solver.CEMSolver/#stable_worldmodel.solver.CEMSolver.solve">solve() (CEMSolver method)</a>, <a href="../stable_worldmodel.solver/#stable_worldmodel.solver.CEMSolver.solve">[1]</a>, <a href="../stable_worldmodel.solver/#stable_worldmodel.solver.cem.CEMSolver.solve">[2]</a>
 
       <ul style="list-style-type:none">
-        <li><a href="../api/generated/stable_worldmodel.solver.GDSolver/#stable_worldmodel.solver.GDSolver.solve">(GDSolver method)</a>, <a href="../stable_worldmodel.solver/#stable_worldmodel.solver.GDSolver.solve">[1]</a>, <a href="../stable_worldmodel.solver/#stable_worldmodel.solver.gd.GDSolver.solve">[2]</a>
+        <li><a href="../stable_worldmodel.solver/#stable_worldmodel.solver.GradientSolver.solve">(GradientSolver method)</a>, <a href="../stable_worldmodel.solver/#stable_worldmodel.solver.gd.GradientSolver.solve">[1]</a>
 </li>
         <li><a href="../api/generated/stable_worldmodel.solver.MPPISolver/#stable_worldmodel.solver.MPPISolver.solve">(MPPISolver method)</a>, <a href="../stable_worldmodel.solver/#stable_worldmodel.solver.MPPISolver.solve">[1]</a>, <a href="../stable_worldmodel.solver/#stable_worldmodel.solver.mppi.MPPISolver.solve">[2]</a>
 </li>
         <li><a href="../api/generated/stable_worldmodel.solver.NevergradSolver/#stable_worldmodel.solver.NevergradSolver.solve">(NevergradSolver method)</a>, <a href="../stable_worldmodel.solver/#stable_worldmodel.solver.NevergradSolver.solve">[1]</a>, <a href="../stable_worldmodel.solver/#stable_worldmodel.solver.nevergrad.NevergradSolver.solve">[2]</a>
+</li>
+        <li><a href="../stable_worldmodel.solver/#stable_worldmodel.solver.discrete_solvers.PGDSolver.solve">(PGDSolver method)</a>
 </li>
         <li><a href="../api/generated/stable_worldmodel.solver.RandomSolver/#stable_worldmodel.solver.RandomSolver.solve">(RandomSolver method)</a>, <a href="../stable_worldmodel.solver/#stable_worldmodel.solver.RandomSolver.solve">[1]</a>, <a href="../stable_worldmodel.solver/#stable_worldmodel.solver.random.RandomSolver.solve">[2]</a>
 </li>
@@ -1133,10 +1392,14 @@
         <li><a href="../api/solver/#stable_worldmodel.solver.solver.Solver">(class in stable_worldmodel.solver.solver)</a>, <a href="../stable_worldmodel.solver/#stable_worldmodel.solver.solver.Solver">[1]</a>
 </li>
       </ul></li>
-      <li><a href="../stable_worldmodel/#stable_worldmodel.data.SpaceInfo">SpaceInfo (class in stable_worldmodel.data)</a>
+      <li><a href="../stable_worldmodel.data/#stable_worldmodel.data.utils.SpaceInfo">SpaceInfo (class in stable_worldmodel.data.utils)</a>
 </li>
       <li><a href="../stable_worldmodel.wm/#stable_worldmodel.wm.DINOWM.split_embedding">split_embedding() (DINOWM method)</a>, <a href="../stable_worldmodel.wm/#stable_worldmodel.wm.dinowm.DINOWM.split_embedding">[1]</a>
+
+      <ul style="list-style-type:none">
+        <li><a href="../stable_worldmodel.wm/#stable_worldmodel.wm.PYRO.split_embedding">(PYRO method)</a>, <a href="../stable_worldmodel.wm/#stable_worldmodel.wm.pyro.PYRO.split_embedding">[1]</a>
 </li>
+      </ul></li>
       <li>
     stable_worldmodel
 
@@ -1155,7 +1418,21 @@
     stable_worldmodel.data
 
       <ul style="list-style-type:none">
-        <li><a href="../stable_worldmodel/#module-stable_worldmodel.data">module</a>
+        <li><a href="../stable_worldmodel.data/#module-stable_worldmodel.data">module</a>
+</li>
+      </ul></li>
+      <li>
+    stable_worldmodel.data.dataset
+
+      <ul style="list-style-type:none">
+        <li><a href="../stable_worldmodel.data/#module-stable_worldmodel.data.dataset">module</a>
+</li>
+      </ul></li>
+      <li>
+    stable_worldmodel.data.utils
+
+      <ul style="list-style-type:none">
+        <li><a href="../stable_worldmodel.data/#module-stable_worldmodel.data.utils">module</a>
 </li>
       </ul></li>
       <li>
@@ -1173,24 +1450,89 @@
 </li>
       </ul></li>
       <li>
-    stable_worldmodel.envs.ogbench_cube
+    stable_worldmodel.envs.ogbench_manip
 
       <ul style="list-style-type:none">
-        <li><a href="../stable_worldmodel.envs/#module-stable_worldmodel.envs.ogbench_cube">module</a>
+        <li><a href="../stable_worldmodel.envs.ogbench_manip/#module-stable_worldmodel.envs.ogbench_manip">module</a>
 </li>
       </ul></li>
       <li>
-    stable_worldmodel.envs.ogbench_scene
+    stable_worldmodel.envs.ogbench_manip.cube_env
 
       <ul style="list-style-type:none">
-        <li><a href="../stable_worldmodel.envs/#module-stable_worldmodel.envs.ogbench_scene">module</a>
+        <li><a href="../stable_worldmodel.envs.ogbench_manip/#module-stable_worldmodel.envs.ogbench_manip.cube_env">module</a>
+</li>
+      </ul></li>
+      <li>
+    stable_worldmodel.envs.ogbench_manip.expert_policy
+
+      <ul style="list-style-type:none">
+        <li><a href="../stable_worldmodel.envs.ogbench_manip/#module-stable_worldmodel.envs.ogbench_manip.expert_policy">module</a>
+</li>
+      </ul></li>
+      <li>
+    stable_worldmodel.envs.ogbench_manip.scene_env
+
+      <ul style="list-style-type:none">
+        <li><a href="../stable_worldmodel.envs.ogbench_manip/#module-stable_worldmodel.envs.ogbench_manip.scene_env">module</a>
 </li>
       </ul></li>
       <li>
     stable_worldmodel.envs.pusht
 
       <ul style="list-style-type:none">
-        <li><a href="../stable_worldmodel.envs/#module-stable_worldmodel.envs.pusht">module</a>
+        <li><a href="../stable_worldmodel.envs.pusht/#module-stable_worldmodel.envs.pusht">module</a>
+</li>
+      </ul></li>
+      <li>
+    stable_worldmodel.envs.pusht.env
+
+      <ul style="list-style-type:none">
+        <li><a href="../stable_worldmodel.envs.pusht/#module-stable_worldmodel.envs.pusht.env">module</a>
+</li>
+      </ul></li>
+      <li>
+    stable_worldmodel.envs.pusht.env_discrete
+
+      <ul style="list-style-type:none">
+        <li><a href="../stable_worldmodel.envs.pusht/#module-stable_worldmodel.envs.pusht.env_discrete">module</a>
+</li>
+      </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul style="margin-left:0;list-style-type:none">
+      <li>
+    stable_worldmodel.envs.pusht.expert_policy
+
+      <ul style="list-style-type:none">
+        <li><a href="../stable_worldmodel.envs.pusht/#module-stable_worldmodel.envs.pusht.expert_policy">module</a>
+</li>
+      </ul></li>
+      <li>
+    stable_worldmodel.envs.quantizer
+
+      <ul style="list-style-type:none">
+        <li><a href="../stable_worldmodel.envs/#module-stable_worldmodel.envs.quantizer">module</a>
+</li>
+      </ul></li>
+      <li>
+    stable_worldmodel.envs.simple_nav
+
+      <ul style="list-style-type:none">
+        <li><a href="../stable_worldmodel.envs.simple_nav/#module-stable_worldmodel.envs.simple_nav">module</a>
+</li>
+      </ul></li>
+      <li>
+    stable_worldmodel.envs.simple_nav.env
+
+      <ul style="list-style-type:none">
+        <li><a href="../stable_worldmodel.envs.simple_nav/#module-stable_worldmodel.envs.simple_nav.env">module</a>
+</li>
+      </ul></li>
+      <li>
+    stable_worldmodel.envs.simple_nav.expert_policy
+
+      <ul style="list-style-type:none">
+        <li><a href="../stable_worldmodel.envs.simple_nav/#module-stable_worldmodel.envs.simple_nav.expert_policy">module</a>
 </li>
       </ul></li>
       <li>
@@ -1204,7 +1546,21 @@
     stable_worldmodel.envs.two_room
 
       <ul style="list-style-type:none">
-        <li><a href="../stable_worldmodel.envs/#module-stable_worldmodel.envs.two_room">module</a>
+        <li><a href="../stable_worldmodel.envs.two_room/#module-stable_worldmodel.envs.two_room">module</a>
+</li>
+      </ul></li>
+      <li>
+    stable_worldmodel.envs.two_room.env
+
+      <ul style="list-style-type:none">
+        <li><a href="../stable_worldmodel.envs.two_room/#module-stable_worldmodel.envs.two_room.env">module</a>
+</li>
+      </ul></li>
+      <li>
+    stable_worldmodel.envs.two_room.expert_policy
+
+      <ul style="list-style-type:none">
+        <li><a href="../stable_worldmodel.envs.two_room/#module-stable_worldmodel.envs.two_room.expert_policy">module</a>
 </li>
       </ul></li>
       <li>
@@ -1214,8 +1570,6 @@
         <li><a href="../stable_worldmodel.envs/#module-stable_worldmodel.envs.utils">module</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul style="margin-left:0;list-style-type:none">
       <li>
     stable_worldmodel.envs.voidrun
 
@@ -1242,6 +1596,13 @@
 
       <ul style="list-style-type:none">
         <li><a href="../stable_worldmodel.solver/#module-stable_worldmodel.solver.cem">module</a>
+</li>
+      </ul></li>
+      <li>
+    stable_worldmodel.solver.discrete_solvers
+
+      <ul style="list-style-type:none">
+        <li><a href="../stable_worldmodel.solver/#module-stable_worldmodel.solver.discrete_solvers">module</a>
 </li>
       </ul></li>
       <li>
@@ -1329,6 +1690,13 @@
 </li>
       </ul></li>
       <li>
+    stable_worldmodel.wm.pyro
+
+      <ul style="list-style-type:none">
+        <li><a href="../stable_worldmodel.wm/#module-stable_worldmodel.wm.pyro">module</a>
+</li>
+      </ul></li>
+      <li>
     stable_worldmodel.wm.tdmpc
 
       <ul style="list-style-type:none">
@@ -1366,23 +1734,25 @@
 </li>
         <li><a href="../api/generated/stable_worldmodel.wrappers.MegaWrapper/#stable_worldmodel.wrappers.MegaWrapper.step">(MegaWrapper method)</a>, <a href="../stable_worldmodel/#stable_worldmodel.wrappers.MegaWrapper.step">[1]</a>
 </li>
-        <li><a href="../stable_worldmodel.envs/#stable_worldmodel.envs.pusht.PushT.step">(PushT method)</a>
+        <li><a href="../stable_worldmodel.envs.pusht/#stable_worldmodel.envs.pusht.PushT.step">(PushT method)</a>, <a href="../stable_worldmodel.envs.pusht/#stable_worldmodel.envs.pusht.env.PushT.step">[1]</a>
+</li>
+        <li><a href="../stable_worldmodel.envs.pusht/#stable_worldmodel.envs.pusht.PushTDiscrete.step">(PushTDiscrete method)</a>, <a href="../stable_worldmodel.envs.pusht/#stable_worldmodel.envs.pusht.env_discrete.PushTDiscrete.step">[1]</a>
 </li>
         <li><a href="../api/generated/stable_worldmodel.wrappers.ResizeGoalWrapper/#stable_worldmodel.wrappers.ResizeGoalWrapper.step">(ResizeGoalWrapper method)</a>, <a href="../stable_worldmodel/#stable_worldmodel.wrappers.ResizeGoalWrapper.step">[1]</a>
+</li>
+        <li><a href="../stable_worldmodel.envs.simple_nav/#stable_worldmodel.envs.simple_nav.SimpleNavigationEnv.step">(SimpleNavigationEnv method)</a>, <a href="../stable_worldmodel.envs.simple_nav/#stable_worldmodel.envs.simple_nav.env.SimpleNavigationEnv.step">[1]</a>
 </li>
         <li><a href="../stable_worldmodel.envs/#stable_worldmodel.envs.simple_point_maze.SimplePointMazeEnv.step">(SimplePointMazeEnv method)</a>
 </li>
         <li><a href="../stable_worldmodel/#stable_worldmodel.wrappers.StackedWrapper.step">(StackedWrapper method)</a>
 </li>
-        <li><a href="../stable_worldmodel.envs/#stable_worldmodel.envs.two_room.TwoRoomEnv.step">(TwoRoomEnv method)</a>
+        <li><a href="../stable_worldmodel.envs.two_room/#stable_worldmodel.envs.two_room.TwoRoomEnv.step">(TwoRoomEnv method)</a>, <a href="../stable_worldmodel.envs.two_room/#stable_worldmodel.envs.two_room.env.TwoRoomEnv.step">[1]</a>
 </li>
         <li><a href="../stable_worldmodel.envs/#stable_worldmodel.envs.voidrun.VoidRunEnv.step">(VoidRunEnv method)</a>
 </li>
         <li><a href="../api/world/#stable_worldmodel.world.World.step">(World method)</a>, <a href="../stable_worldmodel/#stable_worldmodel.World.step">[1]</a>, <a href="../stable_worldmodel/#stable_worldmodel.world.World.step">[2]</a>
 </li>
       </ul></li>
-      <li><a href="../api/data/#stable_worldmodel.data.StepsDataset">StepsDataset (class in stable_worldmodel.data)</a>, <a href="../stable_worldmodel/#stable_worldmodel.data.StepsDataset">[1]</a>
-</li>
   </ul></td>
   </tr>
       </table>
@@ -1400,18 +1770,26 @@
         <li><a href="../stable_worldmodel/#stable_worldmodel.policy.Transformable.transform">(Transformable method)</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul style="margin-left:0;list-style-type:none">
       <li><a href="../stable_worldmodel/#stable_worldmodel.policy.Transformable">Transformable (class in stable_worldmodel.policy)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul style="margin-left:0;list-style-type:none">
       <li><a href="../stable_worldmodel.wm/#stable_worldmodel.wm.dinowm.Transformer">Transformer (class in stable_worldmodel.wm.dinowm)</a>
-</li>
-      <li><a href="../stable_worldmodel.envs/#stable_worldmodel.envs.two_room.TwoRoomEnv">TwoRoomEnv (class in stable_worldmodel.envs.two_room)</a>
-</li>
-      <li><a href="../stable_worldmodel/#stable_worldmodel.data.SpaceInfo.type">type (SpaceInfo attribute)</a>
 
       <ul style="list-style-type:none">
-        <li><a href="../stable_worldmodel/#stable_worldmodel.data.VariationInfo.type">(VariationInfo attribute)</a>
+        <li><a href="../stable_worldmodel.wm/#stable_worldmodel.wm.pyro.Transformer">(class in stable_worldmodel.wm.pyro)</a>
+</li>
+      </ul></li>
+      <li><a href="../stable_worldmodel.envs.two_room/#stable_worldmodel.envs.two_room.TwoRoomEnv">TwoRoomEnv (class in stable_worldmodel.envs.two_room)</a>
+
+      <ul style="list-style-type:none">
+        <li><a href="../stable_worldmodel.envs.two_room/#stable_worldmodel.envs.two_room.env.TwoRoomEnv">(class in stable_worldmodel.envs.two_room.env)</a>
+</li>
+      </ul></li>
+      <li><a href="../stable_worldmodel.data/#stable_worldmodel.data.utils.SpaceInfo.type">type (SpaceInfo attribute)</a>
+
+      <ul style="list-style-type:none">
+        <li><a href="../stable_worldmodel.data/#stable_worldmodel.data.utils.VariationInfo.type">(VariationInfo attribute)</a>
 </li>
       </ul></li>
   </ul></td>
@@ -1444,16 +1822,22 @@
         <li><a href="../api/generated/stable_worldmodel.spaces.MultiDiscrete/#stable_worldmodel.spaces.MultiDiscrete.value">(MultiDiscrete property)</a>, <a href="../stable_worldmodel/#stable_worldmodel.spaces.MultiDiscrete.value">[1]</a>
 </li>
       </ul></li>
-      <li><a href="../stable_worldmodel/#stable_worldmodel.data.WorldInfo.variation">variation (WorldInfo attribute)</a>
+      <li><a href="../stable_worldmodel.data/#stable_worldmodel.data.utils.WorldInfo.variation">variation (WorldInfo attribute)</a>
+</li>
+      <li><a href="../api/world/#stable_worldmodel.world.World.variation_space">variation_space (World property)</a>, <a href="../stable_worldmodel/#stable_worldmodel.World.variation_space">[1]</a>, <a href="../stable_worldmodel/#stable_worldmodel.world.World.variation_space">[2]</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul style="margin-left:0;list-style-type:none">
-      <li><a href="../api/world/#stable_worldmodel.world.World.variation_space">variation_space (World property)</a>, <a href="../stable_worldmodel/#stable_worldmodel.World.variation_space">[1]</a>, <a href="../stable_worldmodel/#stable_worldmodel.world.World.variation_space">[2]</a>
-</li>
-      <li><a href="../stable_worldmodel/#stable_worldmodel.data.VariationInfo">VariationInfo (class in stable_worldmodel.data)</a>
+      <li><a href="../stable_worldmodel.data/#stable_worldmodel.data.utils.VariationInfo">VariationInfo (class in stable_worldmodel.data.utils)</a>
 </li>
       <li><a href="../api/generated/stable_worldmodel.wrappers.VariationWrapper/#stable_worldmodel.wrappers.VariationWrapper">VariationWrapper (class in stable_worldmodel.wrappers)</a>, <a href="../stable_worldmodel/#stable_worldmodel.wrappers.VariationWrapper">[1]</a>
 </li>
+      <li><a href="../stable_worldmodel.data/#stable_worldmodel.data.VideoDataset">VideoDataset (class in stable_worldmodel.data)</a>
+
+      <ul style="list-style-type:none">
+        <li><a href="../stable_worldmodel.data/#stable_worldmodel.data.dataset.VideoDataset">(class in stable_worldmodel.data.dataset)</a>
+</li>
+      </ul></li>
       <li><a href="../stable_worldmodel.envs/#stable_worldmodel.envs.voidrun.VoidRunEnv">VoidRunEnv (class in stable_worldmodel.envs.voidrun)</a>
 </li>
       <li><a href="../stable_worldmodel.wm/#stable_worldmodel.wm.dinowm.VQVAE">VQVAE (class in stable_worldmodel.wm.dinowm)</a>
@@ -1467,6 +1851,12 @@
   <td style="width: 33%; vertical-align: top;"><ul style="margin-left:0;list-style-type:none">
       <li><a href="../api/generated/stable_worldmodel.policy.PlanConfig/#stable_worldmodel.policy.PlanConfig.warm_start">warm_start (PlanConfig attribute)</a>, <a href="../stable_worldmodel/#stable_worldmodel.PlanConfig.warm_start">[1]</a>, <a href="../stable_worldmodel/#stable_worldmodel.policy.PlanConfig.warm_start">[2]</a>
 </li>
+      <li><a href="../stable_worldmodel.envs.pusht/#stable_worldmodel.envs.pusht.WeakPolicy">WeakPolicy (class in stable_worldmodel.envs.pusht)</a>
+
+      <ul style="list-style-type:none">
+        <li><a href="../stable_worldmodel.envs.pusht/#stable_worldmodel.envs.pusht.expert_policy.WeakPolicy">(class in stable_worldmodel.envs.pusht.expert_policy)</a>
+</li>
+      </ul></li>
       <li><a href="../stable_worldmodel/#stable_worldmodel.World">World (class in stable_worldmodel)</a>
 
       <ul style="list-style-type:none">
@@ -1475,9 +1865,9 @@
       </ul></li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul style="margin-left:0;list-style-type:none">
-      <li><a href="../stable_worldmodel/#stable_worldmodel.data.world_info">world_info() (in module stable_worldmodel.data)</a>
+      <li><a href="../stable_worldmodel.data/#stable_worldmodel.data.utils.world_info">world_info() (in module stable_worldmodel.data.utils)</a>
 </li>
-      <li><a href="../stable_worldmodel/#stable_worldmodel.data.WorldInfo">WorldInfo (class in stable_worldmodel.data)</a>
+      <li><a href="../stable_worldmodel.data/#stable_worldmodel.data.utils.WorldInfo">WorldInfo (class in stable_worldmodel.data.utils)</a>
 </li>
       <li><a href="../api/generated/stable_worldmodel.policy.WorldModelPolicy/#stable_worldmodel.policy.WorldModelPolicy">WorldModelPolicy (class in stable_worldmodel.policy)</a>, <a href="../stable_worldmodel/#stable_worldmodel.policy.WorldModelPolicy">[1]</a>
 </li>
@@ -1497,9 +1887,9 @@
     </div><footer class="py-6 border-t border-border md:py-0">
     <div class="container flex flex-col items-center justify-between gap-4 md:h-24 md:flex-row">
       <div class="flex flex-col items-center gap-4 px-8 md:flex-row md:gap-2 md:px-0">
-        <p class="text-sm leading-loose text-center text-muted-foreground md:text-left">© 2025&nbsp;Built with <a class="font-medium underline underline-offset-4"
+        <p class="text-sm leading-loose text-center text-muted-foreground md:text-left">© 2026&nbsp;Built with <a class="font-medium underline underline-offset-4"
     href="https://www.sphinx-doc.org"
-    rel="noreferrer">Sphinx 8.2.3</a></p>
+    rel="noreferrer">Sphinx 8.1.3</a></p>
 </div>
 </div>
 </footer>

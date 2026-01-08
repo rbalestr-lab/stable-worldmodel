@@ -97,7 +97,6 @@
 </ul>
 </li>
 <li class="toctree-l1" x-data="{ expanded: $el.classList.contains('current') ? true : false }"><a :class="{ 'expanded' : expanded }" @click="expanded = !expanded" class="reference internal expandable" href="../api/solver/">Solver<button @click.prevent.stop="expanded = !expanded" type="button"><span class="sr-only"></span><svg fill="currentColor" height="18px" stroke="none" viewbox="0 0 24 24" width="18px" xmlns="http://www.w3.org/2000/svg"><path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"></path></svg></button></a><ul x-show="expanded">
-<li class="toctree-l2"><a class="reference internal" href="../api/generated/stable_worldmodel.solver.GDSolver/">GDSolver</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../api/generated/stable_worldmodel.solver.CEMSolver/">CEMSolver</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../api/generated/stable_worldmodel.solver.MPPISolver/">MPPISolver</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../api/generated/stable_worldmodel.solver.NevergradSolver/">NevergradSolver</a></li>
@@ -167,14 +166,20 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../stable_worldmodel/">stable_worldmodel package</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="../stable_worldmodel/#subpackages">Subpackages</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../stable_worldmodel.data/">stable_worldmodel.data package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../stable_worldmodel.data/#submodules">Submodules</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../stable_worldmodel.data/#module-stable_worldmodel.data.dataset">stable_worldmodel.data.dataset module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../stable_worldmodel.data/#module-stable_worldmodel.data.utils">stable_worldmodel.data.utils module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../stable_worldmodel.data/#module-stable_worldmodel.data">Module contents</a></li>
+</ul>
+</li>
 <li class="toctree-l3"><a class="reference internal" href="../stable_worldmodel.envs/">stable_worldmodel.envs package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../stable_worldmodel.envs/#subpackages">Subpackages</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../stable_worldmodel.envs/#submodules">Submodules</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../stable_worldmodel.envs/#module-stable_worldmodel.envs.image_positioning">stable_worldmodel.envs.image_positioning module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../stable_worldmodel.envs/#module-stable_worldmodel.envs.ogbench_cube">stable_worldmodel.envs.ogbench_cube module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../stable_worldmodel.envs/#module-stable_worldmodel.envs.ogbench_scene">stable_worldmodel.envs.ogbench_scene module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../stable_worldmodel.envs/#module-stable_worldmodel.envs.pusht">stable_worldmodel.envs.pusht module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../stable_worldmodel.envs/#module-stable_worldmodel.envs.quantizer">stable_worldmodel.envs.quantizer module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../stable_worldmodel.envs/#stable-worldmodel-envs-robocasa-module">stable_worldmodel.envs.robocasa module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../stable_worldmodel.envs/#module-stable_worldmodel.envs.simple_point_maze">stable_worldmodel.envs.simple_point_maze module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../stable_worldmodel.envs/#module-stable_worldmodel.envs.two_room">stable_worldmodel.envs.two_room module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../stable_worldmodel.envs/#module-stable_worldmodel.envs.utils">stable_worldmodel.envs.utils module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../stable_worldmodel.envs/#module-stable_worldmodel.envs.voidrun">stable_worldmodel.envs.voidrun module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../stable_worldmodel.envs/#module-stable_worldmodel.envs">Module contents</a></li>
@@ -183,6 +188,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../stable_worldmodel.solver/">stable_worldmodel.solver package</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="../stable_worldmodel.solver/#submodules">Submodules</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../stable_worldmodel.solver/#module-stable_worldmodel.solver.cem">stable_worldmodel.solver.cem module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../stable_worldmodel.solver/#module-stable_worldmodel.solver.discrete_solvers">stable_worldmodel.solver.discrete_solvers module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../stable_worldmodel.solver/#module-stable_worldmodel.solver.gd">stable_worldmodel.solver.gd module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../stable_worldmodel.solver/#module-stable_worldmodel.solver.mppi">stable_worldmodel.solver.mppi module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../stable_worldmodel.solver/#module-stable_worldmodel.solver.nevergrad">stable_worldmodel.solver.nevergrad module</a></li>
@@ -198,6 +204,7 @@
 <li class="toctree-l4"><a class="reference internal" href="../stable_worldmodel.wm/#module-stable_worldmodel.wm.dreamer">stable_worldmodel.wm.dreamer module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../stable_worldmodel.wm/#module-stable_worldmodel.wm.dummy">stable_worldmodel.wm.dummy module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../stable_worldmodel.wm/#module-stable_worldmodel.wm.frame">stable_worldmodel.wm.frame module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../stable_worldmodel.wm/#module-stable_worldmodel.wm.pyro">stable_worldmodel.wm.pyro module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../stable_worldmodel.wm/#module-stable_worldmodel.wm.tdmpc">stable_worldmodel.wm.tdmpc module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../stable_worldmodel.wm/#module-stable_worldmodel.wm">Module contents</a></li>
 </ul>
@@ -212,47 +219,6 @@
 <li class="toctree-l3"><a class="reference internal" href="../stable_worldmodel/#stable_worldmodel.cli.display_world_info"><code class="docutils literal notranslate"><span class="pre">display_world_info()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="../stable_worldmodel/#stable_worldmodel.cli.list_cmd"><code class="docutils literal notranslate"><span class="pre">list_cmd()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="../stable_worldmodel/#stable_worldmodel.cli.show"><code class="docutils literal notranslate"><span class="pre">show()</span></code></a></li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="../stable_worldmodel/#module-stable_worldmodel.data">stable_worldmodel.data module</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="../stable_worldmodel/#stable_worldmodel.data.SpaceInfo"><code class="docutils literal notranslate"><span class="pre">SpaceInfo</span></code></a><ul>
-<li class="toctree-l4"><a class="reference internal" href="../stable_worldmodel/#stable_worldmodel.data.SpaceInfo.dtype"><code class="docutils literal notranslate"><span class="pre">SpaceInfo.dtype</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="../stable_worldmodel/#stable_worldmodel.data.SpaceInfo.high"><code class="docutils literal notranslate"><span class="pre">SpaceInfo.high</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="../stable_worldmodel/#stable_worldmodel.data.SpaceInfo.low"><code class="docutils literal notranslate"><span class="pre">SpaceInfo.low</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="../stable_worldmodel/#stable_worldmodel.data.SpaceInfo.n"><code class="docutils literal notranslate"><span class="pre">SpaceInfo.n</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="../stable_worldmodel/#stable_worldmodel.data.SpaceInfo.shape"><code class="docutils literal notranslate"><span class="pre">SpaceInfo.shape</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="../stable_worldmodel/#stable_worldmodel.data.SpaceInfo.type"><code class="docutils literal notranslate"><span class="pre">SpaceInfo.type</span></code></a></li>
-</ul>
-</li>
-<li class="toctree-l3"><a class="reference internal" href="../stable_worldmodel/#stable_worldmodel.data.StepsDataset"><code class="docutils literal notranslate"><span class="pre">StepsDataset</span></code></a><ul>
-<li class="toctree-l4"><a class="reference internal" href="../stable_worldmodel/#stable_worldmodel.data.StepsDataset.__init__"><code class="docutils literal notranslate"><span class="pre">StepsDataset.__init__()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="../stable_worldmodel/#stable_worldmodel.data.StepsDataset.get_episode_slice"><code class="docutils literal notranslate"><span class="pre">StepsDataset.get_episode_slice()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="../stable_worldmodel/#stable_worldmodel.data.StepsDataset.infer_img_path_columns"><code class="docutils literal notranslate"><span class="pre">StepsDataset.infer_img_path_columns()</span></code></a></li>
-</ul>
-</li>
-<li class="toctree-l3"><a class="reference internal" href="../stable_worldmodel/#stable_worldmodel.data.VariationInfo"><code class="docutils literal notranslate"><span class="pre">VariationInfo</span></code></a><ul>
-<li class="toctree-l4"><a class="reference internal" href="../stable_worldmodel/#stable_worldmodel.data.VariationInfo.has_variation"><code class="docutils literal notranslate"><span class="pre">VariationInfo.has_variation</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="../stable_worldmodel/#stable_worldmodel.data.VariationInfo.names"><code class="docutils literal notranslate"><span class="pre">VariationInfo.names</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="../stable_worldmodel/#stable_worldmodel.data.VariationInfo.type"><code class="docutils literal notranslate"><span class="pre">VariationInfo.type</span></code></a></li>
-</ul>
-</li>
-<li class="toctree-l3"><a class="reference internal" href="../stable_worldmodel/#stable_worldmodel.data.WorldInfo"><code class="docutils literal notranslate"><span class="pre">WorldInfo</span></code></a><ul>
-<li class="toctree-l4"><a class="reference internal" href="../stable_worldmodel/#stable_worldmodel.data.WorldInfo.action_space"><code class="docutils literal notranslate"><span class="pre">WorldInfo.action_space</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="../stable_worldmodel/#stable_worldmodel.data.WorldInfo.config"><code class="docutils literal notranslate"><span class="pre">WorldInfo.config</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="../stable_worldmodel/#stable_worldmodel.data.WorldInfo.name"><code class="docutils literal notranslate"><span class="pre">WorldInfo.name</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="../stable_worldmodel/#stable_worldmodel.data.WorldInfo.observation_space"><code class="docutils literal notranslate"><span class="pre">WorldInfo.observation_space</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="../stable_worldmodel/#stable_worldmodel.data.WorldInfo.variation"><code class="docutils literal notranslate"><span class="pre">WorldInfo.variation</span></code></a></li>
-</ul>
-</li>
-<li class="toctree-l3"><a class="reference internal" href="../stable_worldmodel/#stable_worldmodel.data.dataset_info"><code class="docutils literal notranslate"><span class="pre">dataset_info()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="../stable_worldmodel/#stable_worldmodel.data.delete_dataset"><code class="docutils literal notranslate"><span class="pre">delete_dataset()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="../stable_worldmodel/#stable_worldmodel.data.delete_model"><code class="docutils literal notranslate"><span class="pre">delete_model()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="../stable_worldmodel/#stable_worldmodel.data.get_cache_dir"><code class="docutils literal notranslate"><span class="pre">get_cache_dir()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="../stable_worldmodel/#stable_worldmodel.data.is_image"><code class="docutils literal notranslate"><span class="pre">is_image()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="../stable_worldmodel/#stable_worldmodel.data.list_datasets"><code class="docutils literal notranslate"><span class="pre">list_datasets()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="../stable_worldmodel/#stable_worldmodel.data.list_models"><code class="docutils literal notranslate"><span class="pre">list_models()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="../stable_worldmodel/#stable_worldmodel.data.list_worlds"><code class="docutils literal notranslate"><span class="pre">list_worlds()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="../stable_worldmodel/#stable_worldmodel.data.world_info"><code class="docutils literal notranslate"><span class="pre">world_info()</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="../stable_worldmodel/#module-stable_worldmodel.policy">stable_worldmodel.policy module</a><ul>
@@ -301,6 +267,8 @@
 <li class="toctree-l4"><a class="reference internal" href="../stable_worldmodel/#stable_worldmodel.spaces.Box.init_value"><code class="docutils literal notranslate"><span class="pre">Box.init_value</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="../stable_worldmodel/#stable_worldmodel.spaces.Box.reset"><code class="docutils literal notranslate"><span class="pre">Box.reset()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="../stable_worldmodel/#stable_worldmodel.spaces.Box.sample"><code class="docutils literal notranslate"><span class="pre">Box.sample()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../stable_worldmodel/#stable_worldmodel.spaces.Box.set_init_value"><code class="docutils literal notranslate"><span class="pre">Box.set_init_value()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../stable_worldmodel/#stable_worldmodel.spaces.Box.set_value"><code class="docutils literal notranslate"><span class="pre">Box.set_value()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="../stable_worldmodel/#stable_worldmodel.spaces.Box.value"><code class="docutils literal notranslate"><span class="pre">Box.value</span></code></a></li>
 </ul>
 </li>
@@ -313,6 +281,8 @@
 <li class="toctree-l4"><a class="reference internal" href="../stable_worldmodel/#stable_worldmodel.spaces.Dict.reset"><code class="docutils literal notranslate"><span class="pre">Dict.reset()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="../stable_worldmodel/#stable_worldmodel.spaces.Dict.sample"><code class="docutils literal notranslate"><span class="pre">Dict.sample()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="../stable_worldmodel/#stable_worldmodel.spaces.Dict.sampling_order"><code class="docutils literal notranslate"><span class="pre">Dict.sampling_order</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../stable_worldmodel/#stable_worldmodel.spaces.Dict.set_init_value"><code class="docutils literal notranslate"><span class="pre">Dict.set_init_value()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../stable_worldmodel/#stable_worldmodel.spaces.Dict.set_value"><code class="docutils literal notranslate"><span class="pre">Dict.set_value()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="../stable_worldmodel/#stable_worldmodel.spaces.Dict.to_str"><code class="docutils literal notranslate"><span class="pre">Dict.to_str()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="../stable_worldmodel/#stable_worldmodel.spaces.Dict.update"><code class="docutils literal notranslate"><span class="pre">Dict.update()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="../stable_worldmodel/#stable_worldmodel.spaces.Dict.value"><code class="docutils literal notranslate"><span class="pre">Dict.value</span></code></a></li>
@@ -325,6 +295,8 @@
 <li class="toctree-l4"><a class="reference internal" href="../stable_worldmodel/#stable_worldmodel.spaces.Discrete.init_value"><code class="docutils literal notranslate"><span class="pre">Discrete.init_value</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="../stable_worldmodel/#stable_worldmodel.spaces.Discrete.reset"><code class="docutils literal notranslate"><span class="pre">Discrete.reset()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="../stable_worldmodel/#stable_worldmodel.spaces.Discrete.sample"><code class="docutils literal notranslate"><span class="pre">Discrete.sample()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../stable_worldmodel/#stable_worldmodel.spaces.Discrete.set_init_value"><code class="docutils literal notranslate"><span class="pre">Discrete.set_init_value()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../stable_worldmodel/#stable_worldmodel.spaces.Discrete.set_value"><code class="docutils literal notranslate"><span class="pre">Discrete.set_value()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="../stable_worldmodel/#stable_worldmodel.spaces.Discrete.value"><code class="docutils literal notranslate"><span class="pre">Discrete.value</span></code></a></li>
 </ul>
 </li>
@@ -335,6 +307,8 @@
 <li class="toctree-l4"><a class="reference internal" href="../stable_worldmodel/#stable_worldmodel.spaces.MultiDiscrete.init_value"><code class="docutils literal notranslate"><span class="pre">MultiDiscrete.init_value</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="../stable_worldmodel/#stable_worldmodel.spaces.MultiDiscrete.reset"><code class="docutils literal notranslate"><span class="pre">MultiDiscrete.reset()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="../stable_worldmodel/#stable_worldmodel.spaces.MultiDiscrete.sample"><code class="docutils literal notranslate"><span class="pre">MultiDiscrete.sample()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../stable_worldmodel/#stable_worldmodel.spaces.MultiDiscrete.set_init_value"><code class="docutils literal notranslate"><span class="pre">MultiDiscrete.set_init_value()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../stable_worldmodel/#stable_worldmodel.spaces.MultiDiscrete.set_value"><code class="docutils literal notranslate"><span class="pre">MultiDiscrete.set_value()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="../stable_worldmodel/#stable_worldmodel.spaces.MultiDiscrete.value"><code class="docutils literal notranslate"><span class="pre">MultiDiscrete.value</span></code></a></li>
 </ul>
 </li>
@@ -464,7 +438,7 @@
 </div><footer class="py-6 border-t border-border md:py-0">
 <div class="container flex flex-col items-center justify-between gap-4 md:h-24 md:flex-row">
 <div class="flex flex-col items-center gap-4 px-8 md:flex-row md:gap-2 md:px-0">
-<p class="text-sm leading-loose text-center text-muted-foreground md:text-left">© 2025 Built with <a class="font-medium underline underline-offset-4" href="https://www.sphinx-doc.org" rel="noreferrer">Sphinx 8.2.3</a></p>
+<p class="text-sm leading-loose text-center text-muted-foreground md:text-left">© 2026 Built with <a class="font-medium underline underline-offset-4" href="https://www.sphinx-doc.org" rel="noreferrer">Sphinx 8.1.3</a></p>
 </div>
 </div>
 </footer>

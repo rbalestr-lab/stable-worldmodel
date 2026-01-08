@@ -13,6 +13,7 @@ wandb_entity: marksibrahim
 wandb_project: stable-wm
 
 wandb:
+  use_wandb: false
   entity: ${wandb_entity}
   project: ${wandb_project}
 

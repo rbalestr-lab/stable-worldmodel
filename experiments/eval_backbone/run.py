@@ -146,8 +146,15 @@ def run(cfg: DictConfig):
 
     print(metrics)
 
-    results_path = Path(__file__).parent / cfg.output.filename
+    # results_path = Path(__file__).parent / cfg.output.filename
+    # results_path.parent.mkdir(parents=True, exist_ok=True)
+
+    results_path = (
+        Path(swm.data.get_cache_dir(), cfg.policy).parent if cfg.policy != "random" else Path(__file__).parent
+    )
+    results_path = results_path / cfg.output.filename
     results_path.parent.mkdir(parents=True, exist_ok=True)
+
     with results_path.open("a") as f:
         f.write("\n")  # separate from previous runs
 

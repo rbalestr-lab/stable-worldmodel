@@ -410,9 +410,11 @@ def run(cfg):
         epoch_interval=20,
     )
 
+    cpu_offload_callback = spt.callbacks.CPUOffloadCallback()
+
     trainer = pl.Trainer(
         **cfg.trainer,
-        callbacks=[dump_object_callback],
+        callbacks=[dump_object_callback, cpu_offload_callback],
         num_sanity_val_steps=1,
         logger=wandb_logger,
         enable_checkpointing=True,

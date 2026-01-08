@@ -3,25 +3,30 @@
 defaults:
   - override /hydra/launcher: submitit_slurm
 
-n_gpus: 8
+n_gpus: 1
 cpus_per_gpu: 12
-cpus_per_task: ${n_gpus} * ${cpus_per_gpu}
+cpus_per_task: 96
 mem_per_gpu_gb: 64
 cache_dir: null # Use stable-worldmodel default cache
 
-wandb_entity: stable-wm
+wandb_entity: marksibrahim
 wandb_project: stable-wm
+
+wandb:
+  entity: ${wandb_entity}
+  project: ${wandb_project}
 
 hydra:
   mode: MULTIRUN
 
   launcher:
-    timeout_min: 4320 # 72 hours
-    cpus_per_task: ${cpus_per_task}
-    mem_gb: ${n_gpus} * ${mem_per_gpu_gb}
-    gpus_per_node: ${n_gpus}
+    timeout_min: 4320
+    cpus_per_task: 12
+    mem_gb: 512
+    gpus_per_node: 1
     tasks_per_node: 1
     nodes: 1
-    partition: long
+    partition: null
     account: memorization
+    #qos: h100_memorization_high
     qos: h200_alignment_shared,h200_lowest,h200_memorization_high,lowest,h100_alignment_share,h100_lowest

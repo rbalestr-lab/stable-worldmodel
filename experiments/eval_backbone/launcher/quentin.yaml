@@ -14,18 +14,21 @@ hydra:
   launcher:
     # ===== SLURM resources =====
     account: torch_pr_305_general
-    time: 2-00:00:00
+    timeout_min: 2880 # 2 days
 
     gres: gpu:1
     cpus_per_task: 8
     mem_gb: 50
+    tasks_per_node: 1
+    nodes: 1
+    partition: null
 
-    job_name: swm-planning
+    # job_name: swm-planning
 
-    # ===== logging =====
-    submitit_folder: ${hydra.run.dir}/submitit
-    stdout_to_joblog: true
-    stderr_to_joblog: true
+    # # ===== logging =====
+    # submitit_folder: ${hydra.run.dir}/submitit
+    # stdout_to_joblog: true
+    # stderr_to_joblog: true
 
     # ===== environment setup =====
     setup:

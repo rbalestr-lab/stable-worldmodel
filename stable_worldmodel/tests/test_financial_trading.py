@@ -895,80 +895,62 @@ def test_stability_calculation():
 
 
 def test_financial_dataset_integration():
-    """Test that FinancialDataset is properly integrated and functional."""
-
     from stable_worldmodel.data import FinancialDataset
 
-    # Should have FinancialDataset class
-    assert hasattr(FinancialDataset, "load")
+    assert hasattr(FinancialDataset, "build")
+    assert hasattr(FinancialDataset, "create_dataset")
+    assert hasattr(FinancialDataset, "get_sector_tickers")
+    assert hasattr(FinancialDataset, "available_sectors")
     assert hasattr(FinancialDataset, "DATA_DIR")
-    assert hasattr(FinancialDataset, "SP500_TICKERS")
 
-    # Test DATA_DIR is set
     assert FinancialDataset.DATA_DIR is not None
     assert isinstance(FinancialDataset.DATA_DIR, str)
 
-    # Test SP500_TICKERS is populated
-    assert len(FinancialDataset.SP500_TICKERS) > 0
-    assert "AAPL" in FinancialDataset.SP500_TICKERS
 
-    # Test encoding/decoding methods exist
-    assert hasattr(FinancialDataset, "encode_bfloat16")
-    assert hasattr(FinancialDataset, "decode_bfloat16")
-    assert hasattr(FinancialDataset, "encode_financial_data")
-    assert hasattr(FinancialDataset, "decode_financial_data")
-
-
-def test_financial_dataset_load():
-    """Test FinancialDataset.load() functionality with recent dates."""
-    import pandas as pd
+@requires_data
+def test_financial_dataset_build():
+    from unittest.mock import MagicMock, patch
 
     from stable_worldmodel.data import FinancialDataset
 
-    # Use recent dates (data should be available or auto-downloadable)
-    # Free tier provides ~5-15 days, so use a conservative 2-day window
-    end_date = (pd.Timestamp.now() - pd.Timedelta(days=3)).strftime("%Y-%m-%d")
-    start_date = (pd.Timestamp.now() - pd.Timedelta(days=5)).strftime("%Y-%m-%d")
+    mock_data = np.random.randn(100, 2, 64, 3)
+    mock_build_stock_data = MagicMock(return_value=mock_data)
 
-    # Test loading data
-    df = FinancialDataset.load(stocks=["AAPL"], dates=[(start_date, end_date)])
+    with patch("stable_worldmodel.data._HAS_FINANCE_DATA", True):
+        with patch("stable_worldmodel.data.build_stock_data", mock_build_stock_data):
+            result = FinancialDataset.build(
+                start_time="2024-01-01",
+                end_time="2024-01-31",
+                processing_methods=["return", "volume"],
+                sector_config={"Finance": 64},
+                freq="1min",
+            )
 
-    # Should return a DataFrame (may be empty if Alpaca credentials not configured)
-    assert isinstance(df, pd.DataFrame)
-
-    # If data was loaded, verify structure
-    if not df.empty:
-        required_columns = ["open", "high", "low", "close"]
-        for col in required_columns:
-            assert col in df.columns, f"Missing required column: {col}"
+            assert result.shape == (100, 2, 64, 3)
+            mock_build_stock_data.assert_called_once()
 
 
-def test_financial_dataset_encoding():
-    """Test FinancialDataset bfloat16 encoding/decoding."""
-    import numpy as np
-    import pandas as pd
+@requires_data
+def test_financial_dataset_create_dataset():
+    from unittest.mock import MagicMock, patch
 
     from stable_worldmodel.data import FinancialDataset
 
-    # Create test data
-    test_prices = pd.Series([100.0, 101.5, 99.8, 102.3, 101.0])
+    mock_dataset = MagicMock()
+    mock_stock_dataset = MagicMock(return_value=mock_dataset)
 
-    # Test encoding
-    encoded = FinancialDataset.encode_bfloat16(test_prices)
-    assert encoded is not None
-    assert isinstance(encoded, np.ndarray)
-    assert len(encoded) == len(test_prices)
+    with patch("stable_worldmodel.data._HAS_FINANCE_DATA", True):
+        with patch("stable_worldmodel.data.StockDataset", mock_stock_dataset):
+            result = FinancialDataset.create_dataset(
+                start_time="2024-01-01",
+                end_time="2024-12-31",
+                processing_methods=["return", "volume"],
+                sector_config={"Finance": 81},
+                freq="1min",
+            )
 
-    # Test decoding
-    anchor = test_prices.iloc[0]
-    decoded = FinancialDataset.decode_bfloat16(encoded, anchor)
-    assert decoded is not None
-    assert isinstance(decoded, np.ndarray)
-    assert len(decoded) == len(test_prices)
-
-    # Verify reconstruction accuracy (bfloat16 has some precision loss)
-    max_error = np.abs(test_prices.values - decoded).max()
-    assert max_error < 0.01  # Should be very close
+            assert result == mock_dataset
+            mock_stock_dataset.assert_called_once()
 
 
 # ===== COMPREHENSIVE EDGE CASE TESTS FOR UTILITY FUNCTIONS =====

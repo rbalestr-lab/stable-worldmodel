@@ -18,13 +18,11 @@ except ImportError as e:
     logging.warning(f"Could not import FinancialDataset: {e}")
 
     class FinancialDataset:
-        """Fallback FinancialDataset when import fails."""
 
         DATA_DIR = None
-        SP500_TICKERS = []
 
         @staticmethod
-        def load(stocks=None, dates=None, base_dir=None):
+        def build(start_time=None, end_time=None, processing_methods=None, sector_config=None, freq=None):
             raise NotImplementedError(
                 "FinancialDataset not available. Please ensure stable_worldmodel.data is accessible."
             )
@@ -374,8 +372,13 @@ class FinancialEnvironment(gym.Env):
         return start_date.strftime("%Y-%m-%d"), end_date.strftime("%Y-%m-%d"), symbol
 
     def get_available_symbols(self) -> list[str]:
-        """Get list of available S&P 500 stock symbols."""
-        return FinancialDataset.SP500_TICKERS if FinancialDataset.SP500_TICKERS else []
+        return [
+            "AAPL", "MSFT", "GOOGL", "AMZN", "NVDA", "META", "TSLA", "BRK.B", "UNH", "JNJ",
+            "V", "XOM", "WMT", "JPM", "PG", "MA", "HD", "CVX", "LLY", "ABBV",
+            "MRK", "AVGO", "COST", "KO", "PEP", "ADBE", "TMO", "MCD", "CSCO", "ACN",
+            "ABT", "DHR", "NKE", "TXN", "DIS", "VZ", "CRM", "WFC", "CMCSA", "NEE",
+            "PM", "NFLX", "BMY", "UPS", "HON", "ORCL", "T", "RTX", "QCOM", "INTC",
+        ]
 
     def get_date_range_info(self, symbol: str) -> dict[str, str]:
         """Get date range availability for symbol (auto-downloads from Alpaca if needed)."""

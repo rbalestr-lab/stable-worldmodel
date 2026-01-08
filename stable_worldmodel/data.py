@@ -55,8 +55,6 @@ try:
     secret_key = os.getenv("ALPACA_SECRET_KEY")
 
     if api_key and secret_key:
-        # Note: StockHistoricalDataClient doesn't have 'paper' parameter
-        # Historical data is the same for both paper and live accounts
         _alpaca_client = StockHistoricalDataClient(api_key, secret_key)
         logger.info("Alpaca API client initialized successfully")
     else:
@@ -70,6 +68,16 @@ except ImportError:
 except Exception as e:
     _alpaca_client = None
     logger.error(f"Failed to initialize Alpaca client: {e}")
+
+try:
+    from .finance_data import build_stock_data, get_sector_tickers, StockDataset
+    _HAS_FINANCE_DATA = True
+except ImportError as e:
+    logger.warning(f"finance-data module not available: {e}")
+    _HAS_FINANCE_DATA = False
+    build_stock_data = None
+    get_sector_tickers = None
+    StockDataset = None
 
 
 class StepsDataset(spt.data.HFDataset):
@@ -572,247 +580,77 @@ def delete_model(name):
 
 
 # ============================================================================
-# Financial Data Pipeline (bfloat16 only)
+# Financial Data Pipeline
 # ============================================================================
 
 
 class FinancialDataset:
-    """Financial data management with bfloat16 encoding.
-
-    This class encapsulates all financial data operations including:
-    - S&P 500 ticker list
-    - Data directory configuration
-    - bfloat16 encoding/decoding
-    - Data loading with automatic download from Alpaca API
-
-    Attributes:
-        DATA_DIR: Default data storage directory (~/.stable_worldmodel/data)
-        SP500_TICKERS: List of S&P 500 stock symbols
-    """
 
     DATA_DIR = str(Path.home() / ".stable_worldmodel" / "data")
 
-    SP500_TICKERS = [
-        "MMM",
-        "AOS",
-        "ABT",
-        "ABBV",
-        "ACN",  # codespell:ignore
-        "ADBE",
-        "AMD",
-        "AES",
-        "AFL",
-        "A",
-        "APD",
-        "ABNB",
-        "AKAM",
-        "ALB",
-        "ARE",
-        "ALGN",
-        "ALLE",  # codespell:ignore
-        "LNT",
-        "ALL",
-        "GOOGL",
-        "GOOG",
-        "MO",
-        "AMZN",
-        "AMCR",
-        "AEE",
-        "AEP",
-        "AXP",
-        "AIG",
-        "AMT",
-        "AWK",
-        "AMP",
-        "AME",
-        "AMGN",
-        "APH",
-        "ADI",
-        "AON",
-        "APA",
-        "APO",
-        "AAPL",
-        "AMAT",
-        "APP",
-        "APTV",
-        "ACGL",
-        "ADM",
-        "ANET",
-        "AJG",
-        "AIZ",
-        "T",
-        "ATO",
-        "ADSK",
-        "ADP",
-        "AZO",
-        "AVB",
-        "AVY",
-        "AXON",
-        "BKR",
-        "BALL",
-        "BAC",
-        "BAX",
-        "BDX",
-    ]
-
     @staticmethod
-    def encode_bfloat16(prices: pd.Series) -> np.ndarray:
-        """Encode price series using bfloat16 differential encoding."""
-        if ml_dtypes is None:
-            raise ImportError("ml_dtypes required for bfloat16 encoding")
-        diffs = np.diff(prices.values, prepend=prices.values[0])
-        return np.array(diffs, dtype=ml_dtypes.bfloat16).view(np.uint16)
+    def _check_available():
+        if not _HAS_FINANCE_DATA:
+            raise ImportError(
+                "finance-data module not available. Please ensure dependencies are installed "
+                "(alpaca-py, pandas, h5py, zarr, loguru, tqdm)."
+            )
 
-    @staticmethod
-    def decode_bfloat16(encoded: np.ndarray, anchor: float) -> np.ndarray:
-        """Decode bfloat16 encoded prices."""
-        if ml_dtypes is None:
-            raise ImportError("ml_dtypes required for bfloat16 decoding")
-        bf16 = encoded.astype(np.uint16).view(ml_dtypes.bfloat16)
-        return anchor + np.cumsum(bf16.astype("float32"))
+    @classmethod
+    def get_sector_tickers(cls, sector_config: dict, pad_tickers_ratio: float = 1.0) -> tuple:
+        cls._check_available()
+        return get_sector_tickers(sector_config, pad_tickers_ratio)
 
-    @staticmethod
-    def encode_financial_data(df: pd.DataFrame) -> tuple[pd.DataFrame, dict]:
-        """Encode OHLC columns using bfloat16."""
-        metadata = {}
-        df_encoded = df.copy()
+    @classmethod
+    def available_sectors(cls) -> dict[str, int]:
+        cls._check_available()
+        _, sector_tickers = get_sector_tickers({})
+        return {sector: len(tickers) for sector, tickers in sector_tickers.items()}
 
-        for col in ["open", "high", "low", "close"]:
-            if col in df.columns:
-                anchor = float(df[col].iloc[0])
-                encoded = FinancialDataset.encode_bfloat16(df[col])
-                df_encoded[f"{col}_encoded"] = encoded
-                metadata[f"{col}_anchor"] = anchor
+    @classmethod
+    def build(
+        cls,
+        start_time: str,
+        end_time: str,
+        processing_methods: list[str],
+        sector_config: dict | None = None,
+        freq: str = "1min",
+    ) -> np.ndarray:
+        cls._check_available()
 
-        df_encoded = df_encoded.drop(columns=["open", "high", "low", "close"], errors="ignore")
-        return df_encoded, metadata
+        if sector_config is None:
+            sector_config = {}
+            logger.info("No sector configuration provided, using all available sectors")
 
-    @staticmethod
-    def decode_financial_data(df: pd.DataFrame, metadata: dict) -> pd.DataFrame:
-        """Decode OHLC columns from bfloat16."""
-        df_decoded = df.copy()
+        data = build_stock_data(
+            start_time=start_time,
+            end_time=end_time,
+            processing_methods=processing_methods,
+            sector_config=sector_config,
+            freq=freq,
+        )
 
-        for col in ["open", "high", "low", "close"]:
-            enc_col = f"{col}_encoded"
-            if enc_col in df.columns:
-                anchor = metadata[f"{col}_anchor"]
-                df_decoded[col] = FinancialDataset.decode_bfloat16(df[enc_col].values, anchor)
-                df_decoded = df_decoded.drop(columns=[enc_col])
+        logger.success(f"Built financial dataset with shape {data.shape}")
+        return data
 
-        return df_decoded
+    @classmethod
+    def create_dataset(
+        cls,
+        start_time: str,
+        end_time: str,
+        processing_methods: list[str],
+        sector_config: dict | None = None,
+        freq: str = "1min",
+    ) -> "StockDataset":
+        cls._check_available()
 
-    @staticmethod
-    def load(
-        stocks: list[str],
-        dates: list[str | tuple[str, str]],
-        base_dir: str | None = None,
-    ) -> pd.DataFrame:
-        """Load financial data for specified stocks and dates.
+        if sector_config is None:
+            sector_config = {}
 
-        Parameters
-        ----------
-        stocks : list[str]
-            List of stock symbols (e.g., ['AAPL', 'TSLA'])
-        dates : list[str | tuple[str, str]]
-            List of dates or date ranges:
-            - Individual dates: ['2024-01-17', '2024-02-20']
-            - Date ranges: [('2024-01-01', '2024-01-31')]
-        base_dir : str, optional
-            Base directory for data storage
-
-        Returns
-        -------
-        pd.DataFrame
-            Combined DataFrame with OHLCV data
-        """
-        if base_dir is None:
-            base_dir = Path(FinancialDataset.DATA_DIR)
-        else:
-            base_dir = Path(base_dir)
-
-        # Expand date ranges to individual dates
-        expanded_dates = []
-        for item in dates:
-            if isinstance(item, tuple):
-                start_date, end_date = item
-                current = datetime.fromisoformat(start_date)
-                end = datetime.fromisoformat(end_date)
-                while current <= end:
-                    if current.weekday() < 5:  # Weekdays only
-                        expanded_dates.append(current.strftime("%Y-%m-%d"))
-                    current += timedelta(days=1)
-            else:
-                expanded_dates.append(item)
-
-        storage_dir = base_dir / "numpyformat_bfloat16"
-        storage_dir.mkdir(parents=True, exist_ok=True)
-
-        # Check for missing data
-        missing_data = []
-        available_data = []
-
-        for symbol in stocks:
-            for date in expanded_dates:
-                file_path = storage_dir / f"{symbol}_{date}.npz"
-                if file_path.exists():
-                    data = np.load(file_path)
-                    metadata = {
-                        k: (float(data[k][0]) if k.endswith("_anchor") else data[k])
-                        for k in data.keys()
-                        if k.endswith("_anchor")
-                    }
-                    df = pd.DataFrame({"timestamp": data["timestamps"]})
-                    for col in ["open", "high", "low", "close"]:
-                        if f"{col}_encoded" in data:
-                            df[col] = FinancialDataset.decode_bfloat16(
-                                data[f"{col}_encoded"], metadata[f"{col}_anchor"]
-                            )
-                    if "volume" in data:
-                        df["volume"] = data["volume"]
-                    available_data.append(df)
-                else:
-                    missing_data.append((symbol, date))
-
-        # Download missing data if needed
-        if missing_data and _alpaca_client is not None:
-            logger.info(f"Downloading {len(missing_data)} missing data files...")
-
-            for symbol, date in missing_data:
-                try:
-                    req = StockBarsRequest(
-                        symbol_or_symbols=symbol,
-                        timeframe=TimeFrame.Minute,
-                        start=datetime.fromisoformat(f"{date}T00:00:00"),
-                        end=datetime.fromisoformat(f"{date}T23:59:59"),
-                    )
-                    df_raw = _alpaca_client.get_stock_bars(req).df.reset_index()
-
-                    if df_raw.empty:
-                        continue
-
-                    df_raw["symbol"] = symbol
-                    df_raw["timestamp"] = pd.to_datetime(df_raw["timestamp"], utc=True)
-                    df_raw = df_raw[["timestamp", "open", "high", "low", "close", "volume"]]
-
-                    # Encode and save
-                    df_encoded, metadata = FinancialDataset.encode_financial_data(df_raw)
-                    data_dict = {"timestamps": df_encoded["timestamp"].values}
-                    for col in ["open", "high", "low", "close"]:
-                        if f"{col}_encoded" in df_encoded.columns:
-                            data_dict[f"{col}_encoded"] = df_encoded[f"{col}_encoded"].values
-                    if "volume" in df_raw.columns:
-                        data_dict["volume"] = df_raw["volume"].values
-                    for key, value in metadata.items():
-                        data_dict[key] = np.array([value])
-
-                    file_path = storage_dir / f"{symbol}_{date}.npz"
-                    np.savez_compressed(file_path, **data_dict)
-
-                    available_data.append(df_raw)
-
-                except Exception as e:
-                    logger.error(f"Failed to download {symbol} on {date}: {e}")
-
-        if available_data:
-            return pd.concat(available_data, ignore_index=True)
-        return pd.DataFrame()
+        return StockDataset(
+            start_time=start_time,
+            end_time=end_time,
+            processing_methods=processing_methods,
+            sector_config=sector_config,
+            freq=freq,
+        )

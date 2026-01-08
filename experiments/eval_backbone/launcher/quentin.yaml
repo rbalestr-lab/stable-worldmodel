@@ -1,0 +1,36 @@
+# @package _global_
+
+defaults:
+  - override /hydra/launcher: submitit_slurm
+
+wandb:
+  use_wandb: false
+  entity: quentin-lelidec-nyu
+  project: stable-wm
+
+hydra:
+  mode: MULTIRUN
+
+  launcher:
+    # ===== SLURM resources =====
+    account: torch_pr_305_general
+    time: 2-00:00:00
+
+    gres: gpu:1
+    cpus_per_task: 8
+    mem_gb: 50
+
+    job_name: swm-planning
+
+    # ===== logging =====
+    submitit_folder: ${hydra.run.dir}/submitit
+    stdout_to_joblog: true
+    stderr_to_joblog: true
+
+    # ===== environment setup =====
+    setup:
+      - module purge
+      - module load anaconda3/2025.06
+      - source /share/apps/anaconda3/2025.06/etc/profile.d/conda.sh
+      - conda activate stable-wm
+      - export STABLEWM_HOME=~/vast/.stable_worldmodel/

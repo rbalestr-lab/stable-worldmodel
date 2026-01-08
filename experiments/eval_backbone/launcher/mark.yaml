@@ -28,5 +28,5 @@ hydra:
     nodes: 1
     partition: null
     account: memorization
-    #qos: h100_memorization_high
-    qos: h200_alignment_shared,h200_lowest,h200_memorization_high,lowest,h100_alignment_share,h100_lowest
+    qos: h100_memorization_high
+    #qos: h200_alignment_shared,h200_lowest,h200_memorization_high,lowest,h100_alignment_share,h100_lowest

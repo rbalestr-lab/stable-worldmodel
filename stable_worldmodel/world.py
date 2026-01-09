@@ -949,6 +949,8 @@ class World:
         goal_offset_steps: int,
         eval_budget: int,
         callables: dict | None = None,
+        save_video: bool = True,
+        video_path="./",
     ):
         assert (
             self.envs.envs[0].spec.max_episode_steps is None
@@ -1073,19 +1075,40 @@ class World:
         if "goal" in goal_step and "goal" in self.infos:
             assert np.allclose(self.infos["goal"], goal_step["goal"]), "Goal info does not match"
 
+        target_frames = torch.stack([ep["pixels"] for ep in data]).numpy()
+        video_frames = np.empty((self.num_envs, eval_budget, *self.infos["pixels"].shape[-3:]), dtype=np.uint8)
+
         # TODO assert goal and start state are identical as in the rollout
         # run normal evaluation for eval_budget and TODO: record video
-        for _ in range(eval_budget):
+        for i in range(eval_budget):
+            video_frames[:, i] = self.infos["pixels"].squeeze(1)
             self.infos.update(deepcopy(goal_step))
             self.step()
             results["episode_successes"] = np.logical_or(results["episode_successes"], self.terminateds)
             # for auto-reset
             self.envs.unwrapped._autoreset_envs = np.zeros((self.num_envs,))
 
+        video_frames[:, -1] = self.infos["pixels"].squeeze(1)
+
         n_episodes = len(episodes_idx)
 
         # compute success rate
         results["success_rate"] = float(np.sum(results["episode_successes"])) / n_episodes * 100.0
+
+        # save video if required
+        if save_video:
+            target_len = target_frames.shape[1]
+            video_path = Path(video_path)
+            video_path.mkdir(parents=True, exist_ok=True)
+            for i in range(self.num_envs):
+                out = imageio.get_writer(video_path / f"rollout_{i}.mp4", "output.mp4", fps=15, codec="libx264")
+                goals = np.vstack([target_frames[i, -1], target_frames[i, -1]])
+                for t in range(eval_budget):
+                    stacked_frame = np.vstack([video_frames[i, t], target_frames[i, t % target_len]])
+                    frame = np.hstack([stacked_frame, goals])
+                    out.append_data(frame)
+                out.close()
+            print(f"Video saved to {video_path}")
 
         if results["seeds"] is not None:
             assert np.unique(results["seeds"]).shape[0] == n_episodes, "Some episode seeds are identical!"

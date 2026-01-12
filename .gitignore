@@ -213,6 +213,7 @@ multirun/
 checkpoints/
 dino_wm_ckpt/
 pusht_noise/
+results/
 wandb/
 videos/
 dataset/
@@ -220,3 +221,5 @@ dataset/
 *.mp4
 lightning_logs/
 old_tests/
+results/
+local_scripts/

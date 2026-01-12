@@ -107,7 +107,11 @@ def test_ensure_info_keys_wrapper_step_fail(minimal_env):
 def test_ensure_info_keys_wrapper_regex_pattern(minimal_env):
     """Test that wrapper correctly handles regex patterns for key matching."""
     obs = {"observation": "test_obs"}
-    info = {"pixels.camera1": "image1", "pixels.camera2": "image2", "other_key": "value"}
+    info = {
+        "pixels.camera1": "image1",
+        "pixels.camera2": "image2",
+        "other_key": "value",
+    }
     minimal_env.reset.return_value = (obs, info)
 
     wrapped_env = wrappers.EnsureInfoKeysWrapper(minimal_env, required_keys=[r"pixels\..*"])
@@ -164,7 +168,12 @@ def test_ensure_info_keys_wrapper_regex_dotted_keys_fail(minimal_env):
 def test_ensure_info_keys_wrapper_regex_multiple_patterns(minimal_env):
     """Test multiple regex patterns with dotted keys."""
     obs = {"observation": "test_obs"}
-    info = {"pixels.front": "img1", "pixels.back": "img2", "variation.color": "blue", "reward": 1.0}
+    info = {
+        "pixels.front": "img1",
+        "pixels.back": "img2",
+        "variation.color": "blue",
+        "reward": 1.0,
+    }
     minimal_env.step.return_value = (obs, 1.0, False, False, info)
 
     wrapped_env = wrappers.EnsureInfoKeysWrapper(minimal_env, required_keys=[r"pixels\..*", r"variation\..*"])
@@ -1327,7 +1336,13 @@ def test_mega_wrapper_step_basic(minimal_env):
     terminated = False
     truncated = False
     step_goal = np.random.randint(0, 255, (120, 120, 3), dtype=np.uint8)
-    minimal_env.step.return_value = (step_obs, reward, terminated, truncated, {"goal": step_goal})
+    minimal_env.step.return_value = (
+        step_obs,
+        reward,
+        terminated,
+        truncated,
+        {"goal": step_goal},
+    )
 
     result_obs, result_reward, result_terminated, result_truncated, result_info = wrapped_env.step(0.7)
 
@@ -1477,7 +1492,10 @@ def test_mega_wrapper_with_transforms(minimal_env):
     goal_transform = MagicMock(return_value=np.zeros((64, 64, 3)))
 
     wrapped_env = wrappers.MegaWrapper(
-        minimal_env, image_shape=(64, 64), pixels_transform=pixels_transform, goal_transform=goal_transform
+        minimal_env,
+        image_shape=(64, 64),
+        pixels_transform=pixels_transform,
+        goal_transform=goal_transform,
     )
     result_obs, result_info = wrapped_env.reset()
 
@@ -1509,127 +1527,6 @@ def test_mega_wrapper_custom_image_shape(minimal_env):
     # Both pixels and goal should be resized to custom shape
     assert result_info["pixels"].shape == (128, 256, 3)
     assert result_info["goal"].shape == (128, 256, 3)
-
-
-def test_mega_wrapper_with_financial_environment():
-    """Test MegaWrapper automatically detects and wraps financial environments."""
-    import numpy as np
-
-    # Create a mock financial environment
-    mock_env = MagicMock(spec=gym.Env)
-    mock_env.observation_space = gym.spaces.Box(low=0, high=1, shape=(10,))
-    mock_env.action_space = gym.spaces.Box(low=0, high=1, shape=(2,))
-
-    # Make it look like a financial environment
-    # Don't use MagicMock for unwrapped to avoid render_multiview being auto-created
-    class MockFinancialEnv:
-        def __init__(self):
-            self.__class__.__name__ = "FinancialEnvironment"
-            self.observation_space = mock_env.observation_space
-            self.action_space = mock_env.action_space
-
-        def render(self):
-            return np.random.randint(0, 255, (64, 64, 3), dtype=np.uint8)
-
-    mock_unwrapped = MockFinancialEnv()
-    mock_env.unwrapped = mock_unwrapped
-
-    def render_func():
-        return np.random.randint(0, 255, (64, 64, 3), dtype=np.uint8)
-
-    obs = np.array([1.0] * 10)
-    info = {}
-    mock_env.reset.return_value = (obs, info)
-    mock_env.render = render_func
-    mock_env.action_space.sample = MagicMock(return_value=np.array([0.5, 0.5]))
-
-    # MegaWrapper should detect it's financial and apply FinancialWrapper
-    wrapped_env = wrappers.MegaWrapper(mock_env, separate_goal=True)
-    result_obs, result_info = wrapped_env.reset()
-
-    # Financial wrapper should have cleaned up pixels and goal
-    assert "pixels" not in result_info
-    assert "goal" not in result_info
-    assert "render_time" not in result_info
-    # But should have other info keys
-    assert "observation" in result_info
-    assert "reward" in result_info
-
-
-def test_mega_wrapper_with_backtest_environment():
-    """Test MegaWrapper detects Backtest environments as financial."""
-    import numpy as np
-
-    mock_env = MagicMock(spec=gym.Env)
-    mock_env.observation_space = gym.spaces.Box(low=0, high=1, shape=(10,))
-    mock_env.action_space = gym.spaces.Box(low=0, high=1, shape=(2,))
-
-    # Make it look like a backtest environment
-    class MockBacktestEnv:
-        def __init__(self):
-            self.__class__.__name__ = "BacktestEnv"
-            self.observation_space = mock_env.observation_space
-            self.action_space = mock_env.action_space
-
-        def render(self):
-            return np.random.randint(0, 255, (64, 64, 3), dtype=np.uint8)
-
-    mock_unwrapped = MockBacktestEnv()
-    mock_env.unwrapped = mock_unwrapped
-
-    def render_func():
-        return np.random.randint(0, 255, (64, 64, 3), dtype=np.uint8)
-
-    obs = np.array([1.0] * 10)
-    info = {}
-    mock_env.reset.return_value = (obs, info)
-    mock_env.render = render_func
-    mock_env.action_space.sample = MagicMock(return_value=np.array([0.5, 0.5]))
-
-    wrapped_env = wrappers.MegaWrapper(mock_env)
-    result_obs, result_info = wrapped_env.reset()
-
-    # Should behave like financial environment
-    assert "pixels" not in result_info
-    assert "goal" not in result_info
-
-
-def test_mega_wrapper_financial_with_none_image_shape():
-    """Test MegaWrapper with financial environment and None image_shape uses default."""
-    import numpy as np
-
-    mock_env = MagicMock(spec=gym.Env)
-    mock_env.observation_space = gym.spaces.Box(low=0, high=1, shape=(10,))
-    mock_env.action_space = gym.spaces.Box(low=0, high=1, shape=(2,))
-
-    class MockFinancialEnv:
-        def __init__(self):
-            self.__class__.__name__ = "FinancialEnvironment"
-            self.observation_space = mock_env.observation_space
-            self.action_space = mock_env.action_space
-
-        def render(self):
-            return np.random.randint(0, 255, (64, 64, 3), dtype=np.uint8)
-
-    mock_unwrapped = MockFinancialEnv()
-    mock_env.unwrapped = mock_unwrapped
-
-    def render_func():
-        return np.random.randint(0, 255, (64, 64, 3), dtype=np.uint8)
-
-    obs = np.array([1.0] * 10)
-    info = {}
-    mock_env.reset.return_value = (obs, info)
-    mock_env.render = render_func
-    mock_env.action_space.sample = MagicMock(return_value=np.array([0.5, 0.5]))
-
-    # Pass None for image_shape to trigger default (84, 84) path
-    wrapped_env = wrappers.MegaWrapper(mock_env, image_shape=None)
-    result_obs, result_info = wrapped_env.reset()
-
-    # Should still work and clean up appropriately
-    assert "pixels" not in result_info
-    assert "observation" in result_info
 
 
 ###########################

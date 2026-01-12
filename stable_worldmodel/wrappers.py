@@ -382,9 +382,10 @@ class MegaWrapper(gym.Wrapper):
         super().__init__(env)
 
         # Detect if this is a financial environment by checking the unwrapped env
+        from stable_worldmodel.envs.financial_trading import FinancialEnvironment
+
         unwrapped_env = env.unwrapped if hasattr(env, "unwrapped") else env
-        env_class_name = unwrapped_env.__class__.__name__
-        is_financial = "Financial" in env_class_name or "Backtest" in env_class_name
+        is_financial = isinstance(unwrapped_env, FinancialEnvironment)
 
         # Financial environments don't need goals
         if is_financial:
@@ -395,7 +396,7 @@ class MegaWrapper(gym.Wrapper):
         required_keys.append(r"^pixels(?:\..*)?$")
         # Handle None image_shape by using default
         if image_shape is None:
-            image_shape = (84, 84)
+            image_shape = (224, 224)
         # this adds `pixels` key to info with optional transform
         env = AddPixelsWrapper(env, image_shape, pixels_transform)
         # this removes the info output, everything is in observation!

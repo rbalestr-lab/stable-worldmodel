@@ -10,22 +10,7 @@ from loguru import logger as logging
 from scipy import stats as scipy_stats
 
 import stable_worldmodel as swm
-
-
-try:
-    from stable_worldmodel.data import FinancialDataset
-except ImportError as e:
-    logging.warning(f"Could not import FinancialDataset: {e}")
-
-    class FinancialDataset:
-
-        DATA_DIR = None
-
-        @staticmethod
-        def build(start_time=None, end_time=None, processing_methods=None, sector_config=None, freq=None):
-            raise NotImplementedError(
-                "FinancialDataset not available. Please ensure stable_worldmodel.data is accessible."
-            )
+from stable_worldmodel.data import FinancialDataset
 
 
 def calculate_sharpe_ratio(
@@ -272,16 +257,13 @@ class FinancialEnvironment(gym.Env):
         symbols: list | None = None,
         start_date: str | None = None,
         end_date: str | None = None,
-        seed: int | None = None,
         render_mode: str | None = None,
     ):
         """Initialize financial backtesting environment with data pipeline."""
         super().__init__()
         self.render_mode = render_mode
 
-        self.data_dir = (
-            Path(data_dir) if data_dir else (Path(FinancialDataset.DATA_DIR) if FinancialDataset.DATA_DIR else None)
-        )
+        self.data_dir = Path(data_dir) if data_dir else swm.data.get_cache_dir()
         self.max_steps = max_steps
 
         self.default_symbols = symbols or self.get_available_symbols()[:5]
@@ -373,11 +355,56 @@ class FinancialEnvironment(gym.Env):
 
     def get_available_symbols(self) -> list[str]:
         return [
-            "AAPL", "MSFT", "GOOGL", "AMZN", "NVDA", "META", "TSLA", "BRK.B", "UNH", "JNJ",
-            "V", "XOM", "WMT", "JPM", "PG", "MA", "HD", "CVX", "LLY", "ABBV",
-            "MRK", "AVGO", "COST", "KO", "PEP", "ADBE", "TMO", "MCD", "CSCO", "ACN",
-            "ABT", "DHR", "NKE", "TXN", "DIS", "VZ", "CRM", "WFC", "CMCSA", "NEE",
-            "PM", "NFLX", "BMY", "UPS", "HON", "ORCL", "T", "RTX", "QCOM", "INTC",
+            "AAPL",
+            "MSFT",
+            "GOOGL",
+            "AMZN",
+            "NVDA",
+            "META",
+            "TSLA",
+            "BRK.B",
+            "UNH",
+            "JNJ",
+            "V",
+            "XOM",
+            "WMT",
+            "JPM",
+            "PG",
+            "MA",
+            "HD",
+            "CVX",
+            "LLY",
+            "ABBV",
+            "MRK",
+            "AVGO",
+            "COST",
+            "KO",
+            "PEP",
+            "ADBE",
+            "TMO",
+            "MCD",
+            "CSCO",
+            "ACN",  # codespell:ignore
+            "ABT",
+            "DHR",
+            "NKE",
+            "TXN",
+            "DIS",
+            "VZ",
+            "CRM",
+            "WFC",
+            "CMCSA",
+            "NEE",
+            "PM",
+            "NFLX",
+            "BMY",
+            "UPS",
+            "HON",
+            "ORCL",
+            "T",
+            "RTX",
+            "QCOM",
+            "INTC",
         ]
 
     def get_date_range_info(self, symbol: str) -> dict[str, str]:
@@ -906,11 +933,6 @@ class FinancialEnvironment(gym.Env):
         # Measure consistency of returns (R-squared of returns vs time)
         stability = calculate_stability(returns)
 
-        # TODO: Add dictionary to the step, instead of calling it render give some "get_info" or equiv
-        # Update the info dictionary in step() to include these metrics incrementally
-        # We then want the render function to return a big vector with all information (each dimension is one information)
-        # THis will let use us the pixel based thing as we want, etc. (1d np.array)
-        # Add rthat we can mask stuff as we want, etc.
         return {
             "total_return": total_return,
             "total_return_pct": total_return * 100,

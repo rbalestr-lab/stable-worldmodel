@@ -4,7 +4,7 @@ defaults:
   - override /hydra/launcher: submitit_slurm
 
 wandb:
-  use_wandb: false
+  use_wandb: true
   entity: quentin-lelidec-nyu
   project: stable-wm
 

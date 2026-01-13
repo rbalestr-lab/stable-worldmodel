@@ -355,7 +355,7 @@ def collect_embeddings(world_model, env, process, transform, cfg):
             options = {"state": state}
             default_variation = cfg.env.get("default_variation", None)
             if default_variation is not None:
-                options["variation"] = default_variation
+                options["variation"] = list(default_variation)
             # for the first state of each variation, add variation options
             if variation_cfg.variation["fields"] is not None:
                 assert variation_cfg.variation["values"] is not None and len(variation_cfg.variation["fields"]) == len(

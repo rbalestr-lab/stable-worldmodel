@@ -626,7 +626,7 @@ def run(cfg):
         representations_2d = compute_dimensionality_reduction(all_embeddings_global, local_cfg)
 
         # --- Plot latent space ---
-        dr_save_path = f"{dataset_name}_{model_name}_{env_name}_{local_cfg.dimensionality_reduction}.pdf"
+        dr_save_path = f"{dataset_name}_{model_name}_{local_cfg.dimensionality_reduction}.pdf"
 
         plot_representations(
             grid,

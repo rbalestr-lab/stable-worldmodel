@@ -756,6 +756,7 @@ class CubeEnv(ManipSpaceEnv):
         assert self.variation_space.check(debug=True), "Variation values must be within variation space!"
 
         ob, info = super().reset(seed=seed, options=options, *args, **kwargs)
+        # TODO handle reset to a specific position in options
         print("self._model.qpos0", self._model.qpos0)
         print("qpos", self._data.qpos)
         print("qvel", self._data.qvel)

@@ -188,6 +188,8 @@ class TwoRoomEnv(gym.Env):
 
         self.variation_space.reset()
 
+        print("TwoRoomEnv reset with options:", options)
+
         variations = options.get("variation", DEFAULT_VARIATIONS)
 
         if not isinstance(variations, Sequence):

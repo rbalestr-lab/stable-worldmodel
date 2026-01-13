@@ -41,3 +41,15 @@ datasets:
         - variation:
             fields: null
             values: null
+
+  ogbench_cube:
+    env:
+      env_name: swm/OGBCube-v0
+      history_size: 1
+      frame_skip: 1
+      grid_size: 20
+      default_variation: null
+      variations:
+        - variation:
+            fields: null
+            values: null

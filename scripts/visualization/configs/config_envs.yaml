@@ -31,7 +31,7 @@ datasets:
 
   pusht:
     env:
-      env_name: swm/PushT-v0
+      env_name: swm/PushT-v1
       history_size: 1
       frame_skip: 1
       grid_size: 20

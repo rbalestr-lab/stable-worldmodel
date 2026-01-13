@@ -565,94 +565,95 @@ def plot_representations(
 
 @hydra.main(version_base=None, config_path="./configs", config_name="config_envs")
 def run(cfg):
-    """Run visualization script."""
+    """Run visualization script for all datasets/envs."""
     cache_dir = swm.data.utils.get_cache_dir()
     cfg.cache_dir = cache_dir
 
-    env, process, transform = get_env(cfg)
-    world_model = get_world_model(cfg)
+    for dataset_name, dataset_cfg in cfg.datasets.items():
+        logging.info("==============================")
+        logging.info(f"Processing dataset: {dataset_name}")
+        logging.info("==============================")
 
-    # --- Define naming components ---
-    env_name = type(env.unwrapped.envs[0].unwrapped).__name__
-    if cfg.world_model.model_name is not None:
-        model_name = cfg.world_model.model_name
-    elif cfg.world_model.backbone.name is not None:
-        model_name = cfg.world_model.backbone.type
-    else:
-        model_name = "custom_model"
+        # --- Extract env + world model config ---
+        env_cfg = dataset_cfg.env
+        wm_cfg = dataset_cfg.world_model
 
-    logging.info("Computing embeddings from environment...")
-    grid, embeddings_variations, pixels_variations = collect_embeddings(world_model, env, process, transform, cfg)
+        # Create a shallow merged config object
+        # so existing functions don't need changes
+        local_cfg = cfg.copy()
+        local_cfg.env = env_cfg
+        local_cfg.world_model = wm_cfg
 
-    # Prepare Data for t-SNE
-    # We need to flatten the batch lists for each variation, and then stack variations.
-    all_embeddings_list = []
+        # --- Setup env and model ---
+        env, process, transform = get_env(local_cfg)
+        world_model = get_world_model(local_cfg)
 
-    for var_list in embeddings_variations:
-        # Concatenate batches within one variation -> (N_grid, D)
-        var_emb = torch.cat(var_list, dim=0).cpu().numpy()
-        var_emb = rearrange(var_emb, "b ... -> b (...)")
-        all_embeddings_list.append(var_emb)
+        env_name = type(env.unwrapped.envs[0].unwrapped).__name__
+        model_name = wm_cfg.model_name if wm_cfg.model_name is not None else wm_cfg.backbone.type
 
-    # Stack all variations -> (N_variations * N_grid, D)
-    all_embeddings_global = np.concatenate(all_embeddings_list, axis=0)
-
-    # Metadata for plotting
-    num_variations = len(all_embeddings_list)
-    samples_per_variation = all_embeddings_list[0].shape[0]
-
-    # Compute Global t-SNE
-    logging.info(
-        f"Computing global t-SNE for {num_variations} variations ({all_embeddings_global.shape[0]} total samples)..."
-    )
-    representations_2d_global = compute_dimensionality_reduction(all_embeddings_global, cfg)
-
-    # Plot Combined Dimensionality Reduction
-    dr_save_path = f"{model_name}_{env_name}_{cfg.dimensionality_reduction}.pdf"
-    plot_representations(
-        grid,
-        representations_2d_global,
-        variations_cfg=cfg.env.variations,
-        samples_per_variation=samples_per_variation,
-        title_suffix="Latent Space",
-        save_path=dr_save_path,
-    )
-
-    # Process Distance Maps (Per Variation)
-    # We still loop here because distance maps are best viewed individually per reference image
-    grid_size = cfg.env.grid_size
-
-    for var_idx, var_pixels_list in enumerate(pixels_variations):
-        logging.info(f"--- Processing Distance Maps for Variation {var_idx} ---")
-
-        # Re-extract the embeddings for this specific variation from our global list
-        # to ensure we use the exact data corresponding to the pixels
-        embeddings = all_embeddings_list[var_idx]  # (N_grid, D)
-
-        # Pixels Shape: (N_samples, C, H, W)
-        pixels = torch.cat(var_pixels_list, dim=0).cpu().numpy()
-
-        var_suffix = (
-            f"var_{cfg.env.variations[var_idx]['variation']['fields'][0]}"
-            if cfg.env.variations[var_idx]["variation"]["fields"] is not None
-            else "var_original"
-        )
-        distmap_save_path = f"{model_name}_{env_name}_{var_suffix}_distmap.pdf"
-
-        # Reshape to (Grid_H, Grid_W, ...)
-        grid_reshaped = grid.reshape(grid_size, grid_size, -1)
-        embeddings_reshaped = embeddings.reshape(grid_size, grid_size, -1)
-        pixels_reshaped = pixels.reshape(grid_size, grid_size, *pixels.shape[1:])
-
-        plot_distance_maps(
-            grid_reshaped,
-            embeddings_reshaped,
-            pixels_reshaped,
-            save_path=distmap_save_path,
+        # --- Collect embeddings ---
+        logging.info("Computing embeddings from environment...")
+        grid, embeddings_variations, pixels_variations = collect_embeddings(
+            world_model, env, process, transform, local_cfg
         )
 
-    logging.info("All variations processed.")
-    return
+        # --- Prepare embeddings for dimensionality reduction ---
+        all_embeddings_list = []
+        for var_list in embeddings_variations:
+            var_emb = torch.cat(var_list, dim=0).cpu().numpy()
+            var_emb = rearrange(var_emb, "b ... -> b (...)")
+            all_embeddings_list.append(var_emb)
+
+        all_embeddings_global = np.concatenate(all_embeddings_list, axis=0)
+
+        num_variations = len(all_embeddings_list)
+        samples_per_variation = all_embeddings_list[0].shape[0]
+
+        # --- Dimensionality reduction ---
+        logging.info(
+            f"Computing global {local_cfg.dimensionality_reduction} "
+            f"for {num_variations} variations "
+            f"({all_embeddings_global.shape[0]} samples)..."
+        )
+        representations_2d = compute_dimensionality_reduction(all_embeddings_global, local_cfg)
+
+        # --- Plot latent space ---
+        dr_save_path = f"{dataset_name}_{model_name}_{env_name}_{local_cfg.dimensionality_reduction}.pdf"
+
+        plot_representations(
+            grid,
+            representations_2d,
+            variations_cfg=env_cfg.variations,
+            samples_per_variation=samples_per_variation,
+            title_suffix=f"{dataset_name} Latent Space",
+            save_path=dr_save_path,
+        )
+
+        # --- Distance maps per variation ---
+        grid_size = env_cfg.grid_size
+
+        for var_idx, var_pixels_list in enumerate(pixels_variations):
+            embeddings = all_embeddings_list[var_idx]
+            pixels = torch.cat(var_pixels_list, dim=0).cpu().numpy()
+
+            var_suffix = (
+                f"var_{env_cfg.variations[var_idx]['variation']['fields'][0]}"
+                if env_cfg.variations[var_idx]["variation"]["fields"] is not None
+                else "var_original"
+            )
+
+            distmap_save_path = f"{dataset_name}_{model_name}_{env_name}_{var_suffix}_distmap.pdf"
+
+            plot_distance_maps(
+                grid.reshape(grid_size, grid_size, -1),
+                embeddings.reshape(grid_size, grid_size, -1),
+                pixels.reshape(grid_size, grid_size, *pixels.shape[1:]),
+                save_path=distmap_save_path,
+            )
+
+        logging.info(f"Finished dataset: {dataset_name}")
+
+    logging.info("All datasets processed.")
 
 
 if __name__ == "__main__":

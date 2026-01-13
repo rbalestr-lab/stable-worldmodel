@@ -221,5 +221,17 @@ dataset/
 *.mp4
 lightning_logs/
 old_tests/
+
+# Hydra configuration outputs
+.hydra/
+hydra/
+
+# Assets
+assets/stable-worldmodel-logo.png
+
+# Local testing examples
+examples/example_rocketlanding.py
+examples/example_rocketlanding_moving_pad.py
+
 results/
 local_scripts/

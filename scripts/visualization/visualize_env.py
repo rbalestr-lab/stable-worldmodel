@@ -8,7 +8,7 @@ import stable_pretraining as spt
 import torch
 from einops import rearrange
 from loguru import logger as logging
-from omegaconf import open_dict
+from omegaconf import OmegaConf, open_dict
 from sklearn import preprocessing
 from sklearn.decomposition import PCA
 from sklearn.manifold import TSNE
@@ -580,9 +580,13 @@ def run(cfg):
 
         # Create a shallow merged config object
         # so existing functions don't need changes
-        local_cfg = cfg.copy()
-        local_cfg.env = env_cfg
-        local_cfg.world_model = wm_cfg
+        local_cfg = OmegaConf.merge(
+            cfg,
+            {
+                "env": env_cfg,
+                "world_model": wm_cfg,
+            },
+        )
 
         # --- Setup env and model ---
         env, process, transform = get_env(local_cfg)

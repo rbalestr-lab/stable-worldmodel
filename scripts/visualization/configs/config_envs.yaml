@@ -21,6 +21,7 @@ datasets:
       history_size: 1
       frame_skip: 1
       grid_size: 20
+      default_variation: ["agent.position"]
       variations:
         - variation:
             fields: null
@@ -35,6 +36,7 @@ datasets:
       history_size: 1
       frame_skip: 1
       grid_size: 20
+      default_variation: ["agent.position"]
       variations:
         - variation:
             fields: null

@@ -755,7 +755,14 @@ class CubeEnv(ManipSpaceEnv):
 
         assert self.variation_space.check(debug=True), "Variation values must be within variation space!"
 
-        return super().reset(seed=seed, options=options, *args, **kwargs)
+        ob, info = super().reset(seed=seed, options=options, *args, **kwargs)
+        print("self._model.qpos0", self._model.qpos0)
+        print("qpos", self._data.qpos)
+        print("qvel", self._data.qvel)
+        for i in range(self._num_cubes):
+            print(f"object_joint_{i}", self._data.joint(f"object_joint_{i}").qpos)
+        print("info['proprio/effector_pos']", info["proprio/effector_pos"])
+        return ob, info
 
     def add_objects(self, arena_mjcf):
         """Add cube objects and cameras to the MuJoCo scene.

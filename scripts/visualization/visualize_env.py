@@ -74,6 +74,7 @@ def get_env(cfg):
         "goal": img_transform(),
     }
 
+    # TODO should fix this
     # create the processing
     ACTION_MEAN = np.array([-0.0087, 0.0068])
     ACTION_STD = np.array([0.2019, 0.2002])
@@ -278,9 +279,7 @@ def get_state_from_grid(env, grid_element, dim: int | list = 0):
         # get the positions of the block and the agent closer
         reference_state[2:4] = reference_state[0:2] + 0.3 * (reference_state[2:4] - reference_state[0:2])
     elif isinstance(env, TwoRoomEnv):
-        reference_state = np.concatenate(
-            [env.variation_space["agent"]["position"].value, env.variation_space["goal"]["position"].value]
-        )
+        reference_state = env.variation_space["agent"]["position"].value
     elif isinstance(env, CubeEnv):
         # TODO
         reference_state = []

@@ -367,6 +367,7 @@ def collect_embeddings(world_model, env, process, transform, cfg):
                         variation_cfg.variation["values"],
                     )
                 )
+            print(f"Resetting env with options: {options}")
             _, infos = env.reset(options=options)
             infos = prepare_info(infos, process, transform)
             for key in infos:

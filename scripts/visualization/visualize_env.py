@@ -558,6 +558,20 @@ def plot_representations(
     plt.close(fig)
 
 
+def make_runtime_cfg(global_cfg, dataset_cfg):
+    return OmegaConf.merge(
+        {
+            "device": global_cfg.device,
+            "seed": global_cfg.seed,
+            "image_size": global_cfg.image_size,
+            "patch_size": global_cfg.patch_size,
+            "dimensionality_reduction": global_cfg.dimensionality_reduction,
+            "cache_dir": global_cfg.cache_dir,
+        },
+        dataset_cfg,
+    )
+
+
 # ===========================================================================
 # Main function
 # ===========================================================================
@@ -574,19 +588,9 @@ def run(cfg):
         logging.info(f"Processing dataset: {dataset_name}")
         logging.info("==============================")
 
-        # --- Extract env + world model config ---
-        env_cfg = dataset_cfg.env
-        wm_cfg = dataset_cfg.world_model
-
-        # Create a shallow merged config object
-        # so existing functions don't need changes
-        local_cfg = OmegaConf.merge(
-            cfg,
-            {
-                "env": env_cfg,
-                "world_model": wm_cfg,
-            },
-        )
+        local_cfg = make_runtime_cfg(cfg, dataset_cfg)
+        wm_cfg = local_cfg.world_model
+        env_cfg = local_cfg.env
 
         # --- Setup env and model ---
         env, process, transform = get_env(local_cfg)

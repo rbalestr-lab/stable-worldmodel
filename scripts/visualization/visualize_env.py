@@ -17,6 +17,7 @@ from tqdm import tqdm
 from transformers import AutoModel, AutoModelForImageClassification
 
 import stable_worldmodel as swm
+from stable_worldmodel.envs.ogbench_manip.cube_env import CubeEnv
 from stable_worldmodel.envs.pusht.env import PushT
 from stable_worldmodel.envs.two_room.env import TwoRoomEnv
 from stable_worldmodel.wrappers import MegaWrapper, VariationWrapper
@@ -280,6 +281,10 @@ def get_state_from_grid(env, grid_element, dim: int | list = 0):
         reference_state = np.concatenate(
             [env.variation_space["agent"]["position"].value, env.variation_space["goal"]["position"].value]
         )
+    elif isinstance(env, CubeEnv):
+        # TODO
+        reference_state = []
+        pass
     # computing the state from a grid element
     grid_state = reference_state.copy()
     for i, d in enumerate(dim):
@@ -291,6 +296,9 @@ def get_state_from_grid(env, grid_element, dim: int | list = 0):
     elif isinstance(env, TwoRoomEnv):
         # TODO should check position is feasible
         grid_state
+    elif isinstance(env, CubeEnv):
+        # TODO
+        pass
     return grid_state
 
 
@@ -315,6 +323,10 @@ def get_state_grid(env, grid_size: int = 10):
         range_val = [max_v - min_v for min_v, max_v in zip(min_val, max_val)]
         min_val = [min_v + 0.1 * r for min_v, r in zip(min_val, range_val)]
         max_val = [max_v - 0.1 * r for max_v, r in zip(max_val, range_val)]
+    elif isinstance(env, CubeEnv):
+        # TODO move position of the cube
+        dim = []
+        pass
     else:
         raise NotImplementedError(f"State grid generation not implemented for env type: {type(env)}")
 

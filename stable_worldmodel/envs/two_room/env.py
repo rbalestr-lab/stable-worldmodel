@@ -212,10 +212,14 @@ class TwoRoomEnv(gym.Env):
 
         # restore original state
         if options is not None and "state" in options:
-            state = options["state"]  # TODO replace this with agent_pos and goal_pos
+            agent_pos = options["state"]
         else:
             agent_pos = self.variation_space["agent"]["position"].value
+        if options is not None and "goal_state" in options:
+            goal_pos = options["goal_state"]
+        else:
             goal_pos = self.variation_space["goal"]["position"].value
+
         self._set_position(agent_pos, goal_pos)
 
         # generate observation

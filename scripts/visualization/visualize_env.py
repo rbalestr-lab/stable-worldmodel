@@ -353,9 +353,9 @@ def collect_embeddings(world_model, env, process, transform, cfg):
         variation_pixels = []
         for i, state in tqdm(enumerate(state_grid), desc="Collecting embeddings"):
             options = {"state": state}
-            default_variations = cfg.env.get("default_variations", None)
-            if default_variations is not None:
-                options["variation"] = default_variations
+            default_variation = cfg.env.get("default_variation", None)
+            if default_variation is not None:
+                options["variation"] = default_variation
             # for the first state of each variation, add variation options
             if variation_cfg.variation["fields"] is not None:
                 assert variation_cfg.variation["values"] is not None and len(variation_cfg.variation["fields"]) == len(

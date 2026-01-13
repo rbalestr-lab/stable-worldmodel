@@ -281,9 +281,7 @@ def get_state_from_grid(env, grid_element, dim: int | list = 0):
     elif isinstance(env, TwoRoomEnv):
         reference_state = env.variation_space["agent"]["position"].value
     elif isinstance(env, CubeEnv):
-        # TODO
-        reference_state = []
-        pass
+        reference_state = env._model.qpos0.copy()
     # computing the state from a grid element
     grid_state = reference_state.copy()
     for i, d in enumerate(dim):
@@ -296,8 +294,8 @@ def get_state_from_grid(env, grid_element, dim: int | list = 0):
         # TODO should check position is feasible
         grid_state
     elif isinstance(env, CubeEnv):
-        # TODO
-        pass
+        # TODO should check position is feasible
+        grid_state
     return grid_state
 
 
@@ -324,8 +322,9 @@ def get_state_grid(env, grid_size: int = 10):
         max_val = [max_v - 0.1 * r for max_v, r in zip(max_val, range_val)]
     elif isinstance(env, CubeEnv):
         # TODO move position of the cube
-        dim = []
-        pass
+        dim = [0]
+        min_val = [0.2]
+        max_val = [3.0]
     else:
         raise NotImplementedError(f"State grid generation not implemented for env type: {type(env)}")
 
@@ -356,7 +355,7 @@ def collect_embeddings(world_model, env, process, transform, cfg):
             options = {"state": state}
             default_variations = cfg.env.get("default_variations", None)
             if default_variations is not None:
-                options["variations"] = default_variations
+                options["variation"] = default_variations
             # for the first state of each variation, add variation options
             if variation_cfg.variation["fields"] is not None:
                 assert variation_cfg.variation["values"] is not None and len(variation_cfg.variation["fields"]) == len(

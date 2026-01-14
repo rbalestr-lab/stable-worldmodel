@@ -96,13 +96,16 @@ def get_env(cfg):
     }
 
     with open_dict(cfg) as cfg:
-        cfg.extra_dims = {
-            "action": env.unwrapped.action_space.shape[1],
-            "proprio": env.unwrapped.observation_space.spaces["proprio"].shape[1],
-        }
-        for key in cfg.world_model.get("encoding", {}):
-            if key not in cfg.extra_dims:
-                raise ValueError(f"Encoding key '{key}' not found in env obs.")
+        cfg.extra_dims = {}
+        obs_space = env.unwrapped.observation_space
+        for key in cfg.get("encoding", {}):
+            if hasattr(obs_space, "spaces") and key in obs_space.spaces:
+                inpt_dim = obs_space.spaces[key].shape[1]
+            elif hasattr(obs_space, "spaces") and key not in obs_space.spaces:
+                raise ValueError(f"Encoding key '{key}' not found in dataset columns.")
+            else:
+                inpt_dim = obs_space.shape[0]
+            cfg.extra_dims[key] = inpt_dim if key != "action" else env.unwrapped.action_space.shape[1]
 
     return env, process, transform
 

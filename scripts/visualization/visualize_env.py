@@ -319,7 +319,9 @@ def get_state_from_grid(env, grid_element, dim: int | list = 0):
     elif isinstance(env, TwoRoomEnv):
         reference_state = env.variation_space["agent"]["position"].value
     elif isinstance(env, CubeEnv):
-        reference_state = env._model.qpos0.copy()
+        qpos0 = env._model.qpos0.copy()
+        qvel0 = np.zeros(env._model.nv, dtype=qpos0.dtype)
+        reference_state = np.concatenate([qpos0, qvel0])
     # computing the state from a grid element
     grid_state = reference_state.copy()
     for i, d in enumerate(dim):
@@ -359,10 +361,18 @@ def get_state_grid(env, grid_size: int = 10):
         min_val = [min_v + 0.1 * r for min_v, r in zip(min_val, range_val)]
         max_val = [max_v - 0.1 * r for max_v, r in zip(max_val, range_val)]
     elif isinstance(env, CubeEnv):
-        # TODO move position of the cube
-        dim = [0]
-        min_val = [0.2]
-        max_val = [3.0]
+        cube_pos_start = env._model.nq - 7
+        dim = [cube_pos_start, cube_pos_start + 1]
+        qpos0 = env._model.qpos0
+        cube_xy = qpos0[cube_pos_start : cube_pos_start + 2]
+        bounds = np.asarray(env._object_sampling_bounds, dtype=np.float64)
+        half_range = np.minimum(cube_xy - bounds[0], bounds[1] - cube_xy)
+        if np.any(half_range <= 0.0):
+            min_val = bounds[0].tolist()
+            max_val = bounds[1].tolist()
+        else:
+            min_val = (cube_xy - half_range).tolist()
+            max_val = (cube_xy + half_range).tolist()
     else:
         raise NotImplementedError(f"State grid generation not implemented for env type: {type(env)}")
 

@@ -711,6 +711,8 @@ class CubeEnv(ManipSpaceEnv):
                 - 'variation': List/tuple of variation names to sample. Use ['all']
                   to sample all variations, or specify individual ones like
                   ['cube.color', 'light.intensity']. Defaults to None (no variation).
+                - 'state': Optional simulator state override. Accepts either a
+                  dict with 'qpos' and 'qvel' entries, or a (qpos, qvel) tuple.
             *args: Variable length argument list passed to parent reset.
             **kwargs: Arbitrary keyword arguments passed to parent reset.
 
@@ -756,13 +758,23 @@ class CubeEnv(ManipSpaceEnv):
         assert self.variation_space.check(debug=True), "Variation values must be within variation space!"
 
         ob, info = super().reset(seed=seed, options=options, *args, **kwargs)
-        # TODO handle reset to a specific position in options
-        print("self._model.qpos0", self._model.qpos0)
-        print("qpos", self._data.qpos)
-        print("qvel", self._data.qvel)
-        for i in range(self._num_cubes):
-            print(f"object_joint_{i}", self._data.joint(f"object_joint_{i}").qpos)
-        print("info['proprio/effector_pos']", info["proprio/effector_pos"])
+
+        if "state" in options and options["state"] is not None:
+            state = options["state"]
+            # state should be a np.ndarray representing the concatenation of qpos and qvel
+            assert isinstance(state, np.ndarray), "State option must be a numpy ndarray!"
+            assert state.ndim == 1, "State option must be a 1D array!"
+            assert state.shape[0] == self._model.nq + self._model.nv, (
+                f"State option must have shape ({self._model.nq + self._model.nv},)!"
+            )
+            qpos = state[: self._model.nq]
+            qvel = state[self._model.nq :]
+            self.set_state(qpos, qvel)
+            self.pre_step()
+            self.post_step()
+            ob = self.compute_observation()
+            info = self.get_reset_info()
+
         return ob, info
 
     def add_objects(self, arena_mjcf):

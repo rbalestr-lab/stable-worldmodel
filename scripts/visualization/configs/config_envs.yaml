@@ -54,3 +54,6 @@ datasets:
         - variation:
             fields: null
             values: null
+        - variation:
+            fields: ["floor.color"]
+            values: [[0.0, 100.0, 0.]]

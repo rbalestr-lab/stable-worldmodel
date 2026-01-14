@@ -4,6 +4,7 @@ from pathlib import Path
 
 import hydra
 import lightning as pl
+import numpy as np
 import stable_pretraining as spt
 import torch
 from lightning.pytorch.callbacks import Callback
@@ -109,22 +110,18 @@ def get_data(cfg):
 
     def get_img_pipeline(key, target, img_size=224):
         return spt.data.transforms.Compose(
-            spt.data.transforms.ToImage(
-                **spt.data.dataset_stats.ImageNet,
-                source=key,
-                target=target,
-            ),
+            spt.data.transforms.ToImage(**spt.data.dataset_stats.ImageNet, source=key, target=target),
             spt.data.transforms.Resize(img_size, source=key, target=target),
             spt.data.transforms.CenterCrop(img_size, source=key, target=target),
         )
 
     def norm_col_transform(dataset, col="pixels"):
         """Normalize column to zero mean, unit variance."""
-        data = dataset[col][:].squeeze()
+        data = dataset.get_col_data(col).squeeze()
         mean = data.mean(0).unsqueeze(0)
         std = data.std(0).unsqueeze(0)
         std = std.clamp(min=1e-6)  # Prevent division by near-zero std
-        return lambda x: (x - mean) / std
+        return lambda x: ((x - mean) / std).float()
 
     ds_config = {
         "num_steps": cfg.n_steps,
@@ -134,15 +131,7 @@ def get_data(cfg):
         "subset_prop": cfg.subset_prop,
     }
 
-    data_class = (
-        swm.data.FrameDataset
-        if "expert" in cfg.dataset_name and "video" not in cfg.dataset_name
-        else swm.data.VideoDataset
-    )
-
-    print("Using dataset class:", data_class.__name__)
-
-    dataset = data_class(
+    dataset = swm.data.HDF5Dataset(
         cfg.dataset_name,
         **ds_config,
     )
@@ -166,11 +155,7 @@ def get_data(cfg):
         img_size = (cfg.image_size // cfg.patch_size) * DINO_PATCH_SIZE
         # Apply transforms to all steps
         transform = spt.data.transforms.Compose(
-            *[
-                get_img_pipeline(f"{col}.{i}", f"{col}.{i}", img_size)
-                for col in ["pixels"]
-                for i in range(cfg.n_steps)
-            ],
+            *[get_img_pipeline(col, col, img_size) for col in ["pixels"] for i in range(cfg.n_steps)],
             *all_norm_transforms,
         )
 
@@ -181,7 +166,7 @@ def get_data(cfg):
         for key in cfg.pyro.get("encoding", {}):
             if key not in dataset.column_names:
                 raise ValueError(f"Encoding key '{key}' not found in dataset columns.")
-            inpt_dim = dataset.dataset[0][key].numel()
+            inpt_dim = np.prod(dataset[0][key].shape[1:])
             cfg.extra_dims[key] = inpt_dim if key != "action" else inpt_dim * cfg.frameskip
 
     # add injected datasets if specified

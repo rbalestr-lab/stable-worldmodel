@@ -101,7 +101,7 @@ def get_env(cfg):
         for key in cfg.world_model.get("encoding", {}):
             if hasattr(obs_space, "spaces") and key in obs_space.spaces:
                 inpt_dim = obs_space.spaces[key].shape[1]
-            elif hasattr(obs_space, "spaces") and key not in obs_space.spaces:
+            elif hasattr(obs_space, "spaces") and key != "action" and key not in obs_space.spaces:
                 raise ValueError(f"Encoding key '{key}' not found in dataset columns.")
             else:
                 inpt_dim = obs_space.shape[0]

@@ -10,7 +10,7 @@ from loguru import logger as logging
 from scipy import stats as scipy_stats
 
 import stable_worldmodel as swm
-from stable_worldmodel.data import FinancialDataset
+from stable_worldmodel.finance_data.download import load_market_data
 
 
 def calculate_sharpe_ratio(
@@ -263,7 +263,7 @@ class FinancialEnvironment(gym.Env):
         super().__init__()
         self.render_mode = render_mode
 
-        self.data_dir = Path(data_dir) if data_dir else swm.data.get_cache_dir()
+        self.data_dir = Path(data_dir) if data_dir else swm.data.utils.get_cache_dir()
         self.max_steps = max_steps
 
         self.default_symbols = symbols or self.get_available_symbols()[:5]
@@ -427,13 +427,27 @@ class FinancialEnvironment(gym.Env):
         }
 
     def _load_historical_data(self, symbol: str, start_date: str, end_date: str) -> pd.DataFrame:
-        """Load historical OHLCV data using bfloat16 pipeline (auto-downloads if needed)."""
+        """Load historical OHLCV data using Alpaca API (auto-downloads if needed)."""
         try:
-            df = FinancialDataset.load(
-                stocks=[symbol],
-                dates=[(start_date, end_date)],
-                base_dir=str(self.data_dir) if self.data_dir else None,
-            )
+            # Load market data using the download module - returns numpy array (T, num_stocks, features)
+            data_array = load_market_data(tickers=[symbol], start_time=start_date, end_time=end_date, freq="1min")
+
+            # Convert numpy array back to DataFrame
+            # data_array shape: (T, 1, 7) where features are [open, high, low, close, volume, trade_count, vwap]
+            features = ["open", "high", "low", "close", "volume", "trade_count", "vwap"]
+
+            # Squeeze out the stock dimension since we only have one stock
+            df_data = data_array[:, 0, :]  # Shape: (T, 7)
+
+            # Create DataFrame with timestamp index
+            # Note: We need to reconstruct the timestamps based on the date range
+            start_ts = pd.Timestamp(start_date)
+            timestamps = pd.date_range(start=start_ts, periods=len(df_data), freq="1min")
+
+            df = pd.DataFrame(df_data, columns=features, index=timestamps)
+
+            # Remove NaN rows
+            df = df.dropna()
 
             if df.empty:
                 raise ValueError(f"No data for {symbol} from {start_date} to {end_date}")
@@ -441,9 +455,6 @@ class FinancialEnvironment(gym.Env):
             required_columns = ["open", "high", "low", "close"]
             if missing := set(required_columns) - set(df.columns):
                 raise ValueError(f"Missing columns: {missing}")
-
-            if "timestamp" in df.columns and not isinstance(df.index, pd.DatetimeIndex):
-                df = df.set_index(pd.to_datetime(df["timestamp"]))
 
             df = df.sort_index()
             logging.info(f"Loaded {len(df)} bars for {symbol}")
@@ -514,6 +525,7 @@ class FinancialEnvironment(gym.Env):
                 "end_date": end_date,
                 "symbol": self.current_symbol,
             },
+            "goal": np.zeros((64, 64, 3), dtype=np.uint8),  # Dummy goal for wrapper compatibility
         }
 
         return observation, info
@@ -631,6 +643,13 @@ class FinancialEnvironment(gym.Env):
             "total_return": (self.portfolio_value - self.initial_portfolio_value)
             / max(self.initial_portfolio_value, 1e-8),
             "sharpe_ratio": self._calculate_sharpe_ratio(),
+            "market_data_length": len(self.market_data),
+            "backtest_config": {
+                "start_date": self.market_data.index[0].strftime("%Y-%m-%d"),
+                "end_date": self.market_data.index[-1].strftime("%Y-%m-%d"),
+                "symbol": self.current_symbol,
+            },
+            "goal": np.zeros((64, 64, 3), dtype=np.uint8),  # Dummy goal for wrapper compatibility
         }
 
         return observation, reward, terminated, truncated, info

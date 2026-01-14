@@ -98,7 +98,7 @@ def get_env(cfg):
     with open_dict(cfg) as cfg:
         cfg.extra_dims = {}
         obs_space = env.unwrapped.observation_space
-        for key in cfg.get("encoding", {}):
+        for key in cfg.world_model.get("encoding", {}):
             if hasattr(obs_space, "spaces") and key in obs_space.spaces:
                 inpt_dim = obs_space.spaces[key].shape[1]
             elif hasattr(obs_space, "spaces") and key not in obs_space.spaces:

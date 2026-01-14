@@ -107,7 +107,7 @@ def get_env(cfg):
                 raise ValueError(f"Encoding key '{key}' not found in dataset columns.")
             else:
                 inpt_dim = obs_space.shape[0]
-            cfg.extra_dims[key] = inpt_dim if key != "action" else env.unwrapped.action_space.shape[1]
+            cfg.extra_dims[key] = inpt_dim
 
     return env, process, transform
 

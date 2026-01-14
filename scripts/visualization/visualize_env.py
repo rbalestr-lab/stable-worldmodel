@@ -361,7 +361,7 @@ def get_state_grid(env, grid_size: int = 10):
         min_val = [min_v + 0.1 * r for min_v, r in zip(min_val, range_val)]
         max_val = [max_v - 0.1 * r for max_v, r in zip(max_val, range_val)]
     elif isinstance(env, CubeEnv):
-        cube_pos_start = env._model.joint("object_joint_0").qposadr
+        cube_pos_start = int(np.asarray(env._model.joint("object_joint_0").qposadr).reshape(-1)[0])
         dim = [cube_pos_start, cube_pos_start + 1]
         qpos0 = env._model.qpos0
         cube_xy = qpos0[cube_pos_start : cube_pos_start + 2]

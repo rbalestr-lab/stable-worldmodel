@@ -646,7 +646,6 @@ def run(cfg):
         env, process, transform = get_env(local_cfg)
         world_model = get_world_model(local_cfg)
 
-        env_name = type(env.unwrapped.envs[0].unwrapped).__name__
         model_name = wm_cfg.model_name if wm_cfg.model_name is not None else wm_cfg.backbone.type
 
         # --- Collect embeddings ---
@@ -700,7 +699,7 @@ def run(cfg):
                 else "var_original"
             )
 
-            distmap_save_path = f"{dataset_name}_{model_name}_{env_name}_{var_suffix}_distmap.pdf"
+            distmap_save_path = f"{dataset_name}_{model_name}_{var_suffix}_distmap.pdf"
 
             plot_distance_maps(
                 grid.reshape(grid_size, grid_size, -1),

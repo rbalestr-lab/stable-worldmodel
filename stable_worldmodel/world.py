@@ -122,7 +122,7 @@ class World:
         self,
         env_name: str,
         num_envs: int,
-        image_shape: tuple,
+        image_shape: tuple | None = None,
         goal_transform: Callable | None = None,
         image_transform: Callable | None = None,
         seed: int = 2349867,
@@ -145,8 +145,10 @@ class World:
                 registered environment ID (e.g., 'PushT-v0', 'CubeEnv-v0').
             num_envs (int): Number of parallel environment instances to create.
                 Higher values increase data collection throughput but require more memory.
-            image_shape (tuple): Target shape for image observations as (height, width)
+            image_shape (tuple, optional): Target shape for image observations as (height, width)
                 or (height, width, channels). Images are resized to this shape.
+                If None, automatically sets to (64, 64) for financial environments.
+                For other environments, this parameter is required.
             goal_transform (Callable, optional): Function to transform goal observations.
                 Should accept and return numpy arrays. Applied after resizing.
                 Defaults to None.
@@ -182,6 +184,26 @@ class World:
                     seed=42
                 )
         """
+        # Auto-detect image_shape for financial environments
+        is_financial = "Financial" in env_name or "financial" in env_name.lower()
+
+        if image_shape is None:
+            if is_financial:
+                image_shape = (64, 64)
+                if verbose > 0:
+                    logging.info("Auto-detected financial environment, using image_shape=(64, 64)")
+            else:
+                raise ValueError(
+                    f"image_shape is required for environment '{env_name}'. "
+                    "Please specify image_shape parameter (e.g., image_shape=(96, 96))"
+                )
+
+        # Financial environments are not goal-conditioned
+        if is_financial and goal_conditioned:
+            goal_conditioned = False
+            if verbose > 0:
+                logging.info("Financial environments are not goal-conditioned, disabling goal conditioning")
+
         self.envs = gym.make_vec(
             env_name,
             num_envs=num_envs,
@@ -441,7 +463,15 @@ class World:
         [o.close() for o in out]
         print(f"Video saved to {video_path}")
 
-    def record_dataset(self, dataset_name, episodes=10, seed=None, cache_dir=None, mode="frame", options=None):
+    def record_dataset(
+        self,
+        dataset_name,
+        episodes=10,
+        seed=None,
+        cache_dir=None,
+        mode="frame",
+        options=None,
+    ):
         if self._history_size > 1:
             raise NotImplementedError("Dataset recording with frame history > 1 is not supported.")
 

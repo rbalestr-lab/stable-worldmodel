@@ -444,6 +444,9 @@ class MegaWrapper(gym.Wrapper):
         AddPixelsWrapper → EverythingToInfoWrapper → EnsureInfoKeysWrapper →
         EnsureGoalInfoWrapper → ResizeGoalWrapper → StackedWrapper
 
+    For financial environments, automatically applies FinancialWrapper to remove
+    pixel and goal operations before stacking.
+
     This provides a complete preprocessing pipeline with rendered pixels, unified
     info dict, key validation, goal checking, goal resizing, and temporal stacking.
 
@@ -455,13 +458,14 @@ class MegaWrapper(gym.Wrapper):
         required_keys: Additional regex patterns for keys that must be in info.
             Pattern ``^pixels(?:\\..*)?$`` is always added.
         separate_goal: If True, validates 'goal' is present in info. Defaults to True.
+            Automatically set to False for financial environments.
         n_stacks: Number of steps to stack (passed to StackedWrapper).
     """
 
     def __init__(
         self,
         env,
-        image_shape: tuple[int, int] = (84, 84),
+        image_shape: tuple[int, int] | None = (84, 84),
         pixels_transform: Callable | None = None,
         goal_transform: Callable | None = None,
         required_keys: Iterable | None = None,
@@ -471,9 +475,22 @@ class MegaWrapper(gym.Wrapper):
     ):
         super().__init__(env)
 
+        # Detect if this is a financial environment by checking the unwrapped env
+        from stable_worldmodel.envs.financial_trading import FinancialEnvironment
+
+        unwrapped_env = env.unwrapped if hasattr(env, "unwrapped") else env
+        is_financial = isinstance(unwrapped_env, FinancialEnvironment)
+
+        # Financial environments don't need goals
+        if is_financial:
+            separate_goal = False
+
         if required_keys is None:
             required_keys = []
         required_keys.append(r"^pixels(?:\..*)?$")
+        # Handle None image_shape by using default
+        if image_shape is None:
+            image_shape = (224, 224)
 
         # Build pipeline
         # this adds `pixels` key to info with optional transform
@@ -485,6 +502,10 @@ class MegaWrapper(gym.Wrapper):
         # check goal is provided
         env = EnsureGoalInfoWrapper(env, check_reset=separate_goal, check_step=separate_goal)
         env = ResizeGoalWrapper(env, image_shape, goal_transform)
+
+        # For financial environments, apply FinancialWrapper to clean up pixels/goals
+        if is_financial:
+            env = FinancialWrapper(env)
 
         # We will wrap with StackedWrapper dynamically after we know the keys
         self.env = env
@@ -512,6 +533,53 @@ class MegaWrapper(gym.Wrapper):
         if not self._stack_initialized:
             raise RuntimeError("StackedWrapper not yet initialized — call reset() first.")
         return self.env.step(action)
+
+
+class FinancialWrapper(gym.Wrapper):
+    """Undoes AddPixelsWrapper, EnsureGoalInfoWrapper, and ResizeGoalWrapper effects.
+
+    This wrapper removes pixel-related keys from info dict and goal validation,
+    effectively leaving only EverythingToInfoWrapper → EnsureInfoKeysWrapper
+    functionality when used after MegaWrapper.
+
+    Args:
+        env: The Gymnasium environment to wrap.
+    """
+
+    def __init__(self, env):
+        super().__init__(env)
+        self._dummy_pixels = None
+
+    def _clean_info(self, info):
+        """Remove pixel-related keys and goal from info dict."""
+        cleaned_info = {}
+        for key, value in info.items():
+            if key in ("pixels", "goal", "render_time") or key.startswith("pixels."):
+                continue
+            cleaned_info[key] = value
+        return cleaned_info
+
+    def render(self):
+        """Provide dummy render output for wrappers that require it."""
+        if self._dummy_pixels is None:
+            if hasattr(self.env.observation_space, "shape"):
+                shape = self.env.observation_space.shape
+            else:
+                shape = (64, 64, 3)
+            import numpy as np
+
+            self._dummy_pixels = np.zeros(shape, dtype=np.uint8)
+        return self._dummy_pixels
+
+    def reset(self, *args, **kwargs):
+        obs, info = self.env.reset(*args, **kwargs)
+        info = self._clean_info(info)
+        return obs, info
+
+    def step(self, action):
+        obs, reward, terminated, truncated, info = self.env.step(action)
+        info = self._clean_info(info)
+        return obs, reward, terminated, truncated, info
 
 
 class VariationWrapper(VectorWrapper):

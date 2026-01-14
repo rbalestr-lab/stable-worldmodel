@@ -126,8 +126,8 @@ class TwoRoomEnv(gym.Env):
                             shape=(2,),
                             dtype=np.float32,
                             init_value=np.array([450.0, 450.0], dtype=np.float32),
-                            constrain_fn=lambda x: not self.check_collide(x, entity="goal")
-                            and self.check_other_room(x),
+                            constrain_fn=lambda x: not self.check_collide(x, entity="goal"),
+                            # and self.check_other_room(x),
                         ),
                     },
                     sampling_order=["color", "radius", "position"],

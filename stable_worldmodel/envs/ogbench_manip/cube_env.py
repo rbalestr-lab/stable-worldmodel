@@ -711,6 +711,8 @@ class CubeEnv(ManipSpaceEnv):
                 - 'variation': List/tuple of variation names to sample. Use ['all']
                   to sample all variations, or specify individual ones like
                   ['cube.color', 'light.intensity']. Defaults to None (no variation).
+                - 'variation_values': Optional dict of variation values to set
+                  directly (overrides sampled values when provided).
                 - 'state': Optional simulator state override. Accepts either a
                   dict with 'qpos' and 'qvel' entries, or a (qpos, qvel) tuple.
             *args: Variable length argument list passed to parent reset.
@@ -754,6 +756,9 @@ class CubeEnv(ManipSpaceEnv):
 
             else:
                 self.variation_space.update(set(options["variation"]))
+
+        if options is not None and "variation_values" in options:
+            self.variation_space.set_value(options["variation_values"])
 
         assert self.variation_space.check(debug=True), "Variation values must be within variation space!"
 

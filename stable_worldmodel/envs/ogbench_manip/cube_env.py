@@ -900,7 +900,7 @@ class CubeEnv(ManipSpaceEnv):
                     desired_size = self.variation_space["cube"]["size"].value[i] * np.ones(
                         (3), dtype=np.float32
                     )  # half-extents (x, y, z)
-                    if not np.allclose(geom.size, desired_size):
+                    if geom.size is None or not np.allclose(geom.size, desired_size):
                         size_changed = True
                     geom.size = desired_size
 
@@ -909,7 +909,7 @@ class CubeEnv(ManipSpaceEnv):
             if target_body:
                 for geom in target_body.find_all("geom"):
                     desired_size = self.variation_space["cube"]["size"].value[i] * np.ones((3), dtype=np.float32)
-                    if not np.allclose(geom.size, desired_size):
+                    if geom.size is None or not np.allclose(geom.size, desired_size):
                         size_changed = True
                     geom.size = desired_size
 

@@ -245,7 +245,7 @@ class CubeEnv(ManipSpaceEnv):
                             high=self._arm_sampling_bounds[1],
                             shape=(3,),
                             dtype=np.float64,
-                            init_value=np.mean(self._arm_start_position, axis=0),
+                            init_value=np.mean(self._arm_sampling_bounds, axis=0),
                         ),
                     }
                 ),

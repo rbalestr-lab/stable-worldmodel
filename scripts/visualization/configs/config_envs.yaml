@@ -49,11 +49,11 @@ datasets:
       history_size: 1
       frame_skip: 1
       grid_size: 20
-      default_variation: null
+      default_variation: ["cube.start_position"]
       variations:
         - variation:
-            fields: null
-            values: null
+            fields: ["cube.goal_position", "cube.goal_yaw"]
+            values: [[0.4, 0.0], 0.0]
         # - variation:
-        #     fields: ["floor.color"]
-        #     values: [[[0.0, 1.0, 0.], [0.0, 0.0, 1.0]]]
+        #     fields: ["cube.goal_position", "cube.goal_yaw", "floor.color"]
+        #     values: [[0.4, 0.0], 0.0, [[0.0, 1.0, 0.], [0.0, 0.0, 1.0]]]

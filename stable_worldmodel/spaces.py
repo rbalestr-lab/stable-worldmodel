@@ -405,6 +405,9 @@ class Box(spaces.Box):
         if not self.constrain_fn(self.value):
             logging.warning(f"Box: value {self.value} does not satisfy constrain_fn")
             return False
+        print("self.low:", self.low)
+        print("self.high:", self.high)
+        print(f"Box: checking value {self.value}")
         return self.contains(self.value)
 
     def sample(self, *args, max_tries=1000, warn_after_s=5.0, set_value=True, **kwargs):

@@ -880,14 +880,26 @@ class CubeEnv(ManipSpaceEnv):
             - Some variations (size, light) call self.mark_dirty() to trigger recompilation
             - Camera angle perturbations use the perturb_camera_angle helper function
         """
-        grid_texture = mjcf_model.find("texture", "grid")
         # Modify floor color
         grid_texture = mjcf_model.find("texture", "grid")
+        texture_changed = grid_texture.rgb1 is None or not np.allclose(
+            grid_texture.rgb1, self.variation_space["floor"]["color"].value[0]
+        )
+        texture_changed = texture_changed or (
+            grid_texture.rgb2 is None
+            or not np.allclose(grid_texture.rgb2, self.variation_space["floor"]["color"].value[1])
+        )
         grid_texture.rgb1 = self.variation_space["floor"]["color"].value[0]
         grid_texture.rgb2 = self.variation_space["floor"]["color"].value[1]
         print("Modified floor colors to:", grid_texture.rgb1, grid_texture.rgb2)
 
         # Modify arm color
+        agent_color_changed = np.allclose(
+            mjcf_model.find("material", "ur5e/robotiq/black").rgba[:3], self.variation_space["agent"]["color"].value
+        )
+        agent_color_changed = agent_color_changed or np.allclose(
+            mjcf_model.find("material", "ur5e/robotiq/pad_gray").rgba[:3], self.variation_space["agent"]["color"].value
+        )
         mjcf_model.find("material", "ur5e/robotiq/black").rgba[:3] = self.variation_space["agent"]["color"].value
         mjcf_model.find("material", "ur5e/robotiq/pad_gray").rgba[:3] = self.variation_space["agent"]["color"].value
 
@@ -915,19 +927,22 @@ class CubeEnv(ManipSpaceEnv):
                     geom.size = desired_size
 
         # Perturb camera angle
+        camera_angle_changed = False
         cameras_to_vary = ["front_pixels", "side_pixels"] if self._multiview else ["front_pixels"]
         for i, cam_name in enumerate(cameras_to_vary):
             cam = mjcf_model.find("camera", cam_name)
             cam.xyaxes = perturb_camera_angle(
                 self.cameras[cam_name]["xyaxes"], self.variation_space["camera"]["angle_delta"].value[i]
             )
-
+            camera_angle_changed = camera_angle_changed or not np.allclose(
+                cam.xyaxes, self.cameras[cam_name]["xyaxes"]
+            )
         # Modify light intensity
         light = mjcf_model.find("light", "global")
         desired_diffuse = self.variation_space["light"]["intensity"].value[0] * np.ones((3), dtype=np.float32)
         light_changed = light.diffuse is None or not np.allclose(light.diffuse, desired_diffuse)
         light.diffuse = desired_diffuse
-        if size_changed or light_changed:
+        if size_changed or light_changed or texture_changed or camera_angle_changed or agent_color_changed:
             self.mark_dirty()
         return mjcf_model
 

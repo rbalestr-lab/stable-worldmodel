@@ -891,7 +891,6 @@ class CubeEnv(ManipSpaceEnv):
         )
         grid_texture.rgb1 = self.variation_space["floor"]["color"].value[0]
         grid_texture.rgb2 = self.variation_space["floor"]["color"].value[1]
-        print("Modified floor colors to:", grid_texture.rgb1, grid_texture.rgb2)
 
         # Modify arm color
         agent_color_changed = np.allclose(

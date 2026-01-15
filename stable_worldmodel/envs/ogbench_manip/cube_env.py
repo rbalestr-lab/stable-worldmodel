@@ -215,7 +215,7 @@ class CubeEnv(ManipSpaceEnv):
                             init_value=np.zeros((self._num_cubes,), dtype=np.float32),
                         ),
                         "goal_position": swm.spaces.Box(  # x, y positions
-                            low=-np.tile(self._target_sampling_bounds[0], (self._num_cubes, 1)),
+                            low=np.tile(self._target_sampling_bounds[0], (self._num_cubes, 1)),
                             high=np.tile(self._target_sampling_bounds[1], (self._num_cubes, 1)),
                             shape=(self._num_cubes, 2),
                             dtype=np.float64,

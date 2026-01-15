@@ -746,8 +746,6 @@ class CubeEnv(ManipSpaceEnv):
 
         self.variation_space.reset()
 
-        print("options in reset:", options)
-
         if "variation" in options:
             assert isinstance(options["variation"], list | tuple), (
                 "variation option must be a list or tuple containing variation names to sample"

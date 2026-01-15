@@ -924,7 +924,7 @@ class CubeEnv(ManipSpaceEnv):
         # Modify light intensity
         light = mjcf_model.find("light", "global")
         desired_diffuse = self.variation_space["light"]["intensity"].value[0] * np.ones((3), dtype=np.float32)
-        light_changed = not np.allclose(light.diffuse, desired_diffuse)
+        light_changed = light.diffuse is None or not np.allclose(light.diffuse, desired_diffuse)
         light.diffuse = desired_diffuse
         if size_changed or light_changed:
             self.mark_dirty()

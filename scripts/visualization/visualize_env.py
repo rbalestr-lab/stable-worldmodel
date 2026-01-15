@@ -320,6 +320,7 @@ def get_state_from_grid(env, grid_element, dim: int | list = 0):
         reference_state = env.variation_space["agent"]["position"].value
     elif isinstance(env, CubeEnv):
         qpos0 = env._model.qpos0.copy()
+        print("QPOS0:", qpos0)
         qvel0 = np.zeros(env._model.nv, dtype=qpos0.dtype)
         reference_state = np.concatenate([qpos0, qvel0])
     # computing the state from a grid element

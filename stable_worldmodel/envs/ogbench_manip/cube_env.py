@@ -198,6 +198,20 @@ class CubeEnv(ManipSpaceEnv):
                             dtype=np.float64,
                             init_value=0.02 * np.ones((self._num_cubes,), dtype=np.float32),
                         ),
+                        "start_position": swm.spaces.Box(
+                            low=-0.1,
+                            high=0.1,
+                            shape=(self._num_cubes, 2),
+                            dtype=np.float64,
+                            init_value=np.zeros((self._num_cubes, 2), dtype=np.float64),
+                        ),
+                        "goal_position": swm.spaces.Box(
+                            low=-0.2,
+                            high=0.2,
+                            shape=(self._num_cubes, 2),
+                            dtype=np.float64,
+                            init_value=np.zeros((self._num_cubes, 2), dtype=np.float64),
+                        ),
                     }
                     # sampling_order=["num", "color", "size"]
                 ),

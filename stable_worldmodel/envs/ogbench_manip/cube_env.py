@@ -886,6 +886,8 @@ class CubeEnv(ManipSpaceEnv):
             - Some variations (size, light) call self.mark_dirty() to trigger recompilation
             - Camera angle perturbations use the perturb_camera_angle helper function
         """
+        grid_texture = mjcf_model.find("texture", "grid")
+        print("Original floor colors:", grid_texture.rgb1, grid_texture.rgb2)
         if "all" in self.variation_options or "floor.color" in self.variation_options:
             # Modify floor color
             grid_texture = mjcf_model.find("texture", "grid")

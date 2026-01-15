@@ -800,7 +800,6 @@ class Dict(spaces.Dict):
                 if not v.check():
                     if debug:
                         logging.warning(f"Dict: space {k} failed check()")
-                    print(f"Dict: space {k} failed check()")
                     return False
         return True
 

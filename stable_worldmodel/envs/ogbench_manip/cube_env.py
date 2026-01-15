@@ -239,7 +239,7 @@ class CubeEnv(ManipSpaceEnv):
                             high=1.0,
                             shape=(1,),
                             dtype=np.float64,
-                            init_value=[0.6],
+                            init_value=[0.7],
                         ),
                     }
                 ),
@@ -887,58 +887,45 @@ class CubeEnv(ManipSpaceEnv):
             - Camera angle perturbations use the perturb_camera_angle helper function
         """
         grid_texture = mjcf_model.find("texture", "grid")
-        print("Original floor colors:", grid_texture.rgb1, grid_texture.rgb2)
-        print(
-            "mjcf_model.find('material', 'ur5e/robotiq/black').rgba[:3]",
-            mjcf_model.find("material", "ur5e/robotiq/black").rgba[:3],
-        )
-        print("mjcf_model.find('light', 'global').diffuse", mjcf_model.find("light", "global").diffuse)
-        if "all" in self.variation_options or "floor.color" in self.variation_options:
-            # Modify floor color
-            grid_texture = mjcf_model.find("texture", "grid")
-            grid_texture.rgb1 = self.variation_space["floor"]["color"].value[0]
-            grid_texture.rgb2 = self.variation_space["floor"]["color"].value[1]
+        # Modify floor color
+        grid_texture = mjcf_model.find("texture", "grid")
+        grid_texture.rgb1 = self.variation_space["floor"]["color"].value[0]
+        grid_texture.rgb2 = self.variation_space["floor"]["color"].value[1]
 
-        if "all" in self.variation_options or "agent.color" in self.variation_options:
-            # Modify arm color
-            mjcf_model.find("material", "ur5e/robotiq/black").rgba[:3] = self.variation_space["agent"]["color"].value
-            mjcf_model.find("material", "ur5e/robotiq/pad_gray").rgba[:3] = self.variation_space["agent"][
-                "color"
-            ].value
+        # Modify arm color
+        mjcf_model.find("material", "ur5e/robotiq/black").rgba[:3] = self.variation_space["agent"]["color"].value
+        mjcf_model.find("material", "ur5e/robotiq/pad_gray").rgba[:3] = self.variation_space["agent"]["color"].value
 
-        if "all" in self.variation_options or "cube.size" in self.variation_options:
-            # Modify cube size based on variation space
-            for i in range(self._num_cubes):
-                # Regular cubes
-                body = mjcf_model.find("body", f"object_{i}")
-                if body:
-                    for geom in body.find_all("geom"):
-                        geom.size = self.variation_space["cube"]["size"].value[i] * np.ones(
-                            (3), dtype=np.float32
-                        )  # half-extents (x, y, z)
+        # Modify cube size based on variation space
+        for i in range(self._num_cubes):
+            # Regular cubes
+            body = mjcf_model.find("body", f"object_{i}")
+            if body:
+                for geom in body.find_all("geom"):
+                    geom.size = self.variation_space["cube"]["size"].value[i] * np.ones(
+                        (3), dtype=np.float32
+                    )  # half-extents (x, y, z)
 
-                # Target cubes (if any)
-                target_body = mjcf_model.find("body", f"object_target_{i}")
-                if target_body:
-                    for geom in target_body.find_all("geom"):
-                        geom.size = self.variation_space["cube"]["size"].value[i] * np.ones((3), dtype=np.float32)
+            # Target cubes (if any)
+            target_body = mjcf_model.find("body", f"object_target_{i}")
+            if target_body:
+                for geom in target_body.find_all("geom"):
+                    geom.size = self.variation_space["cube"]["size"].value[i] * np.ones((3), dtype=np.float32)
 
-            self.mark_dirty()
+        self.mark_dirty()
 
-        if "all" in self.variation_options or "camera.angle_delta" in self.variation_options:
-            # Perturb camera angle
-            cameras_to_vary = ["front_pixels", "side_pixels"] if self._multiview else ["front_pixels"]
-            for i, cam_name in enumerate(cameras_to_vary):
-                cam = mjcf_model.find("camera", cam_name)
-                cam.xyaxes = perturb_camera_angle(
-                    self.cameras[cam_name]["xyaxes"], self.variation_space["camera"]["angle_delta"].value[i]
-                )
+        # Perturb camera angle
+        cameras_to_vary = ["front_pixels", "side_pixels"] if self._multiview else ["front_pixels"]
+        for i, cam_name in enumerate(cameras_to_vary):
+            cam = mjcf_model.find("camera", cam_name)
+            cam.xyaxes = perturb_camera_angle(
+                self.cameras[cam_name]["xyaxes"], self.variation_space["camera"]["angle_delta"].value[i]
+            )
 
-        if "all" in self.variation_options or "light.intensity" in self.variation_options:
-            # Modify light intensity
-            light = mjcf_model.find("light", "global")
-            light.diffuse = self.variation_space["light"]["intensity"].value[0] * np.ones((3), dtype=np.float32)
-            self.mark_dirty()
+        # Modify light intensity
+        light = mjcf_model.find("light", "global")
+        light.diffuse = self.variation_space["light"]["intensity"].value[0] * np.ones((3), dtype=np.float32)
+        self.mark_dirty()
 
         return mjcf_model
 

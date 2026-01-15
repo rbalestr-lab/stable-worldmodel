@@ -885,6 +885,7 @@ class CubeEnv(ManipSpaceEnv):
         grid_texture = mjcf_model.find("texture", "grid")
         grid_texture.rgb1 = self.variation_space["floor"]["color"].value[0]
         grid_texture.rgb2 = self.variation_space["floor"]["color"].value[1]
+        print("Modified floor colors to:", grid_texture.rgb1, grid_texture.rgb2)
 
         # Modify arm color
         mjcf_model.find("material", "ur5e/robotiq/black").rgba[:3] = self.variation_space["agent"]["color"].value

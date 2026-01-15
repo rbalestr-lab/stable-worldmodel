@@ -30,6 +30,8 @@ Example:
    https://github.com/seohongpark/ogbench/
 """
 
+from collections.abc import Sequence
+
 import mujoco
 import numpy as np
 from dm_control import mjcf
@@ -742,20 +744,14 @@ class CubeEnv(ManipSpaceEnv):
 
         options = options or {}
 
-        self.variation_options = options.get("variation", {})
+        variations = options.get("variation", [])
+
+        if not isinstance(variations, Sequence):
+            raise ValueError("variation option must be a Sequence containing variations names to sample")
 
         self.variation_space.reset()
 
-        if "variation" in options:
-            assert isinstance(options["variation"], list | tuple), (
-                "variation option must be a list or tuple containing variation names to sample"
-            )
-
-            if len(options["variation"]) == 1 and options["variation"][0] == "all":
-                self.variation_space.sample()
-
-            else:
-                self.variation_space.update(set(options["variation"]))
+        self.variation_space.update(variations)
 
         if options is not None and "variation_values" in options:
             self.variation_space.set_value(options["variation_values"])
@@ -894,23 +890,28 @@ class CubeEnv(ManipSpaceEnv):
         mjcf_model.find("material", "ur5e/robotiq/black").rgba[:3] = self.variation_space["agent"]["color"].value
         mjcf_model.find("material", "ur5e/robotiq/pad_gray").rgba[:3] = self.variation_space["agent"]["color"].value
 
+        size_changed = False
         # Modify cube size based on variation space
         for i in range(self._num_cubes):
             # Regular cubes
             body = mjcf_model.find("body", f"object_{i}")
             if body:
                 for geom in body.find_all("geom"):
-                    geom.size = self.variation_space["cube"]["size"].value[i] * np.ones(
+                    desired_size = self.variation_space["cube"]["size"].value[i] * np.ones(
                         (3), dtype=np.float32
                     )  # half-extents (x, y, z)
+                    if not np.allclose(geom.size, desired_size):
+                        size_changed = True
+                    geom.size = desired_size
 
             # Target cubes (if any)
             target_body = mjcf_model.find("body", f"object_target_{i}")
             if target_body:
                 for geom in target_body.find_all("geom"):
-                    geom.size = self.variation_space["cube"]["size"].value[i] * np.ones((3), dtype=np.float32)
-
-        self.mark_dirty()
+                    desired_size = self.variation_space["cube"]["size"].value[i] * np.ones((3), dtype=np.float32)
+                    if not np.allclose(geom.size, desired_size):
+                        size_changed = True
+                    geom.size = desired_size
 
         # Perturb camera angle
         cameras_to_vary = ["front_pixels", "side_pixels"] if self._multiview else ["front_pixels"]
@@ -922,9 +923,11 @@ class CubeEnv(ManipSpaceEnv):
 
         # Modify light intensity
         light = mjcf_model.find("light", "global")
-        light.diffuse = self.variation_space["light"]["intensity"].value[0] * np.ones((3), dtype=np.float32)
-        self.mark_dirty()
-
+        desired_diffuse = self.variation_space["light"]["intensity"].value[0] * np.ones((3), dtype=np.float32)
+        light_changed = not np.allclose(light.diffuse, desired_diffuse)
+        light.diffuse = desired_diffuse
+        if size_changed or light_changed:
+            self.mark_dirty()
         return mjcf_model
 
     def initialize_episode(self):

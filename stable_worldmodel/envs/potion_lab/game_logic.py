@@ -1029,8 +1029,6 @@ def create_default_layout(
         feedback_duration=tool_params["delivery_window"]["feedback_duration"],
     )
 
-    player_position = tuple(layout_config["player"])
-
     return {
         "dispensers": dispensers,
         "enchanter": enchanter,
@@ -1039,5 +1037,4 @@ def create_default_layout(
         "bottler": bottler,
         "trash_can": trash_can,
         "delivery_window": delivery_window,
-        "player_position": player_position,
     }

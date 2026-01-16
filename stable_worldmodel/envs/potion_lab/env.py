@@ -44,7 +44,6 @@ from .game_logic import (
 
 
 DEFAULT_VARIATIONS = (
-    "player.start_position",
     "player.color",
     "player.mass",
     "player.friction",
@@ -104,34 +103,9 @@ class PotionLab(gym.Env):
         current_dir = os.path.dirname(os.path.abspath(__file__))
         self.rounds_path = rounds_path or os.path.join(current_dir, "rounds.json")
 
-        # Layout defaults, overwritten by variation space
-        layout_data = {
-            "ui": {"top_height": 50, "bottom_height": 80},
-            "dispensers": [
-                {"essence_type": 1, "x": 181, "y": 48},
-                {"essence_type": 2, "x": 231, "y": 48},
-                {"essence_type": 3, "x": 281, "y": 48},
-                {"essence_type": 4, "x": 331, "y": 48},
-            ],
-            "tools": {
-                "enchanter": {"x": 100, "y": 148},
-                "refiner": {"x": 412, "y": 148},
-                "cauldron": {"x": 256, "y": 232},
-                "bottler": {"x": 100, "y": 300},
-                "trash_can": {"x": 400, "y": 300},
-                "delivery_window": {"x": 256, "y": 350},
-            },
-            "player": {"x": 256, "y": 300},
-        }
-
-        ui_config = layout_data["ui"]
-        layout_tools = layout_data["tools"]
-        layout_dispensers = layout_data["dispensers"]
-        layout_player = layout_data["player"]
-
-        # Initialize spatial parameters from defaults (will be re-applied on reset)
-        self.ui_top_height = ui_config.get("top_height", 50)
-        self.ui_bottom_height = ui_config.get("bottom_height", 80)
+        # Initialize spatial parameters from defaults
+        self.ui_top_height = 50
+        self.ui_bottom_height = 80
 
         # Lab fills remaining space between UI bars
         self.map_width_tiles = 16
@@ -220,9 +194,7 @@ class PotionLab(gym.Env):
                         "start_position": swm.spaces.Box(
                             low=50.0,
                             high=self.window_size - 50.0,
-                            init_value=np.array(
-                                [layout_player.get("x", 384.0), layout_player.get("y", 352.0)], dtype=np.float32
-                            ),
+                            init_value=np.array([self.window_size / 2, self.window_size / 2], dtype=np.float32),
                             shape=(2,),
                             dtype=np.float32,
                         ),
@@ -328,72 +300,47 @@ class PotionLab(gym.Env):
                 ),
                 "layout": swm.spaces.Dict(
                     {
-                        "player_position": swm.spaces.Box(
-                            low=0.0,
-                            high=float(self.window_size),
-                            init_value=np.array(
-                                [layout_player.get("x", 256.0), layout_player.get("y", 300.0)], dtype=np.float32
-                            ),
-                            shape=(2,),
-                            dtype=np.float32,
-                        ),
                         "tools": swm.spaces.Dict(
                             {
                                 "enchanter_position": swm.spaces.Box(
                                     low=0.0,
                                     high=float(self.window_size),
-                                    init_value=np.array(
-                                        [layout_tools["enchanter"]["x"], layout_tools["enchanter"]["y"]],
-                                        dtype=np.float32,
-                                    ),
+                                    init_value=np.array([100.0, 148.0], dtype=np.float32),
                                     shape=(2,),
                                     dtype=np.float32,
                                 ),
                                 "refiner_position": swm.spaces.Box(
                                     low=0.0,
                                     high=float(self.window_size),
-                                    init_value=np.array(
-                                        [layout_tools["refiner"]["x"], layout_tools["refiner"]["y"]], dtype=np.float32
-                                    ),
+                                    init_value=np.array([412.0, 148.0], dtype=np.float32),
                                     shape=(2,),
                                     dtype=np.float32,
                                 ),
                                 "cauldron_position": swm.spaces.Box(
                                     low=0.0,
                                     high=float(self.window_size),
-                                    init_value=np.array(
-                                        [layout_tools["cauldron"]["x"], layout_tools["cauldron"]["y"]],
-                                        dtype=np.float32,
-                                    ),
+                                    init_value=np.array([256.0, 232.0], dtype=np.float32),
                                     shape=(2,),
                                     dtype=np.float32,
                                 ),
                                 "bottler_position": swm.spaces.Box(
                                     low=0.0,
                                     high=float(self.window_size),
-                                    init_value=np.array(
-                                        [layout_tools["bottler"]["x"], layout_tools["bottler"]["y"]], dtype=np.float32
-                                    ),
+                                    init_value=np.array([100.0, 300.0], dtype=np.float32),
                                     shape=(2,),
                                     dtype=np.float32,
                                 ),
                                 "trash_can_position": swm.spaces.Box(
                                     low=0.0,
                                     high=float(self.window_size),
-                                    init_value=np.array(
-                                        [layout_tools["trash_can"]["x"], layout_tools["trash_can"]["y"]],
-                                        dtype=np.float32,
-                                    ),
+                                    init_value=np.array([400.0, 300.0], dtype=np.float32),
                                     shape=(2,),
                                     dtype=np.float32,
                                 ),
                                 "delivery_window_position": swm.spaces.Box(
                                     low=0.0,
                                     high=float(self.window_size),
-                                    init_value=np.array(
-                                        [layout_tools["delivery_window"]["x"], layout_tools["delivery_window"]["y"]],
-                                        dtype=np.float32,
-                                    ),
+                                    init_value=np.array([256.0, 350.0], dtype=np.float32),
                                     shape=(2,),
                                     dtype=np.float32,
                                 ),
@@ -404,64 +351,56 @@ class PotionLab(gym.Env):
                                 "d1_position": swm.spaces.Box(
                                     low=0.0,
                                     high=float(self.window_size),
-                                    init_value=np.array(
-                                        [layout_dispensers[0]["x"], layout_dispensers[0]["y"]], dtype=np.float32
-                                    ),
+                                    init_value=np.array([181.0, 48.0], dtype=np.float32),
                                     shape=(2,),
                                     dtype=np.float32,
                                 ),
                                 "d1_type": swm.spaces.Box(
                                     low=1.0,
                                     high=8.0,
-                                    init_value=float(layout_dispensers[0]["essence_type"]),
+                                    init_value=1.0,
                                     shape=(),
                                     dtype=np.float32,
                                 ),
                                 "d2_position": swm.spaces.Box(
                                     low=0.0,
                                     high=float(self.window_size),
-                                    init_value=np.array(
-                                        [layout_dispensers[1]["x"], layout_dispensers[1]["y"]], dtype=np.float32
-                                    ),
+                                    init_value=np.array([231.0, 48.0], dtype=np.float32),
                                     shape=(2,),
                                     dtype=np.float32,
                                 ),
                                 "d2_type": swm.spaces.Box(
                                     low=1.0,
                                     high=8.0,
-                                    init_value=float(layout_dispensers[1]["essence_type"]),
+                                    init_value=2.0,
                                     shape=(),
                                     dtype=np.float32,
                                 ),
                                 "d3_position": swm.spaces.Box(
                                     low=0.0,
                                     high=float(self.window_size),
-                                    init_value=np.array(
-                                        [layout_dispensers[2]["x"], layout_dispensers[2]["y"]], dtype=np.float32
-                                    ),
+                                    init_value=np.array([281.0, 48.0], dtype=np.float32),
                                     shape=(2,),
                                     dtype=np.float32,
                                 ),
                                 "d3_type": swm.spaces.Box(
                                     low=1.0,
                                     high=8.0,
-                                    init_value=float(layout_dispensers[2]["essence_type"]),
+                                    init_value=3.0,
                                     shape=(),
                                     dtype=np.float32,
                                 ),
                                 "d4_position": swm.spaces.Box(
                                     low=0.0,
                                     high=float(self.window_size),
-                                    init_value=np.array(
-                                        [layout_dispensers[3]["x"], layout_dispensers[3]["y"]], dtype=np.float32
-                                    ),
+                                    init_value=np.array([331.0, 48.0], dtype=np.float32),
                                     shape=(2,),
                                     dtype=np.float32,
                                 ),
                                 "d4_type": swm.spaces.Box(
                                     low=1.0,
                                     high=8.0,
-                                    init_value=float(layout_dispensers[3]["essence_type"]),
+                                    init_value=4.0,
                                     shape=(),
                                     dtype=np.float32,
                                 ),
@@ -633,6 +572,9 @@ class PotionLab(gym.Env):
 
         options = options or {}
 
+        self.unlocked_dispensers = set()
+        self.unlocked_tools = set()
+
         self.variation_space.reset()
 
         variations = options.get("variation", DEFAULT_VARIATIONS)
@@ -726,7 +668,6 @@ class PotionLab(gym.Env):
                 "trash_can": layout_tools["trash_can_position"].value.tolist(),
                 "delivery_window": layout_tools["delivery_window_position"].value.tolist(),
             },
-            "player": self.variation_space["layout"]["player_position"].value.tolist(),
         }
 
         def _to_color(arr):
@@ -930,6 +871,10 @@ class PotionLab(gym.Env):
 
         for tool in self.tools.values():
             tool.reset()
+
+        start_pos = self.variation_space["player"]["start_position"].value
+        self.player.body.position = (float(start_pos[0]), float(start_pos[1]))
+        self.player.body.velocity = (0, 0)
 
         if hasattr(self, "collision_handler"):
             self.collision_handler.player_stirring_cauldron = False

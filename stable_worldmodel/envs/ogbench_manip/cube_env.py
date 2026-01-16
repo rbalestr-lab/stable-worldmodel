@@ -1021,7 +1021,7 @@ class CubeEnv(ManipSpaceEnv):
 
             # Randomize object positions and orientations.
             for i in range(self._num_cubes):
-                xy = self.variation_space["cube"]["start_position"].value
+                xy = self.variation_space["cube"]["start_position"].value[i]
                 obj_pos = (*xy, 0.02)
                 yaw = self.variation_space["cube"]["start_yaw"].value[i]
                 obj_ori = lie.SO3.from_z_radians(yaw).wxyz.tolist()
@@ -1146,10 +1146,10 @@ class CubeEnv(ManipSpaceEnv):
             tar_pos = np.array([block_pos[0], block_pos[1], block_pos[2] + 0.04])
         else:
             # Randomize target position.
-            xy = self.variation_space["cube"]["target_position"].sample(self.np_random)
+            xy = self.variation_space["cube"]["target_position"].value[0]
             tar_pos = (*xy, 0.02)
         # Randomize target orientation.
-        yaw = self.variation_space["cube"]["target_yaw"].sample(self.np_random)
+        yaw = self.variation_space["cube"]["target_yaw"].value[0]
         tar_ori = lie.SO3.from_z_radians(yaw).wxyz.tolist()
 
         # Only show the target block.

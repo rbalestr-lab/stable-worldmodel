@@ -1090,6 +1090,26 @@ class CubeEnv(ManipSpaceEnv):
 
         self._success = False
 
+    def initialize_arm(self):
+        # Sample initial effector position and orientation.
+        eff_pos = self.variation_space["agent"]["ee_start_position"].value
+        cur_ori = self._effector_down_rotation
+        yaw = self.np_random.uniform(-np.pi, np.pi)
+        rotz = lie.SO3.from_z_radians(yaw)
+        eff_ori = rotz @ cur_ori
+
+        # Solve for initial joint positions using IK.
+        T_wp = lie.SE3.from_rotation_and_translation(eff_ori, eff_pos)
+        T_wa = T_wp @ self._T_pa
+        qpos_init = self._ik.solve(
+            pos=T_wa.translation(),
+            quat=T_wa.rotation().wxyz,
+            curr_qpos=self._home_qpos,
+        )
+
+        self._data.qpos[self._arm_joint_ids] = qpos_init
+        mujoco.mj_forward(self._model, self._data)
+
     def set_new_target(self, return_info=True, p_stack=0.5):
         """Set a new random target for data collection mode.
 

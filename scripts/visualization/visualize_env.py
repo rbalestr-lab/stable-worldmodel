@@ -320,7 +320,6 @@ def get_state_from_grid(env, grid_element, dim: int | list = 0):
         reference_state = env.variation_space["agent"]["position"].value
     elif isinstance(env, CubeEnv):
         qpos0 = env._model.qpos0.copy()
-        print("QPOS0:", qpos0)
         qvel0 = np.zeros(env._model.nv, dtype=qpos0.dtype)
         reference_state = np.concatenate([qpos0, qvel0])
     # computing the state from a grid element
@@ -362,6 +361,7 @@ def get_state_grid(env, grid_size: int = 10):
         min_val = [min_v + 0.1 * r for min_v, r in zip(min_val, range_val)]
         max_val = [max_v - 0.1 * r for max_v, r in zip(max_val, range_val)]
     elif isinstance(env, CubeEnv):
+        env._mode = "data_collection"
         cube_pos_start = int(np.asarray(env._model.joint("object_joint_0").qposadr).reshape(-1)[0])
         dim = [cube_pos_start, cube_pos_start + 1]
         qpos0 = env._model.qpos0

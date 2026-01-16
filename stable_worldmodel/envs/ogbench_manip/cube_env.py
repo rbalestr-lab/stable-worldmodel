@@ -1138,6 +1138,8 @@ class CubeEnv(ManipSpaceEnv):
         # Pick one of the top cubes as the target.
         self._target_block = self.np_random.choice(top_blocks)
 
+        print("target position", self.variation_space["cube"]["target_position"].value[0])
+
         stack = len(top_blocks) >= 2 and self.np_random.uniform() < p_stack
         if stack:
             # Stack the target block on top of another block.
@@ -1146,6 +1148,7 @@ class CubeEnv(ManipSpaceEnv):
             tar_pos = np.array([block_pos[0], block_pos[1], block_pos[2] + 0.04])
         else:
             # Randomize target position.
+            print("no stack", self.variation_space["cube"]["target_position"].value[0])
             xy = self.variation_space["cube"]["target_position"].value[0]
             tar_pos = (*xy, 0.02)
         # Randomize target orientation.

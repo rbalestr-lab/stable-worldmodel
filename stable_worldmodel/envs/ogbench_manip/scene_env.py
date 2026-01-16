@@ -59,6 +59,8 @@ class SceneEnv(ManipSpaceEnv):
         self._target_drawer_pos = 0.0
         self._target_window_pos = 0.0
 
+        default_start_position = np.mean(self._object_sampling_bounds, axis=0)
+
         self.variation_space = swm.spaces.Dict(
             {
                 "cube": swm.spaces.Dict(
@@ -78,6 +80,34 @@ class SceneEnv(ManipSpaceEnv):
                             dtype=np.float64,
                             init_value=0.02 * np.ones((self._num_cubes,), dtype=np.float32),
                         ),
+                        "start_position": swm.spaces.Box(  # x, y positions
+                            low=np.tile(self._object_sampling_bounds[0], (self._num_cubes, 1)),
+                            high=np.tile(self._object_sampling_bounds[1], (self._num_cubes, 1)),
+                            shape=(self._num_cubes, 2),
+                            dtype=np.float64,
+                            init_value=np.tile(default_start_position, (self._num_cubes, 1)),
+                        ),
+                        "start_yaw": swm.spaces.Box(  # yaw angles
+                            low=0.0,
+                            high=2 * np.pi,
+                            shape=(self._num_cubes,),
+                            dtype=np.float64,
+                            init_value=np.zeros((self._num_cubes,), dtype=np.float32),
+                        ),
+                        "goal_position": swm.spaces.Box(  # x, y positions
+                            low=np.tile(self._target_sampling_bounds[0], (self._num_cubes, 1)),
+                            high=np.tile(self._target_sampling_bounds[1], (self._num_cubes, 1)),
+                            shape=(self._num_cubes, 2),
+                            dtype=np.float64,
+                            init_value=np.tile(default_start_position, (self._num_cubes, 1)),
+                        ),
+                        "goal_yaw": swm.spaces.Box(  # yaw angles
+                            low=0.0,
+                            high=2 * np.pi,
+                            shape=(self._num_cubes,),
+                            dtype=np.float64,
+                            init_value=np.zeros((self._num_cubes,), dtype=np.float32),
+                        ),
                     }
                     # sampling_order=["num", "color", "size"]
                 ),
@@ -96,6 +126,13 @@ class SceneEnv(ManipSpaceEnv):
                             shape=(3,),
                             dtype=np.float64,
                             init_value=self._colors["purple"][:3],
+                        ),
+                        "ee_start_position": swm.spaces.Box(  # x, y, z positions
+                            low=self._arm_sampling_bounds[0],
+                            high=self._arm_sampling_bounds[1],
+                            shape=(3,),
+                            dtype=np.float64,
+                            init_value=np.mean(self._arm_sampling_bounds, axis=0),
                         ),
                     }
                 ),
@@ -230,20 +267,21 @@ class SceneEnv(ManipSpaceEnv):
     def reset(self, options=None, *args, **kwargs):
         options = options or {}
 
-        self.variation_options = options.get("variation", {})
+        variations = options.get("variation", ["cube.start_position", "cube.start_yaw"])
+        if not isinstance(variations, list | tuple):
+            raise ValueError("variation option must be a list or tuple containing variation names to sample")
+
+        self.variation_options = variations
 
         self.variation_space.reset()
 
-        if "variation" in options:
-            assert isinstance(options["variation"], list | tuple), (
-                "variation option must be a list or tuple containing variation names to sample"
-            )
+        if len(variations) == 1 and variations[0] == "all":
+            self.variation_space.sample()
+        else:
+            self.variation_space.update(set(variations))
 
-            if len(options["variation"]) == 1 and options["variation"][0] == "all":
-                self.variation_space.sample()
-
-            else:
-                self.variation_space.update(set(options["variation"]))
+        if "variation_values" in options:
+            self.variation_space.set_value(options["variation_values"])
 
         assert self.variation_space.check(debug=True), "Variation values must be within variation space!"
 
@@ -422,9 +460,9 @@ class SceneEnv(ManipSpaceEnv):
 
             # Randomize block positions and orientations.
             for i in range(self._num_cubes):
-                xy = self.np_random.uniform(*self._object_sampling_bounds)
+                xy = self.variation_space["cube"]["start_position"].value[i]
                 obj_pos = (*xy, 0.02)
-                yaw = self.np_random.uniform(0, 2 * np.pi)
+                yaw = self.variation_space["cube"]["start_yaw"].value[i]
                 obj_ori = lie.SO3.from_z_radians(yaw).wxyz.tolist()
                 self._data.joint(f"object_joint_{i}").qpos[:3] = obj_pos
                 self._data.joint(f"object_joint_{i}").qpos[3:] = obj_ori
@@ -600,10 +638,10 @@ class SceneEnv(ManipSpaceEnv):
                 tar_pos = np.array([block_pos[0], block_pos[1], block_pos[2] + 0.04])
             else:
                 # Randomize target position.
-                xy = self.np_random.uniform(*self._target_sampling_bounds)
+                xy = self.variation_space["cube"]["goal_position"].value[0]
                 tar_pos = (*xy, 0.02)
             # Randomize target orientation.
-            yaw = self.np_random.uniform(0, 2 * np.pi)
+            yaw = self.variation_space["cube"]["goal_yaw"].value[0]
             tar_ori = lie.SO3.from_z_radians(yaw).wxyz.tolist()
 
             # Only show the target block.
@@ -650,6 +688,26 @@ class SceneEnv(ManipSpaceEnv):
 
         if return_info:
             return self.compute_observation(), self.get_reset_info()
+
+    def initialize_arm(self):
+        # Sample initial effector position and orientation.
+        eff_pos = self.variation_space["agent"]["ee_start_position"].value
+        cur_ori = self._effector_down_rotation
+        yaw = self.np_random.uniform(-np.pi, np.pi)
+        rotz = lie.SO3.from_z_radians(yaw)
+        eff_ori = rotz @ cur_ori
+
+        # Solve for initial joint positions using IK.
+        T_wp = lie.SE3.from_rotation_and_translation(eff_ori, eff_pos)
+        T_wa = T_wp @ self._T_pa
+        qpos_init = self._ik.solve(
+            pos=T_wa.translation(),
+            quat=T_wa.rotation().wxyz,
+            curr_qpos=self._home_qpos,
+        )
+
+        self._data.qpos[self._arm_joint_ids] = qpos_init
+        mujoco.mj_forward(self._model, self._data)
 
     def pre_step(self):
         self._prev_button_states = self._cur_button_states.copy()

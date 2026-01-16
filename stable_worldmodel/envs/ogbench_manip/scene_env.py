@@ -1,3 +1,5 @@
+from collections.abc import Sequence
+
 import mujoco
 import numpy as np
 from dm_control import mjcf
@@ -268,17 +270,12 @@ class SceneEnv(ManipSpaceEnv):
         options = options or {}
 
         variations = options.get("variation", ["cube.start_position", "cube.start_yaw"])
-        if not isinstance(variations, list | tuple):
-            raise ValueError("variation option must be a list or tuple containing variation names to sample")
-
-        self.variation_options = variations
+        if not isinstance(variations, Sequence):
+            raise ValueError("variation option must be a Sequence containing variations names to sample")
 
         self.variation_space.reset()
 
-        if len(variations) == 1 and variations[0] == "all":
-            self.variation_space.sample()
-        else:
-            self.variation_space.update(set(variations))
+        self.variation_space.update(variations)
 
         if "variation_values" in options:
             self.variation_space.set_value(options["variation_values"])
@@ -392,51 +389,70 @@ class SceneEnv(ManipSpaceEnv):
         mujoco.mj_forward(self._model, self._data)
 
     def modify_mjcf_model(self, mjcf_model):
-        if "all" in self.variation_options or "floor.color" in self.variation_options:
-            # Modify floor color
-            grid_texture = mjcf_model.find("texture", "grid")
-            grid_texture.rgb1 = self.variation_space["floor"]["color"].value[0]
-            grid_texture.rgb2 = self.variation_space["floor"]["color"].value[1]
+        # Modify floor color
+        grid_texture = mjcf_model.find("texture", "grid")
+        texture_changed = grid_texture.rgb1 is None or not np.allclose(
+            grid_texture.rgb1, self.variation_space["floor"]["color"].value[0]
+        )
+        texture_changed = texture_changed or (
+            grid_texture.rgb2 is None
+            or not np.allclose(grid_texture.rgb2, self.variation_space["floor"]["color"].value[1])
+        )
+        grid_texture.rgb1 = self.variation_space["floor"]["color"].value[0]
+        grid_texture.rgb2 = self.variation_space["floor"]["color"].value[1]
 
-        if "all" in self.variation_options or "agent.color" in self.variation_options:
-            # Modify arm color
-            mjcf_model.find("material", "ur5e/robotiq/black").rgba[:3] = self.variation_space["agent"]["color"].value
-            mjcf_model.find("material", "ur5e/robotiq/pad_gray").rgba[:3] = self.variation_space["agent"][
-                "color"
-            ].value
+        # Modify arm color
+        agent_color_changed = np.allclose(
+            mjcf_model.find("material", "ur5e/robotiq/black").rgba[:3], self.variation_space["agent"]["color"].value
+        )
+        agent_color_changed = agent_color_changed or np.allclose(
+            mjcf_model.find("material", "ur5e/robotiq/pad_gray").rgba[:3], self.variation_space["agent"]["color"].value
+        )
+        mjcf_model.find("material", "ur5e/robotiq/black").rgba[:3] = self.variation_space["agent"]["color"].value
+        mjcf_model.find("material", "ur5e/robotiq/pad_gray").rgba[:3] = self.variation_space["agent"]["color"].value
 
-        if "all" in self.variation_options or "cube.size" in self.variation_options:
-            # Modify cube size based on variation space
-            for i in range(self._num_cubes):
-                # Regular cubes
-                body = mjcf_model.find("body", f"object_{i}")
-                if body:
-                    for geom in body.find_all("geom"):
-                        geom.size = self.variation_space["cube"]["size"].value[i] * np.ones(
-                            (3), dtype=np.float32
-                        )  # half-extents (x, y, z)
+        size_changed = False
+        # Modify cube size based on variation space
+        for i in range(self._num_cubes):
+            # Regular cubes
+            body = mjcf_model.find("body", f"object_{i}")
+            if body:
+                for geom in body.find_all("geom"):
+                    desired_size = self.variation_space["cube"]["size"].value[i] * np.ones(
+                        (3), dtype=np.float32
+                    )  # half-extents (x, y, z)
+                    if geom.size is None or not np.allclose(geom.size, desired_size):
+                        size_changed = True
+                    geom.size = desired_size
 
-                # Target cubes (if any)
-                target_body = mjcf_model.find("body", f"object_target_{i}")
-                if target_body:
-                    for geom in target_body.find_all("geom"):
-                        geom.size = self.variation_space["cube"]["size"].value[i] * np.ones((3), dtype=np.float32)
+            # Target cubes (if any)
+            target_body = mjcf_model.find("body", f"object_target_{i}")
+            if target_body:
+                for geom in target_body.find_all("geom"):
+                    desired_size = self.variation_space["cube"]["size"].value[i] * np.ones((3), dtype=np.float32)
+                    if geom.size is None or not np.allclose(geom.size, desired_size):
+                        size_changed = True
+                    geom.size = desired_size
 
-            self.mark_dirty()
+        # Perturb camera angle
+        camera_angle_changed = False
+        cameras_to_vary = ["front_pixels", "side_pixels"] if self._multiview else ["front_pixels"]
+        for i, cam_name in enumerate(cameras_to_vary):
+            cam = mjcf_model.find("camera", cam_name)
+            cam.xyaxes = perturb_camera_angle(
+                self.cameras[cam_name]["xyaxes"], self.variation_space["camera"]["angle_delta"].value[i]
+            )
+            camera_angle_changed = camera_angle_changed or not np.allclose(
+                cam.xyaxes, self.cameras[cam_name]["xyaxes"]
+            )
 
-        if "all" in self.variation_options or "camera.angle_delta" in self.variation_options:
-            # Perturb camera angle
-            cameras_to_vary = ["front_pixels", "side_pixels"] if self._multiview else ["front_pixels"]
-            for i, cam_name in enumerate(cameras_to_vary):
-                cam = mjcf_model.find("camera", cam_name)
-                cam.xyaxes = perturb_camera_angle(
-                    self.cameras[cam_name]["xyaxes"], self.variation_space["camera"]["angle_delta"].value[i]
-                )
+        # Modify light intensity
+        light = mjcf_model.find("light", "global")
+        desired_diffuse = self.variation_space["light"]["intensity"].value[0] * np.ones((3), dtype=np.float32)
+        light_changed = light.diffuse is None or not np.allclose(light.diffuse, desired_diffuse)
+        light.diffuse = desired_diffuse
 
-        if "all" in self.variation_options or "light.intensity" in self.variation_options:
-            # Modify light intensity
-            light = mjcf_model.find("light", "global")
-            light.diffuse = self.variation_space["light"]["intensity"].value[0] * np.ones((3), dtype=np.float32)
+        if size_changed or light_changed or texture_changed or camera_angle_changed or agent_color_changed:
             self.mark_dirty()
 
         return mjcf_model

@@ -979,6 +979,10 @@ class PotionLab(gym.Env):
             essence.remove_from_world()
         self.essences.clear()
 
+        # Clear all collision tracking to prevent id() reuse issues
+        if hasattr(self, "collision_handler") and self.collision_handler:
+            self.collision_handler.essence_tool_collisions.clear()
+
         for tool in self.tools.values():
             tool.reset()
 
@@ -1288,7 +1292,7 @@ class PotionLab(gym.Env):
             "player_pos": np.array([self.player.body.position.x, self.player.body.position.y], dtype=np.float32),
             "player_vel": np.array([self.player.body.velocity.x, self.player.body.velocity.y], dtype=np.float32),
             "round_description": round_config.get("description", "") if round_config else "",
-            "required_items": self.tools["delivery_window"].required_items,
+            "_required_items": self.tools["delivery_window"].required_items,
             "goal": self._goal_proprio,
         }
 

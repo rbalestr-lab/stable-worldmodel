@@ -385,6 +385,20 @@ class CollisionHandler:
         self.player_stirring_cauldron = False
         self.essence_tool_collisions = set()
 
+    def clear_essence_collisions(self, essence_id: int):
+        """
+        Remove all collision entries involving a specific essence.
+
+        This must be called when an essence is removed from the world to prevent
+        memory address reuse causing new essences to be incorrectly identified
+        as having already collided with tools.
+
+        Args:
+            essence_id: The id() of the essence being removed
+        """
+        # Remove all entries where this essence was involved
+        self.essence_tool_collisions = {(eid, tid) for (eid, tid) in self.essence_tool_collisions if eid != essence_id}
+
     def setup_handlers(self, space: pymunk.Space):
         """
         Set up pymunk collision handlers for game interactions.
@@ -533,9 +547,10 @@ class CollisionHandler:
 
                 accepted = tool_obj.validate_delivery(essence_obj)
                 if accepted:
-                    self.essence_tool_collisions.add(collision_key)
                     if essence_obj in self.env.essences:
                         self.env.essences.remove(essence_obj)
+                    # Clean up collision entries for this essence to prevent id() reuse issues
+                    self.clear_essence_collisions(id(essence_obj))
 
                     # Award delivery reward only for valid matches
                     if will_match:
@@ -543,9 +558,10 @@ class CollisionHandler:
         elif hasattr(tool_obj, "accept_essence"):
             accepted = tool_obj.accept_essence(essence_obj)
             if accepted:
-                self.essence_tool_collisions.add(collision_key)
                 if essence_obj in self.env.essences:
                     self.env.essences.remove(essence_obj)
+                # Clean up collision entries for this essence to prevent id() reuse issues
+                self.clear_essence_collisions(id(essence_obj))
 
     def _check_delivery_will_match(self, essence_obj, delivery_window) -> bool:
         """Check if an essence will match any unfulfilled requirement."""
@@ -584,9 +600,10 @@ class CollisionHandler:
         if hasattr(cauldron, "accept_essence"):
             accepted = cauldron.accept_essence(essence_obj)
             if accepted:
-                self.essence_tool_collisions.add(collision_key)
                 if essence_obj in self.env.essences:
                     self.env.essences.remove(essence_obj)
+                # Clean up collision entries for this essence to prevent id() reuse issues
+                self.clear_essence_collisions(id(essence_obj))
 
 
 # ============================================================================

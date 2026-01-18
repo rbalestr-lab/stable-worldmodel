@@ -594,6 +594,9 @@ class PotionLab(gym.Env):
         self.quotas = self._empty_quotas()
         self.pending_reward = 0.0
 
+        # Goal proprio vector (updated each round)
+        self._goal_proprio = None
+
     def reset(self, seed: int | None = None, options: dict | None = None):
         """Reset the environment to start a new episode."""
         super().reset(seed=seed)
@@ -646,6 +649,9 @@ class PotionLab(gym.Env):
         # Calculate quotas for dense rewards
         self.quotas = self._calculate_quotas(requirements)
         self.pending_reward = 0.0
+
+        # Compute goal proprio for this round
+        self._update_goal_proprio()
 
         observation = self._get_obs()
         info = self._get_info()
@@ -997,6 +1003,9 @@ class PotionLab(gym.Env):
         self.quotas = self._calculate_quotas(requirements)
         self.pending_reward = 0.0
 
+        # Update goal proprio for the new round
+        self._update_goal_proprio()
+
     def _set_round_background_color(self, round_config: dict):
         """Set background color for the current round if specified in round config."""
         if "background_color" in round_config:
@@ -1164,7 +1173,7 @@ class PotionLab(gym.Env):
         )
         self.essences.append(essence)
 
-    def _encode_requirements(self) -> np.ndarray:
+    def _encode_requirements(self, override_completed: bool | None = None) -> np.ndarray:
         """
         Encode requirements into a fixed-size vector.
 
@@ -1175,6 +1184,10 @@ class PotionLab(gym.Env):
         [8-11]  refined (4 floats)
         [12]    bottled (1 float)
         [13]    completed (1 float)
+
+        Args:
+            override_completed: If provided, forces all completed flags to this value.
+                               Used to generate goal proprio with all recipes completed.
         """
         encoded = np.zeros(5 * 14, dtype=np.float32)
         requirements = self.tools["delivery_window"].required_items
@@ -1201,9 +1214,43 @@ class PotionLab(gym.Env):
             encoded[base_idx + 12] = 1.0 if req.get("bottled", False) else 0.0
 
             # Completed status
-            encoded[base_idx + 13] = 1.0 if req.get("completed", False) else 0.0
+            if override_completed is not None:
+                encoded[base_idx + 13] = 1.0 if override_completed else 0.0
+            else:
+                encoded[base_idx + 13] = 1.0 if req.get("completed", False) else 0.0
 
         return encoded
+
+    def _compute_goal_proprio(self) -> np.ndarray:
+        """
+        Compute the goal proprioception vector for the current round.
+
+        The goal proprio has the same structure as the observation proprio vector:
+        - Player position/velocity: filler values (zeros)
+        - Time remaining: filler value (1.0 = full time)
+        - Requirements: same recipes as current round but all marked as completed
+
+        Returns:
+            Goal proprio vector of shape (75,)
+        """
+        # Filler values for player state
+        player_pos = np.zeros(2, dtype=np.float32)
+        player_vel = np.zeros(2, dtype=np.float32)
+
+        # Filler for time (1.0 = full time remaining, representing goal achieved)
+        time_norm = np.array([1.0], dtype=np.float32)
+
+        # Requirements with all completed flags set to True
+        req_encoded = self._encode_requirements(override_completed=True)
+
+        # Combine all parts (75 floats total)
+        goal_proprio = np.concatenate([player_pos, player_vel, time_norm, req_encoded])
+
+        return goal_proprio
+
+    def _update_goal_proprio(self):
+        """Update the goal proprio vector for the current round."""
+        self._goal_proprio = self._compute_goal_proprio()
 
     def _get_obs(self) -> dict[str, np.ndarray]:
         """Get the current observation."""
@@ -1242,6 +1289,7 @@ class PotionLab(gym.Env):
             "player_vel": np.array([self.player.body.velocity.x, self.player.body.velocity.y], dtype=np.float32),
             "round_description": round_config.get("description", "") if round_config else "",
             "required_items": self.tools["delivery_window"].required_items,
+            "goal": self._goal_proprio,
         }
 
     def render(self):

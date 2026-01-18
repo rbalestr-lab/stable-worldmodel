@@ -442,6 +442,8 @@ class Enchanter(Tool):
         self.processing_time = processing_time
         self.eject_delay = eject_delay
         self.current_essence: EssenceState | None = None
+        # Track which components will gain enchantment (for reward calculation)
+        self.components_gaining_property: list[int] = []
 
     def accept_essence(self, essence: Essence) -> bool:
         """
@@ -457,6 +459,13 @@ class Enchanter(Tool):
 
         if all(essence.state.enchanted_per_essence):
             return False
+
+        # Track which components will gain enchantment
+        self.components_gaining_property = [
+            essence.state.essence_types[i]
+            for i, is_ench in enumerate(essence.state.enchanted_per_essence)
+            if not is_ench
+        ]
 
         self.current_essence = essence.state.copy()
         self.state = ToolState.PROCESSING
@@ -481,21 +490,29 @@ class Enchanter(Tool):
                 # Eject will be handled by environment
                 pass
 
-    def eject_essence(self) -> EssenceState | None:
-        """Eject the processed essence and reset state."""
+    def eject_essence(self) -> tuple[EssenceState | None, list[int]]:
+        """
+        Eject the processed essence and reset state.
+
+        Returns:
+            Tuple of (essence_state, components_that_gained_property)
+        """
         if self.state != ToolState.DONE or self.timer > 0:
-            return None
+            return None, []
 
         essence_state = self.current_essence
+        components = self.components_gaining_property.copy()
         self.current_essence = None
+        self.components_gaining_property = []
         self.state = ToolState.EMPTY
-        return essence_state
+        return essence_state, components
 
     def reset(self):
         """Reset enchanter to initial state."""
         self.state = ToolState.EMPTY
         self.timer = 0
         self.current_essence = None
+        self.components_gaining_property = []
 
 
 # ============================================================================
@@ -527,6 +544,8 @@ class Refiner(Tool):
         self.processing_time = processing_time
         self.eject_delay = eject_delay
         self.current_essence: EssenceState | None = None
+        # Track which components will gain refinement (for reward calculation)
+        self.components_gaining_property: list[int] = []
 
     def accept_essence(self, essence: Essence) -> bool:
         """Try to accept an essence for processing."""
@@ -538,6 +557,11 @@ class Refiner(Tool):
 
         if all(essence.state.refined_per_essence):
             return False
+
+        # Track which components will gain refinement
+        self.components_gaining_property = [
+            essence.state.essence_types[i] for i, is_ref in enumerate(essence.state.refined_per_essence) if not is_ref
+        ]
 
         self.current_essence = essence.state.copy()
         self.state = ToolState.PROCESSING
@@ -561,21 +585,29 @@ class Refiner(Tool):
             if self.timer <= 0:
                 pass  # Eject handled by environment
 
-    def eject_essence(self) -> EssenceState | None:
-        """Eject the processed essence and reset state."""
+    def eject_essence(self) -> tuple[EssenceState | None, list[int]]:
+        """
+        Eject the processed essence and reset state.
+
+        Returns:
+            Tuple of (essence_state, components_that_gained_property)
+        """
         if self.state != ToolState.DONE or self.timer > 0:
-            return None
+            return None, []
 
         essence_state = self.current_essence
+        components = self.components_gaining_property.copy()
         self.current_essence = None
+        self.components_gaining_property = []
         self.state = ToolState.EMPTY
-        return essence_state
+        return essence_state, components
 
     def reset(self):
         """Reset refiner to initial state."""
         self.state = ToolState.EMPTY
         self.timer = 0
         self.current_essence = None
+        self.components_gaining_property = []
 
 
 # ============================================================================
@@ -708,16 +740,32 @@ class Cauldron(Tool):
 
         self.essence_slots = [None, None, None, None]
 
-    def eject_essence(self) -> EssenceState | None:
-        """Eject the combined essence and reset state."""
+    def eject_essence(self) -> tuple[EssenceState | None, tuple | None]:
+        """
+        Eject the combined essence and reset state.
+
+        Returns:
+            Tuple of (essence_state, combination_key) where combination_key is
+            (sorted_types, enchanted_tuple, refined_tuple) for quota matching
+        """
         if self.state != CauldronState.DONE or self.timer > 0:
-            return None
+            return None, None
 
         essence_state = self.combined_essence
+
+        # Build combination key for quota matching
+        combo_key = None
+        if essence_state is not None:
+            combo_key = (
+                tuple(sorted(essence_state.essence_types)),
+                tuple(essence_state.enchanted_per_essence),
+                tuple(essence_state.refined_per_essence),
+            )
+
         self.combined_essence = None
         self.state = CauldronState.EMPTY
         self.stir_progress = 0
-        return essence_state
+        return essence_state, combo_key
 
     def get_num_essences(self) -> int:
         """Get the number of essences currently in the cauldron."""
@@ -761,6 +809,8 @@ class Bottler(Tool):
         self.bottling_time = bottling_time
         self.eject_delay = eject_delay
         self.current_essence: EssenceState | None = None
+        # Track pre-bottle state for quota matching
+        self.pre_bottle_key: tuple | None = None
 
     def accept_essence(self, essence: Essence) -> bool:
         """Try to accept an essence for bottling."""
@@ -769,6 +819,14 @@ class Bottler(Tool):
 
         if essence.state.is_bottled:
             return False
+
+        # Store pre-bottle state key for quota matching
+        self.pre_bottle_key = (
+            tuple(sorted(essence.state.essence_types)),
+            tuple(essence.state.enchanted_per_essence),
+            tuple(essence.state.refined_per_essence),
+            len(essence.state.essence_types) > 1,  # is_combined
+        )
 
         self.current_essence = essence.state.copy()
         self.state = ToolState.PROCESSING
@@ -791,21 +849,29 @@ class Bottler(Tool):
             if self.timer <= 0:
                 pass  # Eject handled by environment
 
-    def eject_essence(self) -> EssenceState | None:
-        """Eject the bottled essence and reset state."""
+    def eject_essence(self) -> tuple[EssenceState | None, tuple | None]:
+        """
+        Eject the bottled essence and reset state.
+
+        Returns:
+            Tuple of (essence_state, pre_bottle_key) for quota matching
+        """
         if self.state != ToolState.DONE or self.timer > 0:
-            return None
+            return None, None
 
         essence_state = self.current_essence
+        pre_bottle_key = self.pre_bottle_key
         self.current_essence = None
+        self.pre_bottle_key = None
         self.state = ToolState.EMPTY
-        return essence_state
+        return essence_state, pre_bottle_key
 
     def reset(self):
         """Reset bottler to initial state."""
         self.state = ToolState.EMPTY
         self.timer = 0
         self.current_essence = None
+        self.pre_bottle_key = None
 
 
 # ============================================================================

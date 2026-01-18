@@ -442,6 +442,12 @@ class CollisionHandler:
                 essence_state = dispenser.dispense()
 
                 if essence_state is not None:
+                    # Check dispense quota and award reward
+                    essence_type = dispenser.essence_type
+                    if self.env.quotas["dispense"][essence_type] > 0:
+                        self.env.pending_reward += self.env.reward_config["substep_reward"]
+                        self.env.quotas["dispense"][essence_type] -= 1
+
                     # Spawn essence at dispenser location
                     position = dispenser.position
                     # Offset slightly so player can push it away
@@ -522,17 +528,33 @@ class CollisionHandler:
 
         if tool_name == "delivery_window":
             if hasattr(tool_obj, "validate_delivery"):
+                # Check if this will be a valid delivery (matches a requirement)
+                will_match = self._check_delivery_will_match(essence_obj, tool_obj)
+
                 accepted = tool_obj.validate_delivery(essence_obj)
                 if accepted:
                     self.essence_tool_collisions.add(collision_key)
                     if essence_obj in self.env.essences:
                         self.env.essences.remove(essence_obj)
+
+                    # Award delivery reward only for valid matches
+                    if will_match:
+                        self.env.pending_reward += self.env.reward_config["substep_reward"]
         elif hasattr(tool_obj, "accept_essence"):
             accepted = tool_obj.accept_essence(essence_obj)
             if accepted:
                 self.essence_tool_collisions.add(collision_key)
                 if essence_obj in self.env.essences:
                     self.env.essences.remove(essence_obj)
+
+    def _check_delivery_will_match(self, essence_obj, delivery_window) -> bool:
+        """Check if an essence will match any unfulfilled requirement."""
+        for requirement in delivery_window.required_items:
+            if requirement.get("completed", False):
+                continue
+            if essence_obj.matches_requirement(requirement):
+                return True
+        return False
 
     def _on_essence_cauldron_begin(self, arbiter, space, data):
         """Called when essence collides with the cauldron."""

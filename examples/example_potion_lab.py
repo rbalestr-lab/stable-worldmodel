@@ -33,6 +33,7 @@ if __name__ == "__main__":
     if clock is None:
         clock = pygame.time.Clock()
 
+    total_reward = 0
     while running:
         # Handle pygame events
         for event in pygame.event.get():
@@ -59,6 +60,10 @@ if __name__ == "__main__":
 
         # Step the environment
         obs, reward, terminated, truncated, info = env.step(action)
+
+        if reward > 0:
+            total_reward += reward
+            print(f"Total reward: {total_reward:.2f}")
 
         # Render (handled automatically in human mode)
         env.render()

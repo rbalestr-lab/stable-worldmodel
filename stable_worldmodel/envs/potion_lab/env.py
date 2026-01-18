@@ -3,6 +3,7 @@ Potion Lab environment module.
 """
 
 import os
+from collections import Counter
 from collections.abc import Sequence
 from typing import Any
 
@@ -520,6 +521,31 @@ class PotionLab(gym.Env):
                         ),
                     }
                 ),
+                "rewards": swm.spaces.Dict(
+                    {
+                        "substep_reward": swm.spaces.Box(
+                            low=0.0,
+                            high=1.0,
+                            init_value=0.1,
+                            shape=(),
+                            dtype=np.float32,
+                        ),
+                        "round_complete_bonus": swm.spaces.Box(
+                            low=0.0,
+                            high=10.0,
+                            init_value=1.0,
+                            shape=(),
+                            dtype=np.float32,
+                        ),
+                        "timeout_penalty": swm.spaces.Box(
+                            low=-10.0,
+                            high=0.0,
+                            init_value=-1.0,
+                            shape=(),
+                            dtype=np.float32,
+                        ),
+                    }
+                ),
             },
             sampling_order=[
                 "environment",
@@ -533,6 +559,7 @@ class PotionLab(gym.Env):
                 "dispenser_config",
                 "player_control",
                 "grid",
+                "rewards",
             ],
         )
 
@@ -562,6 +589,10 @@ class PotionLab(gym.Env):
         self.round_time_remaining = 0
 
         self.latest_action = None
+
+        # Dense reward system - quotas and pending rewards
+        self.quotas = self._empty_quotas()
+        self.pending_reward = 0.0
 
     def reset(self, seed: int | None = None, options: dict | None = None):
         """Reset the environment to start a new episode."""
@@ -611,6 +642,10 @@ class PotionLab(gym.Env):
 
         # Set background color for this round if specified
         self._set_round_background_color(round_config)
+
+        # Calculate quotas for dense rewards
+        self.quotas = self._calculate_quotas(requirements)
+        self.pending_reward = 0.0
 
         observation = self._get_obs()
         info = self._get_info()
@@ -733,6 +768,13 @@ class PotionLab(gym.Env):
         env_cfg = self.variation_space["environment"]
         self.env_config = {"wall_thickness": float(env_cfg["wall_thickness"].value)}
 
+        rewards_cfg = self.variation_space["rewards"]
+        self.reward_config = {
+            "substep_reward": float(rewards_cfg["substep_reward"].value),
+            "round_complete_bonus": float(rewards_cfg["round_complete_bonus"].value),
+            "timeout_penalty": float(rewards_cfg["timeout_penalty"].value),
+        }
+
         # Clamp player start position to the playable map (accounts for UI space)
         start_pos = self.variation_space["player"]["start_position"].value
         clamped_start = np.array(
@@ -744,6 +786,66 @@ class PotionLab(gym.Env):
         )
         # Update the variation space value
         self.variation_space["player"]["start_position"]._value = clamped_start
+
+    def _empty_quotas(self) -> dict:
+        """Return an empty quota structure."""
+        return {
+            "dispense": Counter(),  # {essence_type: count}
+            "enchant": Counter(),  # {essence_type: count}
+            "refine": Counter(),  # {essence_type: count}
+            "combine": Counter(),  # {(types_tuple, ench_tuple, ref_tuple): count}
+            "bottle": Counter(),  # {(types_tuple, ench_tuple, ref_tuple, is_combined): count}
+        }
+
+    def _calculate_quotas(self, requirements: list[dict]) -> dict:
+        """
+        Calculate quotas for dense rewards based on round requirements.
+
+        Args:
+            requirements: List of recipe requirement dictionaries
+
+        Returns:
+            Dictionary with quotas for each reward event type
+        """
+        quotas = self._empty_quotas()
+
+        for req in requirements:
+            types = req["base_essences"]
+            enchanted = req.get("enchanted", [False] * len(types))
+            refined = req.get("refined", [False] * len(types))
+            bottled = req.get("bottled", False)
+
+            # Dispense quota: count each essence type needed
+            for t in types:
+                quotas["dispense"][t] += 1
+
+            # Enchant/Refine quota: count per-component property requirements
+            for i, t in enumerate(types):
+                if enchanted[i]:
+                    quotas["enchant"][t] += 1
+                if refined[i]:
+                    quotas["refine"][t] += 1
+
+            # Combine quota: only if multi-essence, exact state required
+            if len(types) > 1:
+                combo_key = (
+                    tuple(sorted(types)),
+                    tuple(enchanted),
+                    tuple(refined),
+                )
+                quotas["combine"][combo_key] += 1
+
+            # Bottle quota: exact pre-bottle state
+            if bottled:
+                pre_bottle_key = (
+                    tuple(sorted(types)),
+                    tuple(enchanted),
+                    tuple(refined),
+                    len(types) > 1,  # is_combined
+                )
+                quotas["bottle"][pre_bottle_key] += 1
+
+        return quotas
 
     def _setup(self):
         """Initialize physics space and game objects."""
@@ -832,12 +934,14 @@ class PotionLab(gym.Env):
 
         terminated = False
         truncated = False
-        reward = 0.0
+
+        # Collect accumulated substep rewards
+        reward = self.pending_reward
+        self.pending_reward = 0.0
 
         if self.tools["delivery_window"].all_requirements_met():
-            # Round is complete!
-            # Give reward here. Here and failure are the only rewards.
-            reward = 1.0
+            # Round is complete! Add round completion bonus
+            reward += self.reward_config["round_complete_bonus"]
             self.round_manager.advance_round()
 
             if self.round_manager.is_complete():
@@ -846,8 +950,8 @@ class PotionLab(gym.Env):
                 self._load_next_round()
 
         elif self.round_time_remaining <= 0:
-            # Round failed. Give negative reward here.
-            reward = -1.0
+            # Round failed. Add timeout penalty.
+            reward += self.reward_config["timeout_penalty"]
             terminated = True
 
         observation = self._get_obs()
@@ -888,6 +992,10 @@ class PotionLab(gym.Env):
 
         # Set background color for this round if specified
         self._set_round_background_color(round_config)
+
+        # Recalculate quotas for new round
+        self.quotas = self._calculate_quotas(requirements)
+        self.pending_reward = 0.0
 
     def _set_round_background_color(self, round_config: dict):
         """Set background color for the current round if specified in round config."""
@@ -956,7 +1064,7 @@ class PotionLab(gym.Env):
         self.unlocked_tools.update(tools_needed)
 
     def _check_tool_ejections(self):
-        """Check if any tools are ready to eject processed essences."""
+        """Check if any tools are ready to eject processed essences and award substep rewards."""
         eject_offset = self.tile_size * self.tool_params["eject_offset_multiplier"]
 
         # Get essence physics properties from variation space
@@ -974,23 +1082,87 @@ class PotionLab(gym.Env):
             "bottler": (0, eject_offset),
         }
 
-        for tool_name, (x_offset, y_offset) in tool_offsets.items():
-            tool = self.tools[tool_name]
-            essence_state = tool.eject_essence()
-            if essence_state is not None:
-                pos = (tool.position[0] + x_offset, tool.position[1] + y_offset)
-                essence = Essence(
-                    self.space,
-                    pos,
-                    essence_state,
-                    self.tile_size,
-                    mass,
-                    friction,
-                    elasticity,
-                    radius_scale=radius_scale,
-                    drag_coefficient=drag_coefficient,
-                )
-                self.essences.append(essence)
+        substep_reward = self.reward_config["substep_reward"]
+
+        # Handle Enchanter ejection
+        enchanter = self.tools["enchanter"]
+        essence_state, components_enchanted = enchanter.eject_essence()
+        if essence_state is not None:
+            # Award rewards for each component that gained enchantment
+            for essence_type in components_enchanted:
+                if self.quotas["enchant"][essence_type] > 0:
+                    self.pending_reward += substep_reward
+                    self.quotas["enchant"][essence_type] -= 1
+
+            pos = (
+                enchanter.position[0] + tool_offsets["enchanter"][0],
+                enchanter.position[1] + tool_offsets["enchanter"][1],
+            )
+            self._spawn_essence(pos, essence_state, mass, friction, elasticity, radius_scale, drag_coefficient)
+
+        # Handle Refiner ejection
+        refiner = self.tools["refiner"]
+        essence_state, components_refined = refiner.eject_essence()
+        if essence_state is not None:
+            # Award rewards for each component that gained refinement
+            for essence_type in components_refined:
+                if self.quotas["refine"][essence_type] > 0:
+                    self.pending_reward += substep_reward
+                    self.quotas["refine"][essence_type] -= 1
+
+            pos = (refiner.position[0] + tool_offsets["refiner"][0], refiner.position[1] + tool_offsets["refiner"][1])
+            self._spawn_essence(pos, essence_state, mass, friction, elasticity, radius_scale, drag_coefficient)
+
+        # Handle Cauldron ejection
+        cauldron = self.tools["cauldron"]
+        essence_state, combo_key = cauldron.eject_essence()
+        if essence_state is not None:
+            # Award reward if this exact combination is in quota
+            if combo_key is not None and self.quotas["combine"][combo_key] > 0:
+                self.pending_reward += substep_reward
+                self.quotas["combine"][combo_key] -= 1
+
+            pos = (
+                cauldron.position[0] + tool_offsets["cauldron"][0],
+                cauldron.position[1] + tool_offsets["cauldron"][1],
+            )
+            self._spawn_essence(pos, essence_state, mass, friction, elasticity, radius_scale, drag_coefficient)
+
+        # Handle Bottler ejection
+        bottler = self.tools["bottler"]
+        essence_state, pre_bottle_key = bottler.eject_essence()
+        if essence_state is not None:
+            # Award reward if this exact pre-bottle state is in quota
+            if pre_bottle_key is not None and self.quotas["bottle"][pre_bottle_key] > 0:
+                self.pending_reward += substep_reward
+                self.quotas["bottle"][pre_bottle_key] -= 1
+
+            pos = (bottler.position[0] + tool_offsets["bottler"][0], bottler.position[1] + tool_offsets["bottler"][1])
+            self._spawn_essence(pos, essence_state, mass, friction, elasticity, radius_scale, drag_coefficient)
+
+    def _spawn_essence(
+        self,
+        pos: tuple[float, float],
+        essence_state: EssenceState,
+        mass: float,
+        friction: float,
+        elasticity: float,
+        radius_scale: float,
+        drag_coefficient: float,
+    ):
+        """Helper to spawn an essence at a position."""
+        essence = Essence(
+            self.space,
+            pos,
+            essence_state,
+            self.tile_size,
+            mass,
+            friction,
+            elasticity,
+            radius_scale=radius_scale,
+            drag_coefficient=drag_coefficient,
+        )
+        self.essences.append(essence)
 
     def _encode_requirements(self) -> np.ndarray:
         """

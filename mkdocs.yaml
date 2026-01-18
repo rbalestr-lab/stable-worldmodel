@@ -1,0 +1,24 @@
+site_name: stable-worldmodel
+
+theme:
+  name: shadcn
+  show_title: true
+  show_stargazers: false
+  pygments_style:
+    light: shadcn-light
+    dark: github-dark
+  icon: heroicons:globe-europe-africa
+  topbar_sections: false
+  show_datetime: false
+
+site_url: https://lucas-maes.github.io/stable-worldmodel/
+repo_url: https://github.com/lucas-maes/swm/
+
+nav:
+  - Start: index.md
+
+markdown_extensions:
+  - codehilite
+  - admonition
+  - pymdownx.blocks.tab
+  - pymdownx.blocks.details

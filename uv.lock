@@ -5127,6 +5127,7 @@ train = [
 dev = [
     { name = "ipdb" },
     { name = "mkdocs-shadcn" },
+    { name = "pymdown-extensions" },
     { name = "pytest" },
     { name = "pytest-cov" },
     { name = "ruff" },
@@ -5162,6 +5163,7 @@ requires-dist = [
 dev = [
     { name = "ipdb" },
     { name = "mkdocs-shadcn" },
+    { name = "pymdown-extensions" },
     { name = "pytest" },
     { name = "pytest-cov", specifier = ">=7.0.0" },
     { name = "ruff" },

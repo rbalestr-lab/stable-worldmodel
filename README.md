@@ -12,8 +12,19 @@ pip install stable-worldmodel
 
 **NOTE:** The library is still in active development.
 
+
+## Contributing
+
+Setup your codebase:
+
+```bash
+uv venv --python=3.10
+source .venv/bin/activate
+uv sync --all-extras --group dev
+```
+
 ## Questions
 
 If you have a question, please [file an issue][issues].
 
-[issues]: https://github.com/galilai-group/stable-pretraining/issues
+[issues]: https://github.com/lucas-maes/swm/issues

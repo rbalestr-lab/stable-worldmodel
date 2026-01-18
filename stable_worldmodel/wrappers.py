@@ -17,19 +17,7 @@ from stable_worldmodel.utils import get_in
 
 
 class EnsureInfoKeysWrapper(gym.Wrapper):
-    """Validates that required keys are present in the info dict after reset and step.
-
-    Supports regex patterns for flexible key matching. Raises RuntimeError if any
-    required pattern has no matching key.
-
-    Args:
-        env: The Gymnasium environment to wrap.
-        required_keys: Iterable of regex patterns as strings. Each pattern must match
-            at least one key in the info dict.
-
-    Raises:
-        RuntimeError: If any required pattern has no matching key in info dict.
-    """
+    """Validates that required keys are present in the info dict."""
 
     def __init__(self, env, required_keys: Iterable[str]):
         super().__init__(env)
@@ -60,16 +48,7 @@ class EnsureInfoKeysWrapper(gym.Wrapper):
 
 
 class EnsureImageShape(gym.Wrapper):
-    """Validates that an image in the info dict has the expected spatial dimensions.
-
-    Args:
-        env: The Gymnasium environment to wrap.
-        image_key: Key in info dict containing the image to validate.
-        image_shape: Expected (height, width) tuple for the image.
-
-    Raises:
-        RuntimeError: If the image shape doesn't match the expected dimensions.
-    """
+    """Validates that an image in the info dict has the expected spatial dimensions."""
 
     def __init__(self, env, image_key, image_shape):
         super().__init__(env)
@@ -90,18 +69,7 @@ class EnsureImageShape(gym.Wrapper):
 
 
 class EnsureGoalInfoWrapper(gym.Wrapper):
-    """Validates that 'goal' key is present in info dict during reset and/or step.
-
-    Useful for goal-conditioned environments to ensure goal information is provided.
-
-    Args:
-        env: The Gymnasium environment to wrap.
-        check_reset: If True, validates 'goal' key is in info after reset().
-        check_step: If True, validates 'goal' key is in info after step().
-
-    Raises:
-        RuntimeError: If 'goal' key is missing when validation is enabled.
-    """
+    """Validates that 'goal' key is present in info dict."""
 
     def __init__(self, env, check_reset, check_step: bool = False):
         super().__init__(env)
@@ -122,26 +90,7 @@ class EnsureGoalInfoWrapper(gym.Wrapper):
 
 
 class EverythingToInfoWrapper(gym.Wrapper):
-    """Moves all transition information into the info dict for unified data access.
-
-    Adds observation, reward, terminated, truncated, action, and step_idx to info.
-    Optionally tracks environment variations when specified in reset options.
-
-    Args:
-        env: The Gymnasium environment to wrap.
-
-    Info Keys Added:
-        - observation (or dict keys if obs is dict): Current observation.
-        - reward: Reward value (NaN after reset).
-        - terminated: Episode termination flag.
-        - truncated: Episode truncation flag.
-        - action: Action taken (NaN sample after reset).
-        - step_idx: Current step counter.
-        - variation.{key}: Variation values if requested via reset options.
-
-    Note:
-        Pass options={"variation": ["key1", "key2"]} or ["all"] to reset() to track variations.
-    """
+    """Moves all transition information into the info dict."""
 
     def __init__(self, env):
         super().__init__(env)
@@ -236,22 +185,7 @@ class EverythingToInfoWrapper(gym.Wrapper):
 
 
 class AddPixelsWrapper(gym.Wrapper):
-    """Adds rendered environment pixels to info dict with optional resizing and transforms.
-
-    Supports single images, dictionaries of images (multiview), or lists of images.
-    Uses PIL for resizing and optional torchvision transforms.
-
-    Args:
-        env: The Gymnasium environment to wrap.
-        pixels_shape: Target (height, width) for resized images. Defaults to (84, 84).
-        torchvision_transform: Optional transform to apply to PIL images.
-
-    Info Keys Added:
-        - pixels: Rendered image (single view).
-        - pixels.{key}: Individual images (multiview dict).
-        - pixels.{idx}: Individual images (multiview list).
-        - render_time: Time taken to render in seconds.
-    """
+    """Adds rendered environment pixels to info dict."""
 
     def __init__(
         self,
@@ -311,16 +245,7 @@ class AddPixelsWrapper(gym.Wrapper):
 
 
 class ResizeGoalWrapper(gym.Wrapper):
-    """Resizes goal images in info dict with optional transforms.
-
-    Applies PIL-based resizing and optional torchvision transforms to the 'goal'
-    image in info dict during both reset and step.
-
-    Args:
-        env: The Gymnasium environment to wrap.
-        pixels_shape: Target (height, width) for resized goal images. Defaults to (84, 84).
-        torchvision_transform: Optional transform to apply to PIL goal images.
-    """
+    """Resizes goal images in info dict."""
 
     def __init__(
         self,
@@ -362,20 +287,7 @@ class ResizeGoalWrapper(gym.Wrapper):
 
 
 class StackedWrapper(gym.Wrapper):
-    """Stacks specified key(s) in the info dict over the last k steps.
-
-    The initial reset will fill the stack(s) with the initial value(s).
-
-    Note:
-        Stacked values are combined into a tensor/array along a new first
-        dimension if the data type is a torch.Tensor or np.ndarray.
-
-    Args:
-        env: The Gymnasium environment to wrap.
-        key: The key or list of keys in the info dict to stack.
-        frameskip: Number of frames to skip between stacked entries.
-        history_size: Number of past entries to stack.
-    """
+    """Stacks specified key(s) in the info dict over the last k steps."""
 
     def __init__(
         self,
@@ -445,25 +357,7 @@ class StackedWrapper(gym.Wrapper):
 
 
 class MegaWrapper(gym.Wrapper):
-    """Combines multiple wrappers for comprehensive environment preprocessing.
-
-    Applies in sequence:
-        AddPixelsWrapper → EverythingToInfoWrapper → EnsureInfoKeysWrapper →
-        EnsureGoalInfoWrapper → ResizeGoalWrapper → StackedWrapper
-
-    This provides a complete preprocessing pipeline with rendered pixels, unified
-    info dict, key validation, goal checking, goal resizing, and temporal stacking.
-
-    Args:
-        env: The Gymnasium environment to wrap.
-        image_shape: Target (height, width) for pixels and goal. Defaults to (84, 84).
-        pixels_transform: Optional torchvision transform for rendered pixels.
-        goal_transform: Optional torchvision transform for goal images.
-        required_keys: Additional regex patterns for keys that must be in info.
-            Pattern ``^pixels(?:\\..*)?$`` is always added.
-        separate_goal: If True, validates 'goal' is present in info. Defaults to True.
-        n_stacks: Number of steps to stack (passed to StackedWrapper).
-    """
+    """Combines multiple wrappers for comprehensive environment preprocessing."""
 
     def __init__(
         self,
@@ -522,24 +416,7 @@ class MegaWrapper(gym.Wrapper):
 
 
 class VariationWrapper(VectorWrapper):
-    """Manages variation spaces for vectorized environments.
-
-    Handles batching of variation spaces across multiple environments, supporting
-    either shared variations (same) or independent variations (different).
-
-    Args:
-        env: The vectorized Gymnasium environment to wrap.
-        variation_mode: Mode for handling variations across environments:
-            - "same": All environments share the same variation space (batched).
-            - "different": Each environment has independent variation spaces.
-
-    Raises:
-        ValueError: If variation_mode is invalid or sub-environment spaces don't match.
-
-    Note:
-        Base environment must have a ``variation_space`` attribute. If missing,
-        variation spaces are set to None.
-    """
+    """Manages variation spaces for vectorized environments."""
 
     def __init__(
         self,

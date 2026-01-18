@@ -9,25 +9,10 @@ from stable_worldmodel.envs.utils import perturb_camera_angle
 
 
 class SceneEnv(ManipSpaceEnv):
-    """Scene environment.
-
-    This environment consists of a cube, two buttons, a drawer, and a window. The goal is to manipulate the objects
-    to a target configuration. The buttons toggle the lock state of the drawer and window.
-
-    In addition to `qpos` and `qvel`, it maintains the following state variables.
-    - `button_states`: A binary array of size `num_buttons` representing the state of each button. Stored in
-        `_cur_button_states`.
-    """
+    """Scene environment."""
 
     def __init__(self, env_type="scene", ob_type="pixels", permute_blocks=True, multiview=False, *args, **kwargs):
-        """Initialize the Scene environment.
-
-        Args:
-            env_type: Unused; defined for compatibility with the other environments.
-            permute_blocks: Whether to randomly permute the order of the blocks at task initialization.
-            *args: Additional arguments to pass to the parent class.
-            **kwargs: Additional keyword arguments to pass to the parent class.
-        """
+        """Initialize the Scene environment."""
         self._env_type = env_type
         self._permute_blocks = permute_blocks
         self._multiview = multiview
@@ -528,6 +513,7 @@ class SceneEnv(ManipSpaceEnv):
 
     def _is_in_drawer(self, obj_pos):
         """Check if the object is in the drawer."""
+        # Keep this docstring as it's already simple
         drawer_pos_y = self._data.site_xpos[self._drawer_site_id][1]
         drawer_low = np.array([0.21, drawer_pos_y - 0.27, 0.0])
         drawer_high = np.array([0.45, drawer_pos_y - 0.07, 0.15])

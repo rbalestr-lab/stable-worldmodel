@@ -17,25 +17,7 @@ def pretraining(
     dump_object: bool = True,
     args: str = "",
 ) -> int:
-    """Run a pretraining script as a subprocess with optional command-line arguments.
-
-    This function checks if the specified script exists, constructs a command to run it with the provided arguments,
-    and executes the command in a subprocess.
-
-    Args:
-        script_path (str): The path to the pretraining script to be executed.
-        dataset_name (str): The name of the dataset to be used in pretraining.
-        output_model_name (str): The name to save the output model.
-        dump_object (bool, optional): Whether to dump the model object after training. Defaults to
-        args (str, optional): A string of command-line arguments to pass to the script. Defaults to an empty string.
-
-    Returns:
-        int: The return code of the subprocess. A return code of 0 indicates success.
-
-    Raises:
-        ValueError: If the specified script does not exist.
-        SystemExit: If the subprocess exits with a non-zero return code.
-    """
+    """Run a pretraining script as a subprocess."""
     if not os.path.isfile(script_path):
         raise ValueError(f"Script {script_path} does not exist.")
 
@@ -55,27 +37,7 @@ def pretraining(
 
 
 def flatten_dict(d, parent_key="", sep="."):
-    """Flatten a nested dictionary into a single-level dictionary with concatenated keys.
-
-    The naming convention for the new keys is similar to Hydra's, using a `.` separator to denote levels of nesting.
-    Attention is needed when flattening dictionaries with overlapping keys, as this may lead to information loss.
-
-    Args:
-        d (dict): The nested dictionary to flatten.
-        parent_key (str, optional): The base key to use for the flattened keys.
-        sep (str, optional): The separator to use between levels of nesting. Defaults to '.'.
-
-    Returns:
-        dict: A flattened version of the input dictionary.
-
-    Examples:
-        >>> info = {"a": {"b": {"c": 42, "d": 43}}, "e": 44}
-        >>> flatten_dict(info)
-        {'a.b.c': 42, 'a.b.d': 43, 'e': 44}
-
-        >>> flatten_dict({"a": {"b": 2}, "a.b": 3})
-        {'a.b': 3}
-    """
+    """Flatten a nested dictionary into a single-level dictionary."""
     items = {}
     for k, v in d.items():
         new_key = f"{parent_key}{sep}{k}" if parent_key else k
@@ -87,23 +49,7 @@ def flatten_dict(d, parent_key="", sep="."):
 
 
 def get_in(mapping: dict, path: Iterable[str]) -> Any:
-    """Retrieve a value from a nested dictionary using a sequence of keys.
-
-    Args:
-        mapping (dict): A nested dictionary.
-        path (Iterable[str]): An iterable of keys representing the path to the desired value in mapping.
-
-    Returns:
-        Any: The value located at the specified path in the nested dictionary.
-
-    Raises:
-        KeyError: If any key in the path does not exist in the mapping dict.
-
-    Examples:
-        >>> variations = {"a": {"b": {"c": 42}}}
-        >>> get_in(variations, ["a", "b", "c"])
-        42
-    """
+    """Retrieve a value from a nested dictionary using a sequence of keys."""
     cur = mapping
     for key in list(path):
         cur = cur[key]

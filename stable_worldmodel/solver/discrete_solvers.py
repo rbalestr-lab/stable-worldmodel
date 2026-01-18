@@ -21,17 +21,7 @@ class PGDSolver(torch.nn.Module):
         device="cpu",
         seed: int = 1234,
     ):
-        """Projected Gradient Descent Solver.
-        Args:
-            model (Costable): The world model used to compute costs.
-            n_steps (int): Number of gradient descent steps.
-            batch_size (int | None): Batch size for processing environments. If None, process all envs at once.
-            var_scale (float): Scale of the initial action variance in the samples.
-            num_samples (int): Number of initial action samples to optimize.
-            action_noise (float): Standard deviation of noise added to actions during optimization.
-            device (str): Device to run the solver on.
-            seed (int): Random seed for reproducibility.
-        """
+        """Initialize the Projected Gradient Descent solver."""
         super().__init__()
         self.model = model
         self.n_steps = n_steps
@@ -81,13 +71,7 @@ class PGDSolver(torch.nn.Module):
         return self.solve(*args, **kwargs)
 
     def init_action(self, actions=None, from_scalar=False):
-        """Initialize the action tensor for the solver.
-
-        Set self.init to initial action sequences (n_envs, horizon, action_simplex_dim)
-        Args:
-            actions (torch.Tensor, optional): The initial action to warm-start the solver.
-            from_scalar (bool, optional): Whether to initialize the action sequence from a scalar (vs one-hot).
-        """
+        """Initialize the action tensor for the solver."""
         if actions is None:
             actions = torch.zeros((self._n_envs, 0, self.action_simplex_dim))
         elif from_scalar:
@@ -120,14 +104,7 @@ class PGDSolver(torch.nn.Module):
             self.register_parameter("init", torch.nn.Parameter(actions))
 
     def solve(self, info_dict, init_action=None, from_scalar=False) -> dict:
-        """Solve the planning optimization problem using gradient descent with batch processing.
-        Args:
-            info_dict (dict): The information dictionary containing the current state of the environment.
-            init_action (torch.Tensor, optional): The initial action to warm-start the solver.
-            from_scalar (bool, optional): Whether to initialize the action from a scalar (vs one-hot).
-        Returns:
-            dict: A dictionary containing the cost and actions.
-        """
+        """Solve the planning optimization problem using gradient descent."""
         start_time = time.time()
         outputs = {
             "cost": [],  # Will store list of cost histories per batch
@@ -223,14 +200,7 @@ class PGDSolver(torch.nn.Module):
         return outputs
 
     def _factor_action_block(self, actions):
-        """Factor the action block dimension from action_simplex_dim
-
-        Prepares the last dimension to be in the action simplex for projection.
-        Args:
-            actions (torch.Tensor): The action to factor.
-        Returns:
-            torch.Tensor: The factored action with shape (n_envs, horizon, action_block, self._action_simplex_dim)
-        """
+        """Factor the action block dimension from action_simplex_dim."""
         # actions shape (n_envs, horizon, action_simplex_dim)
         original_shape = actions.shape
         action_block = self._config.action_block
@@ -238,12 +208,7 @@ class PGDSolver(torch.nn.Module):
         return actions.reshape(*original_shape[:-1], action_block, simplex_dim)
 
     def _project_action_simplex(self, actions):
-        """Project the action onto the simplex.
-        Args:
-            actions (torch.Tensor): The action to project.
-        Returns:
-            torch.Tensor: The projected action with shape (n_envs, horizon, action_simplex_dim)
-        """
+        """Project the action onto the simplex."""
         original_shape = actions.shape
 
         s = self._factor_action_block(actions).reshape(-1, self._action_simplex_dim)

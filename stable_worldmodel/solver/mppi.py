@@ -9,15 +9,7 @@ from .solver import Costable
 
 
 class MPPISolver:
-    """Model Predictive Path Integral Solver.
-
-    proposed in https://arxiv.org/abs/1509.01149
-    algorithm from: https://acdslab.github.io/mppi-generic-website/docs/mppi.html
-
-    Note:
-        The original MPPI compute the cost as a summation of costs along the trajectory.
-        Here, we use the final cost only, which should be updated in future updates.
-    """
+    """Model Predictive Path Integral Solver."""
 
     def __init__(
         self,
@@ -70,11 +62,7 @@ class MPPISolver:
         return self.solve(*args, **kwargs)
 
     def init_action_distrib(self, actions=None):
-        """Initialize the action distribution params (mu, sigma) given the initial condition.
-
-        Args:
-            actions (n_envs, T, action_dim): initial actions, T <= horizon
-        """
+        """Initialize the action distribution params."""
         var = self.var_scale * torch.ones([self.n_envs, self.horizon, self.action_dim])
         mean = torch.zeros([self.n_envs, 0, self.action_dim]) if actions is None else actions
 

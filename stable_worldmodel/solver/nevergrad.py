@@ -9,14 +9,7 @@ from .solver import Costable
 
 
 class NevergradSolver:
-    """Nevergrad Solver.
-
-    supporting https://github.com/facebookresearch/nevergrad
-
-    Attention:
-        - CPU based optimizer (no GPU support)
-        - It's your duty to ensure num_workers == n_envs for parallelization
-    """
+    """Nevergrad Solver."""
 
     def __init__(
         self,

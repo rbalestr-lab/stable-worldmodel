@@ -24,19 +24,7 @@ class GradientSolver(torch.nn.Module):
         optimizer_cls: type[torch.optim.Optimizer] = torch.optim.SGD,
         optimizer_kwargs: dict | None = None,
     ):
-        """Gradient Descent Method Solver.
-        Args:
-            model (Costable): The world model used to compute costs.
-            n_steps (int): Number of gradient descent steps.
-            batch_size (int | None): Batch size for processing environments. If None, process all envs at once.
-            var_scale (float): Scale of the initial action variance in the samples.
-            num_samples (int): Number of initial action samples to optimize.
-            action_noise (float): Standard deviation of noise added to actions during optimization.
-            device (str): Device to run the solver on.
-            seed (int): Random seed for reproducibility.
-            optimizer_cls: The class of the optimizer to use (e.g., torch.optim.Adam).
-            optimizer_kwargs: Dictionary of arguments for the optimizer (e.g., {'lr': 1e-3}).
-        """
+        """Initialize the Gradient Descent solver."""
         super().__init__()
         self.model = model
         self.n_steps = n_steps
@@ -84,10 +72,7 @@ class GradientSolver(torch.nn.Module):
         return self.solve(*args, **kwargs)
 
     def init_action(self, actions=None):
-        """Initialize the action tensor for the solver.
-
-        set self.init - initial action sequences (n_envs, horizon, action_dim)
-        """
+        """Initialize the action tensor for the solver."""
         if actions is None:
             actions = torch.zeros((self._n_envs, 0, self.action_dim))
 
@@ -110,7 +95,7 @@ class GradientSolver(torch.nn.Module):
             self.register_parameter("init", torch.nn.Parameter(actions))
 
     def solve(self, info_dict, init_action=None) -> dict:
-        """Solve the planning optimization problem using gradient descent with batch processing."""
+        """Solve the planning optimization problem using gradient descent."""
         start_time = time.time()
         outputs = {
             "cost": [],  # Will store list of cost histories per batch

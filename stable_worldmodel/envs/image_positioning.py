@@ -3,7 +3,6 @@ import matplotlib.colors as mcolors
 import matplotlib.pyplot as plt
 import numpy as np
 import pygame
-from PIL import Image, ImageOps
 
 
 # Get the default color cycle from Matplotlib's rcParams
@@ -22,10 +21,15 @@ class ImagePositioning(gym.Env):
     def __init__(
         self,
         resolution: int,
-        images: list[Image],
+        images: list,
         render_mode: str | None = None,
         background_power_decay: float | None = 1.0,
     ):
+        # Lazy-load PIL only when ImagePositioning is instantiated
+        from PIL import Image, ImageOps
+
+        self._Image = Image
+
         self.resolution = resolution
         self.background_power_decay = background_power_decay
 

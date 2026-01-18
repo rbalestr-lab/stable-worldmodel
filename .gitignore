@@ -8,6 +8,7 @@ build/
 # Tools
 .claude/
 .pytest_cache/
+.mypy_cache/
 .ruff_cache/
 .venv/
 

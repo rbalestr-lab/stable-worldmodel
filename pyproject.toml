@@ -48,8 +48,11 @@ env = [
 dev = [
   "ipdb",
   "pytest",
+  "pytest-cov>=7.0.0",
   "ruff",
   "twine",
+  "mkdocs-shadcn",
+  "pymdown-extensions",
 ]
 
 [build-system]

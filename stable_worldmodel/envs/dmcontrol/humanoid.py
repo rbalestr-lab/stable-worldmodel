@@ -38,6 +38,7 @@ class HumanoidDMControlWrapper(DMControlWrapper):
                             high=1.5,
                             shape=(1,),
                             dtype=np.float32,
+                            init_value=np.array([1.0], dtype=np.float32),
                         ),
                     }
                 ),
@@ -48,6 +49,7 @@ class HumanoidDMControlWrapper(DMControlWrapper):
                             high=1.0,
                             shape=(1,),
                             dtype=np.float32,
+                            init_value=np.array([1.0], dtype=np.float32),
                         ),
                         "color": swm_space.Box(
                             low=0.0,

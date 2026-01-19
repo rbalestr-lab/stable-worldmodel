@@ -55,6 +55,11 @@ class DMControlWrapper(gym.Env):
 
     @property
     def unwrapped(self):
+        return self
+
+    @property
+    def dmc_env(self):
+        """Access the underlying dm_control env explicitly."""
         return self.env
 
     @property

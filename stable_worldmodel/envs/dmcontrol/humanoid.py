@@ -20,7 +20,14 @@ _WALK_SPEED = 1
 class HumanoidDMControlWrapper(DMControlWrapper):
     def __init__(self, seed=None, environment_kwargs=None):
         xml, assets = humanoid.get_model_and_assets()
-        self._mjcf_model = mjcf.from_xml_string(xml, assets)
+        assets = assets or {}
+        normalized_assets = dict(assets)
+        for key, value in assets.items():
+            if key.startswith("./"):
+                normalized_assets[key[2:]] = value
+            else:
+                normalized_assets[f"./{key}"] = value
+        self._mjcf_model = mjcf.from_xml_string(xml, normalized_assets)
         self.compile_model(seed=seed, environment_kwargs=environment_kwargs)
         super().__init__(self.env, "humanoid")
         self.variation_space = swm_space.Dict(

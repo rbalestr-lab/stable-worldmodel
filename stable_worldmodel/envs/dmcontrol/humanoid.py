@@ -153,11 +153,13 @@ class HumanoidDMControlWrapper(DMControlWrapper):
                 mass_changed = True
             geom.density = desired_density
 
-        # Modify light intensity
+        # Modify light intensity if a global light exists.
         light = mjcf_model.find("light", "global")
-        desired_diffuse = self.variation_space["light"]["intensity"].value[0] * np.ones((3), dtype=np.float32)
-        light_changed = light.diffuse is None or not np.allclose(light.diffuse, desired_diffuse)
-        light.diffuse = desired_diffuse
+        light_changed = False
+        if light is not None:
+            desired_diffuse = self.variation_space["light"]["intensity"].value[0] * np.ones((3), dtype=np.float32)
+            light_changed = light.diffuse is None or not np.allclose(light.diffuse, desired_diffuse)
+            light.diffuse = desired_diffuse
         if light_changed or texture_changed or friction_changed or mass_changed:
             self.mark_dirty()
         return mjcf_model

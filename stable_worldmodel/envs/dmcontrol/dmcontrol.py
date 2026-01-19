@@ -32,7 +32,7 @@ def get_obs_shape(env):
     return (int(np.sum(obs_shp)),)
 
 
-class DMControlWrapper:
+class DMControlWrapper(gym.Env):
     def __init__(self, env, domain):
         self.env = env
         self.camera_id = 2 if domain == "quadruped" else 0
@@ -58,10 +58,6 @@ class DMControlWrapper:
     @property
     def unwrapped(self):
         return self.env
-
-    @property
-    def metadata(self):
-        return None
 
     @property
     def info(self):

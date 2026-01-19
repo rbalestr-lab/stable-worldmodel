@@ -156,7 +156,7 @@ class HumanoidDMControlWrapper(DMControlWrapper):
         # Modify light intensity if a global light exists.
         light = mjcf_model.find("light", "global")
         light_changed = False
-        if light is not None:
+        if light is not None:  # TODO check why sometimes light is None and find a way to vary it anyway
             desired_diffuse = self.variation_space["light"]["intensity"].value[0] * np.ones((3), dtype=np.float32)
             light_changed = light.diffuse is None or not np.allclose(light.diffuse, desired_diffuse)
             light.diffuse = desired_diffuse

@@ -3,7 +3,6 @@ import os
 
 os.environ["MUJOCO_GL"] = "egl"
 
-import concurrent.futures
 
 import hydra
 import numpy as np
@@ -58,18 +57,20 @@ def run(cfg: DictConfig):
     rng = np.random.default_rng(cfg.seed)
     seeds = [rng.integers(0, 1_000_000).item() for _ in range(cfg.num_shards)]
 
-    with concurrent.futures.ProcessPoolExecutor(max_workers=max_workers) as executor:
-        futures = []
+    collect_shard(0, seeds[0], cfg)
 
-        for i in range(cfg.num_shards):
-            futures.append(executor.submit(collect_shard, i, seeds[i], cfg))
+    # with concurrent.futures.ProcessPoolExecutor(max_workers=max_workers) as executor:
+    #     futures = []
 
-        for future in concurrent.futures.as_completed(futures):
-            try:
-                result = future.result()
-                logging.success(f"✅ {result}")
-            except Exception as e:
-                logging.error(f"❌ Worker failed with error: {e}")
+    #     for i in range(cfg.num_shards):
+    #         futures.append(executor.submit(collect_shard, i, seeds[i], cfg))
+
+    #     for future in concurrent.futures.as_completed(futures):
+    #         try:
+    #             result = future.result()
+    #             logging.success(f"✅ {result}")
+    #         except Exception as e:
+    #             logging.error(f"❌ Worker failed with error: {e}")
 
     logging.success("🎉🎉🎉 Completed data collection for all shards 🎉🎉🎉")
 

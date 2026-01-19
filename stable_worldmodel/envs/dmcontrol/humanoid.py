@@ -47,9 +47,9 @@ class HumanoidDMControlWrapper(DMControlWrapper):
                         "friction": swm_space.Box(
                             low=0.0,
                             high=1.0,
-                            shape=(1,),
+                            shape=(3,),
                             dtype=np.float32,
-                            init_value=np.array([1.0], dtype=np.float32),
+                            init_value=np.array([1.0, 0.005, 0.0001], dtype=np.float32),
                         ),
                         "color": swm_space.Box(
                             low=0.0,
@@ -125,7 +125,7 @@ class HumanoidDMControlWrapper(DMControlWrapper):
 
         # Modify floor friction
         floor_geom = mjcf_model.find("geom", "floor")
-        desired_friction = self.variation_space["floor"]["friction"].value[0]
+        desired_friction = self.variation_space["floor"]["friction"].value
         friction_changed = floor_geom.friction is None or not np.allclose(floor_geom.friction, desired_friction)
         floor_geom.friction = desired_friction
 

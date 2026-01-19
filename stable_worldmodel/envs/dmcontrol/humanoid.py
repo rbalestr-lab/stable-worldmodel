@@ -47,9 +47,9 @@ class HumanoidDMControlWrapper(DMControlWrapper):
                         "friction": swm_space.Box(
                             low=0.0,
                             high=1.0,
-                            shape=(3,),
+                            shape=(1,),
                             dtype=np.float32,
-                            init_value=np.array([1.0, 0.005, 0.0001], dtype=np.float32),
+                            init_value=np.array([1.0], dtype=np.float32),
                         ),
                         "color": swm_space.Box(
                             low=0.0,
@@ -126,8 +126,8 @@ class HumanoidDMControlWrapper(DMControlWrapper):
         # Modify floor friction
         floor_geom = mjcf_model.find("geom", "floor")
         desired_friction = self.variation_space["floor"]["friction"].value
-        friction_changed = floor_geom.friction is None or not np.allclose(floor_geom.friction, desired_friction)
-        floor_geom.friction = desired_friction
+        friction_changed = floor_geom.friction is None or not np.allclose(floor_geom.friction[0], desired_friction)
+        floor_geom.friction[0] = desired_friction
 
         # Modify body mass (scale geom density)
         if not hasattr(self, "_base_geom_densities"):
@@ -154,12 +154,13 @@ class HumanoidDMControlWrapper(DMControlWrapper):
             geom.density = desired_density
 
         # Modify light intensity if a global light exists.
-        light = mjcf_model.find("light", "global")
         light_changed = False
-        if light is not None:  # TODO check why sometimes light is None and find a way to vary it anyway
-            desired_diffuse = self.variation_space["light"]["intensity"].value[0] * np.ones((3), dtype=np.float32)
-            light_changed = light.diffuse is None or not np.allclose(light.diffuse, desired_diffuse)
-            light.diffuse = desired_diffuse
+        light = mjcf_model.find("light", "top")
+        desired_diffuse = self.variation_space["light"]["intensity"].value[0] * np.ones((3), dtype=np.float32)
+        light_changed = light.diffuse is None or not np.allclose(light.diffuse, desired_diffuse)
+        light.diffuse = desired_diffuse
+
+        # If any properties changed, mark the model as dirty.
         if light_changed or texture_changed or friction_changed or mass_changed:
             self.mark_dirty()
         return mjcf_model

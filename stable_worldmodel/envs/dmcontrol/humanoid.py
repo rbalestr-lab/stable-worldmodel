@@ -20,7 +20,7 @@ _WALK_SPEED = 1
 class HumanoidDMControlWrapper(DMControlWrapper):
     def __init__(self, seed=None, environment_kwargs=None):
         xml, assets = humanoid.get_model_and_assets()
-        xml = xml.replace('file="./common/', 'file="common/')
+        xml = xml.replace(b'file="./common/', b'file="common/')
         self._mjcf_model = mjcf.from_xml_string(xml, assets or {})
         self.compile_model(seed=seed, environment_kwargs=environment_kwargs)
         super().__init__(self.env, "humanoid")

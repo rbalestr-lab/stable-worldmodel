@@ -51,8 +51,6 @@ class DMControlWrapper(gym.Env):
         self.action_spec_dtype = env.action_spec().dtype
         self._cumulative_reward = 0
         self.action_repeat = 2
-        self._mjcf_model = None
-        self._dirty = True
         self.variation_space = None
 
     @property

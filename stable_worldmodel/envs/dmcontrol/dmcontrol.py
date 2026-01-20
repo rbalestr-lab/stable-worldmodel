@@ -65,7 +65,6 @@ class DMControlWrapper(gym.Env):
     @property
     def info(self):
         return {
-            "terminated": False,
             "truncated": False,
             "success": float("nan"),
             "score": self._cumulative_reward / 1000,

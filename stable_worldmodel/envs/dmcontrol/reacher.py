@@ -105,7 +105,7 @@ class ReacherDMControlWrapper(DMControlWrapper):
         )
         xml_path = os.path.join(self._mjcf_tempdir.name, "reacher.xml")
         physics = reacher.Physics.from_xml_path(xml_path)
-        task = reacher.Reacher(target_size=_SMALL_TARGET, pure_state=False, random=seed)
+        task = reacher.Reacher(target_size=_SMALL_TARGET, random=seed)
         environment_kwargs = environment_kwargs or {}
         env = control.Environment(physics, task, time_limit=_DEFAULT_TIME_LIMIT, **environment_kwargs)
         env = action_scale.Wrapper(env, minimum=-1.0, maximum=1.0)

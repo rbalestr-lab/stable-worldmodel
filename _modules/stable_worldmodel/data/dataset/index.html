@@ -631,77 +631,138 @@
 </span><span id="line-373">        <span class="n">num_steps</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
 </span><span id="line-374">        <span class="n">transform</span><span class="p">:</span> <span class="n">Callable</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 </span><span id="line-375">        <span class="n">keys_to_load</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-</span><span id="line-376">        <span class="n">cache_dir</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-</span><span id="line-377">    <span class="p">):</span>
-</span><span id="line-378">        <span class="bp">self</span><span class="o">.</span><span class="n">h5_path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">cache_dir</span> <span class="ow">or</span> <span class="n">get_cache_dir</span><span class="p">(),</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">.h5&quot;</span><span class="p">)</span>
-</span><span id="line-379">        <span class="bp">self</span><span class="o">.</span><span class="n">h5_file</span> <span class="o">=</span> <span class="kc">None</span>
-</span><span id="line-380">
-</span><span id="line-381">        <span class="bp">self</span><span class="o">.</span><span class="n">keys_to_load</span> <span class="o">=</span> <span class="n">keys_to_load</span>
+</span><span id="line-376">        <span class="n">keys_to_cache</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+</span><span id="line-377">        <span class="n">cache_dir</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+</span><span id="line-378">    <span class="p">):</span>
+</span><span id="line-379">        <span class="bp">self</span><span class="o">.</span><span class="n">h5_path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">cache_dir</span> <span class="ow">or</span> <span class="n">get_cache_dir</span><span class="p">(),</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">.h5&quot;</span><span class="p">)</span>
+</span><span id="line-380">        <span class="bp">self</span><span class="o">.</span><span class="n">h5_file</span> <span class="o">=</span> <span class="kc">None</span>
+</span><span id="line-381">        <span class="bp">self</span><span class="o">.</span><span class="n">_cache</span> <span class="o">=</span> <span class="p">{}</span>
 </span><span id="line-382">
-</span><span id="line-383">        <span class="k">with</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">h5_path</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
-</span><span id="line-384">            <span class="bp">self</span><span class="o">.</span><span class="n">offsets</span> <span class="o">=</span> <span class="n">f</span><span class="p">[</span><span class="s2">&quot;ep_offset&quot;</span><span class="p">][:]</span>
-</span><span id="line-385">            <span class="bp">self</span><span class="o">.</span><span class="n">lengths</span> <span class="o">=</span> <span class="n">f</span><span class="p">[</span><span class="s2">&quot;ep_len&quot;</span><span class="p">][:]</span>
+</span><span id="line-383">        <span class="bp">self</span><span class="o">.</span><span class="n">keys_to_load</span> <span class="o">=</span> <span class="n">keys_to_load</span>
+</span><span id="line-384">        <span class="bp">self</span><span class="o">.</span><span class="n">metadata_keys</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;ep_len&quot;</span><span class="p">,</span> <span class="s2">&quot;ep_offset&quot;</span><span class="p">]</span>
+</span><span id="line-385">        <span class="bp">self</span><span class="o">.</span><span class="n">keys_to_cache</span> <span class="o">=</span> <span class="n">keys_to_cache</span> <span class="ow">or</span> <span class="p">[]</span>
 </span><span id="line-386">
-</span><span id="line-387">            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">keys_to_load</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-</span><span id="line-388">                <span class="bp">self</span><span class="o">.</span><span class="n">keys_to_load</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
-</span><span id="line-389">
-</span><span id="line-390">        <span class="bp">self</span><span class="o">.</span><span class="n">transform</span> <span class="o">=</span> <span class="n">transform</span>
-</span><span id="line-391">        <span class="bp">self</span><span class="o">.</span><span class="n">frameskip</span> <span class="o">=</span> <span class="n">frameskip</span>
-</span><span id="line-392">        <span class="bp">self</span><span class="o">.</span><span class="n">num_steps</span> <span class="o">=</span> <span class="n">num_steps</span>
-</span><span id="line-393">        <span class="bp">self</span><span class="o">.</span><span class="n">span</span> <span class="o">=</span> <span class="n">num_steps</span> <span class="o">*</span> <span class="n">frameskip</span>
-</span><span id="line-394">
-</span><span id="line-395">        <span class="c1"># valid episode indices</span>
-</span><span id="line-396">        <span class="bp">self</span><span class="o">.</span><span class="n">clip_indices</span> <span class="o">=</span> <span class="p">[]</span>
-</span><span id="line-397">        <span class="k">for</span> <span class="n">ep_idx</span><span class="p">,</span> <span class="n">length</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lengths</span><span class="p">):</span>
-</span><span id="line-398">            <span class="k">if</span> <span class="n">length</span> <span class="o">&gt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">span</span><span class="p">:</span>
-</span><span id="line-399">                <span class="k">for</span> <span class="n">start_f</span> <span class="ow">in</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">length</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">span</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">):</span>
-</span><span id="line-400">                    <span class="bp">self</span><span class="o">.</span><span class="n">clip_indices</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">ep_idx</span><span class="p">,</span> <span class="n">start_f</span><span class="p">))</span>
-</span><span id="line-401">        <span class="k">return</span>
-</span><span id="line-402">
-</span><span id="line-403">    <span class="nd">@property</span>
-</span><span id="line-404">    <span class="k">def</span><span class="w"> </span><span class="nf">column_names</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-</span><span id="line-405">        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">keys_to_load</span>
-</span><span id="line-406">
-</span><span id="line-407">    <span class="k">def</span><span class="w"> </span><span class="fm">__len__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-</span><span id="line-408">        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">clip_indices</span><span class="p">)</span>
-</span><span id="line-409">
-</span><span id="line-410">    <span class="k">def</span><span class="w"> </span><span class="fm">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">idx</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
-</span><span id="line-411">        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">h5_file</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-</span><span id="line-412">            <span class="bp">self</span><span class="o">.</span><span class="n">h5_file</span> <span class="o">=</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">h5_path</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">,</span> <span class="n">swmr</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</span><span id="line-387">        <span class="k">with</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">h5_path</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+</span><span id="line-388">            <span class="bp">self</span><span class="o">.</span><span class="n">offsets</span> <span class="o">=</span> <span class="n">f</span><span class="p">[</span><span class="s2">&quot;ep_offset&quot;</span><span class="p">][:]</span>
+</span><span id="line-389">            <span class="bp">self</span><span class="o">.</span><span class="n">lengths</span> <span class="o">=</span> <span class="n">f</span><span class="p">[</span><span class="s2">&quot;ep_len&quot;</span><span class="p">][:]</span>
+</span><span id="line-390">
+</span><span id="line-391">            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">keys_to_load</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+</span><span id="line-392">                <span class="bp">self</span><span class="o">.</span><span class="n">keys_to_load</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+</span><span id="line-393">
+</span><span id="line-394">            <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">keys_to_cache</span><span class="p">:</span>
+</span><span id="line-395">                <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">f</span><span class="p">:</span>
+</span><span id="line-396">                    <span class="bp">self</span><span class="o">.</span><span class="n">_cache</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">f</span><span class="p">[</span><span class="n">key</span><span class="p">][:]</span>
+</span><span id="line-397">                    <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Cached key &#39;</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2">&#39; from HDF5 file &#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">h5_path</span><span class="si">}</span><span class="s2">&#39;&quot;</span><span class="p">)</span>
+</span><span id="line-398">                <span class="k">else</span><span class="p">:</span>
+</span><span id="line-399">                    <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Key &#39;</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2">&#39; not found in HDF5 file &#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">h5_path</span><span class="si">}</span><span class="s2">&#39;&quot;</span><span class="p">)</span>
+</span><span id="line-400">
+</span><span id="line-401">        <span class="bp">self</span><span class="o">.</span><span class="n">transform</span> <span class="o">=</span> <span class="n">transform</span>
+</span><span id="line-402">        <span class="bp">self</span><span class="o">.</span><span class="n">frameskip</span> <span class="o">=</span> <span class="n">frameskip</span>
+</span><span id="line-403">        <span class="bp">self</span><span class="o">.</span><span class="n">num_steps</span> <span class="o">=</span> <span class="n">num_steps</span>
+</span><span id="line-404">        <span class="bp">self</span><span class="o">.</span><span class="n">span</span> <span class="o">=</span> <span class="n">num_steps</span> <span class="o">*</span> <span class="n">frameskip</span>
+</span><span id="line-405">
+</span><span id="line-406">        <span class="c1"># valid episode indices</span>
+</span><span id="line-407">        <span class="bp">self</span><span class="o">.</span><span class="n">clip_indices</span> <span class="o">=</span> <span class="p">[]</span>
+</span><span id="line-408">        <span class="k">for</span> <span class="n">ep_idx</span><span class="p">,</span> <span class="n">length</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lengths</span><span class="p">):</span>
+</span><span id="line-409">            <span class="k">if</span> <span class="n">length</span> <span class="o">&gt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">span</span><span class="p">:</span>
+</span><span id="line-410">                <span class="k">for</span> <span class="n">start_f</span> <span class="ow">in</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">length</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">span</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">):</span>
+</span><span id="line-411">                    <span class="bp">self</span><span class="o">.</span><span class="n">clip_indices</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">ep_idx</span><span class="p">,</span> <span class="n">start_f</span><span class="p">))</span>
+</span><span id="line-412">        <span class="k">return</span>
 </span><span id="line-413">
-</span><span id="line-414">        <span class="n">ep_idx</span><span class="p">,</span> <span class="n">local_start</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">clip_indices</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span>
-</span><span id="line-415">        <span class="n">start</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">offsets</span><span class="p">[</span><span class="n">ep_idx</span><span class="p">]</span> <span class="o">+</span> <span class="n">local_start</span>
-</span><span id="line-416">
-</span><span id="line-417">        <span class="n">steps</span> <span class="o">=</span> <span class="p">{}</span>
-</span><span id="line-418">        <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">keys_to_load</span><span class="p">:</span>
-</span><span id="line-419">            <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">h5_file</span><span class="p">[</span><span class="n">col</span><span class="p">][</span><span class="n">start</span> <span class="p">:</span> <span class="n">start</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">span</span><span class="p">]</span>
+</span><span id="line-414">    <span class="nd">@property</span>
+</span><span id="line-415">    <span class="k">def</span><span class="w"> </span><span class="nf">column_names</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+</span><span id="line-416">        <span class="k">return</span> <span class="p">[</span><span class="n">key</span> <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">keys_to_load</span> <span class="k">if</span> <span class="n">key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">metadata_keys</span><span class="p">]</span>
+</span><span id="line-417">
+</span><span id="line-418">    <span class="k">def</span><span class="w"> </span><span class="fm">__len__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+</span><span id="line-419">        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">clip_indices</span><span class="p">)</span>
 </span><span id="line-420">
-</span><span id="line-421">            <span class="c1"># apply frameskip if not action</span>
-</span><span id="line-422">            <span class="k">if</span> <span class="n">col</span> <span class="o">!=</span> <span class="s2">&quot;action&quot;</span><span class="p">:</span>
-</span><span id="line-423">                <span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="p">[::</span> <span class="bp">self</span><span class="o">.</span><span class="n">frameskip</span><span class="p">]</span>
-</span><span id="line-424">
-</span><span id="line-425">            <span class="n">steps</span><span class="p">[</span><span class="n">col</span><span class="p">]</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">from_numpy</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
-</span><span id="line-426">
-</span><span id="line-427">            <span class="c1"># channel first for images</span>
-</span><span id="line-428">            <span class="n">is_img</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">==</span> <span class="mi">4</span> <span class="ow">and</span> <span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">]</span>
-</span><span id="line-429">            <span class="k">if</span> <span class="n">is_img</span><span class="p">:</span>
-</span><span id="line-430">                <span class="n">steps</span><span class="p">[</span><span class="n">col</span><span class="p">]</span> <span class="o">=</span> <span class="n">steps</span><span class="p">[</span><span class="n">col</span><span class="p">]</span><span class="o">.</span><span class="n">permute</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>  <span class="c1"># TCHW</span>
+</span><span id="line-421">    <span class="k">def</span><span class="w"> </span><span class="nf">_init_h5</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+</span><span id="line-422">        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">h5_file</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+</span><span id="line-423">            <span class="bp">self</span><span class="o">.</span><span class="n">h5_file</span> <span class="o">=</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">h5_path</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">,</span> <span class="n">swmr</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">rdcc_nbytes</span><span class="o">=</span><span class="mi">256</span> <span class="o">*</span> <span class="mi">1024</span> <span class="o">*</span> <span class="mi">1024</span><span class="p">)</span>
+</span><span id="line-424">        <span class="k">return</span>
+</span><span id="line-425">
+<div class="viewcode-block" id="HDF5Dataset.load_slice">
+<a class="viewcode-back" href="../../../../stable_worldmodel.data/#stable_worldmodel.data.dataset.HDF5Dataset.load_slice">[docs]</a>
+</span><span id="line-426">    <span class="k">def</span><span class="w"> </span><span class="nf">load_slice</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">start_idx</span><span class="p">,</span> <span class="n">end_idx</span><span class="p">):</span>
+</span><span id="line-427">        <span class="n">steps</span> <span class="o">=</span> <span class="p">{}</span>
+</span><span id="line-428">        <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">keys_to_load</span><span class="p">:</span>
+</span><span id="line-429">            <span class="k">if</span> <span class="n">col</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">metadata_keys</span><span class="p">:</span>
+</span><span id="line-430">                <span class="k">continue</span>
 </span><span id="line-431">
-</span><span id="line-432">        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">transform</span><span class="p">:</span>
-</span><span id="line-433">            <span class="n">steps</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">steps</span><span class="p">)</span>
-</span><span id="line-434">
-</span><span id="line-435">        <span class="k">if</span> <span class="s2">&quot;action&quot;</span> <span class="ow">in</span> <span class="n">steps</span><span class="p">:</span>
-</span><span id="line-436">            <span class="n">act_shape</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_steps</span>
-</span><span id="line-437">            <span class="n">steps</span><span class="p">[</span><span class="s2">&quot;action&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">steps</span><span class="p">[</span><span class="s2">&quot;action&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">act_shape</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
-</span><span id="line-438">
-</span><span id="line-439">        <span class="k">return</span> <span class="n">steps</span>
+</span><span id="line-432">            <span class="k">if</span> <span class="n">col</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cache</span><span class="p">:</span>
+</span><span id="line-433">                <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cache</span><span class="p">[</span><span class="n">col</span><span class="p">][</span><span class="n">start_idx</span><span class="p">:</span><span class="n">end_idx</span><span class="p">]</span>
+</span><span id="line-434">            <span class="k">else</span><span class="p">:</span>
+</span><span id="line-435">                <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">h5_file</span><span class="p">[</span><span class="n">col</span><span class="p">][</span><span class="n">start_idx</span><span class="p">:</span><span class="n">end_idx</span><span class="p">]</span>
+</span><span id="line-436">
+</span><span id="line-437">            <span class="c1"># apply frameskip if not action</span>
+</span><span id="line-438">            <span class="k">if</span> <span class="n">col</span> <span class="o">!=</span> <span class="s2">&quot;action&quot;</span><span class="p">:</span>
+</span><span id="line-439">                <span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="p">[::</span> <span class="bp">self</span><span class="o">.</span><span class="n">frameskip</span><span class="p">]</span>
 </span><span id="line-440">
+</span><span id="line-441">            <span class="n">steps</span><span class="p">[</span><span class="n">col</span><span class="p">]</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">from_numpy</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+</span><span id="line-442">
+</span><span id="line-443">            <span class="c1"># channel first for images</span>
+</span><span id="line-444">            <span class="n">is_img</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">==</span> <span class="mi">4</span> <span class="ow">and</span> <span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">]</span>
+</span><span id="line-445">            <span class="k">if</span> <span class="n">is_img</span><span class="p">:</span>
+</span><span id="line-446">                <span class="n">steps</span><span class="p">[</span><span class="n">col</span><span class="p">]</span> <span class="o">=</span> <span class="n">steps</span><span class="p">[</span><span class="n">col</span><span class="p">]</span><span class="o">.</span><span class="n">permute</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>  <span class="c1"># TCHW</span>
+</span><span id="line-447">
+</span><span id="line-448">        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">transform</span><span class="p">:</span>
+</span><span id="line-449">            <span class="n">steps</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">steps</span><span class="p">)</span>
+</span><span id="line-450">
+</span><span id="line-451">        <span class="k">return</span> <span class="n">steps</span></div>
+
+</span><span id="line-452">
+</span><span id="line-453">    <span class="k">def</span><span class="w"> </span><span class="fm">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">idx</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
+</span><span id="line-454">        <span class="n">ep_idx</span><span class="p">,</span> <span class="n">local_start</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">clip_indices</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span>
+</span><span id="line-455">        <span class="n">start</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">offsets</span><span class="p">[</span><span class="n">ep_idx</span><span class="p">]</span> <span class="o">+</span> <span class="n">local_start</span>
+</span><span id="line-456">        <span class="n">end</span> <span class="o">=</span> <span class="n">start</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">span</span>
+</span><span id="line-457">
+</span><span id="line-458">        <span class="bp">self</span><span class="o">.</span><span class="n">_init_h5</span><span class="p">()</span>
+</span><span id="line-459">        <span class="n">steps</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">load_slice</span><span class="p">(</span><span class="n">start</span><span class="p">,</span> <span class="n">end</span><span class="p">)</span>
+</span><span id="line-460">
+</span><span id="line-461">        <span class="k">if</span> <span class="s2">&quot;action&quot;</span> <span class="ow">in</span> <span class="n">steps</span><span class="p">:</span>
+</span><span id="line-462">            <span class="n">act_shape</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_steps</span>
+</span><span id="line-463">            <span class="n">steps</span><span class="p">[</span><span class="s2">&quot;action&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">steps</span><span class="p">[</span><span class="s2">&quot;action&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">act_shape</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+</span><span id="line-464">
+</span><span id="line-465">        <span class="k">return</span> <span class="n">steps</span>
+</span><span id="line-466">
+<div class="viewcode-block" id="HDF5Dataset.get_chunk_data">
+<a class="viewcode-back" href="../../../../stable_worldmodel.data/#stable_worldmodel.data.dataset.HDF5Dataset.get_chunk_data">[docs]</a>
+</span><span id="line-467">    <span class="k">def</span><span class="w"> </span><span class="nf">get_chunk_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">episodes_idx</span><span class="p">,</span> <span class="n">start</span><span class="p">,</span> <span class="n">end</span><span class="p">):</span>
+</span><span id="line-468">        <span class="bp">self</span><span class="o">.</span><span class="n">_init_h5</span><span class="p">()</span>
+</span><span id="line-469">        <span class="n">global_start</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">offsets</span><span class="p">[</span><span class="n">episodes_idx</span><span class="p">]</span> <span class="o">+</span> <span class="n">start</span>
+</span><span id="line-470">        <span class="n">end</span> <span class="o">=</span> <span class="n">global_start</span> <span class="o">+</span> <span class="p">(</span><span class="n">end</span> <span class="o">-</span> <span class="n">start</span><span class="p">)</span>
+</span><span id="line-471">
+</span><span id="line-472">        <span class="n">chunk</span> <span class="o">=</span> <span class="p">[]</span>
+</span><span id="line-473">        <span class="k">for</span> <span class="n">s_idx</span><span class="p">,</span> <span class="n">e_idx</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">global_start</span><span class="p">,</span> <span class="n">end</span><span class="p">):</span>
+</span><span id="line-474">            <span class="n">steps</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">load_slice</span><span class="p">(</span><span class="n">s_idx</span><span class="p">,</span> <span class="n">e_idx</span><span class="p">)</span>
+</span><span id="line-475">
+</span><span id="line-476">            <span class="c1"># reshape action</span>
+</span><span id="line-477">            <span class="k">if</span> <span class="s2">&quot;action&quot;</span> <span class="ow">in</span> <span class="n">steps</span><span class="p">:</span>
+</span><span id="line-478">                <span class="n">act_shape</span> <span class="o">=</span> <span class="p">(</span><span class="n">e_idx</span> <span class="o">-</span> <span class="n">s_idx</span><span class="p">)</span> <span class="o">//</span> <span class="bp">self</span><span class="o">.</span><span class="n">frameskip</span>
+</span><span id="line-479">                <span class="n">steps</span><span class="p">[</span><span class="s2">&quot;action&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">steps</span><span class="p">[</span><span class="s2">&quot;action&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">act_shape</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+</span><span id="line-480">            <span class="n">chunk</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">steps</span><span class="p">)</span>
+</span><span id="line-481">
+</span><span id="line-482">        <span class="k">return</span> <span class="n">chunk</span></div>
+
+</span><span id="line-483">
 <div class="viewcode-block" id="HDF5Dataset.get_col_data">
 <a class="viewcode-back" href="../../../../stable_worldmodel.data/#stable_worldmodel.data.dataset.HDF5Dataset.get_col_data">[docs]</a>
-</span><span id="line-441">    <span class="k">def</span><span class="w"> </span><span class="nf">get_col_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">col</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
-</span><span id="line-442">        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">h5_file</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-</span><span id="line-443">            <span class="bp">self</span><span class="o">.</span><span class="n">h5_file</span> <span class="o">=</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">h5_path</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">,</span> <span class="n">swmr</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-</span><span id="line-444">        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">h5_file</span><span class="p">[</span><span class="n">col</span><span class="p">][:]</span></div>
+</span><span id="line-484">    <span class="k">def</span><span class="w"> </span><span class="nf">get_col_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">col</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+</span><span id="line-485">        <span class="bp">self</span><span class="o">.</span><span class="n">_init_h5</span><span class="p">()</span>
+</span><span id="line-486">        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">h5_file</span><span class="p">[</span><span class="n">col</span><span class="p">][:]</span></div>
+
+</span><span id="line-487">
+<div class="viewcode-block" id="HDF5Dataset.get_row_data">
+<a class="viewcode-back" href="../../../../stable_worldmodel.data/#stable_worldmodel.data.dataset.HDF5Dataset.get_row_data">[docs]</a>
+</span><span id="line-488">    <span class="k">def</span><span class="w"> </span><span class="nf">get_row_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">row_idx</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">]):</span>
+</span><span id="line-489">        <span class="bp">self</span><span class="o">.</span><span class="n">_init_h5</span><span class="p">()</span>
+</span><span id="line-490">        <span class="n">sample</span> <span class="o">=</span> <span class="p">{}</span>
+</span><span id="line-491">        <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">keys_to_load</span><span class="p">:</span>
+</span><span id="line-492">            <span class="k">if</span> <span class="n">col</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">metadata_keys</span><span class="p">:</span>
+</span><span id="line-493">                <span class="k">continue</span>
+</span><span id="line-494">            <span class="n">sample</span><span class="p">[</span><span class="n">col</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">h5_file</span><span class="p">[</span><span class="n">col</span><span class="p">][</span><span class="n">row_idx</span><span class="p">]</span>
+</span><span id="line-495">
+</span><span id="line-496">        <span class="k">return</span> <span class="n">sample</span></div>
 </div>
 
 </span></code></pre></div>

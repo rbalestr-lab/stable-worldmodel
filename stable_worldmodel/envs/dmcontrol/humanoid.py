@@ -33,13 +33,22 @@ class HumanoidDMControlWrapper(DMControlWrapper):
             {  # TODO check default values to match original humanoid env
                 "agent": swm_space.Dict(
                     {
-                        "body_mass": swm_space.Box(
-                            low=0.5,
-                            high=1.5,
+                        "torso_density": swm_space.Box(
+                            low=500,
+                            high=1500,
                             shape=(1,),
                             dtype=np.float32,
-                            init_value=np.array([1.0], dtype=np.float32),
+                            init_value=np.array([1000], dtype=np.float32),
                         ),
+                        "right_lower_arm_density": swm_space.Box(
+                            low=500,
+                            high=1500,
+                            shape=(1,),
+                            dtype=np.float32,
+                            init_value=np.array([1000], dtype=np.float32),
+                        ),
+                        # TODO lock left_knee joint (by default it is unlocked 1)
+                        "left_knee_locked": swm_space.Discrete(2, init_value=1),
                     }
                 ),
                 "floor": swm_space.Dict(
@@ -129,29 +138,24 @@ class HumanoidDMControlWrapper(DMControlWrapper):
         friction_changed = floor_geom.friction is None or not np.allclose(floor_geom.friction[0], desired_friction)
         floor_geom.friction[0] = desired_friction
 
-        # Modify body mass (scale geom density)
-        if not hasattr(self, "_base_geom_densities"):
-            self._base_geom_densities = {}
-            for geom in mjcf_model.find_all("geom"):
-                if geom.name == "floor":
-                    continue
-                base_density = geom.density if geom.density is not None else 1000.0
-                geom_key = getattr(geom, "full_identifier", geom.name)
-                self._base_geom_densities[geom_key] = float(base_density)
         mass_changed = False
-        mass_scale = float(self.variation_space["agent"]["body_mass"].value[0])
-        for geom in mjcf_model.find_all("geom"):
-            if geom.name == "floor":
-                continue
-            geom_key = getattr(geom, "full_identifier", geom.name)
-            base_density = self._base_geom_densities.get(
-                geom_key, geom.density if geom.density is not None else 1000.0
-            )
-            desired_density = base_density * mass_scale
-            current_density = geom.density if geom.density is not None else base_density
-            if not np.allclose(current_density, desired_density):
-                mass_changed = True
-            geom.density = desired_density
+        # Modify torso density
+        torso_geom = mjcf_model.find("geom", "torso")
+        base = torso_geom.density if torso_geom.density is not None else 1000.0
+        desired_density = float(np.asarray(self.variation_space["agent"]["torso_density"].value).reshape(-1)[0])
+        if not np.allclose(base, desired_density):
+            mass_changed = True
+        torso_geom.density = desired_density
+
+        # Modify right lower arm density
+        rla_geom = mjcf_model.find("geom", "right_lower_arm")
+        base = rla_geom.density if rla_geom.density is not None else 1000.0
+        desired_density = float(
+            np.asarray(self.variation_space["agent"]["right_lower_arm_density"].value).reshape(-1)[0]
+        )
+        if not np.allclose(base, desired_density):
+            mass_changed = True
+        rla_geom.density = desired_density
 
         # Modify light intensity if a global light exists.
         light_changed = False

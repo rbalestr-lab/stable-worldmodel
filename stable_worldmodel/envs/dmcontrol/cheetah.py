@@ -151,9 +151,20 @@ class CheetahDMControlWrapper(DMControlWrapper):
 
         # Modify floor friction
         floor_geom = mjcf_model.find("geom", "ground")
-        desired_friction = self.variation_space["floor"]["friction"].value
-        friction_changed = floor_geom.friction is None or not np.allclose(floor_geom.friction[0], desired_friction)
-        floor_geom.friction[0] = desired_friction
+        desired_friction = float(np.asarray(self.variation_space["floor"]["friction"].value).reshape(-1)[0])
+
+        # MJCF may store geom.friction as None if not specified in XML.
+        # MuJoCo default is: [1, 0.005, 0.0001]
+        if floor_geom.friction is None:
+            current_friction = np.array([1.0, 0.005, 0.0001], dtype=np.float32)
+        else:
+            current_friction = np.asarray(floor_geom.friction, dtype=np.float32).copy()
+
+        new_friction = current_friction.copy()
+        new_friction[0] = desired_friction
+
+        friction_changed = not np.allclose(current_friction, new_friction)
+        floor_geom.friction = new_friction
 
         mass_changed = False
         # Modify torso density

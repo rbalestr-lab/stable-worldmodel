@@ -21,7 +21,7 @@ def collect_shard(shard_id, seed, cfg):
     """
     try:
         world = swm.World(
-            "swm/HumanoidDMControl-v0",
+            "swm/HopperDMControl-v0",
             **cfg.world,
             goal_conditioned=False,
         )
@@ -33,7 +33,7 @@ def collect_shard(shard_id, seed, cfg):
         logging.info(f"Process {shard_id}: Started collecting {traj_per_shard} trajectories...")
 
         world.record_dataset(
-            f"dmc_humanoid/shard_{shard_id}",
+            f"dmc_hopper/shard_{shard_id}",
             episodes=traj_per_shard,
             seed=seed,
             cache_dir=cfg.cache_dir,

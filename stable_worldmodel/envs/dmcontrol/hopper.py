@@ -14,8 +14,6 @@ from stable_worldmodel.envs.dmcontrol.dmcontrol import DMControlWrapper
 _CONTROL_TIMESTEP = 0.02
 _DEFAULT_TIME_LIMIT = 20
 
-_HOP_SPEED = 2
-
 
 class HopperDMControlWrapper(DMControlWrapper):
     def __init__(self, seed=None, environment_kwargs=None):

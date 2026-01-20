@@ -11,8 +11,8 @@ from stable_worldmodel import spaces as swm_space
 from stable_worldmodel.envs.dmcontrol.dmcontrol import DMControlWrapper
 
 
-_CONTROL_TIMESTEP = 0.02
-_DEFAULT_TIME_LIMIT = 20
+_CONTROL_TIMESTEP = 0.025
+_DEFAULT_TIME_LIMIT = 25
 
 _WALK_SPEED = 1
 

@@ -11,7 +11,6 @@ from stable_worldmodel import spaces as swm_space
 from stable_worldmodel.envs.dmcontrol.dmcontrol import DMControlWrapper
 
 
-_CONTROL_TIMESTEP = 0.02
 _DEFAULT_TIME_LIMIT = 20
 
 _SMALL_TARGET = 0.015
@@ -108,9 +107,7 @@ class ReacherDMControlWrapper(DMControlWrapper):
         physics = reacher.Physics.from_xml_path(xml_path)
         task = reacher.Reacher(target_size=_SMALL_TARGET, pure_state=False, random=seed)
         environment_kwargs = environment_kwargs or {}
-        env = control.Environment(
-            physics, task, time_limit=_DEFAULT_TIME_LIMIT, control_timestep=_CONTROL_TIMESTEP, **environment_kwargs
-        )
+        env = control.Environment(physics, task, time_limit=_DEFAULT_TIME_LIMIT, **environment_kwargs)
         env = action_scale.Wrapper(env, minimum=-1.0, maximum=1.0)
         self.env = env
         # Mark the environment as clean.

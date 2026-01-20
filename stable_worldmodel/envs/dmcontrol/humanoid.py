@@ -33,6 +33,13 @@ class HumanoidDMControlWrapper(DMControlWrapper):
             {  # TODO check default values to match original humanoid env
                 "agent": swm_space.Dict(
                     {
+                        "color": swm_space.Box(
+                            low=0.0,
+                            high=1.0,
+                            shape=(3,),
+                            dtype=np.float64,
+                            init_value=np.array([0.7, 0.5, 0.3], dtype=np.float64),
+                        ),
                         "torso_density": swm_space.Box(
                             low=500,
                             high=1500,
@@ -65,7 +72,7 @@ class HumanoidDMControlWrapper(DMControlWrapper):
                             high=1.0,
                             shape=(2, 3),
                             dtype=np.float64,
-                            init_value=np.array([[0.08, 0.11, 0.16], [0.15, 0.18, 0.25]]),
+                            init_value=np.array([[0.1, 0.2, 0.3], [0.2, 0.3, 0.4]], dtype=np.float64),
                         ),
                     }
                 ),
@@ -76,7 +83,7 @@ class HumanoidDMControlWrapper(DMControlWrapper):
                             high=1.0,
                             shape=(1,),
                             dtype=np.float64,
-                            init_value=[0.7],
+                            init_value=np.array([0.7], dtype=np.float64),
                         ),
                     }
                 ),
@@ -132,6 +139,21 @@ class HumanoidDMControlWrapper(DMControlWrapper):
         grid_texture.rgb1 = self.variation_space["floor"]["color"].value[0]
         grid_texture.rgb2 = self.variation_space["floor"]["color"].value[1]
 
+        # Modify agent (humanoid) color via material
+        agent_color_changed = False
+
+        desired_rgb = np.asarray(self.variation_space["agent"]["color"].value, dtype=np.float32).reshape(3)
+        desired_rgba = np.concatenate([desired_rgb, np.array([1.0], dtype=np.float32)], axis=0)
+
+        self_mat = mjcf_model.find("material", "self")
+        assert self_mat is not None, "Expected material named 'self'"
+
+        if self_mat.rgba is None or not np.allclose(np.asarray(self_mat.rgba, dtype=np.float32), desired_rgba):
+            agent_color_changed = True
+        self_mat.rgba = desired_rgba
+
+        mass_changed = False
+
         # Modify floor friction
         floor_geom = mjcf_model.find("geom", "floor")
         desired_friction = self.variation_space["floor"]["friction"].value
@@ -165,7 +187,7 @@ class HumanoidDMControlWrapper(DMControlWrapper):
         light.diffuse = desired_diffuse
 
         # If any properties changed, mark the model as dirty.
-        if light_changed or texture_changed or friction_changed or mass_changed:
+        if light_changed or texture_changed or friction_changed or mass_changed or agent_color_changed:
             self.mark_dirty()
         return mjcf_model
 

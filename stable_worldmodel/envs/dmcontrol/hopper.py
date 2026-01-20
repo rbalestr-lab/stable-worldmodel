@@ -4,29 +4,31 @@ import tempfile
 import numpy as np
 from dm_control import mjcf
 from dm_control.rl import control
-from dm_control.suite import cheetah
+from dm_control.suite import hopper
 from dm_control.suite.wrappers import action_scale
 
 from stable_worldmodel import spaces as swm_space
 from stable_worldmodel.envs.dmcontrol.dmcontrol import DMControlWrapper
 
 
-_CONTROL_TIMESTEP = 0.025
-_DEFAULT_TIME_LIMIT = 25
+_CONTROL_TIMESTEP = 0.02
+_DEFAULT_TIME_LIMIT = 20
+
+_HOP_SPEED = 2
 
 
-class CheetahDMControlWrapper(DMControlWrapper):
+class HopperDMControlWrapper(DMControlWrapper):
     def __init__(self, seed=None, environment_kwargs=None):
-        xml, assets = cheetah.get_model_and_assets()
+        xml, assets = hopper.get_model_and_assets()
         xml = xml.replace(b'file="./common/', b'file="common/')
-        suite_dir = os.path.dirname(cheetah.__file__)  # .../dm_control/suite
+        suite_dir = os.path.dirname(hopper.__file__)  # .../dm_control/suite
         self._mjcf_model = mjcf.from_xml_string(
             xml,
             model_dir=suite_dir,
             assets=assets or {},
         )
         self.compile_model(seed=seed, environment_kwargs=environment_kwargs)
-        super().__init__(self.env, "cheetah")
+        super().__init__(self.env, "hopper")
         self.variation_space = swm_space.Dict(
             {  # TODO check default values to match original cheetah env
                 "agent": swm_space.Dict(
@@ -36,7 +38,7 @@ class CheetahDMControlWrapper(DMControlWrapper):
                             high=1.0,
                             shape=(3,),
                             dtype=np.float64,
-                            init_value=np.array([0.6, 0.3, 0.3], dtype=np.float64),
+                            init_value=np.array([0.7, 0.5, 0.3], dtype=np.float64),
                         ),
                         "torso_density": swm_space.Box(
                             low=500,
@@ -45,15 +47,15 @@ class CheetahDMControlWrapper(DMControlWrapper):
                             dtype=np.float32,
                             init_value=np.array([1000], dtype=np.float32),
                         ),
-                        "back_foot_density": swm_space.Box(
+                        "foot_density": swm_space.Box(
                             low=500,
                             high=1500,
                             shape=(1,),
                             dtype=np.float32,
                             init_value=np.array([1000], dtype=np.float32),
                         ),
-                        # TODO lock back foot joint (by default it is unlocked 1)
-                        "back_foot_locked": swm_space.Discrete(2, init_value=1),
+                        # TODO lock foot joint (by default it is unlocked 1)
+                        "foot_locked": swm_space.Discrete(2, init_value=1),
                     }
                 ),
                 "floor": swm_space.Dict(
@@ -95,11 +97,11 @@ class CheetahDMControlWrapper(DMControlWrapper):
         mjcf.export_with_assets(
             self._mjcf_model,
             self._mjcf_tempdir.name,
-            out_file_name="cheetah.xml",
+            out_file_name="hopper.xml",
         )
-        xml_path = os.path.join(self._mjcf_tempdir.name, "cheetah.xml")
-        physics = cheetah.Physics.from_xml_path(xml_path)
-        task = cheetah.Cheetah(random=seed)
+        xml_path = os.path.join(self._mjcf_tempdir.name, "hopper.xml")
+        physics = hopper.Physics.from_xml_path(xml_path)
+        task = hopper.Hopper(hopping=True, random=seed)
         environment_kwargs = environment_kwargs or {}
         env = control.Environment(
             physics, task, time_limit=_DEFAULT_TIME_LIMIT, control_timestep=_CONTROL_TIMESTEP, **environment_kwargs
@@ -137,7 +139,7 @@ class CheetahDMControlWrapper(DMControlWrapper):
         grid_texture.rgb1 = self.variation_space["floor"]["color"].value[0]
         grid_texture.rgb2 = self.variation_space["floor"]["color"].value[1]
 
-        # Modify agent (cheetah) color via material
+        # Modify agent (hopper) color via material
         agent_color_changed = False
 
         desired_rgb = np.asarray(self.variation_space["agent"]["color"].value, dtype=np.float32).reshape(3)
@@ -153,7 +155,7 @@ class CheetahDMControlWrapper(DMControlWrapper):
         mass_changed = False
 
         # Modify floor friction
-        floor_geom = mjcf_model.find("geom", "ground")
+        floor_geom = mjcf_model.find("geom", "floor")
         desired_friction = self.variation_space["floor"]["friction"].value
         friction_changed = floor_geom.friction is None or not np.allclose(floor_geom.friction[0], desired_friction)
         floor_geom.friction[0] = desired_friction
@@ -167,17 +169,17 @@ class CheetahDMControlWrapper(DMControlWrapper):
             mass_changed = True
         torso_geom.density = desired_density
 
-        # Modify back foot density
-        bfoot_geom = mjcf_model.find("geom", "bfoot")
-        base = bfoot_geom.density if bfoot_geom.density is not None else 1000.0
-        desired_density = float(np.asarray(self.variation_space["agent"]["back_foot_density"].value).reshape(-1)[0])
+        # Modify foot density
+        foot_geom = mjcf_model.find("geom", "foot")
+        base = foot_geom.density if foot_geom.density is not None else 1000.0
+        desired_density = float(np.asarray(self.variation_space["agent"]["foot_density"].value).reshape(-1)[0])
         if not np.allclose(base, desired_density):
             mass_changed = True
-        bfoot_geom.density = desired_density
+        foot_geom.density = desired_density
 
         # Modify light intensity if a global light exists.
         light_changed = False
-        light = mjcf_model.find("light", "light")
+        light = mjcf_model.find("light", "top")
         desired_diffuse = self.variation_space["light"]["intensity"].value[0] * np.ones((3), dtype=np.float32)
         light_changed = light.diffuse is None or not np.allclose(light.diffuse, desired_diffuse)
         light.diffuse = desired_diffuse
@@ -189,7 +191,7 @@ class CheetahDMControlWrapper(DMControlWrapper):
 
 
 if __name__ == "__main__":
-    env = CheetahDMControlWrapper(seed=0)
+    env = HopperDMControlWrapper(seed=0)
     obs, info = env.reset()
     print("obs shape:", obs.shape)
     print("info:", info)

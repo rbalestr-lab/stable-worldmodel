@@ -276,20 +276,40 @@
 </span><span id="line-56">    <span class="n">entry_point</span><span class="o">=</span><span class="s2">&quot;stable_worldmodel.envs.rocket_landing.pyflyt_rocketlanding:RocketLandingEnv&quot;</span><span class="p">,</span>
 </span><span id="line-57"><span class="p">)</span>
 </span><span id="line-58">
-</span><span id="line-59">
-</span><span id="line-60"><span class="c1">############</span>
-</span><span id="line-61"><span class="c1"># DISCRETE #</span>
-</span><span id="line-62"><span class="c1">############</span>
+</span><span id="line-59"><span class="n">register</span><span class="p">(</span>
+</span><span id="line-60">    <span class="nb">id</span><span class="o">=</span><span class="s2">&quot;swm/HumanoidDMControl-v0&quot;</span><span class="p">,</span>
+</span><span id="line-61">    <span class="n">entry_point</span><span class="o">=</span><span class="s2">&quot;stable_worldmodel.envs.dmcontrol.humanoid:HumanoidDMControlWrapper&quot;</span><span class="p">,</span>
+</span><span id="line-62"><span class="p">)</span>
 </span><span id="line-63">
 </span><span id="line-64"><span class="n">register</span><span class="p">(</span>
-</span><span id="line-65">    <span class="nb">id</span><span class="o">=</span><span class="s2">&quot;swm/SimpleNavigation-v0&quot;</span><span class="p">,</span>
-</span><span id="line-66">    <span class="n">entry_point</span><span class="o">=</span><span class="s2">&quot;stable_worldmodel.envs.simple_nav.env:SimpleNavigationEnv&quot;</span><span class="p">,</span>
+</span><span id="line-65">    <span class="nb">id</span><span class="o">=</span><span class="s2">&quot;swm/CheetahDMControl-v0&quot;</span><span class="p">,</span>
+</span><span id="line-66">    <span class="n">entry_point</span><span class="o">=</span><span class="s2">&quot;stable_worldmodel.envs.dmcontrol.cheetah:CheetahDMControlWrapper&quot;</span><span class="p">,</span>
 </span><span id="line-67"><span class="p">)</span>
 </span><span id="line-68">
 </span><span id="line-69"><span class="n">register</span><span class="p">(</span>
-</span><span id="line-70">    <span class="nb">id</span><span class="o">=</span><span class="s2">&quot;swm/PushT-Discrete-v1&quot;</span><span class="p">,</span>
-</span><span id="line-71">    <span class="n">entry_point</span><span class="o">=</span><span class="s2">&quot;stable_worldmodel.envs.pusht:PushTDiscrete&quot;</span><span class="p">,</span>
+</span><span id="line-70">    <span class="nb">id</span><span class="o">=</span><span class="s2">&quot;swm/HopperDMControl-v0&quot;</span><span class="p">,</span>
+</span><span id="line-71">    <span class="n">entry_point</span><span class="o">=</span><span class="s2">&quot;stable_worldmodel.envs.dmcontrol.hopper:HopperDMControlWrapper&quot;</span><span class="p">,</span>
 </span><span id="line-72"><span class="p">)</span>
+</span><span id="line-73">
+</span><span id="line-74"><span class="n">register</span><span class="p">(</span>
+</span><span id="line-75">    <span class="nb">id</span><span class="o">=</span><span class="s2">&quot;swm/ReacherDMControl-v0&quot;</span><span class="p">,</span>
+</span><span id="line-76">    <span class="n">entry_point</span><span class="o">=</span><span class="s2">&quot;stable_worldmodel.envs.dmcontrol.reacher:ReacherDMControlWrapper&quot;</span><span class="p">,</span>
+</span><span id="line-77"><span class="p">)</span>
+</span><span id="line-78">
+</span><span id="line-79">
+</span><span id="line-80"><span class="c1">############</span>
+</span><span id="line-81"><span class="c1"># DISCRETE #</span>
+</span><span id="line-82"><span class="c1">############</span>
+</span><span id="line-83">
+</span><span id="line-84"><span class="n">register</span><span class="p">(</span>
+</span><span id="line-85">    <span class="nb">id</span><span class="o">=</span><span class="s2">&quot;swm/SimpleNavigation-v0&quot;</span><span class="p">,</span>
+</span><span id="line-86">    <span class="n">entry_point</span><span class="o">=</span><span class="s2">&quot;stable_worldmodel.envs.simple_nav.env:SimpleNavigationEnv&quot;</span><span class="p">,</span>
+</span><span id="line-87"><span class="p">)</span>
+</span><span id="line-88">
+</span><span id="line-89"><span class="n">register</span><span class="p">(</span>
+</span><span id="line-90">    <span class="nb">id</span><span class="o">=</span><span class="s2">&quot;swm/PushT-Discrete-v1&quot;</span><span class="p">,</span>
+</span><span id="line-91">    <span class="n">entry_point</span><span class="o">=</span><span class="s2">&quot;stable_worldmodel.envs.pusht:PushTDiscrete&quot;</span><span class="p">,</span>
+</span><span id="line-92"><span class="p">)</span>
 </span></code></pre></div>
     </div></div>
         </main>

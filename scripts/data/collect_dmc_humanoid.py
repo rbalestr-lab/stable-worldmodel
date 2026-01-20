@@ -35,7 +35,6 @@ def collect_shard(shard_id, seed, cfg):
             episodes=traj_per_shard,
             seed=seed,
             cache_dir=cfg.cache_dir,
-            mode=cfg.ds_type,
             options=options,
         )
 

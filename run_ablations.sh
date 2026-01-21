@@ -40,6 +40,8 @@ NUM_ENVS=4
 PRED_EPOCHS=50
 PRED_EPISODES=100
 SEED=42  # Fixed seed for reproducibility across all experiments
+EPISODES=100
+STEPS_PER_EPISODE=252  # ~1 trading year worth of steps
 
 # Date ranges
 TRAIN_START="2023-01-03"
@@ -108,8 +110,9 @@ EOF
     # If TICKERS is empty, script will use all available tickers by default
 
     # Run training
+    # shellcheck disable=SC2086
     if python "scripts/train/${model_name}.py" \
-    "${ticker_arg}" \
+    ${ticker_arg} \
     --train-start ${TRAIN_START} \
     --train-end ${TRAIN_END} \
     --test-start ${TEST_START} \
@@ -427,6 +430,8 @@ run_experiment "vjepa_worldmodel" "ratio_1to2" \
 run_experiment "vjepa_worldmodel" "ratio_6to1" \
 --context-len 30 \
 --predict-len 5 \
+--hidden-dim 128 \
+--momentum 0.996
 
 # -----------------------------------
 # 7. COMBINATION: BEST FROM EACH

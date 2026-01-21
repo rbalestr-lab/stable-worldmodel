@@ -36,7 +36,7 @@ def process_and_store(values, hdf_path, table_key, drop_cols=None):
 
     logger.info(df.head())
     logger.info(df.dtypes)
-    logger.info(df.head().applymap(lambda x: sys.getsizeof(x)))
+    logger.info(df.head().map(lambda x: sys.getsizeof(x)))
 
     cols_to_convert = df.columns.difference(["symbol"])
     df[cols_to_convert] = df[cols_to_convert].astype(np.float32)
@@ -222,7 +222,8 @@ def load_market_data(tickers, start_time, end_time, freq):
             logger.success("Downloaded earlier data")
 
         # Step 3: Download later data for all tickers if needed
-        if needs_later_data:
+        # Only extend if the requested end date is actually newer than stored data
+        if needs_later_data and requested_end_dt > stored_end_dt:
             logger.info(f"Extending time range forwards for all {len(all_tickers)} tickers")
             logger.info(f"Downloading: {stored_end} to {end_time}")
             _download_and_save(all_tickers, stored_end, end_time, hdf_path)

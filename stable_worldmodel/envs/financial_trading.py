@@ -488,7 +488,13 @@ class FinancialEnvironment(gym.Env):
         obs_size = self.window_size * 6 + 7
         self.observation_space = gym.spaces.Box(low=-np.inf, high=np.inf, shape=(obs_size,), dtype=np.float32)
 
-        start_date, end_date, self.current_symbol = self._get_default_backtest_config()
+        # Use provided dates/symbols or fall back to defaults
+        if self.default_start_date and self.default_end_date and self.default_symbols:
+            start_date = self.default_start_date
+            end_date = self.default_end_date
+            self.current_symbol = self.default_symbols[0]
+        else:
+            start_date, end_date, self.current_symbol = self._get_default_backtest_config()
 
         print(f"Loading historical data for backtesting: {self.current_symbol} from {start_date} to {end_date}")
         self.market_data = self._load_historical_data(self.current_symbol, start_date, end_date)

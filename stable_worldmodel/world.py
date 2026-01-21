@@ -558,7 +558,8 @@ class World:
         _, infos = self.envs.envs[env_idx].reset(seed=seed, options=options)
 
         for k, v in infos.items():
-            self.infos[k][env_idx] = v
+            if k in self.infos:
+                self.infos[k][env_idx] = v
 
     def _handle_done_ep(self, tmp_buffer, env_idx, n_ep_recorded):
         """Prepares the episode buffer for writing (alignment and casting)."""

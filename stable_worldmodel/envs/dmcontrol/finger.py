@@ -58,7 +58,7 @@ class FingerDMControlWrapper(DMControlWrapper):
                 ),
                 "spinner": swm_space.Dict(
                     {
-                        "spinner_density": swm_space.Box(
+                        "density": swm_space.Box(
                             low=500,
                             high=1500,
                             shape=(1,),
@@ -195,7 +195,7 @@ class FingerDMControlWrapper(DMControlWrapper):
         cap1_geom = mjcf_model.find("geom", "cap1")
         cap2_geom = mjcf_model.find("geom", "cap2")
         base = cap1_geom.density if cap1_geom.density is not None else 1000.0
-        desired_density = float(np.asarray(self.variation_space["agent"]["spinner_density"].value).reshape(-1)[0])
+        desired_density = float(np.asarray(self.variation_space["spinner"]["density"].value).reshape(-1)[0])
         if not np.allclose(base, desired_density):
             mass_changed = True
         cap1_geom.density = desired_density
@@ -204,7 +204,7 @@ class FingerDMControlWrapper(DMControlWrapper):
         # Modify spinner friction
         spinner_joint = mjcf_model.find("joint", "hinge")
         base = spinner_joint.frictionloss if spinner_joint.frictionloss is not None else 0.1
-        desired_friction = float(np.asarray(self.variation_space["agent"]["spinner_friction"].value).reshape(-1)[0])
+        desired_friction = float(np.asarray(self.variation_space["spinner"]["friction"].value).reshape(-1)[0])
         if not np.allclose(base, desired_friction):
             mass_changed = True
         spinner_joint.frictionloss = desired_friction

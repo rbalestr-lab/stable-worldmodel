@@ -182,10 +182,10 @@ class AcrobotDMControlWrapper(DMControlWrapper):
         # Modify target appearance (color, shape)
         target_changed = False
 
-        target_geom = mjcf_model.find("geom", "target")
+        target_site = mjcf_model.find("site", "target")
         target_mat = mjcf_model.find("material", "target")
 
-        assert target_geom is not None, "Expected geom named 'target'"
+        assert target_site is not None, "Expected geom named 'target'"
         assert target_mat is not None, "Expected material named 'target'"
 
         # ----- Color -----
@@ -207,10 +207,10 @@ class AcrobotDMControlWrapper(DMControlWrapper):
             desired_type = "sphere"
             desired_size = np.array([_SMALL_TARGET], dtype=np.float32)
 
-        if target_geom.type != desired_type:
+        if target_site.type != desired_type:
             target_changed = True
-        target_geom.type = desired_type
-        target_geom.size = desired_size
+        target_site.type = desired_type
+        target_site.size = desired_size
 
         # If any properties changed, mark the model as dirty.
         if light_changed or texture_changed or mass_changed or target_changed or agent_color_changed:

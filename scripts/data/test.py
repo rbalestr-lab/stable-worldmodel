@@ -12,5 +12,47 @@ for i in range(5):
     world.record_video(
         "./",
         seed=i,
+        options={"variation": ("agent.color",)},
+    )
+for i in range(5):
+    world.record_video(
+        "./",
+        seed=i,
+        options={"variation": ("agent.arm_density",)},
+    )
+for i in range(5):
+    world.record_video(
+        "./",
+        seed=i,
+        options={"variation": ("agent.finger_density",)},
+    )
+for i in range(5):
+    world.record_video(
+        "./",
+        seed=i,
+        options={"variation": ("target.color",)},
+    )
+for i in range(5):
+    world.record_video(
+        "./",
+        seed=i,
+        options={"variation": ("target.shape",)},
+    )
+for i in range(5):
+    world.record_video(
+        "./",
+        seed=i,
+        options={"variation": ("floor.color",)},
+    )
+for i in range(5):
+    world.record_video(
+        "./",
+        seed=i,
+        options={"variation": ("light.intensity",)},
+    )
+for i in range(5):
+    world.record_video(
+        "./",
+        seed=i,
         options={"variation": ("all",)},
     )

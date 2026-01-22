@@ -37,9 +37,9 @@ wandb:
   project: stable-worldmodel
   entity: DanHrmti
 
-dataset_name: pusht_expert_train_video
+dataset_name: pusht_expert_video_train
 # cache_dir: null #${oc.env:SLURM_TMPDIR, null}
-cache_dir: /users/dharamat/data/dharamat/code/stable-worldmodel/dataset
+cache_dir: /home/ql2867/vast/.stable_worldmodel
 output_model_name: dinogcbc
 
 trainer:

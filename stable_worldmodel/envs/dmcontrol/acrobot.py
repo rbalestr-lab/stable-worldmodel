@@ -11,9 +11,9 @@ from stable_worldmodel import spaces as swm_space
 from stable_worldmodel.envs.dmcontrol.dmcontrol import DMControlWrapper
 
 
-_DEFAULT_TIME_LIMIT = 20
+_DEFAULT_TIME_LIMIT = 10
 
-_SMALL_TARGET = 0.015
+_SMALL_TARGET = 0.2
 
 
 class AcrobotDMControlWrapper(DMControlWrapper):
@@ -29,7 +29,7 @@ class AcrobotDMControlWrapper(DMControlWrapper):
         self.compile_model(seed=seed, environment_kwargs=environment_kwargs)
         super().__init__(self.env, "acrobot")
         self.variation_space = swm_space.Dict(
-            {  # TODO check default values to match original cheetah env
+            {
                 "agent": swm_space.Dict(
                     {
                         "color": swm_space.Box(

@@ -213,7 +213,7 @@ class BallInCupDMControlWrapper(DMControlWrapper):
         # Modify target appearance (color, shape)
         target_changed = False
 
-        target_geom = mjcf_model.find("geom", "target")
+        target_geom = mjcf_model.find("site", "target")
         target_mat = mjcf_model.find("material", "target")
 
         assert target_geom is not None, "Expected geom named 'target'"

@@ -4,7 +4,7 @@ import tempfile
 import numpy as np
 from dm_control import mjcf
 from dm_control.rl import control
-from dm_control.suite import reacher
+from dm_control.suite import acrobot
 from dm_control.suite.wrappers import action_scale
 
 from stable_worldmodel import spaces as swm_space
@@ -16,18 +16,18 @@ _DEFAULT_TIME_LIMIT = 20
 _SMALL_TARGET = 0.015
 
 
-class ReacherDMControlWrapper(DMControlWrapper):
+class AcrobotDMControlWrapper(DMControlWrapper):
     def __init__(self, seed=None, environment_kwargs=None):
-        xml, assets = reacher.get_model_and_assets()
+        xml, assets = acrobot.get_model_and_assets()
         xml = xml.replace(b'file="./common/', b'file="common/')
-        suite_dir = os.path.dirname(reacher.__file__)  # .../dm_control/suite
+        suite_dir = os.path.dirname(acrobot.__file__)  # .../dm_control/suite
         self._mjcf_model = mjcf.from_xml_string(
             xml,
             model_dir=suite_dir,
             assets=assets or {},
         )
         self.compile_model(seed=seed, environment_kwargs=environment_kwargs)
-        super().__init__(self.env, "reacher")
+        super().__init__(self.env, "acrobot")
         self.variation_space = swm_space.Dict(
             {  # TODO check default values to match original cheetah env
                 "agent": swm_space.Dict(
@@ -39,22 +39,22 @@ class ReacherDMControlWrapper(DMControlWrapper):
                             dtype=np.float64,
                             init_value=np.array([0.7, 0.5, 0.3], dtype=np.float64),
                         ),
-                        "arm_density": swm_space.Box(
+                        "upper_arm_density": swm_space.Box(
                             low=500,
                             high=1500,
                             shape=(1,),
                             dtype=np.float32,
                             init_value=np.array([1000], dtype=np.float32),
                         ),
-                        "finger_density": swm_space.Box(
+                        "lower_arm_density": swm_space.Box(
                             low=500,
                             high=1500,
                             shape=(1,),
                             dtype=np.float32,
                             init_value=np.array([1000], dtype=np.float32),
                         ),
-                        # TODO lock finger joint (by default it is unlocked 1)
-                        "finger_locked": swm_space.Discrete(2, init_value=1),
+                        # TODO lock upper arm joint (by default it is unlocked 1)
+                        "upper_arm_locked": swm_space.Discrete(2, init_value=1),
                     }
                 ),
                 "floor": swm_space.Dict(
@@ -101,11 +101,11 @@ class ReacherDMControlWrapper(DMControlWrapper):
         mjcf.export_with_assets(
             self._mjcf_model,
             self._mjcf_tempdir.name,
-            out_file_name="reacher.xml",
+            out_file_name="acrobot.xml",
         )
-        xml_path = os.path.join(self._mjcf_tempdir.name, "reacher.xml")
-        physics = reacher.Physics.from_xml_path(xml_path)
-        task = reacher.Reacher(target_size=_SMALL_TARGET, random=seed)
+        xml_path = os.path.join(self._mjcf_tempdir.name, "acrobot.xml")
+        physics = acrobot.Physics.from_xml_path(xml_path)
+        task = acrobot.Balance(sparse=True, random=seed)
         environment_kwargs = environment_kwargs or {}
         env = control.Environment(physics, task, time_limit=_DEFAULT_TIME_LIMIT, **environment_kwargs)
         env = action_scale.Wrapper(env, minimum=-1.0, maximum=1.0)
@@ -141,7 +141,7 @@ class ReacherDMControlWrapper(DMControlWrapper):
         grid_texture.rgb1 = self.variation_space["floor"]["color"].value[0]
         grid_texture.rgb2 = self.variation_space["floor"]["color"].value[1]
 
-        # Modify agent (reacher) color via material
+        # Modify agent (acrobot) color via material
         agent_color_changed = False
 
         desired_rgb = np.asarray(self.variation_space["agent"]["color"].value, dtype=np.float32).reshape(3)
@@ -156,21 +156,21 @@ class ReacherDMControlWrapper(DMControlWrapper):
 
         mass_changed = False
 
-        # Modify arm density
-        arm_geom = mjcf_model.find("geom", "arm")
-        base = arm_geom.density if arm_geom.density is not None else 1000.0
-        desired_density = float(np.asarray(self.variation_space["agent"]["arm_density"].value).reshape(-1)[0])
+        # Modify upper arm density
+        upper_arm_geom = mjcf_model.find("geom", "upper_arm")
+        base = upper_arm_geom.density if upper_arm_geom.density is not None else 1000.0
+        desired_density = float(np.asarray(self.variation_space["agent"]["upper_arm_density"].value).reshape(-1)[0])
         if not np.allclose(base, desired_density):
             mass_changed = True
-        arm_geom.density = desired_density
+        upper_arm_geom.density = desired_density
 
-        # Modify finger density
-        finger_geom = mjcf_model.find("geom", "finger")
-        base = finger_geom.density if finger_geom.density is not None else 1000.0
-        desired_density = float(np.asarray(self.variation_space["agent"]["finger_density"].value).reshape(-1)[0])
+        # Modify lower arm density
+        lower_arm_geom = mjcf_model.find("geom", "lower_arm")
+        base = lower_arm_geom.density if lower_arm_geom.density is not None else 1000.0
+        desired_density = float(np.asarray(self.variation_space["agent"]["lower_arm_density"].value).reshape(-1)[0])
         if not np.allclose(base, desired_density):
             mass_changed = True
-        finger_geom.density = desired_density
+        lower_arm_geom.density = desired_density
 
         # Modify light intensity if a global light exists.
         light_changed = False
@@ -219,7 +219,7 @@ class ReacherDMControlWrapper(DMControlWrapper):
 
 
 if __name__ == "__main__":
-    env = ReacherDMControlWrapper(seed=0)
+    env = AcrobotDMControlWrapper(seed=0)
     obs, info = env.reset()
     print("obs shape:", obs.shape)
     print("info:", info)

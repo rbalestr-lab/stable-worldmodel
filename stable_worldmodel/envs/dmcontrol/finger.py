@@ -58,6 +58,13 @@ class FingerDMControlWrapper(DMControlWrapper):
                 ),
                 "spinner": swm_space.Dict(
                     {
+                        "color": swm_space.Box(
+                            low=0.0,
+                            high=1.0,
+                            shape=(3,),
+                            dtype=np.float64,
+                            init_value=np.array([0.7, 0.5, 0.3], dtype=np.float64),
+                        ),
                         "density": swm_space.Box(
                             low=500,
                             high=1500,
@@ -160,7 +167,7 @@ class FingerDMControlWrapper(DMControlWrapper):
         grid_texture.rgb1 = self.variation_space["floor"]["color"].value[0]
         grid_texture.rgb2 = self.variation_space["floor"]["color"].value[1]
 
-        # Modify agent and spinner color via material
+        # Modify agent color via material
         agent_color_changed = False
 
         desired_rgb = np.asarray(self.variation_space["agent"]["color"].value, dtype=np.float32).reshape(3)
@@ -201,12 +208,28 @@ class FingerDMControlWrapper(DMControlWrapper):
         cap1_geom.density = desired_density
         cap2_geom.density = desired_density
 
+        # Modify spinner color
+        spinner_color_changed = False
+        base = cap1_geom.rgba if cap1_geom.rgba is not None else np.array([0.7, 0.5, 0.3, 1.0], dtype=np.float32)
+        desired_rgba = np.concatenate(
+            [
+                np.asarray(self.variation_space["spinner"]["color"].value, dtype=np.float32).reshape(3),
+                np.array([1.0], dtype=np.float32),
+            ],
+            axis=0,
+        )
+        if not np.allclose(base, desired_rgba):
+            spinner_color_changed = True
+        cap1_geom.rgba = desired_rgba
+        cap2_geom.rgba = desired_rgba
+
         # Modify spinner friction
+        spinner_friction_changed = False
         spinner_joint = mjcf_model.find("joint", "hinge")
         base = spinner_joint.frictionloss if spinner_joint.frictionloss is not None else 0.1
         desired_friction = float(np.asarray(self.variation_space["spinner"]["friction"].value).reshape(-1)[0])
         if not np.allclose(base, desired_friction):
-            mass_changed = True
+            spinner_friction_changed = True
         spinner_joint.frictionloss = desired_friction
 
         # Modify light intensity if a global light exists.
@@ -250,7 +273,15 @@ class FingerDMControlWrapper(DMControlWrapper):
         target_geom.size = desired_size
 
         # If any properties changed, mark the model as dirty.
-        if light_changed or texture_changed or mass_changed or target_changed or agent_color_changed:
+        if (
+            light_changed
+            or texture_changed
+            or mass_changed
+            or target_changed
+            or agent_color_changed
+            or spinner_color_changed
+            or spinner_friction_changed
+        ):
             self.mark_dirty()
         return mjcf_model
 

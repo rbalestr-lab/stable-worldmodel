@@ -37,27 +37,14 @@ class GCBC(torch.nn.Module):
         emb_keys=None,
         prefix=None,
         target="embed",
+        is_video=False,
     ):
         assert target not in info, f"{target} key already in info_dict"
-
         emb_keys = emb_keys or self.extra_encoders.keys()
         prefix = prefix or ""
 
-        # == pixels embeddings
-        pixels = info[pixels_key].float()  # (B, T, 3, H, W)
-        B = pixels.shape[0]
-        pixels = rearrange(pixels, "b t ... -> (b t) ...")
-
-        kwargs = {"interpolate_pos_encoding": True} if self.interpolate_pos_encoding else {}
-        pixels_embed = self.backbone(pixels, **kwargs)
-
-        if hasattr(pixels_embed, "last_hidden_state"):
-            pixels_embed = pixels_embed.last_hidden_state
-            pixels_embed = pixels_embed[:, 1:, :]  # drop cls token
-        else:
-            pixels_embed = pixels_embed.logits.unsqueeze(1)  # (B*T, 1, emb_dim)
-
-        pixels_embed = rearrange(pixels_embed.detach(), "(b t) p d -> b t p d", b=B)
+        encode_fn = self._encode_video if is_video else self._encode_image
+        pixels_embed = encode_fn(info[pixels_key].float())  # (B, T, 3, H, W)
 
         # == improve the embedding
         n_patches = pixels_embed.shape[2]
@@ -79,6 +66,47 @@ class GCBC(torch.nn.Module):
         info[target] = embedding  # (B, T, P, d)
 
         return info
+
+    def _encode_image(self, pixels):
+        # == pixels embedding
+        B = pixels.shape[0]
+        pixels = rearrange(pixels, "b t ... -> (b t) ...")
+
+        kwargs = {"interpolate_pos_encoding": True} if self.interpolate_pos_encoding else {}
+        pixels_embed = self.backbone(pixels, **kwargs)
+
+        if hasattr(pixels_embed, "last_hidden_state"):
+            pixels_embed = pixels_embed.last_hidden_state
+            pixels_embed = pixels_embed[:, 1:, :]  # drop cls token
+        else:
+            pixels_embed = pixels_embed.logits.unsqueeze(1)  # (B*T, 1, emb_dim)
+
+        pixels_embed = rearrange(pixels_embed.detach(), "(b t) p d -> b t p d", b=B)
+
+        return pixels_embed
+
+    def _encode_video(self, pixels):
+        B, T, C, H, W = pixels.shape
+        kwargs = {"interpolate_pos_encoding": True} if self.interpolate_pos_encoding else {}
+
+        pixels_embeddings = []
+
+        # roll the embedding computation over time
+        for t in range(T):
+            padding = max(T - (t + 1), 0)  # number of frames to pad
+            past_frames = pixels[:, : t + 1, :, :, :]  # (B, t+1, C, H, W)
+
+            # repeat last frame to pad
+            pad_frames = past_frames[:, -1:, :, :, :].repeat(1, padding, 1, 1, 1)  # (B, padding, C, H, W)
+            frames = torch.cat([past_frames, pad_frames], dim=1)  # (B, T, C, H, W)
+
+            frame_embed = self.backbone(frames, **kwargs)  # (B, 1, P, emb_dim)
+            frame_embed = frame_embed.last_hidden_state
+            pixels_embeddings.append(frame_embed)
+
+        pixels_embed = torch.stack(pixels_embeddings, dim=1)  # (B, T, P, emb_dim)
+
+        return pixels_embed
 
     def predict(self, embedding, embedding_goal):
         """predict actions

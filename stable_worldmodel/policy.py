@@ -39,6 +39,14 @@ class Transformable(Protocol):
         ...
 
 
+class Actionable(Protocol):
+    """Protocol for model action computation."""
+
+    def get_action(x) -> torch.Tensor:  # pragma: no cover
+        """Compute action from observation and goal"""
+        ...
+
+
 class BasePolicy:
     """Base class for agent policies."""
 
@@ -83,6 +91,20 @@ class ExpertPolicy(BasePolicy):
     def get_action(self, obs, goal_obs, **kwargs):
         # Implement expert policy logic here
         pass
+
+
+class FeedForwardPolicy(BasePolicy):
+    """Feed-Forward Policy using a neural network model. Actions are computed via a single forward pass."""
+
+    def __init__(self, model: Actionable, process: dict[str, Transformable] | None = None, **kwargs):
+        super().__init__(**kwargs)
+        self.type = "feed_forward"
+        self.model = model.eval()
+        self.process = process or {}
+
+    def get_action(self, info_dict, **kwargs):
+        # TODO preprocess info_dict
+        return self.model.get_action(info_dict)
 
 
 class WorldModelPolicy(BasePolicy):

@@ -152,7 +152,7 @@ class CartpoleDMControlWrapper(DMControlWrapper):
         cart_geom.mass = desired_mass
 
         # Modify pole density
-        pole_geom = mjcf_model.find("geom", "pole")
+        pole_geom = mjcf_model.find("geom", "pole_1")
         base = pole_geom.density if pole_geom.density is not None else 1000.0
         desired_density = float(np.asarray(self.variation_space["agent"]["mass_density"].value).reshape(-1)[0])
         if not np.allclose(base, desired_density):

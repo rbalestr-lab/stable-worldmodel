@@ -6,6 +6,10 @@ from einops import rearrange, repeat
 from torch import nn
 
 
+# TODO encode is very similar to the one in pyro.py - consider refactoring
+# TODO models are very similar to the ones in pyro.py - consider refactoring
+
+
 class GCBC(torch.nn.Module):
     def __init__(
         self,

@@ -13,7 +13,6 @@ from stable_worldmodel.envs.dmcontrol.dmcontrol import DMControlWrapper
 
 _CONTROL_TIMESTEP = 0.01  # (Seconds)
 _TIME_LIMIT = 10  # (Seconds)
-_DEFAULT_TIME_LIMIT = 20
 
 _SMALL_TARGET = 0.015
 

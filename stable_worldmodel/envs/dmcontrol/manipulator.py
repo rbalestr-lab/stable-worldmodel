@@ -112,9 +112,7 @@ class ManipulatorDMControlWrapper(DMControlWrapper):
         )
         xml_path = os.path.join(self._mjcf_tempdir.name, "manipulator.xml")
         physics = manipulator.Physics.from_xml_path(xml_path)
-        task = manipulator.Bring(
-            use_peg=False, insert=False, fully_observable=True, target_size=_SMALL_TARGET, random=seed
-        )
+        task = manipulator.Bring(use_peg=False, insert=False, fully_observable=True, random=seed)
         environment_kwargs = environment_kwargs or {}
         env = control.Environment(
             physics, task, time_limit=_TIME_LIMIT, control_timestep=_CONTROL_TIMESTEP, **environment_kwargs

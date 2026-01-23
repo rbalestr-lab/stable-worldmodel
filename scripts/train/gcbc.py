@@ -54,8 +54,8 @@ def get_data(cfg):
         keys_to_cache=["action", "proprio"],
     )
 
-    norm_action_transform = norm_col_transform(dataset.dataset, "action")
-    norm_proprio_transform = norm_col_transform(dataset.dataset, "proprio")
+    norm_action_transform = norm_col_transform(dataset, "action")
+    norm_proprio_transform = norm_col_transform(dataset, "proprio")
 
     # Apply transforms to all steps and goal observations
     transform = spt.data.transforms.Compose(

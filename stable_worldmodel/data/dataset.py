@@ -656,10 +656,6 @@ class GoalDataset:
             goal_val = goal_step[src_key]
             if goal_val.ndim == 0:
                 goal_val = goal_val.unsqueeze(0)
-            # Repeat to match trajectory length if needed
-            if goal_val.shape[0] != steps[src_key].shape[0]:
-                reps = [steps[src_key].shape[0]] + [1] * (goal_val.ndim - 1)
-                goal_val = goal_val.repeat(*reps)
             steps[goal_key] = goal_val
 
         return steps

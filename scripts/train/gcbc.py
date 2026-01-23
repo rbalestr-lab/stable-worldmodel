@@ -57,21 +57,32 @@ def get_data(cfg):
     # Image size must be multiple of DINO patch size (14)
     img_size = (cfg.image_size // cfg.patch_size) * DINO_PATCH_SIZE
 
-    norm_action_transform = norm_col_transform(dataset.dataset, "action")
-    norm_proprio_transform = norm_col_transform(dataset.dataset, "proprio")
+    norm_action_transform = norm_col_transform(dataset.dataset.dataset, "action")
+    norm_proprio_transform = norm_col_transform(dataset.dataset.dataset, "proprio")
 
-    # Apply transforms to all steps
+    # Apply transforms to all steps and goal observations
     transform = spt.data.transforms.Compose(
+        # Transform regular pixels at each timestep
         *[get_img_pipeline(f"{col}.{i}", f"{col}.{i}", img_size) for col in ["pixels"] for i in range(cfg.n_steps)],
+        # Transform goal pixels
+        get_img_pipeline("goal_pixels", "goal_pixels", img_size),
+        # Normalize actions
         spt.data.transforms.WrapTorchTransform(
             norm_action_transform,
             source="action",
             target="action",
         ),
+        # Normalize proprio
         spt.data.transforms.WrapTorchTransform(
             norm_proprio_transform,
             source="proprio",
             target="proprio",
+        ),
+        # Normalize goal proprio
+        spt.data.transforms.WrapTorchTransform(
+            norm_proprio_transform,
+            source="goal_proprio",
+            target="goal_proprio",
         ),
     )
 

@@ -123,9 +123,16 @@ class GCBC(torch.nn.Module):
 
         return preds
 
-    def act(self, embedding, embedding_goal):
-        with torch.no_grad():
-            return self.predict(embedding, embedding_goal)
+    def get_action(self, info):
+        """Get action given observation and goal."""
+        # first encode observation
+        info = self.encode(info, pixels_key="pixels", emb_keys=["proprio"], target="embed")
+        # encode goal
+        info = self.encode(info, pixels_key="goal", emb_keys=["proprio"], prefix="goal_", target="goal_embed")
+        # then predict action
+        actions = self.predict(info["embed"], info["goal_embed"])
+        actions = actions.squeeze(1)
+        return actions
 
 
 class Embedder(torch.nn.Module):

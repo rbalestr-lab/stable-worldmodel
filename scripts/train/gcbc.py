@@ -163,7 +163,9 @@ def get_gcbc_policy(cfg):
     encoder = AutoModel.from_pretrained("facebook/dinov2-small")
     embedding_dim = encoder.config.hidden_size
 
-    num_patches = (cfg.image_size // cfg.patch_size) ** 2
+    # Calculate actual number of patches based on the actual image size used by DINO
+    img_size = (cfg.image_size // cfg.patch_size) * DINO_PATCH_SIZE
+    num_patches = (img_size // DINO_PATCH_SIZE) ** 2
     embedding_dim += cfg.dinowm.proprio_embed_dim  # Total embedding size
 
     logging.info(f"Patches: {num_patches}, Embedding dim: {embedding_dim}")

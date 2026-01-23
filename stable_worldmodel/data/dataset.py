@@ -637,7 +637,7 @@ class GoalDataset:
         # Get episode and local start for this index
         ep_idx, local_start = self._get_clip_info(idx)
 
-        # Sample goal
+        # Sample goal (transform will be applied via underlying dataset's load_chunk/load_slice)
         goal_kind = self._sample_goal_kind()
         if goal_kind == "random":
             goal_ep_idx, goal_local_idx = self._sample_random_step()

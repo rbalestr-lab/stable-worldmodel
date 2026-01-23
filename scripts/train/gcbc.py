@@ -63,8 +63,6 @@ def get_data(cfg):
     transform = spt.data.transforms.Compose(
         # Transform regular pixels at each timestep
         *[get_img_pipeline(f"{col}.{i}", f"{col}.{i}", img_size) for col in ["pixels"] for i in range(cfg.n_steps)],
-        # Transform goal pixels
-        get_img_pipeline("goal_pixels", "goal_pixels", img_size),
         # Normalize actions
         spt.data.transforms.WrapTorchTransform(
             norm_action_transform,
@@ -76,12 +74,6 @@ def get_data(cfg):
             norm_proprio_transform,
             source="proprio",
             target="proprio",
-        ),
-        # Normalize goal proprio
-        spt.data.transforms.WrapTorchTransform(
-            norm_proprio_transform,
-            source="goal_proprio",
-            target="goal_proprio",
         ),
     )
 

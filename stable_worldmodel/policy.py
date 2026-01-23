@@ -165,6 +165,12 @@ class FeedForwardPolicy(BasePolicy):
         if "goal" in info_dict:
             info_dict["goal_pixels"] = info_dict["goal"]
 
+        # Move all tensors to the model's device
+        device = next(self.model.parameters()).device
+        for k, v in info_dict.items():
+            if torch.is_tensor(v):
+                info_dict[k] = v.to(device)
+
         # Get action from model
         with torch.no_grad():
             action = self.model.get_action(info_dict)

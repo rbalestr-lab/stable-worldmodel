@@ -25,6 +25,7 @@ Usage:
 """
 
 import argparse
+import gc
 import warnings
 from datetime import datetime
 
@@ -35,6 +36,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 from loguru import logger
 from scipy.stats import spearmanr
+from torch.cuda.amp import GradScaler, autocast
 from torch.utils.data import DataLoader, Dataset
 from tqdm import tqdm
 
@@ -88,7 +90,10 @@ def collect_trajectories(world, num_episodes, steps_per_episode, seed=42):
 
 
 class WorldModelDataset(Dataset):
-    """Dataset for world model learning with I-JEPA style masking."""
+    """Dataset for world model learning with I-JEPA style masking.
+
+    Memory optimized: lazy loading, no pre-computed windows.
+    """
 
     def __init__(self, transitions, mask_ratio=0.3):
         self.transitions = transitions
@@ -103,7 +108,7 @@ class WorldModelDataset(Dataset):
         logger.info(
             f"Dataset: {len(transitions)} transitions, "
             f"state_dim={self.state_dim}, action_dim={self.action_dim}, "
-            f"mask_ratio={mask_ratio}"
+            f"mask_ratio={mask_ratio} (lazy loading enabled)"
         )
 
     def __len__(self):
@@ -147,8 +152,9 @@ class WorldModelDataset(Dataset):
 class StateEncoder(nn.Module):
     """Encodes state observations (used for both context and target in I-JEPA)."""
 
-    def __init__(self, state_dim, d_model=128, num_layers=3, dropout=0.1):
+    def __init__(self, state_dim, d_model=128, num_layers=3, dropout=0.1, use_checkpointing=False):
         super().__init__()
+        self.use_checkpointing = use_checkpointing
 
         layers = [
             nn.Linear(state_dim, d_model),
@@ -168,6 +174,8 @@ class StateEncoder(nn.Module):
         self.encoder = nn.Sequential(*layers)
 
     def forward(self, state):
+        if self.use_checkpointing and self.training:
+            return torch.utils.checkpoint.checkpoint(self.encoder, state, use_reentrant=False)
         return self.encoder(state)
 
 
@@ -230,6 +238,8 @@ class IJEPAWorldModel(nn.Module):
     Key insight: Both encoders have the same architecture and process states.
     The difference is context encoder processes current state, target encoder
     processes next state. Predictor combines context + action to predict next.
+
+    Memory optimized with gradient checkpointing.
     """
 
     def __init__(
@@ -240,14 +250,15 @@ class IJEPAWorldModel(nn.Module):
         num_layers=3,
         dropout=0.1,
         momentum=0.996,
+        use_checkpointing=True,
     ):
         super().__init__()
 
         self.momentum = momentum
 
         # Both encoders have same architecture (I-JEPA principle)
-        self.context_encoder = StateEncoder(state_dim, d_model, num_layers, dropout)
-        self.target_encoder = StateEncoder(state_dim, d_model, num_layers, dropout)
+        self.context_encoder = StateEncoder(state_dim, d_model, num_layers, dropout, use_checkpointing)
+        self.target_encoder = StateEncoder(state_dim, d_model, num_layers, dropout, use_checkpointing)
         self.predictor = NextStatePredictor(d_model, action_dim, num_layers=2)
 
         # Initialize target encoder with same weights as context encoder
@@ -278,18 +289,31 @@ class IJEPAWorldModel(nn.Module):
 
 
 def train_world_model(train_dataset, args):
-    """Train I-JEPA world model."""
-    logger.info("Training I-JEPA World Model")
+    """Train I-JEPA world model with memory optimizations."""
+    logger.info("Training I-JEPA World Model (Memory Optimized)")
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     logger.info(f"Device: {device}")
 
+    # Enable memory optimizations
+    if torch.cuda.is_available():
+        logger.info(f"CUDA Memory: {torch.cuda.get_device_properties(0).total_memory / 1e9:.2f} GB")
+        torch.backends.cudnn.benchmark = True
+
+    # Reduce effective batch size with gradient accumulation
+    effective_batch_size = args.batch_size
+    actual_batch_size = max(1, args.batch_size // args.grad_accum_steps)
+    logger.info(
+        f"Effective batch: {effective_batch_size}, Actual batch: {actual_batch_size}, Accum steps: {args.grad_accum_steps}"
+    )
+
     train_loader = DataLoader(
         train_dataset,
-        batch_size=args.batch_size,
+        batch_size=actual_batch_size,
         shuffle=True,
         num_workers=0,
         drop_last=True,
+        pin_memory=torch.cuda.is_available(),
     )
 
     model = IJEPAWorldModel(
@@ -299,6 +323,7 @@ def train_world_model(train_dataset, args):
         num_layers=args.num_layers,
         dropout=args.dropout,
         momentum=args.momentum,
+        use_checkpointing=args.use_checkpointing,
     ).to(device)
 
     # Only train context encoder and predictor (target encoder is momentum-updated)
@@ -310,40 +335,73 @@ def train_world_model(train_dataset, args):
 
     scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=args.epochs)
 
+    # Mixed precision training
+    scaler = GradScaler(enabled=args.use_amp)
+
     train_losses = []
 
     for epoch in range(args.epochs):
         model.train()
         epoch_loss = 0.0
+        optimizer.zero_grad()
 
-        for state, action, next_state, masked_next_state, mask, reward in tqdm(
-            train_loader, desc=f"Epoch {epoch + 1}/{args.epochs}"
-        ):
+        for batch_idx, (
+            state,
+            action,
+            next_state,
+            masked_next_state,
+            mask,
+            reward,
+        ) in enumerate(tqdm(train_loader, desc=f"Epoch {epoch + 1}/{args.epochs}")):
             state, action, next_state = (
-                state.to(device),
-                action.to(device),
-                next_state.to(device),
+                state.to(device, non_blocking=True),
+                action.to(device, non_blocking=True),
+                next_state.to(device, non_blocking=True),
             )
-            masked_next_state, mask = masked_next_state.to(device), mask.to(device)
+            masked_next_state, mask = (
+                masked_next_state.to(device, non_blocking=True),
+                mask.to(device, non_blocking=True),
+            )
 
-            optimizer.zero_grad()
+            # Mixed precision forward pass
+            with autocast(enabled=args.use_amp):
+                pred_repr, target_repr = model(state, action, next_state, masked_next_state, mask)
+                loss = F.mse_loss(pred_repr, target_repr.detach())
+                loss = loss / args.grad_accum_steps
 
-            pred_repr, target_repr = model(state, action, next_state, masked_next_state, mask)
-            loss = F.mse_loss(pred_repr, target_repr.detach())
+            # Backward with gradient scaling
+            scaler.scale(loss).backward()
 
-            loss.backward()
-            torch.nn.utils.clip_grad_norm_(model.parameters(), 1.0)
-            optimizer.step()
+            # Update weights after accumulation steps
+            if (batch_idx + 1) % args.grad_accum_steps == 0:
+                scaler.unscale_(optimizer)
+                torch.nn.utils.clip_grad_norm_(model.parameters(), 1.0)
+                scaler.step(optimizer)
+                scaler.update()
+                optimizer.zero_grad()
 
-            model.update_target_encoder()
+                model.update_target_encoder()
 
-            epoch_loss += loss.item()
+            epoch_loss += loss.item() * args.grad_accum_steps
+
+            # Periodic memory cleanup
+            if batch_idx % 100 == 0 and torch.cuda.is_available():
+                torch.cuda.empty_cache()
 
         epoch_loss /= len(train_loader)
         train_losses.append(epoch_loss)
         scheduler.step()
 
+        # Memory cleanup after epoch
+        if torch.cuda.is_available():
+            torch.cuda.empty_cache()
+        gc.collect()
+
         logger.info(f"Epoch {epoch + 1}/{args.epochs}, Loss: {epoch_loss:.6f}, LR: {scheduler.get_last_lr()[0]:.6f}")
+        if torch.cuda.is_available():
+            logger.info(
+                f"CUDA Memory: {torch.cuda.memory_allocated() / 1e9:.2f} GB / {torch.cuda.max_memory_allocated() / 1e9:.2f} GB peak"
+            )
 
     # Save
     plt.figure(figsize=(10, 6))
@@ -539,7 +597,32 @@ def main():
     parser.add_argument("--dropout", type=float, default=0.1)
     parser.add_argument("--momentum", type=float, default=0.996)
     parser.add_argument("--epochs", type=int, default=5)
-    parser.add_argument("--batch-size", type=int, default=32)
+    parser.add_argument(
+        "--batch-size",
+        type=int,
+        default=16,
+        help="Effective batch size (reduced for memory)",
+    )
+    parser.add_argument("--grad-accum-steps", type=int, default=2, help="Gradient accumulation steps")
+    parser.add_argument(
+        "--use-amp",
+        action="store_true",
+        default=True,
+        help="Use automatic mixed precision",
+    )
+    parser.add_argument("--no-amp", dest="use_amp", action="store_false", help="Disable AMP")
+    parser.add_argument(
+        "--use-checkpointing",
+        action="store_true",
+        default=True,
+        help="Use gradient checkpointing",
+    )
+    parser.add_argument(
+        "--no-checkpointing",
+        dest="use_checkpointing",
+        action="store_false",
+        help="Disable checkpointing",
+    )
     parser.add_argument("--lr", type=float, default=1e-4)
     parser.add_argument("--weight-decay", type=float, default=0.05)
     parser.add_argument("--seed", type=int, default=42, help="Random seed for reproducibility")

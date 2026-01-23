@@ -25,6 +25,7 @@ Usage:
 """
 
 import argparse
+import gc
 import warnings
 from datetime import datetime
 
@@ -34,6 +35,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from loguru import logger
+from torch.cuda.amp import GradScaler, autocast
 from torch.utils.data import DataLoader, Dataset
 from tqdm import tqdm
 
@@ -96,7 +98,10 @@ def collect_trajectories(world, num_episodes, steps_per_episode, seed=42):
 
 
 class TemporalWorldModelDataset(Dataset):
-    """Dataset for V-JEPA temporal world model learning."""
+    """Dataset for V-JEPA temporal world model learning.
+
+    Memory optimized: stores trajectory references, creates windows on-the-fly.
+    """
 
     def __init__(self, trajectories, context_len=10, predict_len=5):
         self.trajectories = trajectories
@@ -107,47 +112,56 @@ class TemporalWorldModelDataset(Dataset):
         self.state_dim = trajectories[0]["states"][0].shape[0]
         self.action_dim = trajectories[0]["actions"][0].shape[0]
 
-        # Create windows from trajectories
-        self.windows = []
-        for traj in trajectories:
-            states = np.array(traj["states"])
-            actions = np.array(traj["actions"])
-
-            # Create sliding windows
+        # Store indices instead of full windows (memory efficient)
+        self.window_indices = []
+        for traj_idx, traj in enumerate(trajectories):
+            states = traj["states"]
+            # Create window indices
             for i in range(len(states) - context_len - predict_len):
-                self.windows.append(
-                    {
-                        "context_states": states[i : i + context_len],
-                        "context_actions": actions[i : i + context_len],
-                        "future_states": states[i + context_len : i + context_len + predict_len],
-                        # Note: future_actions not used to avoid leakage
-                    }
-                )
+                self.window_indices.append((traj_idx, i))
 
         logger.info(
-            f"Dataset: {len(self.windows)} windows from {len(trajectories)} trajectories, "
+            f"Dataset: {len(self.window_indices)} windows from {len(trajectories)} trajectories, "
             f"state_dim={self.state_dim}, action_dim={self.action_dim}, "
-            f"context={context_len}, predict={predict_len}"
+            f"context={context_len}, predict={predict_len} (lazy loading)"
         )
 
     def __len__(self):
-        return len(self.windows)
+        return len(self.window_indices)
 
     def __getitem__(self, idx):
-        w = self.windows[idx]
+        traj_idx, start_idx = self.window_indices[idx]
+        traj = self.trajectories[traj_idx]
+
+        states = np.array(traj["states"])
+        actions = np.array(traj["actions"])
+
+        context_states = states[start_idx : start_idx + self.context_len]
+        context_actions = actions[start_idx : start_idx + self.context_len]
+        future_states = states[start_idx + self.context_len : start_idx + self.context_len + self.predict_len]
 
         return (
-            torch.tensor(w["context_states"], dtype=torch.float32),
-            torch.tensor(w["context_actions"], dtype=torch.float32),
-            torch.tensor(w["future_states"], dtype=torch.float32),
+            torch.tensor(context_states, dtype=torch.float32),
+            torch.tensor(context_actions, dtype=torch.float32),
+            torch.tensor(future_states, dtype=torch.float32),
         )
 
 
 class TemporalEncoder(nn.Module):
     """Encodes temporal sequences of (state, action) pairs."""
 
-    def __init__(self, state_dim, action_dim, d_model=128, nhead=8, num_layers=4, dropout=0.1):
+    def __init__(
+        self,
+        state_dim,
+        action_dim,
+        d_model=128,
+        nhead=8,
+        num_layers=4,
+        dropout=0.1,
+        use_checkpointing=False,
+    ):
         super().__init__()
+        self.use_checkpointing = use_checkpointing
 
         input_dim = state_dim + action_dim
         self.input_proj = nn.Linear(input_dim, d_model)
@@ -184,8 +198,11 @@ class TemporalEncoder(nn.Module):
         # Add positional encoding
         x = x + self.pos_encoder[:, :time_steps, :]
 
-        # Transform
-        x = self.transformer(x)
+        # Transform with optional checkpointing
+        if self.use_checkpointing and self.training:
+            x = torch.utils.checkpoint.checkpoint(self.transformer, x, use_reentrant=False)
+        else:
+            x = self.transformer(x)
         x = self.norm(x)
 
         return x
@@ -194,8 +211,17 @@ class TemporalEncoder(nn.Module):
 class StateEncoder(nn.Module):
     """Encodes state sequences (for target) - NO ACTIONS to avoid leakage."""
 
-    def __init__(self, state_dim, d_model=128, nhead=8, num_layers=4, dropout=0.1):
+    def __init__(
+        self,
+        state_dim,
+        d_model=128,
+        nhead=8,
+        num_layers=4,
+        dropout=0.1,
+        use_checkpointing=False,
+    ):
         super().__init__()
+        self.use_checkpointing = use_checkpointing
 
         self.input_proj = nn.Linear(state_dim, d_model)
         self.pos_encoder = nn.Parameter(torch.randn(1, 1000, d_model) * 0.02)
@@ -223,7 +249,11 @@ class StateEncoder(nn.Module):
 
         x = self.input_proj(states)
         x = x + self.pos_encoder[:, :time_steps, :]
-        x = self.transformer(x)
+
+        if self.use_checkpointing and self.training:
+            x = torch.utils.checkpoint.checkpoint(self.transformer, x, use_reentrant=False)
+        else:
+            x = self.transformer(x)
         x = self.norm(x)
 
         return x
@@ -315,6 +345,7 @@ class VJEPAWorldModel(nn.Module):
         predict_len=5,
         dropout=0.1,
         momentum=0.996,
+        use_checkpointing=True,
     ):
         super().__init__()
 
@@ -322,10 +353,18 @@ class VJEPAWorldModel(nn.Module):
         self.predict_len = predict_len
 
         # Context encoder: processes historical (state, action) sequences
-        self.context_encoder = TemporalEncoder(state_dim, action_dim, d_model, nhead, num_layers, dropout)
+        self.context_encoder = TemporalEncoder(
+            state_dim,
+            action_dim,
+            d_model,
+            nhead,
+            num_layers,
+            dropout,
+            use_checkpointing,
+        )
 
         # Target encoder: processes future STATES only (no actions to avoid leakage)
-        self.target_encoder = StateEncoder(state_dim, d_model, nhead, num_layers, dropout)
+        self.target_encoder = StateEncoder(state_dim, d_model, nhead, num_layers, dropout, use_checkpointing)
 
         # Predictor: predicts future from context only (no future actions)
         self.predictor = FuturePredictor(d_model, predict_len, nhead, 2)
@@ -393,18 +432,31 @@ class VJEPAWorldModel(nn.Module):
 
 
 def train_world_model(train_dataset, args):
-    """Train V-JEPA world model."""
-    logger.info("Training V-JEPA World Model")
+    """Train V-JEPA world model with memory optimizations."""
+    logger.info("Training V-JEPA World Model (Memory Optimized)")
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     logger.info(f"Device: {device}")
 
+    # Enable memory optimizations
+    if torch.cuda.is_available():
+        logger.info(f"CUDA Memory: {torch.cuda.get_device_properties(0).total_memory / 1e9:.2f} GB")
+        torch.backends.cudnn.benchmark = True
+
+    # Gradient accumulation for memory efficiency
+    effective_batch_size = args.batch_size
+    actual_batch_size = max(1, args.batch_size // args.grad_accum_steps)
+    logger.info(
+        f"Effective batch: {effective_batch_size}, Actual batch: {actual_batch_size}, Accum steps: {args.grad_accum_steps}"
+    )
+
     train_loader = DataLoader(
         train_dataset,
-        batch_size=args.batch_size,
+        batch_size=actual_batch_size,
         shuffle=True,
         num_workers=0,
         drop_last=True,
+        pin_memory=torch.cuda.is_available(),
     )
 
     model = VJEPAWorldModel(
@@ -416,6 +468,7 @@ def train_world_model(train_dataset, args):
         predict_len=args.predict_len,
         dropout=args.dropout,
         momentum=args.momentum,
+        use_checkpointing=args.use_checkpointing,
     ).to(device)
 
     optimizer = torch.optim.AdamW(
@@ -426,37 +479,62 @@ def train_world_model(train_dataset, args):
 
     scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=args.epochs)
 
+    # Mixed precision scaler
+    scaler = GradScaler(enabled=args.use_amp)
+
     train_losses = []
 
     for epoch in range(args.epochs):
         model.train()
         epoch_loss = 0.0
+        optimizer.zero_grad()
 
-        for context_states, context_actions, future_states in tqdm(
-            train_loader, desc=f"Epoch {epoch + 1}/{args.epochs}"
+        for batch_idx, (context_states, context_actions, future_states) in enumerate(
+            tqdm(train_loader, desc=f"Epoch {epoch + 1}/{args.epochs}")
         ):
-            context_states = context_states.to(device)
-            context_actions = context_actions.to(device)
-            future_states = future_states.to(device)
+            context_states = context_states.to(device, non_blocking=True)
+            context_actions = context_actions.to(device, non_blocking=True)
+            future_states = future_states.to(device, non_blocking=True)
 
-            optimizer.zero_grad()
+            # Mixed precision forward
+            with autocast(enabled=args.use_amp):
+                pred_repr, target_repr = model(context_states, context_actions, future_states)
+                loss = F.mse_loss(pred_repr, target_repr.detach())
+                loss = loss / args.grad_accum_steps
 
-            pred_repr, target_repr = model(context_states, context_actions, future_states)
-            loss = F.mse_loss(pred_repr, target_repr.detach())
+            # Backward with scaling
+            scaler.scale(loss).backward()
 
-            loss.backward()
-            torch.nn.utils.clip_grad_norm_(model.parameters(), 1.0)
-            optimizer.step()
+            # Update after accumulation
+            if (batch_idx + 1) % args.grad_accum_steps == 0:
+                scaler.unscale_(optimizer)
+                torch.nn.utils.clip_grad_norm_(model.parameters(), 1.0)
+                scaler.step(optimizer)
+                scaler.update()
+                optimizer.zero_grad()
 
-            model.update_target_encoder()
+                model.update_target_encoder()
 
-            epoch_loss += loss.item()
+            epoch_loss += loss.item() * args.grad_accum_steps
+
+            # Periodic memory cleanup
+            if batch_idx % 100 == 0 and torch.cuda.is_available():
+                torch.cuda.empty_cache()
 
         epoch_loss /= len(train_loader)
         train_losses.append(epoch_loss)
         scheduler.step()
 
+        # Cleanup after epoch
+        if torch.cuda.is_available():
+            torch.cuda.empty_cache()
+        gc.collect()
+
         logger.info(f"Epoch {epoch + 1}/{args.epochs}, Loss: {epoch_loss:.6f}, LR: {scheduler.get_last_lr()[0]:.6f}")
+        if torch.cuda.is_available():
+            logger.info(
+                f"CUDA Memory: {torch.cuda.memory_allocated() / 1e9:.2f} GB / {torch.cuda.max_memory_allocated() / 1e9:.2f} GB peak"
+            )
 
     # Save
     plt.figure(figsize=(10, 6))
@@ -645,7 +723,32 @@ def main():
     parser.add_argument("--dropout", type=float, default=0.1)
     parser.add_argument("--momentum", type=float, default=0.996)
     parser.add_argument("--epochs", type=int, default=5)
-    parser.add_argument("--batch-size", type=int, default=32)
+    parser.add_argument(
+        "--batch-size",
+        type=int,
+        default=16,
+        help="Effective batch size (reduced for memory)",
+    )
+    parser.add_argument("--grad-accum-steps", type=int, default=2, help="Gradient accumulation steps")
+    parser.add_argument(
+        "--use-amp",
+        action="store_true",
+        default=True,
+        help="Use automatic mixed precision",
+    )
+    parser.add_argument("--no-amp", dest="use_amp", action="store_false", help="Disable AMP")
+    parser.add_argument(
+        "--use-checkpointing",
+        action="store_true",
+        default=True,
+        help="Use gradient checkpointing",
+    )
+    parser.add_argument(
+        "--no-checkpointing",
+        dest="use_checkpointing",
+        action="store_false",
+        help="Disable checkpointing",
+    )
     parser.add_argument("--lr", type=float, default=1e-4)
     parser.add_argument("--weight-decay", type=float, default=0.05)
     parser.add_argument("--seed", type=int, default=42, help="Random seed for reproducibility")

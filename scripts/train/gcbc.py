@@ -127,13 +127,15 @@ def get_gcbc_policy(cfg):
         if proprio_key is not None:
             batch[proprio_key] = torch.nan_to_num(batch[proprio_key], 0.0)
         batch["action"] = torch.nan_to_num(batch["action"], 0.0)
-
+        print(f"pixels shape: {batch['pixels'].shape}, goal_pixels shape: {batch['goal_pixels'].shape}")
         # Encode all timesteps into latent embeddings
         batch = self.model.encode(
             batch,
             target="embed",
             pixels_key="pixels",
         )
+
+        print(f"pixels_embed shape: {batch['pixels_embed'].shape}")
 
         # Encode goal into latent embedding
         batch = self.model.encode(

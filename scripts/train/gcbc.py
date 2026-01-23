@@ -118,15 +118,12 @@ def get_gcbc_policy(cfg):
         if proprio_key is not None:
             batch[proprio_key] = torch.nan_to_num(batch[proprio_key], 0.0)
         batch["action"] = torch.nan_to_num(batch["action"], 0.0)
-        print(f"pixels shape: {batch['pixels'].shape}, goal_pixels shape: {batch['goal_pixels'].shape}")
         # Encode all timesteps into latent embeddings
         batch = self.model.encode(
             batch,
             target="embed",
             pixels_key="pixels",
         )
-
-        print(f"pixels_embed shape: {batch['pixels_embed'].shape}")
 
         # Encode goal into latent embedding
         batch = self.model.encode(
@@ -136,7 +133,6 @@ def get_gcbc_policy(cfg):
         # Use history to predict next actions
         embedding = batch["embed"][:, : cfg.dinowm.history_size, :, :]  # (B, T-1, patches, dim)
         goal_embedding = batch["goal_embed"]  # (B, 1, patches, dim)
-        print(f"Embedding shape: {embedding.shape}, Goal embedding shape: {goal_embedding.shape}")
         action_pred = self.model.predict(embedding, goal_embedding)  # (B, num_preds, action_dim)
         action_target = batch["action"][:, -cfg.dinowm.num_preds :, :]  # (B, num_preds, action_dim)
 

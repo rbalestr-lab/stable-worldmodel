@@ -50,18 +50,14 @@ def get_data(cfg):
         transform=None,
         cache_dir=cfg.get("cache_dir", None),
     )
-    dataset = swm.data.GoalDataset(
-        dataset=dataset,
-        goal_probabilities=(0.0, 1.0, 0.0),
-        goal_keys={"pixels": "goal_pixels", "proprio": "goal_proprio"},
-        seed=cfg.seed,
-    )
 
     # Image size must be multiple of DINO patch size (14)
     img_size = (cfg.image_size // cfg.patch_size) * DINO_PATCH_SIZE
 
-    norm_action_transform = norm_col_transform(dataset.dataset.dataset, "action")
-    norm_proprio_transform = norm_col_transform(dataset.dataset.dataset, "proprio")
+    norm_action_transform = norm_col_transform(dataset.dataset, "action")
+    norm_proprio_transform = norm_col_transform(dataset.dataset, "proprio")
+
+    print(f"Image size: {img_size}")
 
     # Apply transforms to all steps and goal observations
     transform = spt.data.transforms.Compose(
@@ -90,6 +86,14 @@ def get_data(cfg):
     )
 
     dataset.transform = transform
+
+    dataset = swm.data.GoalDataset(
+        dataset=dataset,
+        goal_probabilities=(0.0, 1.0, 0.0),
+        goal_keys={"pixels": "goal_pixels", "proprio": "goal_proprio"},
+        seed=cfg.seed,
+    )
+
     rnd_gen = torch.Generator().manual_seed(cfg.seed)
     train_set, val_set = spt.data.random_split(
         dataset, lengths=[cfg.train_split, 1 - cfg.train_split], generator=rnd_gen

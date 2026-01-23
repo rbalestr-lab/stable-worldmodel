@@ -51,7 +51,10 @@ def get_data(cfg):
         cache_dir=cfg.get("cache_dir", None),
     )
     dataset = swm.data.GoalDataset(
-        dataset=dataset, goal_probabilities=(0.0, 1.0, 0.0), goal_keys=["pixels", "proprio"], seed=cfg.seed
+        dataset=dataset,
+        goal_probabilities=(0.0, 1.0, 0.0),
+        goal_keys={"pixels": "goal_pixels", "proprio": "goal_proprio"},
+        seed=cfg.seed,
     )
 
     # Image size must be multiple of DINO patch size (14)

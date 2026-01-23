@@ -528,6 +528,14 @@ class GoalDataset:
         goal_keys: dict[str, str] | None = None,
         seed: int | None = None,
     ):
+        """
+        Args:
+            dataset: Base dataset to wrap.
+            goal_probabilities: Tuple of (p_random, p_future, p_current) for goal sampling.
+            gamma: Discount factor for future goal sampling.
+            goal_keys: Mapping of source observation keys to goal observation keys. If None, defaults to {"pixels": "goal", "proprio": "goal_proprio"}.
+            seed: Random seed for goal sampling.
+        """
         self.dataset = dataset
         self.is_hdf5 = isinstance(dataset, HDF5Dataset)
 
@@ -556,7 +564,7 @@ class GoalDataset:
             goal_keys = {}
             column_names = dataset.column_names
             if "pixels" in column_names:
-                goal_keys["pixels"] = "goal"
+                goal_keys["pixels"] = "goal_pixels"
             if "proprio" in column_names:
                 goal_keys["proprio"] = "goal_proprio"
         self.goal_keys = goal_keys

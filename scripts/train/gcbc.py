@@ -141,6 +141,7 @@ def get_gcbc_policy(cfg):
         # Use history to predict next actions
         embedding = batch["embed"][:, : cfg.dinowm.history_size, :, :]  # (B, T-1, patches, dim)
         goal_embedding = batch["goal_embed"]  # (B, 1, patches, dim)
+        print(f"Embedding shape: {embedding.shape}, Goal embedding shape: {goal_embedding.shape}")
         action_pred = self.model.predict(embedding, goal_embedding)  # (B, num_preds, action_dim)
         action_target = batch["action"][:, -cfg.dinowm.num_preds :, :]  # (B, num_preds, action_dim)
 

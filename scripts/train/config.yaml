@@ -23,8 +23,7 @@ seed: 42
 image_size: 224
 patch_size: 16
 
-# n_steps: ${eval:'${dinowm.num_preds} + ${dinowm.history_size}'}
-n_steps: 49  # 49 is the minimum episode length in PushT expert dataset. NOTE: -1 gets complete trajectory, only works when all episodes have same length
+n_steps: ${eval:'${dinowm.num_preds} + ${dinowm.history_size}'}
 frameskip: 1
 
 dinowm:

@@ -41,6 +41,12 @@ def get_episodes_length(dataset, episodes):
     return np.array(lengths)
 
 
+def get_dataset(cfg, dataset_name):
+    dataset_path = Path(cfg.cache_dir or swm.data.utils.get_cache_dir())
+    dataset = swm.data.HDF5Dataset(dataset_name, cache_dir=dataset_path)
+    return dataset
+
+
 @hydra.main(version_base=None, config_path=".", config_name="config")
 def run(cfg: DictConfig):
     """Run evaluation of dinowm vs random policy."""
@@ -62,27 +68,16 @@ def run(cfg: DictConfig):
         "goal": img_transform(),
     }
 
-    dataset_path = Path(cfg.cache_dir or swm.data.utils.get_cache_dir())
+    dataset = get_dataset(cfg, cfg.eval.dataset_name)
 
-    data_class = (
-        swm.data.FrameDataset
-        if "expert" in cfg.eval.dataset_name and "video" not in cfg.eval.dataset_name
-        else swm.data.VideoDataset
-    )
-
-    print("Using dataset class:", data_class.__name__)
-
-    dataset = data_class(cfg.eval.dataset_name, cache_dir=dataset_path)
-    hf_dataset = dataset.dataset.with_format("numpy")
-
-    ep_indices, _ = np.unique(hf_dataset["episode_idx"][:], return_index=True)
+    ep_indices, _ = np.unique(dataset.get_col_data("episode_idx"), return_index=True)
 
     # create the processing
     action_process = preprocessing.StandardScaler()
-    action_process.fit(hf_dataset["action"][:])
+    action_process.fit(dataset.get_col_data("action"))
 
     proprio_process = preprocessing.StandardScaler()
-    proprio_process.fit(hf_dataset["proprio"][:])
+    proprio_process.fit(dataset.get_col_data("proprio"))
 
     process = {
         "action": action_process,
@@ -108,20 +103,27 @@ def run(cfg: DictConfig):
     )
 
     # sample the episodes and the starting indices
-    episode_len = get_episodes_length(hf_dataset, ep_indices)
+    episode_len = get_episodes_length(dataset, ep_indices)
     max_start_idx = episode_len - cfg.eval.goal_offset_steps - 1
     max_start_idx_dict = {ep_id: max_start_idx[i] for i, ep_id in enumerate(ep_indices)}
     # Map each dataset row’s episode_idx to its max_start_idx
-    max_start_per_row = np.array([max_start_idx_dict[ep_id] for ep_id in hf_dataset["episode_idx"][:]])
+    max_start_per_row = np.array([max_start_idx_dict[ep_id] for ep_id in dataset.get_col_data("episode_idx")])
 
     # remove all the lines of dataset for which dataset['step_idx'] > max_start_per_row
-    valid_mask = hf_dataset["step_idx"][:] <= max_start_per_row
-    dataset_start = hf_dataset.select(np.nonzero(valid_mask)[0])
+    valid_mask = dataset.get_col_data("step_idx") <= max_start_per_row
+    valid_indices = np.nonzero(valid_mask)[0]
+    print(valid_mask.sum(), "valid starting points found for evaluation.")
 
     g = np.random.default_rng(cfg.seed)
-    random_episode_indices = g.choice(len(dataset_start) - 1, size=cfg.eval.num_eval, replace=False)
-    eval_episodes = dataset_start[random_episode_indices]["episode_idx"]
-    eval_start_idx = dataset_start[random_episode_indices]["step_idx"]
+    random_episode_indices = g.choice(len(valid_indices) - 1, size=cfg.eval.num_eval, replace=False)
+
+    # sort increasingly to avoid issues with HDF5Dataset indexing
+    random_episode_indices = np.sort(valid_indices[random_episode_indices])
+
+    print(random_episode_indices)
+
+    eval_episodes = dataset.get_row_data(random_episode_indices)["episode_idx"]
+    eval_start_idx = dataset.get_row_data(random_episode_indices)["step_idx"]
 
     if len(eval_episodes) < cfg.eval.num_eval:
         raise ValueError("Not enough episodes with sufficient length for evaluation.")

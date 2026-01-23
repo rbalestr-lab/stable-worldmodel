@@ -16,9 +16,6 @@ from transformers import AutoModel
 import stable_worldmodel as swm
 
 
-DINO_PATCH_SIZE = 14  # DINO encoder uses 14x14 patches
-
-
 # ============================================================================
 # Data Setup
 # ============================================================================
@@ -51,25 +48,17 @@ def get_data(cfg):
         cache_dir=cfg.get("cache_dir", None),
     )
 
-    # Image size must be multiple of DINO patch size (14)
-    img_size = (cfg.image_size // cfg.patch_size) * DINO_PATCH_SIZE
-
     norm_action_transform = norm_col_transform(dataset.dataset, "action")
     norm_proprio_transform = norm_col_transform(dataset.dataset, "proprio")
 
-    print(f"Image size: {img_size}")
-
     # Apply transforms to all steps and goal observations
     transform = spt.data.transforms.Compose(
-        # Transform regular pixels at each timestep
-        *[get_img_pipeline(f"{col}.{i}", f"{col}.{i}", img_size) for col in ["pixels"] for i in range(cfg.n_steps)],
-        # Normalize actions
+        get_img_pipeline("pixels", "pixels", cfg.image_size),
         spt.data.transforms.WrapTorchTransform(
             norm_action_transform,
             source="action",
             target="action",
         ),
-        # Normalize proprio
         spt.data.transforms.WrapTorchTransform(
             norm_proprio_transform,
             source="proprio",
@@ -162,8 +151,8 @@ def get_gcbc_policy(cfg):
     embedding_dim = encoder.config.hidden_size
 
     # Calculate actual number of patches based on the actual image size used by DINO
-    img_size = (cfg.image_size // cfg.patch_size) * DINO_PATCH_SIZE
-    num_patches = (img_size // DINO_PATCH_SIZE) ** 2
+    assert cfg.image_size % cfg.patch_size == 0, "Image size must be multiple of patch size"
+    num_patches = (cfg.image_size // cfg.patch_size) ** 2
     embedding_dim += cfg.dinowm.proprio_embed_dim  # Total embedding size
 
     logging.info(f"Patches: {num_patches}, Embedding dim: {embedding_dim}")

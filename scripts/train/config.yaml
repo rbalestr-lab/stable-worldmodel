@@ -21,7 +21,7 @@ train_split: 0.9
 seed: 42
 
 image_size: 224
-patch_size: 16
+patch_size: 14
 
 n_steps: ${eval:'${dinowm.num_preds} + ${dinowm.history_size}'}
 frameskip: 1

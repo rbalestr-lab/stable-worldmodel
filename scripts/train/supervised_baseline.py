@@ -17,14 +17,21 @@ Usage:
         --train-start 2023-01-01 --train-end 2023-12-31 \\
         --test-start 2024-01-02 --test-end 2024-06-30
 
-    # Train transformer model with custom hyperparameters
+    # Train transformer with custom hyperparameters and memory settings
     python scripts/train/supervised_baseline.py --model transformer --tickers AAPL MSFT \\
         --train-start 2022-01-03 --train-end 2023-12-31 \\
         --test-start 2024-01-02 --test-end 2024-03-31 \\
-        --epochs 50 --batch-size 64 --lr 1e-4
+        --epochs 50 --batch-size 64 --gradient-accumulation-steps 4 --lr 1e-4
+
+    # Reduce memory further with aggressive time sampling
+    python scripts/train/supervised_baseline.py --model both \\
+        --train-start 2022-01-03 --train-end 2023-12-31 \\
+        --test-start 2024-01-02 --test-end 2024-03-31 \\
+        --time-sampling-rate 10 --batch-size 32 --gradient-accumulation-steps 8
 """
 
 import argparse
+import gc
 import os
 from datetime import datetime
 
@@ -40,7 +47,6 @@ import torch.nn as nn
 from loguru import logger
 from scipy.stats import spearmanr
 from sklearn.linear_model import SGDRegressor
-from sklearn.preprocessing import StandardScaler
 from torch.utils.data import DataLoader, Dataset
 from tqdm import tqdm
 
@@ -142,9 +148,11 @@ def rolling_std(data: np.ndarray, window: int) -> np.ndarray:
 
 
 class FinancialDataset(Dataset):
-    """PyTorch Dataset wrapper for financial time series prediction.
+    """Memory-efficient PyTorch Dataset for financial time series prediction.
 
-    Wraps data loaded from stable_worldmodel's finance data module.
+    KEY FIX: Does NOT create Cartesian product (time × stock).
+    Instead, samples one random stock per time step, reducing dataset size by ~3600×.
+    Technical features are computed on-the-fly to avoid storing enhanced data.
     """
 
     def __init__(
@@ -153,63 +161,85 @@ class FinancialDataset(Dataset):
         symbols: list[str],
         window_size: int = 30,
         prediction_horizon: int = 30,
+        time_sampling_rate: int = 1,  # Sample every Nth minute
     ):
         """Initialize financial dataset.
 
         Args:
-            data: Market data array (T, num_stocks, features) - should already include technical features
+            data: Market data array (T, num_stocks, features) - RAW data only (no tech features)
             symbols: List of stock symbols
             window_size: Number of historical minutes to use
             prediction_horizon: Minutes ahead to predict returns
+            time_sampling_rate: Sample every Nth time step (1=all, 5=every 5 min)
         """
-        self.data = data
+        # Store RAW data only (no enhanced features)
+        self.data = data.astype(np.float32)  # Force float32 immediately
         self.symbols = symbols
         self.window_size = window_size
         self.prediction_horizon = prediction_horizon
         self.num_stocks = data.shape[1]
-        self.num_features = data.shape[2]
+        self.num_features = data.shape[2]  # Raw features only (~7)
+        self.time_sampling_rate = time_sampling_rate
 
-        # Compute returns (30-minute ahead)
-        close_prices = data[:, :, 3]  # Close is 4th feature
+        # Pre-compute returns for efficiency (lightweight)
+        close_prices = data[:, :, 3].astype(np.float32)  # Close is 4th feature
         future_close = np.roll(close_prices, -prediction_horizon, axis=0)
-        self.returns = (future_close - close_prices) / (close_prices + 1e-8)
+        self.returns = ((future_close - close_prices) / (close_prices + 1e-8)).astype(np.float32)
 
-        # Valid indices (have enough history and future)
-        self.valid_indices = list(range(window_size, len(data) - prediction_horizon))
+        # Valid time indices (have enough history and future)
+        all_valid = list(range(window_size, len(data) - prediction_horizon))
+        self.valid_indices = all_valid[::time_sampling_rate]  # Sample every Nth
+
+        # Determine enhanced feature count by computing once
+        # Raw features: 7 (open, high, low, close, volume, trade_count, vwap)
+        # Tech features added: 9 (ema_5, ema_15, ema_30, returns_1, returns_5, returns_10, volatility, volume_ratio, hl_range)
+        # Total enhanced: 16
+        dummy_window = data[:window_size, :1, :]  # (window, 1 stock, raw_features)
+        enhanced_dummy = add_technical_features(dummy_window)
+        self.enhanced_num_features = enhanced_dummy.shape[2]
 
         logger.info(
-            f"Dataset initialized: {len(self.valid_indices)} samples, "
-            f"{self.num_stocks} stocks, {self.num_features} features"
+            f"Dataset initialized: {len(self.valid_indices)} time samples "
+            f"(1 random stock per sample), {self.num_stocks} stocks total, "
+            f"{self.num_features} raw features → {self.enhanced_num_features} enhanced features (computed on-the-fly)"
         )
+        logger.info(f"Memory footprint reduced by ~{self.num_stocks}× vs Cartesian product")
 
     def __len__(self):
-        return len(self.valid_indices) * self.num_stocks
+        # KEY FIX: Length is just number of time samples, NOT (time × stock)
+        return len(self.valid_indices)
 
     def __getitem__(self, idx):
         """Get a single sample.
 
         Returns:
-            features: (window_size * num_features,) flattened historical features
+            features: (window_size * enhanced_features,) flattened features with tech indicators
             target: scalar future return
             stock_idx: which stock this sample is for
             time_idx: which time this sample is for
         """
-        stock_idx = idx % self.num_stocks
-        time_idx_in_valid = idx // self.num_stocks
-        time_idx = self.valid_indices[time_idx_in_valid]
+        # KEY FIX: Sample ONE random stock per time step
+        stock_idx = np.random.randint(self.num_stocks)
+        time_idx = self.valid_indices[idx]
 
-        # Get historical window
+        # Get historical window for this stock
         start_t = time_idx - self.window_size
-        historical_features = self.data[start_t:time_idx, stock_idx, :]  # (window, features)
+        historical_raw = self.data[start_t:time_idx, stock_idx, :]  # (window, raw_features)
+
+        # Compute technical features ON-THE-FLY for this window only
+        # Add a dummy stock dimension: (window, features) -> (window, 1, features)
+        historical_raw_3d = historical_raw[:, None, :]
+        historical_enhanced = add_technical_features(historical_raw_3d)  # (window, 1, enhanced_features)
+        historical_enhanced = historical_enhanced[:, 0, :]  # (window, enhanced_features)
 
         # Flatten to 1D
-        features = historical_features.flatten()
+        features = historical_enhanced.flatten().astype(np.float32)
 
         # Get target return
         target = self.returns[time_idx, stock_idx]
 
         return (
-            torch.tensor(features, dtype=torch.float32),
+            torch.from_numpy(features),  # Already float32, avoid copy
             torch.tensor(target, dtype=torch.float32),
             stock_idx,
             time_idx,
@@ -315,20 +345,50 @@ def compute_ic_per_stock(predictions, targets, stock_indices, num_stocks):
     return ic_per_stock, avg_ic
 
 
-def train_linear_model(train_dataset, test_dataset, symbols, batch_size=1024):
-    """Train a linear (SGD) regression model with mini-batch training."""
+def train_linear_model(train_dataset, test_dataset, symbols, batch_size=512):
+    """Train a linear (SGD) regression model with mini-batch training.
+
+    Memory optimization: Removed StandardScaler (major memory hog).
+    Uses simple mean/std normalization computed incrementally.
+    """
     logger.info("Training Linear Model (SGDRegressor)")
 
-    # Create data loader for mini-batch training
-    train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True, num_workers=0)
+    # Create data loader for mini-batch training (reduced batch size)
+    train_loader = DataLoader(
+        train_dataset,
+        batch_size=batch_size,
+        shuffle=True,
+        num_workers=0,
+        pin_memory=False,
+    )
 
-    # Initialize StandardScaler - fit incrementally
-    scaler = StandardScaler()
-    logger.info("Fitting scaler on training data...")
-    for features, _, _, _ in tqdm(train_loader, desc="Fitting scaler"):
-        scaler.partial_fit(features.numpy())
+    # Compute simple normalization stats incrementally (much lighter than StandardScaler)
+    logger.info("Computing normalization statistics...")
+    running_mean = None
+    running_var = None
+    n_samples = 0
 
-    # Initialize SGDRegressor
+    for features, _, _, _ in tqdm(train_loader, desc="Computing stats"):
+        batch_np = features.numpy()
+        batch_mean = batch_np.mean(axis=0)
+        batch_var = batch_np.var(axis=0)
+        batch_n = len(batch_np)
+
+        if running_mean is None:
+            running_mean = batch_mean
+            running_var = batch_var
+            n_samples = batch_n
+        else:
+            # Welford's online algorithm for stable mean/variance
+            delta = batch_mean - running_mean
+            running_mean += delta * batch_n / (n_samples + batch_n)
+            running_var = (running_var * n_samples + batch_var * batch_n) / (n_samples + batch_n)
+            n_samples += batch_n
+
+    running_std = np.sqrt(running_var + 1e-8)
+    logger.info("Normalization stats computed")
+
+    # Initialize SGDRegressor with fit_intercept to handle unnormalized data better
     model = SGDRegressor(
         loss="squared_error",
         penalty="l2",
@@ -338,6 +398,7 @@ def train_linear_model(train_dataset, test_dataset, symbols, batch_size=1024):
         max_iter=1,
         tol=None,
         random_state=42,
+        fit_intercept=True,
     )
 
     # Train in mini-batches and track losses
@@ -349,7 +410,8 @@ def train_linear_model(train_dataset, test_dataset, symbols, batch_size=1024):
         n_batches = 0
 
         for features, targets, _, _ in tqdm(train_loader, desc=f"Training epoch {epoch + 1}/{n_epochs}"):
-            X_batch = scaler.transform(features.numpy())
+            # Simple normalization (no copies like StandardScaler)
+            X_batch = (features.numpy() - running_mean) / running_std
             y_batch = targets.numpy()
             model.partial_fit(X_batch, y_batch)
 
@@ -358,6 +420,9 @@ def train_linear_model(train_dataset, test_dataset, symbols, batch_size=1024):
             loss = np.mean((preds - y_batch) ** 2)
             epoch_loss += loss
             n_batches += 1
+
+            # Clear batch memory
+            del X_batch
 
         avg_epoch_loss = epoch_loss / n_batches
         epoch_losses.append(avg_epoch_loss)
@@ -377,73 +442,148 @@ def train_linear_model(train_dataset, test_dataset, symbols, batch_size=1024):
     logger.info(f"Training loss plot saved to {plot_path}")
     plt.close()
 
-    # Evaluate on training set (in batches to avoid memory issues)
-    logger.info("Evaluating on training set...")
-    train_preds = []
-    train_targets = []
-    train_stock_indices = []
+    # Evaluate on training set STREAMING (avoid accumulating all predictions)
+    logger.info("Evaluating on training set (streaming)...")
+
+    # Store per-stock predictions/targets in dict to avoid massive concatenation
+    stock_data = {i: {"preds": [], "targets": []} for i in range(len(symbols))}
 
     for features, targets, stock_idx, _ in tqdm(train_loader, desc="Train evaluation"):
-        X_batch = scaler.transform(features.numpy())
+        X_batch = (features.numpy() - running_mean) / running_std
         preds = model.predict(X_batch)
-        train_preds.append(preds)
-        train_targets.append(targets.numpy())
-        train_stock_indices.append(stock_idx.numpy())
 
-    train_preds = np.concatenate(train_preds)
-    train_targets = np.concatenate(train_targets)
-    train_stock_indices = np.concatenate(train_stock_indices)
+        # Append to per-stock lists
+        for i, (pred, target, sid) in enumerate(zip(preds, targets.numpy(), stock_idx.numpy())):
+            stock_data[sid]["preds"].append(pred)
+            stock_data[sid]["targets"].append(target)
 
-    train_ic_per_stock, train_avg_ic = compute_ic_per_stock(
-        train_preds, train_targets, train_stock_indices, len(symbols)
-    )
+        del X_batch
+
+    # Compute IC per stock from accumulated data
+    train_ic_per_stock = []
+    for stock_idx in range(len(symbols)):
+        preds = stock_data[stock_idx]["preds"]
+        targets = stock_data[stock_idx]["targets"]
+
+        if len(preds) < 2:
+            train_ic_per_stock.append(0.0)
+            continue
+
+        ic, _ = spearmanr(preds, targets)
+        if np.isnan(ic) or ic is None:
+            ic = 0.0
+        train_ic_per_stock.append(ic)
+
+    train_ic_per_stock = np.array(train_ic_per_stock)
+    train_avg_ic = np.mean(np.abs(train_ic_per_stock))
+
+    # Clear memory
+    del stock_data
+    gc.collect()
+
     logger.info(f"Train IC: {train_avg_ic:.4f}")
 
-    # Evaluate on test set (in batches)
-    logger.info("Evaluating on test set...")
-    test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=False, num_workers=0)
+    # Evaluate on test set STREAMING
+    logger.info("Evaluating on test set (streaming)...")
+    test_loader = DataLoader(
+        test_dataset,
+        batch_size=batch_size,
+        shuffle=False,
+        num_workers=0,
+        pin_memory=False,
+    )
 
-    test_preds = []
-    test_targets = []
-    test_stock_indices = []
+    stock_data = {i: {"preds": [], "targets": []} for i in range(len(symbols))}
 
     for features, targets, stock_idx, _ in tqdm(test_loader, desc="Test evaluation"):
-        X_batch = scaler.transform(features.numpy())
+        X_batch = (features.numpy() - running_mean) / running_std
         preds = model.predict(X_batch)
-        test_preds.append(preds)
-        test_targets.append(targets.numpy())
-        test_stock_indices.append(stock_idx.numpy())
 
-    test_preds = np.concatenate(test_preds)
-    test_targets = np.concatenate(test_targets)
-    test_stock_indices = np.concatenate(test_stock_indices)
+        for i, (pred, target, sid) in enumerate(zip(preds, targets.numpy(), stock_idx.numpy())):
+            stock_data[sid]["preds"].append(pred)
+            stock_data[sid]["targets"].append(target)
 
-    test_ic_per_stock, test_avg_ic = compute_ic_per_stock(test_preds, test_targets, test_stock_indices, len(symbols))
+        del X_batch
+
+    # Compute IC per stock
+    test_ic_per_stock = []
+    for stock_idx in range(len(symbols)):
+        preds = stock_data[stock_idx]["preds"]
+        targets = stock_data[stock_idx]["targets"]
+
+        if len(preds) < 2:
+            test_ic_per_stock.append(0.0)
+            continue
+
+        ic, _ = spearmanr(preds, targets)
+        if np.isnan(ic) or ic is None:
+            ic = 0.0
+        test_ic_per_stock.append(ic)
+
+    test_ic_per_stock = np.array(test_ic_per_stock)
+    test_avg_ic = np.mean(np.abs(test_ic_per_stock))
+
+    del stock_data
+    gc.collect()
 
     logger.info(f"Test IC: {test_avg_ic:.4f}")
-    logger.info(f"Test IC per stock:\n{dict(zip(symbols, test_ic_per_stock))}")
+    logger.info(f"Test IC per stock (top 10): {dict(list(zip(symbols, test_ic_per_stock))[:10])}")
 
     return {
         "model": "Linear",
         "train_ic": train_avg_ic,
         "test_ic": test_avg_ic,
         "test_ic_per_stock": test_ic_per_stock,
+        "normalization": {
+            "mean": running_mean,
+            "std": running_std,
+        },  # Save for later use
     }
 
 
-def train_transformer_model(train_dataset, test_dataset, symbols, epochs=20, lr=1e-3, batch_size=256):
-    """Train a simple transformer model."""
+def train_transformer_model(
+    train_dataset,
+    test_dataset,
+    symbols,
+    epochs=20,
+    lr=1e-3,
+    batch_size=64,
+    gradient_accumulation_steps=4,
+):
+    """Train a simple transformer model with memory-efficient settings.
+
+    Args:
+        gradient_accumulation_steps: Accumulate gradients over N steps to simulate larger batch size
+                                     Effective batch size = batch_size * gradient_accumulation_steps
+    """
     logger.info("Training Transformer Model")
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     logger.info(f"Using device: {device}")
+    logger.info(f"Batch size: {batch_size}, Gradient accumulation steps: {gradient_accumulation_steps}")
+    logger.info(f"Effective batch size: {batch_size * gradient_accumulation_steps}")
 
-    # Create data loaders
-    train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True, num_workers=0)
-    test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=False, num_workers=0)
+    # Create data loaders with reduced batch size and no pin_memory
+    train_loader = DataLoader(
+        train_dataset,
+        batch_size=batch_size,
+        shuffle=True,
+        num_workers=0,
+        pin_memory=False,
+    )
+    test_loader = DataLoader(
+        test_dataset,
+        batch_size=batch_size,
+        shuffle=False,
+        num_workers=0,
+        pin_memory=False,
+    )
 
     # Initialize model
-    input_dim = train_dataset.num_features
+    # Use enhanced_num_features since technical features are computed on-the-fly
+    input_dim = train_dataset.enhanced_num_features
+    logger.info(f"Model input dimension: {input_dim} (enhanced features per timestep)")
+
     model = SimpleTransformer(
         input_dim=input_dim,
         d_model=64,
@@ -456,28 +596,72 @@ def train_transformer_model(train_dataset, test_dataset, symbols, epochs=20, lr=
     optimizer = torch.optim.Adam(model.parameters(), lr=lr, weight_decay=1e-5)
     scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=epochs)
 
-    # Training loop with tracking
+    # Enable mixed precision training for memory efficiency
+    use_amp = device.type == "cuda"
+    scaler = torch.cuda.amp.GradScaler() if use_amp else None
+    if use_amp:
+        logger.info("Using automatic mixed precision (AMP) training")
+
+    # Training loop with tracking and gradient accumulation
     train_losses = []
 
     for epoch in range(epochs):
         model.train()
         train_loss = 0.0
+        optimizer.zero_grad()
 
-        for features, targets, _, _ in tqdm(train_loader, desc=f"Epoch {epoch + 1}/{epochs}"):
-            features = features.to(device)
-            targets = targets.to(device)
+        for batch_idx, (features, targets, _, _) in enumerate(tqdm(train_loader, desc=f"Epoch {epoch + 1}/{epochs}")):
+            features = features.to(device, non_blocking=False)
+            targets = targets.to(device, non_blocking=False)
 
-            optimizer.zero_grad()
-            predictions = model(features, train_dataset.window_size)
-            loss = criterion(predictions, targets)
-            loss.backward()
+            # Use automatic mixed precision if available
+            if use_amp:
+                with torch.cuda.amp.autocast():
+                    predictions = model(features, train_dataset.window_size)
+                    loss = criterion(predictions, targets)
+                    loss = loss / gradient_accumulation_steps  # Normalize loss
+
+                scaler.scale(loss).backward()
+            else:
+                predictions = model(features, train_dataset.window_size)
+                loss = criterion(predictions, targets)
+                loss = loss / gradient_accumulation_steps  # Normalize loss
+                loss.backward()
+
+            # Update weights every N steps
+            if (batch_idx + 1) % gradient_accumulation_steps == 0:
+                if use_amp:
+                    scaler.step(optimizer)
+                    scaler.update()
+                else:
+                    optimizer.step()
+                optimizer.zero_grad()
+
+                # Clear GPU cache periodically
+                if device.type == "cuda" and (batch_idx + 1) % (gradient_accumulation_steps * 10) == 0:
+                    torch.cuda.empty_cache()
+
+            train_loss += loss.item() * gradient_accumulation_steps  # Denormalize for logging
+
+            # Clean up
+            del features, targets, predictions, loss
+
+        # Handle any remaining gradients
+        if use_amp:
+            scaler.step(optimizer)
+            scaler.update()
+        else:
             optimizer.step()
-
-            train_loss += loss.item()
+        optimizer.zero_grad()
 
         train_loss /= len(train_loader)
         train_losses.append(train_loss)
         scheduler.step()
+
+        # Force garbage collection
+        if device.type == "cuda":
+            torch.cuda.empty_cache()
+        gc.collect()
 
         logger.info(f"Epoch {epoch + 1}/{epochs}, Train Loss: {train_loss:.6f}")
 
@@ -495,50 +679,115 @@ def train_transformer_model(train_dataset, test_dataset, symbols, epochs=20, lr=
     logger.info(f"Training loss plot saved to {plot_path}")
     plt.close()
 
-    # Evaluate on training set
+    # Evaluate on training set STREAMING
     model.eval()
-    train_preds = []
-    train_targets = []
-    train_stock_indices = []
+    logger.info("Evaluating on train set (streaming)...")
+
+    stock_data = {i: {"preds": [], "targets": []} for i in range(len(symbols))}
 
     with torch.no_grad():
         for features, targets, stock_idx, _ in tqdm(train_loader, desc="Evaluating on train set"):
-            features = features.to(device)
-            predictions = model(features, train_dataset.window_size)
-            train_preds.append(predictions.cpu().numpy())
-            train_targets.append(targets.numpy())
-            train_stock_indices.append(stock_idx.numpy())
+            features = features.to(device, non_blocking=False)
 
-    train_preds = np.concatenate(train_preds)
-    train_targets = np.concatenate(train_targets)
-    train_stock_indices = np.concatenate(train_stock_indices)
+            # Use mixed precision for inference too
+            if use_amp:
+                with torch.cuda.amp.autocast():
+                    predictions = model(features, train_dataset.window_size)
+            else:
+                predictions = model(features, train_dataset.window_size)
 
-    train_ic_per_stock, train_avg_ic = compute_ic_per_stock(
-        train_preds, train_targets, train_stock_indices, len(symbols)
-    )
+            # Store per-stock instead of concatenating all
+            preds_np = predictions.cpu().numpy()
+            targets_np = targets.numpy()
+            stock_idx_np = stock_idx.numpy()
+
+            for pred, target, sid in zip(preds_np, targets_np, stock_idx_np):
+                stock_data[sid]["preds"].append(pred)
+                stock_data[sid]["targets"].append(target)
+
+            # Clean up
+            del features, predictions, preds_np, targets_np, stock_idx_np
+
+    # Compute IC per stock
+    train_ic_per_stock = []
+    for stock_idx in range(len(symbols)):
+        preds = stock_data[stock_idx]["preds"]
+        targets = stock_data[stock_idx]["targets"]
+
+        if len(preds) < 2:
+            train_ic_per_stock.append(0.0)
+            continue
+
+        ic, _ = spearmanr(preds, targets)
+        if np.isnan(ic) or ic is None:
+            ic = 0.0
+        train_ic_per_stock.append(ic)
+
+    train_ic_per_stock = np.array(train_ic_per_stock)
+    train_avg_ic = np.mean(np.abs(train_ic_per_stock))
+
+    del stock_data
+
+    # Clear cache after evaluation
+    if device.type == "cuda":
+        torch.cuda.empty_cache()
+    gc.collect()
+
     logger.info(f"Train IC: {train_avg_ic:.4f}")
 
-    # Evaluate on test set
-    test_preds = []
-    test_targets = []
-    test_stock_indices = []
+    # Evaluate on test set STREAMING
+    logger.info("Evaluating on test set (streaming)...")
+    stock_data = {i: {"preds": [], "targets": []} for i in range(len(symbols))}
 
     with torch.no_grad():
         for features, targets, stock_idx, _ in tqdm(test_loader, desc="Evaluating on test set"):
-            features = features.to(device)
-            predictions = model(features, test_dataset.window_size)
-            test_preds.append(predictions.cpu().numpy())
-            test_targets.append(targets.numpy())
-            test_stock_indices.append(stock_idx.numpy())
+            features = features.to(device, non_blocking=False)
 
-    test_preds = np.concatenate(test_preds)
-    test_targets = np.concatenate(test_targets)
-    test_stock_indices = np.concatenate(test_stock_indices)
+            # Use mixed precision for inference too
+            if use_amp:
+                with torch.cuda.amp.autocast():
+                    predictions = model(features, train_dataset.window_size)
+            else:
+                predictions = model(features, train_dataset.window_size)
 
-    test_ic_per_stock, test_avg_ic = compute_ic_per_stock(test_preds, test_targets, test_stock_indices, len(symbols))
+            preds_np = predictions.cpu().numpy()
+            targets_np = targets.numpy()
+            stock_idx_np = stock_idx.numpy()
+
+            for pred, target, sid in zip(preds_np, targets_np, stock_idx_np):
+                stock_data[sid]["preds"].append(pred)
+                stock_data[sid]["targets"].append(target)
+
+            # Clean up
+            del features, predictions, preds_np, targets_np, stock_idx_np
+
+    # Compute IC per stock
+    test_ic_per_stock = []
+    for stock_idx in range(len(symbols)):
+        preds = stock_data[stock_idx]["preds"]
+        targets = stock_data[stock_idx]["targets"]
+
+        if len(preds) < 2:
+            test_ic_per_stock.append(0.0)
+            continue
+
+        ic, _ = spearmanr(preds, targets)
+        if np.isnan(ic) or ic is None:
+            ic = 0.0
+        test_ic_per_stock.append(ic)
+
+    test_ic_per_stock = np.array(test_ic_per_stock)
+    test_avg_ic = np.mean(np.abs(test_ic_per_stock))
+
+    del stock_data
+
+    # Clear cache after evaluation
+    if device.type == "cuda":
+        torch.cuda.empty_cache()
+    gc.collect()
 
     logger.info(f"Test IC: {test_avg_ic:.4f}")
-    logger.info(f"Test IC per stock:\n{dict(zip(symbols, test_ic_per_stock))}")
+    logger.info(f"Test IC per stock (top 10): {dict(list(zip(symbols, test_ic_per_stock))[:10])}")
 
     return {
         "model": "Transformer",
@@ -573,6 +822,12 @@ def main():
         help="Prediction horizon (minutes)",
     )
     parser.add_argument(
+        "--time-sampling-rate",
+        type=int,
+        default=5,
+        help="Sample every Nth minute (1=all, 5=every 5min, reduces dataset by 5×)",
+    )
+    parser.add_argument(
         "--model",
         type=str,
         choices=["linear", "transformer", "both"],
@@ -580,7 +835,18 @@ def main():
         help="Which model to train",
     )
     parser.add_argument("--epochs", type=int, default=20, help="Number of epochs for transformer")
-    parser.add_argument("--batch-size", type=int, default=256, help="Batch size for transformer")
+    parser.add_argument(
+        "--batch-size",
+        type=int,
+        default=64,
+        help="Batch size for transformer (reduced for memory efficiency)",
+    )
+    parser.add_argument(
+        "--gradient-accumulation-steps",
+        type=int,
+        default=4,
+        help="Gradient accumulation steps (effective batch = batch_size * this)",
+    )
     parser.add_argument("--lr", type=float, default=1e-3, help="Learning rate for transformer")
 
     args = parser.parse_args()
@@ -623,26 +889,40 @@ def main():
         freq="1min",
     )
 
-    # Add technical features to the data
-    logger.info("Adding technical features...")
-    train_data_enhanced = add_technical_features(train_data)
-    test_data_enhanced = add_technical_features(test_data)
+    # CRITICAL: Force float32 immediately (cuts memory in half)
+    logger.info("Converting to float32...")
+    train_data = train_data.astype(np.float32)
+    test_data = test_data.astype(np.float32)
+    logger.info(f"Train data shape: {train_data.shape}, dtype: {train_data.dtype}")
+    logger.info(f"Test data shape: {test_data.shape}, dtype: {test_data.dtype}")
 
-    # Create datasets
+    # DO NOT pre-compute technical features (memory killer!)
+    # Features will be computed on-the-fly in the dataset
+
+    # Create datasets (pass RAW data only - tech features computed on-the-fly)
     logger.info("Creating datasets...")
+    logger.info(f"Time sampling rate: {args.time_sampling_rate}× (reduces dataset size)")
+
     train_dataset = FinancialDataset(
-        train_data_enhanced,
+        train_data,  # RAW data only!
         args.tickers,
         window_size=args.window_size,
         prediction_horizon=args.prediction_horizon,
+        time_sampling_rate=args.time_sampling_rate,
     )
 
     test_dataset = FinancialDataset(
-        test_data_enhanced,
+        test_data,  # RAW data only!
         args.tickers,
         window_size=args.window_size,
         prediction_horizon=args.prediction_horizon,
+        time_sampling_rate=args.time_sampling_rate,
     )
+
+    # Clear original data if we don't need it anymore
+    del train_data, test_data
+    gc.collect()
+    logger.info("Original data arrays cleared from memory")
 
     # Train models
     results = []
@@ -659,8 +939,14 @@ def main():
             epochs=args.epochs,
             lr=args.lr,
             batch_size=args.batch_size,
+            gradient_accumulation_steps=args.gradient_accumulation_steps,
         )
         results.append(transformer_results)
+
+        # Clean up after transformer training
+        if torch.cuda.is_available():
+            torch.cuda.empty_cache()
+        gc.collect()
 
     # Print summary
     logger.info("\n" + "=" * 80)

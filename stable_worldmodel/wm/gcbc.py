@@ -119,7 +119,6 @@ class GCBC(torch.nn.Module):
 
         embedding = rearrange(embedding, "b t p d -> b (t p) d")
         embedding_goal = rearrange(embedding_goal, "b t p d -> b (t p) d")
-        print(f"embedding shape: {embedding.shape}, embedding_goal shape: {embedding_goal.shape}")
         preds = self.predictor(embedding, embedding_goal)
 
         return preds

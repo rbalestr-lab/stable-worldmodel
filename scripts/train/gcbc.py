@@ -50,6 +50,9 @@ def get_data(cfg):
         transform=None,
         cache_dir=cfg.get("cache_dir", None),
     )
+    dataset = swm.data.GoalDataset(
+        dataset=dataset, goal_probabilities=(0.0, 1.0, 0.0), goal_keys=["pixels", "proprio"], seed=cfg.seed
+    )
 
     # Image size must be multiple of DINO patch size (14)
     img_size = (cfg.image_size // cfg.patch_size) * DINO_PATCH_SIZE
@@ -111,28 +114,6 @@ def get_gcbc_policy(cfg):
             batch[proprio_key] = torch.nan_to_num(batch[proprio_key], 0.0)
         batch["action"] = torch.nan_to_num(batch["action"], 0.0)
 
-        # Remove 'data_dir' from batch to avoid issues with indexing
-        batch.pop("data_dir", None)
-
-        # State and goal sampling: batch contains part-trajectories from which (history-)states and goals are sampled
-        device = batch["action"].device
-        batch_size, episode_len = batch["action"].shape[:2]
-        slice_len = cfg.dinowm.history_size + cfg.dinowm.num_preds
-        batch_idxs = torch.arange(batch_size, device=device).unsqueeze(1)  # shape: (batch_size, 1)
-        # sample state indices
-        idxs = torch.randint(episode_len - slice_len, size=(batch_size,), device=device)
-        slice_idxs = idxs.unsqueeze(1) + torch.arange(slice_len, device=device).unsqueeze(
-            0
-        )  # shape: (batch_size, slice_len)
-        # sample goal indices from future of state indices
-        distances = torch.rand(batch_size, device=device)  # in [0, 1)
-        goal_idxs = torch.round((idxs + slice_len) * distances + (episode_len - 1) * (1 - distances)).to(torch.int)
-        goal_idxs = goal_idxs.unsqueeze(1)  # shape: (batch_size, 1)
-
-        # Extract state and goal from batch
-        goal_batch = {k: v[batch_idxs, goal_idxs] for k, v in batch.items()}
-        batch = {k: v[batch_idxs, slice_idxs] for k, v in batch.items()}
-
         # Encode all timesteps into latent embeddings
         batch = self.model.encode(
             batch,
@@ -141,15 +122,11 @@ def get_gcbc_policy(cfg):
         )
 
         # Encode goal into latent embedding
-        goal_batch = self.model.encode(
-            goal_batch,
-            target="embed",
-            pixels_key="pixels",
-        )
+        batch = self.model.encode(batch, target="goal_embed", pixels_key="goal_pixels", emb_keys=["goal_proprio"])
 
         # Use history to predict next actions
         embedding = batch["embed"][:, : cfg.dinowm.history_size, :, :]  # (B, T-1, patches, dim)
-        goal_embedding = goal_batch["embed"]  # (B, 1, patches, dim)
+        goal_embedding = batch["goal_embed"]  # (B, 1, patches, dim)
         action_pred = self.model.predict(embedding, goal_embedding)  # (B, num_preds, action_dim)
         action_target = batch["action"][:, -cfg.dinowm.num_preds :, :]  # (B, num_preds, action_dim)
 

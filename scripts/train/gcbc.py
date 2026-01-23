@@ -1,3 +1,4 @@
+import os
 from collections import OrderedDict
 from pathlib import Path
 
@@ -30,22 +31,27 @@ def get_data(cfg):
                 target=target,
             ),
             spt.data.transforms.Resize(img_size, source=key, target=target),
-            spt.data.transforms.CenterCrop(img_size, source=key, target=target),
         )
 
     def norm_col_transform(dataset, col="pixels"):
         """Normalize column to zero mean, unit variance."""
-        data = dataset[col][:]
-        mean = data.mean(0).unsqueeze(0)
-        std = data.std(0).unsqueeze(0)
-        return lambda x: (x - mean) / std
+        data = torch.from_numpy(dataset.get_col_data(col)[:])
+        mean = data.mean(0).unsqueeze(0).clone()
+        std = data.std(0).unsqueeze(0).clone()
+        return lambda x: ((x - mean) / std).float()
 
-    dataset = swm.data.VideoDataset(
+    cache_dir = None
+    if not hasattr(cfg, "local_cache_dir"):
+        cache_dir = os.environ.get("SLURM_TMPDIR", None)
+
+    dataset = swm.data.HDF5Dataset(
         cfg.dataset_name,
         num_steps=cfg.n_steps,
         frameskip=cfg.frameskip,
         transform=None,
-        cache_dir=cfg.get("cache_dir", None),
+        cache_dir=cache_dir,
+        keys_to_load=["pixels", "action", "proprio"],
+        keys_to_cache=["action", "proprio"],
     )
 
     norm_action_transform = norm_col_transform(dataset.dataset, "action")

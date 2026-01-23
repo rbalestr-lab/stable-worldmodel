@@ -136,7 +136,9 @@ def get_gcbc_policy(cfg):
         )
 
         # Encode goal into latent embedding
-        batch = self.model.encode(batch, target="goal_embed", pixels_key="goal_pixels", emb_keys=["goal_proprio"])
+        batch = self.model.encode(
+            batch, target="goal_embed", pixels_key="goal_pixels", emb_keys=["proprio"], prefix="goal_"
+        )
 
         # Use history to predict next actions
         embedding = batch["embed"][:, : cfg.dinowm.history_size, :, :]  # (B, T-1, patches, dim)

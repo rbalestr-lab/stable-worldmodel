@@ -36,5 +36,3 @@ hydra:
       - source /share/apps/anaconda3/2025.06/etc/profile.d/conda.sh
       - conda activate stable-wm
       - export STABLEWM_HOME=~/vast/.stable_worldmodel/
-      - tar -cf $STABLEWM_HOME/dataset.tar -C $STABLEWM_HOME ${dataset_name}
-      - tar -xf $STABLEWM_HOME/dataset.tar -C $SLURM_TMPDIR

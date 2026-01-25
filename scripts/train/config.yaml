@@ -3,7 +3,6 @@
 defaults:
   - launcher: local
   - _self_
-  - override hydra/launcher: submitit_local
 
 
 output_model_name: dinogcbc

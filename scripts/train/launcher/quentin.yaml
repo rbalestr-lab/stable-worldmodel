@@ -8,7 +8,7 @@ wandb:
   entity: quentin-lelidec-nyu
   project: stable-wm
 
-dataset_name: pusht_expert_video_train
+dataset_name: pusht_expert_train
 cache_dir: /home/ql2867/vast/.stable_worldmodel
 cpus_per_task: 8
 

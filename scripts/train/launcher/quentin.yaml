@@ -12,6 +12,8 @@ dataset_name: pusht_expert_train
 cache_dir: /home/ql2867/vast/.stable_worldmodel
 cpus_per_task: 8
 
+local_cache_dir: True
+
 hydra:
   mode: MULTIRUN
 
@@ -34,3 +36,5 @@ hydra:
       - source /share/apps/anaconda3/2025.06/etc/profile.d/conda.sh
       - conda activate stable-wm
       - export STABLEWM_HOME=~/vast/.stable_worldmodel/
+      - tar -cf $STABLEWM_HOME/dataset.tar -C $STABLEWM_HOME ${dataset_name}
+      - tar -xf $STABLEWM_HOME/dataset.tar -C $SLURM_TMPDIR

@@ -9,3 +9,56 @@ external_links:
 ![dmc](assets/env/dmc/normal.gif)
 
 
+# DeepMind Control Suite
+
+
+------
+
+#### [Hopper-v1]
+
+##### Description
+
+##### Specs
+
+##### Datasets
+
+----------------------------------------
+
+#### [Hopper-v1]
+
+##### Description
+
+##### Specs
+
+##### Datasets
+
+----------------------------------------
+
+#### [Hopper-v1]
+
+##### Description
+
+##### Specs
+
+##### Datasets
+
+----------------------------------------
+
+#### [Hopper-v1]
+
+##### Description
+
+##### Specs
+
+|      |      |      |
+| ---- | ---- | ---- |
+|      |      |      |
+|      |      |      |
+|      |      |      |
+
+
+
+##### Datasets
+
+----------------------------------------
+

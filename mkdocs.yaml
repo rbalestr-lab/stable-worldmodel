@@ -7,7 +7,6 @@ theme:
   pygments_style:
     light: shadcn-light
     dark: github-dark
-  icon: heroicons:globe-europe-africa
   topbar_sections: false
   show_datetime: false
 

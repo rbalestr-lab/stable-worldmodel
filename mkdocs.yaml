@@ -15,7 +15,12 @@ site_url: https://lucas-maes.github.io/stable-worldmodel/
 repo_url: https://github.com/lucas-maes/swm/
 
 nav:
-  - Start: index.md
+  - Home: index.md
+  - Environment:
+      - Push-T: pusht.md
+      - DM Control: dmc.md
+      - OGBench: ogb.md
+      - Two-Room: tworoom.md
 
 markdown_extensions:
   - codehilite

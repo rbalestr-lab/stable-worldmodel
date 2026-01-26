@@ -14,9 +14,6 @@ theme:
   topbar_sections: false
   show_datetime: false
 
-site_url: https://lucas-maes.github.io/stable-worldmodel/
-repo_url: https://github.com/lucas-maes/swm/
-
 nav:
   - Home: index.md
   - Environment:

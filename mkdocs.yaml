@@ -1,5 +1,9 @@
 site_name: stable-worldmodel
 
+site_url: https://lucas-maes.github.io/stable-worldmodel/
+repo_url: https://github.com/lucas-maes/swm/
+use_directory_urls: true
+
 theme:
   name: shadcn
   show_title: true

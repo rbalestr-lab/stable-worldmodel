@@ -15,7 +15,8 @@ theme:
   show_datetime: false
 
 nav:
-  - Home: index.md
+  - index.md
+  - basic_usage.md
   - Environment:
       - environments/pusht.md
       - environments/dmc.md
@@ -65,7 +66,14 @@ plugins:
             summary: true
 
 markdown_extensions:
-  - codehilite
-  - admonition
-  - pymdownx.blocks.tab
-  - pymdownx.blocks.details
+  shadcn.extensions.iconify:
+  codehilite:
+  admonition:
+  pymdownx.blocks.details:
+  pymdownx.tabbed:
+  pymdownx.blocks.tab:
+    combine_header_slug: true
+    separator: ___
+  pymdownx.arithmatex:
+    generic: true
+  pymdownx.blocks.caption:

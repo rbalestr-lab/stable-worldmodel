@@ -5,4 +5,4 @@ external_links:
     arxiv: tbd
 ---
 
-![tworoom](assets/env/tworoom/normal.gif)
+<!-- ![tworoom](assets/env/tworoom/normal.gif) -->

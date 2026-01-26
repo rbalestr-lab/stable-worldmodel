@@ -6,7 +6,7 @@ external_links:
     github: https://github.com/google-deepmind/dm_control
 ---
 
-![dmc](assets/env/dmc/normal.gif)
+<!-- ![dmc](#) -->
 
 
 # DeepMind Control Suite

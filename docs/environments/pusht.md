@@ -5,7 +5,7 @@ external_links:
     arxiv: tbd
 ---
 
-![pusht](assets/env/pusht/normal.gif)
+<!-- ![pusht](assets/env/pusht/normal.gif) -->
 
 ## Description
 

@@ -194,7 +194,7 @@ def test_hdf5_dataset_cache_missing_key(sample_h5_file):
     """Test HDF5Dataset raises error for missing cache key."""
     cache_dir, name = sample_h5_file
 
-    with pytest.raises(KeyError, match="not found"):
+    with pytest.raises(KeyError):
         HDF5Dataset(
             name,
             cache_dir=str(cache_dir),

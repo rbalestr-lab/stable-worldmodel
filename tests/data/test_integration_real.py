@@ -336,7 +336,7 @@ class TestImageDatasetReal:
 
 
 class TestVideoDatasetReal:
-    """Test VideoDataset with real collected data (uses same format as ImageDataset)."""
+    """Test VideoDataset with real collected data."""
 
     @pytest.fixture
     def temp_cache_dir(self, tmp_path):
@@ -344,6 +344,8 @@ class TestVideoDatasetReal:
 
     def test_collect_convert_and_load(self, temp_cache_dir):
         """Test collecting data, converting to video format, and loading."""
+        import imageio.v3 as iio
+
         # 1. Collect data
         world = World(
             env_name="swm/PushT-v1",
@@ -364,13 +366,29 @@ class TestVideoDatasetReal:
         )
         world.envs.close()
 
-        # 2. Convert HDF5 to video format (same as image but with "video" key)
+        # 2. Convert HDF5 to video format (MP4 files)
         h5_path = temp_cache_dir / f"{h5_name}.h5"
         video_dataset_dir = temp_cache_dir / "test_video_format"
-        convert_hdf5_to_image_format(h5_path, video_dataset_dir, image_key="pixels")
+        video_dataset_dir.mkdir()
 
-        # Rename pixels folder to video for VideoDataset
-        (video_dataset_dir / "pixels").rename(video_dataset_dir / "video")
+        with h5py.File(h5_path, "r") as f:
+            ep_lengths = f["ep_len"][:]
+            ep_offsets = f["ep_offset"][:]
+            pixels = f["pixels"][:]
+            action = f["action"][:]
+
+        # Save metadata
+        np.savez(video_dataset_dir / "ep_len.npz", ep_lengths)
+        np.savez(video_dataset_dir / "ep_offset.npz", ep_offsets)
+        np.savez(video_dataset_dir / "action.npz", action)
+
+        # Create video folder with MP4 files
+        video_path = video_dataset_dir / "video"
+        video_path.mkdir()
+
+        for ep_idx, (offset, length) in enumerate(zip(ep_offsets, ep_lengths)):
+            frames = pixels[offset : offset + length]
+            iio.imwrite(video_path / f"ep_{ep_idx}.mp4", frames, fps=30)
 
         # 3. Load with VideoDataset
         dataset = VideoDataset(

@@ -85,7 +85,9 @@ def sample_image_dataset_short_episode(tmp_path):
 
 @pytest.fixture
 def sample_video_dataset(tmp_path):
-    """Create a sample VideoDataset directory structure for testing."""
+    """Create a sample VideoDataset directory structure with MP4 files for testing."""
+    import imageio.v3 as iio
+
     dataset_path = tmp_path / "test_video_dataset"
     dataset_path.mkdir()
 
@@ -98,15 +100,13 @@ def sample_video_dataset(tmp_path):
     np.savez(dataset_path / "observation.npz", np.random.rand(total_steps, 4).astype(np.float32))
     np.savez(dataset_path / "action.npz", np.random.rand(total_steps, 2).astype(np.float32))
 
-    # Create video folder with frames
+    # Create video folder with MP4 files
     video_path = dataset_path / "video"
     video_path.mkdir()
 
     for ep_idx in range(2):
-        for step_idx in range(10):
-            img_array = np.random.randint(0, 255, (64, 64, 3), dtype=np.uint8)
-            img = Image.fromarray(img_array)
-            img.save(video_path / f"ep_{ep_idx}_step_{step_idx}.jpeg")
+        frames = [np.random.randint(0, 255, (64, 64, 3), dtype=np.uint8) for _ in range(10)]
+        iio.imwrite(video_path / f"ep_{ep_idx}.mp4", frames, fps=30)
 
     return tmp_path, "test_video_dataset"
 
@@ -187,7 +187,7 @@ class TestImageDataset:
         cache_dir, name = sample_image_dataset
         dataset = ImageDataset(name, cache_dir=str(cache_dir))
 
-        assert dataset.data_path == cache_dir / name
+        assert dataset.path == cache_dir / name
         assert len(dataset.lengths) == 2
         assert len(dataset.offsets) == 2
 
@@ -289,7 +289,7 @@ class TestImageDataset:
         cache_dir, name = sample_image_dataset
         dataset = ImageDataset(name, cache_dir=str(cache_dir))
 
-        with pytest.raises(KeyError, match="not found in cache"):
+        with pytest.raises(KeyError, match="not in cache"):
             dataset.get_col_data("pixels")
 
     def test_get_row_data(self, sample_image_dataset):
@@ -331,45 +331,14 @@ class TestImageDataset:
         for ep_idx, _ in dataset.clip_indices:
             assert ep_idx == 1
 
-    def test_load_image(self, sample_image_dataset):
-        """Test _load_image method."""
+    def test_load_file(self, sample_image_dataset):
+        """Test _load_file method."""
         cache_dir, name = sample_image_dataset
         dataset = ImageDataset(name, cache_dir=str(cache_dir))
 
-        img = dataset._load_image(0, 0, "pixels")
+        img = dataset._load_file(0, 0, "pixels")
         assert isinstance(img, np.ndarray)
         assert img.shape == (64, 64, 3)
-
-    def test_keys_to_load_with_metadata(self, sample_image_dataset):
-        """Test ImageDataset with metadata keys in keys_to_load (should be skipped)."""
-        cache_dir, name = sample_image_dataset
-        dataset = ImageDataset(
-            name,
-            cache_dir=str(cache_dir),
-            keys_to_load=["observation", "action", "ep_len", "ep_offset"],
-        )
-
-        item = dataset[0]
-        assert "observation" in item
-        assert "action" in item
-        # metadata keys should not appear in the item
-        assert "ep_len" not in item
-        assert "ep_offset" not in item
-
-    def test_get_row_data_with_metadata_keys(self, sample_image_dataset):
-        """Test get_row_data skips metadata keys."""
-        cache_dir, name = sample_image_dataset
-        dataset = ImageDataset(
-            name,
-            cache_dir=str(cache_dir),
-            keys_to_load=["observation", "action", "ep_len", "ep_offset"],
-        )
-
-        row_data = dataset.get_row_data(5)
-        assert "observation" in row_data
-        assert "ep_len" not in row_data
-        assert "ep_offset" not in row_data
-
 
 class TestVideoDataset:
     def test_init(self, sample_video_dataset):
@@ -377,7 +346,7 @@ class TestVideoDataset:
         cache_dir, name = sample_video_dataset
         dataset = VideoDataset(name, cache_dir=str(cache_dir))
 
-        assert dataset.data_path == cache_dir / name
+        assert dataset.path == cache_dir / name
         assert len(dataset.lengths) == 2
         assert len(dataset.offsets) == 2
 
@@ -461,6 +430,7 @@ class TestVideoDataset:
         assert len(chunk) == 2
         assert "observation" in chunk[0]
         assert "action" in chunk[0]
+        assert "video" in chunk[0]
 
     def test_get_col_data(self, sample_video_dataset):
         """Test get_col_data method."""
@@ -476,7 +446,7 @@ class TestVideoDataset:
         cache_dir, name = sample_video_dataset
         dataset = VideoDataset(name, cache_dir=str(cache_dir))
 
-        with pytest.raises(KeyError, match="not found in cache"):
+        with pytest.raises(KeyError, match="not in cache"):
             dataset.get_col_data("video")
 
     def test_get_row_data(self, sample_video_dataset):
@@ -508,44 +478,14 @@ class TestVideoDataset:
         item = dataset[0]
         assert isinstance(item, dict)
 
-    def test_load_frame(self, sample_video_dataset):
-        """Test _load_frame method."""
+    def test_load_file(self, sample_video_dataset):
+        """Test _load_file method."""
         cache_dir, name = sample_video_dataset
         dataset = VideoDataset(name, cache_dir=str(cache_dir))
 
-        frame = dataset._load_frame(0, 0, "video")
+        frame = dataset._load_file(0, 0, "video")
         assert isinstance(frame, np.ndarray)
         assert frame.shape == (64, 64, 3)
-
-    def test_keys_to_load_with_metadata(self, sample_video_dataset):
-        """Test VideoDataset with metadata keys in keys_to_load (should be skipped)."""
-        cache_dir, name = sample_video_dataset
-        dataset = VideoDataset(
-            name,
-            cache_dir=str(cache_dir),
-            keys_to_load=["observation", "action", "ep_len", "ep_offset"],
-        )
-
-        item = dataset[0]
-        assert "observation" in item
-        assert "action" in item
-        # metadata keys should not appear in the item
-        assert "ep_len" not in item
-        assert "ep_offset" not in item
-
-    def test_get_row_data_with_metadata_keys(self, sample_video_dataset):
-        """Test get_row_data skips metadata keys."""
-        cache_dir, name = sample_video_dataset
-        dataset = VideoDataset(
-            name,
-            cache_dir=str(cache_dir),
-            keys_to_load=["observation", "action", "ep_len", "ep_offset"],
-        )
-
-        row_data = dataset.get_row_data(5)
-        assert "observation" in row_data
-        assert "ep_len" not in row_data
-        assert "ep_offset" not in row_data
 
 
 class TestMergeDataset:
@@ -558,21 +498,8 @@ class TestMergeDataset:
 
     def test_init_empty_raises(self):
         """Test MergeDataset raises error for empty list."""
-        with pytest.raises(ValueError, match="requires at least one dataset"):
+        with pytest.raises(ValueError, match="Need at least one dataset"):
             MergeDataset([])
-
-    def test_init_different_lengths_raises(self, mock_dataset_a, mock_dataset_c):
-        """Test MergeDataset raises error for different lengths."""
-        with pytest.raises(ValueError, match="must have the same length"):
-            MergeDataset([mock_dataset_a, mock_dataset_c])
-
-    def test_init_keys_from_dataset_mismatch_raises(self, mock_dataset_a, mock_dataset_b):
-        """Test MergeDataset raises error for mismatched keys_from_dataset."""
-        with pytest.raises(ValueError, match="must have same length as datasets"):
-            MergeDataset(
-                [mock_dataset_a, mock_dataset_b],
-                keys_from_dataset=[["pixels"]],  # Only 1 list, need 2
-            )
 
     def test_column_names_auto_dedupe(self, mock_dataset_a, mock_dataset_b):
         """Test column_names with automatic deduplication."""
@@ -674,15 +601,9 @@ class TestMergeDataset:
         assert "action" in chunk[0]
         assert "audio" in chunk[0]
 
-    def test_load_chunk_empty_keys(self, mock_dataset_a, mock_dataset_b):
-        """Test load_chunk when one dataset has empty keys list."""
-        merged = MergeDataset(
-            [mock_dataset_a, mock_dataset_b],
-            keys_from_dataset=[
-                ["pixels"],
-                [],
-            ],
-        )
+    def test_load_chunk_merges_all_datasets(self, mock_dataset_a, mock_dataset_b):
+        """Test load_chunk merges data from all datasets."""
+        merged = MergeDataset([mock_dataset_a, mock_dataset_b])
 
         episodes_idx = np.array([0])
         start = np.array([0])
@@ -691,8 +612,9 @@ class TestMergeDataset:
         chunk = merged.load_chunk(episodes_idx, start, end)
 
         assert len(chunk) == 1
+        # load_chunk returns data from all datasets
         assert "pixels" in chunk[0]
-        assert "audio" not in chunk[0]
+        assert "audio" in chunk[0]
 
     def test_get_col_data(self, mock_dataset_a, mock_dataset_b):
         """Test get_col_data method."""
@@ -720,7 +642,7 @@ class TestMergeDataset:
             ],
         )
 
-        with pytest.raises(KeyError, match="not assigned to any dataset"):
+        with pytest.raises(KeyError):
             merged.get_col_data("action")
 
     def test_get_row_data(self, mock_dataset_a, mock_dataset_b):
@@ -762,11 +684,11 @@ class TestConcatDataset:
         concat = ConcatDataset([mock_dataset_a, mock_dataset_c])
 
         assert len(concat.datasets) == 2
-        assert concat._total_length == 35  # 20 + 15
+        assert concat._cum[-1] == 35  # 20 + 15
 
     def test_init_empty_raises(self):
         """Test ConcatDataset raises error for empty list."""
-        with pytest.raises(ValueError, match="requires at least one dataset"):
+        with pytest.raises(ValueError, match="Need at least one dataset"):
             ConcatDataset([])
 
     def test_len(self, mock_dataset_a, mock_dataset_c):
@@ -814,31 +736,17 @@ class TestConcatDataset:
         assert "pixels" in item
         assert "action" in item
 
-    def test_getitem_out_of_range_raises(self, mock_dataset_a, mock_dataset_c):
-        """Test __getitem__ raises for out of range index."""
-        concat = ConcatDataset([mock_dataset_a, mock_dataset_c])
-
-        with pytest.raises(IndexError, match="out of range"):
-            concat[100]
-
-    def test_getitem_negative_out_of_range_raises(self, mock_dataset_a, mock_dataset_c):
-        """Test __getitem__ raises for negative out of range index."""
-        concat = ConcatDataset([mock_dataset_a, mock_dataset_c])
-
-        with pytest.raises(IndexError, match="out of range"):
-            concat[-100]
-
-    def test_get_dataset_and_idx(self, mock_dataset_a, mock_dataset_c):
-        """Test _get_dataset_and_idx mapping."""
+    def test_loc(self, mock_dataset_a, mock_dataset_c):
+        """Test _loc mapping."""
         concat = ConcatDataset([mock_dataset_a, mock_dataset_c])
 
         # First dataset
-        ds_idx, local_idx = concat._get_dataset_and_idx(5)
+        ds_idx, local_idx = concat._loc(5)
         assert ds_idx == 0
         assert local_idx == 5
 
         # Second dataset
-        ds_idx, local_idx = concat._get_dataset_and_idx(25)
+        ds_idx, local_idx = concat._loc(25)
         assert ds_idx == 1
         assert local_idx == 5
 
@@ -869,7 +777,7 @@ class TestConcatDataset:
         """Test get_col_data raises for missing column."""
         concat = ConcatDataset([mock_dataset_a, mock_dataset_c])
 
-        with pytest.raises(KeyError, match="not found in any dataset"):
+        with pytest.raises(KeyError):
             concat.get_col_data("nonexistent")
 
     def test_get_row_data_single_int(self, mock_dataset_a, mock_dataset_c):

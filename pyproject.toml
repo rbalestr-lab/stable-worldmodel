@@ -24,6 +24,7 @@ dependencies = [
   "h5py",
   "hdf5plugin",
   "tqdm",
+  "mkdocstrings[python]>=1.0.2",
 ]
 
 [project.optional-dependencies]
@@ -53,6 +54,7 @@ dev = [
   "twine",
   "mkdocs-shadcn",
   "pymdown-extensions",
+  "mkdocstrings[python]",
 ]
 
 [build-system]

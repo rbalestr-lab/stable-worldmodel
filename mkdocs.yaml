@@ -15,7 +15,54 @@ site_url: https://lucas-maes.github.io/stable-worldmodel/
 repo_url: https://github.com/lucas-maes/swm/
 
 nav:
-  - Start: index.md
+  - Home: index.md
+  - Environment:
+      - environments/pusht.md
+      - environments/dmc.md
+      - environments/ogb.md
+      - environments/tworoom.md
+  - Baseline:
+      - baseline/dinowm.md
+      - baseline/pldm.md
+      - baseline/gcbc.md
+      - baseline/iql.md
+  - Tutorial:
+      - tutorial/collect_data.md
+      - tutorial/new_env.md
+      - tutorial/training_wm.md 
+  - API:
+      - api/world.md
+      - api/policy.md
+      - api/solver.md
+      - api/spaces.md
+      - api/dataset.md
+      - api/wrapper.md
+
+plugins:
+  - search
+  - mkdocstrings:
+      handlers:
+        python:
+          inventories:
+          - https://docs.python.org/3/objects.inv
+          paths: [stable_worldmodel]
+          options:
+            docstring_options:
+              ignore_init_summary: true
+            docstring_section_style: list
+            filters: ["!^_"]
+            heading_level: 3
+            inherited_members: false
+            merge_init_into_class: true
+            separate_signature: true
+            show_root_heading: true
+            show_root_full_path: false
+            show_signature_annotations: true
+            show_symbol_type_heading: true
+            show_symbol_type_toc: true
+            show_source: false
+            signature_crossrefs: true
+            summary: true
 
 markdown_extensions:
   - codehilite

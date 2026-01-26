@@ -3,7 +3,7 @@ from unittest.mock import MagicMock
 import gymnasium as gym
 import pytest
 
-from stable_worldmodel import wrappers
+from stable_worldmodel import wrapper
 
 
 @pytest.fixture
@@ -22,26 +22,26 @@ def minimal_env():
 
 def test_ensure_info_keys_wrapper_check_logic_success_single_key(minimal_env):
     infos = {"key1": "value1", "key2": "value2"}
-    env = wrappers.EnsureInfoKeysWrapper(minimal_env, required_keys=["key1"])
+    env = wrapper.EnsureInfoKeysWrapper(minimal_env, required_keys=["key1"])
     env._check(infos, where="test")
 
 
 def test_ensure_info_keys_wrapper_check_logic_success_multiple_key(minimal_env):
     infos = {"key1": "value1", "key2": "value2"}
-    env = wrappers.EnsureInfoKeysWrapper(minimal_env, required_keys=["key1", "key2"])
+    env = wrapper.EnsureInfoKeysWrapper(minimal_env, required_keys=["key1", "key2"])
     env._check(infos, where="test")
 
 
 def test_ensure_info_keys_wrapper_check_logic_fail_single_key(minimal_env):
     infos = {"key1": "value1", "key2": "value2"}
-    env = wrappers.EnsureInfoKeysWrapper(minimal_env, required_keys=["info"])
+    env = wrapper.EnsureInfoKeysWrapper(minimal_env, required_keys=["info"])
     with pytest.raises(RuntimeError):
         env._check(infos, where="test")
 
 
 def test_ensure_info_keys_wrapper_check_logic_fail_multiple_key(minimal_env):
     infos = {"key1": "value1", "key2": "value2"}
-    env = wrappers.EnsureInfoKeysWrapper(minimal_env, required_keys=["key1", "info"])
+    env = wrapper.EnsureInfoKeysWrapper(minimal_env, required_keys=["key1", "info"])
     with pytest.raises(RuntimeError):
         env._check(infos, where="test")
 
@@ -52,7 +52,7 @@ def test_ensure_info_keys_wrapper_reset_success(minimal_env):
     info = {"key1": "value1", "key2": "value2"}
     minimal_env.reset.return_value = (obs, info)
 
-    wrapped_env = wrappers.EnsureInfoKeysWrapper(minimal_env, required_keys=["key1"])
+    wrapped_env = wrapper.EnsureInfoKeysWrapper(minimal_env, required_keys=["key1"])
     result_obs, result_info = wrapped_env.reset()
 
     assert result_obs == obs
@@ -66,7 +66,7 @@ def test_ensure_info_keys_wrapper_reset_fail(minimal_env):
     info = {"key1": "value1", "key2": "value2"}
     minimal_env.reset.return_value = (obs, info)
 
-    wrapped_env = wrappers.EnsureInfoKeysWrapper(minimal_env, required_keys=["missing_key"])
+    wrapped_env = wrapper.EnsureInfoKeysWrapper(minimal_env, required_keys=["missing_key"])
 
     with pytest.raises(RuntimeError):
         wrapped_env.reset()
@@ -81,7 +81,7 @@ def test_ensure_info_keys_wrapper_step_success(minimal_env):
     info = {"key1": "value1", "key2": "value2"}
     minimal_env.step.return_value = (obs, reward, terminated, truncated, info)
 
-    wrapped_env = wrappers.EnsureInfoKeysWrapper(minimal_env, required_keys=["key1", "key2"])
+    wrapped_env = wrapper.EnsureInfoKeysWrapper(minimal_env, required_keys=["key1", "key2"])
     action = 0.5
     result = wrapped_env.step(action)
 
@@ -98,7 +98,7 @@ def test_ensure_info_keys_wrapper_step_fail(minimal_env):
     info = {"key1": "value1"}
     minimal_env.step.return_value = (obs, reward, terminated, truncated, info)
 
-    wrapped_env = wrappers.EnsureInfoKeysWrapper(minimal_env, required_keys=["key1", "missing_key"])
+    wrapped_env = wrapper.EnsureInfoKeysWrapper(minimal_env, required_keys=["key1", "missing_key"])
 
     with pytest.raises(RuntimeError):
         wrapped_env.step(0.5)
@@ -110,7 +110,7 @@ def test_ensure_info_keys_wrapper_regex_pattern(minimal_env):
     info = {"pixels.camera1": "image1", "pixels.camera2": "image2", "other_key": "value"}
     minimal_env.reset.return_value = (obs, info)
 
-    wrapped_env = wrappers.EnsureInfoKeysWrapper(minimal_env, required_keys=[r"pixels\..*"])
+    wrapped_env = wrapper.EnsureInfoKeysWrapper(minimal_env, required_keys=[r"pixels\..*"])
     result_obs, result_info = wrapped_env.reset()
 
     assert result_obs == obs
@@ -123,7 +123,7 @@ def test_ensure_info_keys_wrapper_regex_dotted_keys_success(minimal_env):
     info = {"variation.color": "red", "variation.size": "large", "other": "value"}
     minimal_env.reset.return_value = (obs, info)
 
-    wrapped_env = wrappers.EnsureInfoKeysWrapper(minimal_env, required_keys=[r"variation\.color"])
+    wrapped_env = wrapper.EnsureInfoKeysWrapper(minimal_env, required_keys=[r"variation\.color"])
     result_obs, result_info = wrapped_env.reset()
 
     assert result_obs == obs
@@ -142,7 +142,7 @@ def test_ensure_info_keys_wrapper_regex_dotted_keys_wildcard(minimal_env):
     }
     minimal_env.step.return_value = (obs, 1.0, False, False, info)
 
-    wrapped_env = wrappers.EnsureInfoKeysWrapper(minimal_env, required_keys=[r"variation\..*"])
+    wrapped_env = wrapper.EnsureInfoKeysWrapper(minimal_env, required_keys=[r"variation\..*"])
     result = wrapped_env.step(0.5)
 
     assert result[0] == obs
@@ -155,7 +155,7 @@ def test_ensure_info_keys_wrapper_regex_dotted_keys_fail(minimal_env):
     info = {"variation.color": "red", "other": "value"}
     minimal_env.reset.return_value = (obs, info)
 
-    wrapped_env = wrappers.EnsureInfoKeysWrapper(minimal_env, required_keys=[r"variation\.size"])
+    wrapped_env = wrapper.EnsureInfoKeysWrapper(minimal_env, required_keys=[r"variation\.size"])
 
     with pytest.raises(RuntimeError):
         wrapped_env.reset()
@@ -167,7 +167,7 @@ def test_ensure_info_keys_wrapper_regex_multiple_patterns(minimal_env):
     info = {"pixels.front": "img1", "pixels.back": "img2", "variation.color": "blue", "reward": 1.0}
     minimal_env.step.return_value = (obs, 1.0, False, False, info)
 
-    wrapped_env = wrappers.EnsureInfoKeysWrapper(minimal_env, required_keys=[r"pixels\..*", r"variation\..*"])
+    wrapped_env = wrapper.EnsureInfoKeysWrapper(minimal_env, required_keys=[r"pixels\..*", r"variation\..*"])
     result = wrapped_env.step(0.5)
 
     assert result[4] == info
@@ -184,7 +184,7 @@ def test_ensure_info_keys_wrapper_regex_nested_dotted_keys(minimal_env):
     }
     minimal_env.reset.return_value = (obs, info)
 
-    wrapped_env = wrappers.EnsureInfoKeysWrapper(minimal_env, required_keys=[r"env\.variation\.position\..*"])
+    wrapped_env = wrapper.EnsureInfoKeysWrapper(minimal_env, required_keys=[r"env\.variation\.position\..*"])
     result_obs, result_info = wrapped_env.reset()
 
     assert result_info == info
@@ -196,7 +196,7 @@ def test_ensure_info_keys_wrapper_regex_exact_vs_pattern(minimal_env):
     info = {"exact_key": "value1", "pixels.camera1": "img1", "pixels.camera2": "img2"}
     minimal_env.reset.return_value = (obs, info)
 
-    wrapped_env = wrappers.EnsureInfoKeysWrapper(minimal_env, required_keys=["exact_key", r"pixels\..*"])
+    wrapped_env = wrapper.EnsureInfoKeysWrapper(minimal_env, required_keys=["exact_key", r"pixels\..*"])
     result_obs, result_info = wrapped_env.reset()
 
     assert result_info == info
@@ -217,7 +217,7 @@ def test_ensure_image_shape_reset_success(minimal_env):
     info = {"pixels": image}
     minimal_env.reset.return_value = (obs, info)
 
-    wrapped_env = wrappers.EnsureImageShape(minimal_env, image_key="pixels", image_shape=(64, 64))
+    wrapped_env = wrapper.EnsureImageShape(minimal_env, image_key="pixels", image_shape=(64, 64))
     result_obs, result_info = wrapped_env.reset()
 
     assert result_obs == obs
@@ -236,7 +236,7 @@ def test_ensure_image_shape_reset_fail(minimal_env):
     minimal_env.reset.return_value = (obs, info)
 
     # Expect different shape
-    wrapped_env = wrappers.EnsureImageShape(minimal_env, image_key="pixels", image_shape=(84, 84))
+    wrapped_env = wrapper.EnsureImageShape(minimal_env, image_key="pixels", image_shape=(84, 84))
 
     with pytest.raises(RuntimeError):
         wrapped_env.reset()
@@ -255,7 +255,7 @@ def test_ensure_image_shape_step_success(minimal_env):
     info = {"image": image}
     minimal_env.step.return_value = (obs, reward, terminated, truncated, info)
 
-    wrapped_env = wrappers.EnsureImageShape(minimal_env, image_key="image", image_shape=(128, 128))
+    wrapped_env = wrapper.EnsureImageShape(minimal_env, image_key="image", image_shape=(128, 128))
     action = 0.5
     result = wrapped_env.step(action)
 
@@ -277,7 +277,7 @@ def test_ensure_image_shape_step_fail(minimal_env):
     minimal_env.step.return_value = (obs, reward, terminated, truncated, info)
 
     # Expect different shape
-    wrapped_env = wrappers.EnsureImageShape(minimal_env, image_key="pixels", image_shape=(128, 128))
+    wrapped_env = wrapper.EnsureImageShape(minimal_env, image_key="pixels", image_shape=(128, 128))
 
     with pytest.raises(RuntimeError):
         wrapped_env.step(0.5)
@@ -294,7 +294,7 @@ def test_ensure_image_shape_different_channels(minimal_env):
     minimal_env.reset.return_value = (obs, info_gray)
 
     # Should succeed because shape[:-1] is (64, 64) regardless of channels
-    wrapped_env = wrappers.EnsureImageShape(minimal_env, image_key="pixels", image_shape=(64, 64))
+    wrapped_env = wrapper.EnsureImageShape(minimal_env, image_key="pixels", image_shape=(64, 64))
     result_obs, result_info = wrapped_env.reset()
 
     assert result_info == info_gray
@@ -319,7 +319,7 @@ def test_ensure_image_shape_non_square_images(minimal_env):
     info = {"camera": image}
     minimal_env.step.return_value = (obs, 1.0, False, False, info)
 
-    wrapped_env = wrappers.EnsureImageShape(minimal_env, image_key="camera", image_shape=(480, 640))
+    wrapped_env = wrapper.EnsureImageShape(minimal_env, image_key="camera", image_shape=(480, 640))
     result = wrapped_env.step(0.5)
 
     assert result[4] == info
@@ -336,14 +336,14 @@ def test_ensure_image_shape_multiple_images_different_keys(minimal_env):
     minimal_env.reset.return_value = (obs, info)
 
     # Wrap for first image
-    wrapped_env = wrappers.EnsureImageShape(minimal_env, image_key="pixels.front", image_shape=(64, 64))
+    wrapped_env = wrapper.EnsureImageShape(minimal_env, image_key="pixels.front", image_shape=(64, 64))
     result_obs, result_info = wrapped_env.reset()
 
     assert result_info == info
 
     # If we wrap for the second image with wrong shape, it should fail
     minimal_env.reset.return_value = (obs, info)
-    wrapped_env2 = wrappers.EnsureImageShape(minimal_env, image_key="pixels.back", image_shape=(64, 64))
+    wrapped_env2 = wrapper.EnsureImageShape(minimal_env, image_key="pixels.back", image_shape=(64, 64))
 
     with pytest.raises(RuntimeError):
         wrapped_env2.reset()
@@ -360,7 +360,7 @@ def test_ensure_goal_info_wrapper_reset_success_check_enabled(minimal_env):
     info = {"goal": "target", "other_key": "value"}
     minimal_env.reset.return_value = (obs, info)
 
-    wrapped_env = wrappers.EnsureGoalInfoWrapper(minimal_env, check_reset=True)
+    wrapped_env = wrapper.EnsureGoalInfoWrapper(minimal_env, check_reset=True)
     result_obs, result_info = wrapped_env.reset()
 
     assert result_obs == obs
@@ -374,7 +374,7 @@ def test_ensure_goal_info_wrapper_reset_fail_check_enabled(minimal_env):
     info = {"other_key": "value"}
     minimal_env.reset.return_value = (obs, info)
 
-    wrapped_env = wrappers.EnsureGoalInfoWrapper(minimal_env, check_reset=True)
+    wrapped_env = wrapper.EnsureGoalInfoWrapper(minimal_env, check_reset=True)
 
     with pytest.raises(RuntimeError):
         wrapped_env.reset()
@@ -386,7 +386,7 @@ def test_ensure_goal_info_wrapper_reset_no_check(minimal_env):
     info = {"other_key": "value"}
     minimal_env.reset.return_value = (obs, info)
 
-    wrapped_env = wrappers.EnsureGoalInfoWrapper(minimal_env, check_reset=False)
+    wrapped_env = wrapper.EnsureGoalInfoWrapper(minimal_env, check_reset=False)
     result_obs, result_info = wrapped_env.reset()
 
     assert result_obs == obs
@@ -402,7 +402,7 @@ def test_ensure_goal_info_wrapper_step_success_check_enabled(minimal_env):
     info = {"goal": "target", "other_key": "value"}
     minimal_env.step.return_value = (obs, reward, terminated, truncated, info)
 
-    wrapped_env = wrappers.EnsureGoalInfoWrapper(minimal_env, check_reset=False, check_step=True)
+    wrapped_env = wrapper.EnsureGoalInfoWrapper(minimal_env, check_reset=False, check_step=True)
     action = 0.5
     result = wrapped_env.step(action)
 
@@ -419,7 +419,7 @@ def test_ensure_goal_info_wrapper_step_fail_check_enabled(minimal_env):
     info = {"other_key": "value"}
     minimal_env.step.return_value = (obs, reward, terminated, truncated, info)
 
-    wrapped_env = wrappers.EnsureGoalInfoWrapper(minimal_env, check_reset=False, check_step=True)
+    wrapped_env = wrapper.EnsureGoalInfoWrapper(minimal_env, check_reset=False, check_step=True)
 
     with pytest.raises(RuntimeError):
         wrapped_env.step(0.5)
@@ -434,7 +434,7 @@ def test_ensure_goal_info_wrapper_step_no_check(minimal_env):
     info = {"other_key": "value"}
     minimal_env.step.return_value = (obs, reward, terminated, truncated, info)
 
-    wrapped_env = wrappers.EnsureGoalInfoWrapper(minimal_env, check_reset=False, check_step=False)
+    wrapped_env = wrapper.EnsureGoalInfoWrapper(minimal_env, check_reset=False, check_step=False)
     result = wrapped_env.step(0.5)
 
     assert result == (obs, reward, terminated, truncated, info)
@@ -447,7 +447,7 @@ def test_ensure_goal_info_wrapper_both_checks_enabled(minimal_env):
     minimal_env.reset.return_value = (obs, info_with_goal)
     minimal_env.step.return_value = (obs, 1.0, False, False, info_with_goal)
 
-    wrapped_env = wrappers.EnsureGoalInfoWrapper(minimal_env, check_reset=True, check_step=True)
+    wrapped_env = wrapper.EnsureGoalInfoWrapper(minimal_env, check_reset=True, check_step=True)
 
     result_obs, result_info = wrapped_env.reset()
     assert result_info == info_with_goal
@@ -463,7 +463,7 @@ def test_ensure_goal_info_wrapper_both_checks_enabled_fail(minimal_env):
     minimal_env.reset.return_value = (obs, info_no_goal)
     minimal_env.step.return_value = (obs, 1.0, False, False, info_no_goal)
 
-    wrapped_env = wrappers.EnsureGoalInfoWrapper(minimal_env, check_reset=True, check_step=True)
+    wrapped_env = wrapper.EnsureGoalInfoWrapper(minimal_env, check_reset=True, check_step=True)
 
     with pytest.raises(RuntimeError):
         wrapped_env.reset()
@@ -478,7 +478,7 @@ def test_ensure_goal_info_wrapper_default_check_step(minimal_env):
     info_no_goal = {"other": "value"}
     minimal_env.step.return_value = (obs, 1.0, False, False, info_no_goal)
 
-    wrapped_env = wrappers.EnsureGoalInfoWrapper(minimal_env, check_reset=False)
+    wrapped_env = wrapper.EnsureGoalInfoWrapper(minimal_env, check_reset=False)
     result = wrapped_env.step(0.5)
 
     assert result[4] == info_no_goal
@@ -499,7 +499,7 @@ def test_everything_to_info_wrapper_reset_non_dict_obs(minimal_env):
     minimal_env.action_space = MagicMock()
     minimal_env.action_space.sample = MagicMock(return_value=0.5)
 
-    wrapped_env = wrappers.EverythingToInfoWrapper(minimal_env)
+    wrapped_env = wrapper.EverythingToInfoWrapper(minimal_env)
     result_obs, result_info = wrapped_env.reset()
 
     # Original obs should be returned
@@ -527,7 +527,7 @@ def test_everything_to_info_wrapper_reset_dict_obs(minimal_env):
     minimal_env.action_space = MagicMock()
     minimal_env.action_space.sample = MagicMock(return_value=0.5)
 
-    wrapped_env = wrappers.EverythingToInfoWrapper(minimal_env)
+    wrapped_env = wrapper.EverythingToInfoWrapper(minimal_env)
     result_obs, result_info = wrapped_env.reset()
 
     # Original obs should be returned
@@ -554,7 +554,7 @@ def test_everything_to_info_wrapper_step_non_dict_obs(minimal_env):
     minimal_env.reset.return_value = (reset_obs, {})
     minimal_env.action_space = MagicMock()
     minimal_env.action_space.sample = MagicMock(return_value=0.5)
-    wrapped_env = wrappers.EverythingToInfoWrapper(minimal_env)
+    wrapped_env = wrapper.EverythingToInfoWrapper(minimal_env)
     wrapped_env.reset()
 
     # Now test step
@@ -590,7 +590,7 @@ def test_everything_to_info_wrapper_step_dict_obs(minimal_env):
     minimal_env.reset.return_value = ({"state": "init"}, {})
     minimal_env.action_space = MagicMock()
     minimal_env.action_space.sample = MagicMock(return_value=0.5)
-    wrapped_env = wrappers.EverythingToInfoWrapper(minimal_env)
+    wrapped_env = wrapper.EverythingToInfoWrapper(minimal_env)
     wrapped_env.reset()
 
     # Now test step
@@ -629,7 +629,7 @@ def test_everything_to_info_wrapper_step_counter(minimal_env):
     minimal_env.action_space = MagicMock()
     minimal_env.action_space.sample = MagicMock(return_value=0.5)
 
-    wrapped_env = wrappers.EverythingToInfoWrapper(minimal_env)
+    wrapped_env = wrapper.EverythingToInfoWrapper(minimal_env)
 
     # Reset should have step_idx = 0
     _, info = wrapped_env.reset()
@@ -660,7 +660,7 @@ def test_everything_to_info_wrapper_action_nan_in_reset(minimal_env):
     minimal_env.action_space = MagicMock()
     minimal_env.action_space.sample = MagicMock(return_value=np.array([0.5, 0.6]))
 
-    wrapped_env = wrappers.EverythingToInfoWrapper(minimal_env)
+    wrapped_env = wrapper.EverythingToInfoWrapper(minimal_env)
     _, result_info = wrapped_env.reset()
 
     # Action should be NaN
@@ -675,7 +675,7 @@ def test_everything_to_info_wrapper_terminated_truncated_bool_conversion(minimal
     minimal_env.reset.return_value = (np.array([0]), {})
     minimal_env.action_space = MagicMock()
     minimal_env.action_space.sample = MagicMock(return_value=0.5)
-    wrapped_env = wrappers.EverythingToInfoWrapper(minimal_env)
+    wrapped_env = wrapper.EverythingToInfoWrapper(minimal_env)
     wrapped_env.reset()
 
     # Use numpy bool (should be converted to Python bool)
@@ -702,7 +702,7 @@ def test_everything_to_info_wrapper_no_key_collision(minimal_env):
     minimal_env.action_space = MagicMock()
     minimal_env.action_space.sample = MagicMock(return_value=0.5)
 
-    wrapped_env = wrappers.EverythingToInfoWrapper(minimal_env)
+    wrapped_env = wrapper.EverythingToInfoWrapper(minimal_env)
 
     with pytest.raises(AssertionError):
         wrapped_env.reset()
@@ -719,7 +719,7 @@ def test_everything_to_info_wrapper_dict_action_not_implemented(minimal_env):
     minimal_env.action_space = MagicMock()
     minimal_env.action_space.sample = MagicMock(return_value={"arm": 0.5, "gripper": 0.3})
 
-    wrapped_env = wrappers.EverythingToInfoWrapper(minimal_env)
+    wrapped_env = wrapper.EverythingToInfoWrapper(minimal_env)
 
     with pytest.raises(NotImplementedError):
         wrapped_env.reset()
@@ -743,7 +743,7 @@ def test_everything_to_info_wrapper_with_variation_single(minimal_env):
     minimal_env.unwrapped = MagicMock()
     minimal_env.unwrapped.variation_space = mock_variation_space
 
-    wrapped_env = wrappers.EverythingToInfoWrapper(minimal_env)
+    wrapped_env = wrapper.EverythingToInfoWrapper(minimal_env)
 
     # Call reset with variation option
     result_obs, result_info = wrapped_env.reset(options={"variation": ["color"]})
@@ -772,7 +772,7 @@ def test_everything_to_info_wrapper_with_variation_all(minimal_env):
     minimal_env.unwrapped = MagicMock()
     minimal_env.unwrapped.variation_space = mock_variation_space
 
-    wrapped_env = wrappers.EverythingToInfoWrapper(minimal_env)
+    wrapped_env = wrapper.EverythingToInfoWrapper(minimal_env)
 
     # Call reset with variation option set to "all"
     result_obs, result_info = wrapped_env.reset(options={"variation": ["all"]})
@@ -802,7 +802,7 @@ def test_everything_to_info_wrapper_with_variation_multiple(minimal_env):
     minimal_env.unwrapped = MagicMock()
     minimal_env.unwrapped.variation_space = mock_variation_space
 
-    wrapped_env = wrappers.EverythingToInfoWrapper(minimal_env)
+    wrapped_env = wrapper.EverythingToInfoWrapper(minimal_env)
 
     # Call reset with multiple variation keys
     result_obs, result_info = wrapped_env.reset(options={"variation": ["color", "size"]})
@@ -832,7 +832,7 @@ def test_everything_to_info_wrapper_variation_persists_in_step(minimal_env):
     minimal_env.unwrapped = MagicMock()
     minimal_env.unwrapped.variation_space = mock_variation_space
 
-    wrapped_env = wrappers.EverythingToInfoWrapper(minimal_env)
+    wrapped_env = wrapper.EverythingToInfoWrapper(minimal_env)
 
     # Call reset with variation
     wrapped_env.reset(options={"variation": ["color"]})
@@ -866,7 +866,7 @@ def test_add_pixels_wrapper_reset_single_image(minimal_env):
     minimal_env.render = MagicMock(return_value=rendered_image)
     minimal_env.unwrapped = minimal_env
 
-    wrapped_env = wrappers.AddPixelsWrapper(minimal_env, pixels_shape=(84, 84))
+    wrapped_env = wrapper.AddPixelsWrapper(minimal_env, pixels_shape=(84, 84))
     result_obs, result_info = wrapped_env.reset()
 
     # Check that pixels key is added
@@ -894,7 +894,7 @@ def test_add_pixels_wrapper_reset_dict_images(minimal_env):
     minimal_env.render = MagicMock(return_value=rendered_images)
     minimal_env.unwrapped = minimal_env
 
-    wrapped_env = wrappers.AddPixelsWrapper(minimal_env, pixels_shape=(64, 64))
+    wrapped_env = wrapper.AddPixelsWrapper(minimal_env, pixels_shape=(64, 64))
     result_obs, result_info = wrapped_env.reset()
 
     # Check that pixels.front and pixels.back keys are added
@@ -920,7 +920,7 @@ def test_add_pixels_wrapper_reset_list_images(minimal_env):
     minimal_env.render = MagicMock(return_value=rendered_images)
     minimal_env.unwrapped = minimal_env
 
-    wrapped_env = wrappers.AddPixelsWrapper(minimal_env, pixels_shape=(64, 64))
+    wrapped_env = wrapper.AddPixelsWrapper(minimal_env, pixels_shape=(64, 64))
     result_obs, result_info = wrapped_env.reset()
 
     # Check that pixels.0 and pixels.1 keys are added
@@ -945,7 +945,7 @@ def test_add_pixels_wrapper_step_single_image(minimal_env):
     minimal_env.render = MagicMock(return_value=rendered_image)
     minimal_env.unwrapped = minimal_env
 
-    wrapped_env = wrappers.AddPixelsWrapper(minimal_env, pixels_shape=(96, 96))
+    wrapped_env = wrapper.AddPixelsWrapper(minimal_env, pixels_shape=(96, 96))
     result = wrapped_env.step(0.5)
 
     # Check that pixels key is added to info
@@ -978,7 +978,7 @@ def test_add_pixels_wrapper_render_multiview_priority(minimal_env):
     minimal_env.unwrapped = MagicMock()
     minimal_env.unwrapped.render_multiview = MagicMock(return_value=multiview_images)
 
-    wrapped_env = wrappers.AddPixelsWrapper(minimal_env, pixels_shape=(64, 64))
+    wrapped_env = wrapper.AddPixelsWrapper(minimal_env, pixels_shape=(64, 64))
     result_obs, result_info = wrapped_env.reset()
 
     # render_multiview should be called, not render
@@ -1003,7 +1003,7 @@ def test_add_pixels_wrapper_no_render_multiview(minimal_env):
     minimal_env.render = MagicMock(return_value=single_image)
     minimal_env.unwrapped = minimal_env
 
-    wrapped_env = wrappers.AddPixelsWrapper(minimal_env, pixels_shape=(64, 64))
+    wrapped_env = wrapper.AddPixelsWrapper(minimal_env, pixels_shape=(64, 64))
     result_obs, result_info = wrapped_env.reset()
 
     # render should be called
@@ -1025,7 +1025,7 @@ def test_add_pixels_wrapper_custom_shape(minimal_env):
     minimal_env.unwrapped = minimal_env
 
     # Use non-square shape
-    wrapped_env = wrappers.AddPixelsWrapper(minimal_env, pixels_shape=(128, 256))  # (height, width)
+    wrapped_env = wrapper.AddPixelsWrapper(minimal_env, pixels_shape=(128, 256))  # (height, width)
     result_obs, result_info = wrapped_env.reset()
 
     assert "pixels" in result_info
@@ -1046,7 +1046,7 @@ def test_add_pixels_wrapper_with_transform(minimal_env):
     # Create a simple transform mock
     transform_mock = MagicMock(return_value=np.array([[1, 2], [3, 4]]))
 
-    wrapped_env = wrappers.AddPixelsWrapper(minimal_env, pixels_shape=(64, 64), torchvision_transform=transform_mock)
+    wrapped_env = wrapper.AddPixelsWrapper(minimal_env, pixels_shape=(64, 64), torchvision_transform=transform_mock)
     result_obs, result_info = wrapped_env.reset()
 
     # Transform should be called
@@ -1067,7 +1067,7 @@ def test_add_pixels_wrapper_preserves_existing_info(minimal_env):
     minimal_env.render = MagicMock(return_value=rendered_image)
     minimal_env.unwrapped = minimal_env
 
-    wrapped_env = wrappers.AddPixelsWrapper(minimal_env, pixels_shape=(64, 64))
+    wrapped_env = wrapper.AddPixelsWrapper(minimal_env, pixels_shape=(64, 64))
     result_obs, result_info = wrapped_env.reset()
 
     # Existing keys should be preserved
@@ -1093,7 +1093,7 @@ def test_resize_goal_wrapper_reset_success(minimal_env):
     info = {"goal": goal_image, "other_key": "value"}
     minimal_env.reset.return_value = (obs, info)
 
-    wrapped_env = wrappers.ResizeGoalWrapper(minimal_env, pixels_shape=(64, 64))
+    wrapped_env = wrapper.ResizeGoalWrapper(minimal_env, pixels_shape=(64, 64))
     result_obs, result_info = wrapped_env.reset()
 
     # Check that goal is resized
@@ -1118,7 +1118,7 @@ def test_resize_goal_wrapper_step_success(minimal_env):
     info = {"goal": goal_image}
     minimal_env.step.return_value = (obs, reward, terminated, truncated, info)
 
-    wrapped_env = wrappers.ResizeGoalWrapper(minimal_env, pixels_shape=(84, 84))
+    wrapped_env = wrapper.ResizeGoalWrapper(minimal_env, pixels_shape=(84, 84))
     result = wrapped_env.step(0.5)
 
     # Check that goal is resized
@@ -1141,7 +1141,7 @@ def test_resize_goal_wrapper_non_square_shape(minimal_env):
     minimal_env.reset.return_value = (obs, info)
 
     # Use non-square shape (height, width)
-    wrapped_env = wrappers.ResizeGoalWrapper(minimal_env, pixels_shape=(128, 256))
+    wrapped_env = wrapper.ResizeGoalWrapper(minimal_env, pixels_shape=(128, 256))
     result_obs, result_info = wrapped_env.reset()
 
     # Check dimensions (height, width, channels)
@@ -1160,7 +1160,7 @@ def test_resize_goal_wrapper_with_transform(minimal_env):
     # Create a simple transform mock
     transform_mock = MagicMock(return_value=np.array([[5, 6], [7, 8]]))
 
-    wrapped_env = wrappers.ResizeGoalWrapper(minimal_env, pixels_shape=(64, 64), torchvision_transform=transform_mock)
+    wrapped_env = wrapper.ResizeGoalWrapper(minimal_env, pixels_shape=(64, 64), torchvision_transform=transform_mock)
     result_obs, result_info = wrapped_env.reset()
 
     # Transform should be called
@@ -1179,7 +1179,7 @@ def test_resize_goal_wrapper_preserves_other_info(minimal_env):
     info = {"goal": goal_image, "extra_data": "preserved", "score": 42}
     minimal_env.step.return_value = (obs, 1.0, False, False, info)
 
-    wrapped_env = wrappers.ResizeGoalWrapper(minimal_env, pixels_shape=(64, 64))
+    wrapped_env = wrapper.ResizeGoalWrapper(minimal_env, pixels_shape=(64, 64))
     result = wrapped_env.step(0.5)
 
     # Goal should be resized
@@ -1199,7 +1199,7 @@ def test_resize_goal_wrapper_default_shape(minimal_env):
     minimal_env.reset.return_value = (obs, info)
 
     # Use default shape
-    wrapped_env = wrappers.ResizeGoalWrapper(minimal_env)
+    wrapped_env = wrapper.ResizeGoalWrapper(minimal_env)
     result_obs, result_info = wrapped_env.reset()
 
     # Default shape should be (84, 84)
@@ -1216,7 +1216,7 @@ def test_resize_goal_wrapper_grayscale_goal(minimal_env):
     info = {"goal": goal_image}
     minimal_env.reset.return_value = (obs, info)
 
-    wrapped_env = wrappers.ResizeGoalWrapper(minimal_env, pixels_shape=(64, 64))
+    wrapped_env = wrapper.ResizeGoalWrapper(minimal_env, pixels_shape=(64, 64))
     result_obs, result_info = wrapped_env.reset()
 
     # Should resize to (64, 64) for grayscale
@@ -1237,7 +1237,7 @@ def test_resize_goal_wrapper_both_reset_and_step(minimal_env):
     step_goal = np.random.randint(0, 255, (120, 120, 3), dtype=np.uint8)
     minimal_env.step.return_value = (step_obs, 1.0, False, False, {"goal": step_goal})
 
-    wrapped_env = wrappers.ResizeGoalWrapper(minimal_env, pixels_shape=(48, 48))
+    wrapped_env = wrapper.ResizeGoalWrapper(minimal_env, pixels_shape=(48, 48))
 
     # Test reset
     result_obs, result_info = wrapped_env.reset()
@@ -1262,7 +1262,7 @@ def test_resize_goal_wrapper_different_input_sizes(minimal_env):
         goal_image = np.random.randint(0, 255, input_size, dtype=np.uint8)
         minimal_env.reset.return_value = (obs, {"goal": goal_image})
 
-        wrapped_env = wrappers.ResizeGoalWrapper(minimal_env, pixels_shape=target_shape)
+        wrapped_env = wrapper.ResizeGoalWrapper(minimal_env, pixels_shape=target_shape)
         result_obs, result_info = wrapped_env.reset()
 
         # All should resize to the target shape
@@ -1286,7 +1286,7 @@ def test_mega_wrapper_reset_basic(minimal_env):
     minimal_env.unwrapped = minimal_env
     minimal_env.action_space = MagicMock()
     minimal_env.action_space.sample = MagicMock(return_value=0.5)
-    wrapped_env = wrappers.MegaWrapper(minimal_env, image_shape=(64, 64))
+    wrapped_env = wrapper.MegaWrapper(minimal_env, image_shape=(64, 64))
     result_obs, result_info = wrapped_env.reset()
 
     # Check that pixels key is added (from AddPixelsWrapper)
@@ -1317,7 +1317,7 @@ def test_mega_wrapper_step_basic(minimal_env):
     minimal_env.action_space = MagicMock()
     minimal_env.action_space.sample = MagicMock(return_value=0.5)
 
-    wrapped_env = wrappers.MegaWrapper(minimal_env, image_shape=(64, 64))
+    wrapped_env = wrapper.MegaWrapper(minimal_env, image_shape=(64, 64))
     wrapped_env.reset()
 
     # Now test step
@@ -1357,7 +1357,7 @@ def test_mega_wrapper_with_custom_required_keys(minimal_env):
     minimal_env.action_space.sample = MagicMock(return_value=0.5)
 
     # Require custom_key in addition to pixels
-    wrapped_env = wrappers.MegaWrapper(minimal_env, image_shape=(64, 64), required_keys=["custom_key"])
+    wrapped_env = wrapper.MegaWrapper(minimal_env, image_shape=(64, 64), required_keys=["custom_key"])
     result_obs, result_info = wrapped_env.reset()
 
     # Should succeed because custom_key is present
@@ -1379,7 +1379,7 @@ def test_mega_wrapper_missing_required_keys_fails(minimal_env):
     minimal_env.action_space.sample = MagicMock(return_value=0.5)
 
     # Require a key that doesn't exist
-    wrapped_env = wrappers.MegaWrapper(minimal_env, image_shape=(64, 64), required_keys=["missing_key"])
+    wrapped_env = wrapper.MegaWrapper(minimal_env, image_shape=(64, 64), required_keys=["missing_key"])
 
     with pytest.raises(RuntimeError):
         wrapped_env.reset()
@@ -1398,7 +1398,7 @@ def test_mega_wrapper_separate_goal_option(minimal_env):
     minimal_env.action_space.sample = MagicMock(return_value=0.5)
 
     # separate_goal=True should still allow reset without goal
-    wrapped_env = wrappers.MegaWrapper(minimal_env, image_shape=(64, 64), separate_goal=True)
+    wrapped_env = wrapper.MegaWrapper(minimal_env, image_shape=(64, 64), separate_goal=True)
 
     # Should not raise - goal checking is not enforced in current implementation
     wrapped_env.reset()
@@ -1417,7 +1417,7 @@ def test_mega_wrapper_no_goal_check_when_disabled(minimal_env):
     minimal_env.action_space.sample = MagicMock(return_value=0.5)
 
     # separate_goal=False should not require goal key in reset
-    wrapped_env = wrappers.MegaWrapper(minimal_env, image_shape=(64, 64), separate_goal=False)
+    wrapped_env = wrapper.MegaWrapper(minimal_env, image_shape=(64, 64), separate_goal=False)
 
     # This should work but will fail at ResizeGoalWrapper because goal doesn't exist
     # Let's add a goal to test the check is disabled
@@ -1447,7 +1447,7 @@ def test_mega_wrapper_multiview_pixels(minimal_env):
     minimal_env.action_space = MagicMock()
     minimal_env.action_space.sample = MagicMock(return_value=0.5)
 
-    wrapped_env = wrappers.MegaWrapper(minimal_env, image_shape=(64, 64))
+    wrapped_env = wrapper.MegaWrapper(minimal_env, image_shape=(64, 64))
     result_obs, result_info = wrapped_env.reset()
 
     # Should have multiple pixel keys
@@ -1475,7 +1475,7 @@ def test_mega_wrapper_with_transforms(minimal_env):
     pixels_transform = MagicMock(return_value=np.ones((64, 64, 3)))
     goal_transform = MagicMock(return_value=np.zeros((64, 64, 3)))
 
-    wrapped_env = wrappers.MegaWrapper(
+    wrapped_env = wrapper.MegaWrapper(
         minimal_env, image_shape=(64, 64), pixels_transform=pixels_transform, goal_transform=goal_transform
     )
     result_obs, result_info = wrapped_env.reset()
@@ -1502,7 +1502,7 @@ def test_mega_wrapper_custom_image_shape(minimal_env):
     minimal_env.action_space.sample = MagicMock(return_value=0.5)
 
     # Use non-square custom shape
-    wrapped_env = wrappers.MegaWrapper(minimal_env, image_shape=(128, 256))
+    wrapped_env = wrapper.MegaWrapper(minimal_env, image_shape=(128, 256))
     result_obs, result_info = wrapped_env.reset()
 
     # Both pixels and goal should be resized to custom shape
@@ -1546,7 +1546,7 @@ def test_variation_wrapper_no_variation_space(mock_vector_env):
     for env in mock_vector_env.envs:
         delattr(env.unwrapped, "variation_space")
 
-    wrapped_env = wrappers.VariationWrapper(mock_vector_env)
+    wrapped_env = wrapper.VariationWrapper(mock_vector_env)
 
     # Should set variation spaces to None
     assert wrapped_env.single_variation_space is None
@@ -1555,7 +1555,7 @@ def test_variation_wrapper_no_variation_space(mock_vector_env):
 
 def test_variation_wrapper_same_mode(mock_vector_env):
     """Test VariationWrapper with variation_mode='same'."""
-    wrapped_env = wrappers.VariationWrapper(mock_vector_env, variation_mode="same")
+    wrapped_env = wrapper.VariationWrapper(mock_vector_env, variation_mode="same")
 
     # Should have variation spaces set
     assert wrapped_env.single_variation_space is not None
@@ -1566,7 +1566,7 @@ def test_variation_wrapper_same_mode(mock_vector_env):
 
 def test_variation_wrapper_different_mode(mock_vector_env):
     """Test VariationWrapper with variation_mode='different'."""
-    wrapped_env = wrappers.VariationWrapper(mock_vector_env, variation_mode="different")
+    wrapped_env = wrapper.VariationWrapper(mock_vector_env, variation_mode="different")
 
     # Should have variation spaces set
     assert wrapped_env.single_variation_space is not None
@@ -1576,12 +1576,12 @@ def test_variation_wrapper_different_mode(mock_vector_env):
 def test_variation_wrapper_invalid_mode(mock_vector_env):
     """Test that VariationWrapper raises error for invalid variation_mode."""
     with pytest.raises(ValueError):
-        wrappers.VariationWrapper(mock_vector_env, variation_mode="invalid_mode")
+        wrapper.VariationWrapper(mock_vector_env, variation_mode="invalid_mode")
 
 
 def test_variation_wrapper_envs_property(mock_vector_env):
     """Test that envs property returns the wrapped env's envs."""
-    wrapped_env = wrappers.VariationWrapper(mock_vector_env, variation_mode="same")
+    wrapped_env = wrapper.VariationWrapper(mock_vector_env, variation_mode="same")
 
     assert wrapped_env.envs == mock_vector_env.envs
 
@@ -1592,7 +1592,7 @@ def test_variation_wrapper_observation_space_mismatch_same_mode(mock_vector_env)
     mock_vector_env.envs[1].unwrapped.observation_space = gym.spaces.Box(low=0, high=1, shape=(5,))
 
     with pytest.raises(ValueError):
-        wrappers.VariationWrapper(mock_vector_env, variation_mode="same")
+        wrapper.VariationWrapper(mock_vector_env, variation_mode="same")
 
 
 def test_variation_wrapper_observation_space_mismatch_different_mode(mock_vector_env):
@@ -1601,12 +1601,12 @@ def test_variation_wrapper_observation_space_mismatch_different_mode(mock_vector
     mock_vector_env.envs[1].unwrapped.observation_space = gym.spaces.Box(low=0, high=1, shape=(5,))
 
     with pytest.raises(ValueError):
-        wrappers.VariationWrapper(mock_vector_env, variation_mode="different")
+        wrapper.VariationWrapper(mock_vector_env, variation_mode="different")
 
 
 def test_variation_wrapper_preserves_num_envs(mock_vector_env):
     """Test that VariationWrapper preserves num_envs from wrapped environment."""
-    wrapped_env = wrappers.VariationWrapper(mock_vector_env, variation_mode="same")
+    wrapped_env = wrapper.VariationWrapper(mock_vector_env, variation_mode="same")
 
     assert wrapped_env.num_envs == mock_vector_env.num_envs
 
@@ -1618,7 +1618,7 @@ def test_variation_wrapper_with_different_variation_spaces(mock_vector_env):
     mock_vector_env.envs[1].unwrapped.variation_space = gym.spaces.Box(low=0, high=2, shape=(2,))
     mock_vector_env.envs[2].unwrapped.variation_space = gym.spaces.Box(low=0, high=3, shape=(2,))
 
-    wrapped_env = wrappers.VariationWrapper(mock_vector_env, variation_mode="different")
+    wrapped_env = wrapper.VariationWrapper(mock_vector_env, variation_mode="different")
 
     # Should succeed with different mode
     assert wrapped_env.variation_space is not None
@@ -1638,7 +1638,7 @@ def test_stacked_wrapper_reset_numpy_k3_and_step(minimal_env):
     init = np.array([1, 2])
     minimal_env.reset.return_value = (obs, {"stack_key": init})
 
-    wrapped = wrappers.StackedWrapper(minimal_env, key="stack_key", history_size=3)
+    wrapped = wrapper.StackedWrapper(minimal_env, key="stack_key", history_size=3)
     _, info = wrapped.reset()
 
     # After reset the key should be stacked history_size times -> shape (3, 2)
@@ -1669,7 +1669,7 @@ def test_stacked_wrapper_torch_k2(minimal_env):
     t0 = torch.tensor([1.0, 2.0])
     minimal_env.reset.return_value = (obs, {"t": t0})
 
-    wrapped = wrappers.StackedWrapper(minimal_env, key="t", history_size=2)
+    wrapped = wrapper.StackedWrapper(minimal_env, key="t", history_size=2)
     _, info = wrapped.reset()
 
     # After reset should be a torch.Tensor stacked along dim 0 with shape (2, 2)
@@ -1699,7 +1699,7 @@ def test_stacked_wrapper_k1_returns_raw(minimal_env):
     arr = np.array([9, 9, 9])
     minimal_env.reset.return_value = (obs, {"a": arr})
 
-    wrapped = wrappers.StackedWrapper(minimal_env, key="a", history_size=1)
+    wrapped = wrapper.StackedWrapper(minimal_env, key="a", history_size=1)
     _, info = wrapped.reset()
 
     # For history_size==1, the wrapper should set the key to the raw element (not stacked)
@@ -1711,7 +1711,7 @@ def test_stacked_wrapper_k1_returns_raw(minimal_env):
 
 def test_stacked_wrapper_empty_buffer(minimal_env):
     """Test that get_buffer_data returns empty list when buffer is empty."""
-    wrapped = wrappers.StackedWrapper(minimal_env, key="test_key", history_size=3)
+    wrapped = wrapper.StackedWrapper(minimal_env, key="test_key", history_size=3)
 
     # Before reset, buffer should be empty
     result = wrapped.get_buffer_data("test_key")
@@ -1728,7 +1728,7 @@ def test_stacked_wrapper_frameskip_and_history(minimal_env):
     minimal_env.reset.return_value = (obs, {"k": v0})
 
     # history_size=2, frameskip=2 => capacity=4
-    wrapped = wrappers.StackedWrapper(minimal_env, key="k", history_size=2, frameskip=2)
+    wrapped = wrapper.StackedWrapper(minimal_env, key="k", history_size=2, frameskip=2)
     _, info = wrapped.reset()
 
     # After reset stacked output should have shape (2, 1)
@@ -1752,7 +1752,7 @@ def test_stacked_wrapper_primitive_numbers(minimal_env):
     obs = {"observation": "o"}
     minimal_env.reset.return_value = (obs, {"n": 7})
 
-    wrapped = wrappers.StackedWrapper(minimal_env, key="n", history_size=3)
+    wrapped = wrapper.StackedWrapper(minimal_env, key="n", history_size=3)
     _, info = wrapped.reset()
 
     # Should be numpy array of shape (3,)
@@ -1774,7 +1774,7 @@ def test_stacked_wrapper_list_elements_fallback(minimal_env):
     obs = {"observation": "o"}
     minimal_env.reset.return_value = (obs, {"L": [1, 2]})
 
-    wrapped = wrappers.StackedWrapper(minimal_env, key="L", history_size=2)
+    wrapped = wrapper.StackedWrapper(minimal_env, key="L", history_size=2)
     _, info = wrapped.reset()
 
     # For list elements, the wrapper should return a list of elements (length history_size)
@@ -1797,7 +1797,7 @@ def test_stacked_wrapper_multiple_keys(minimal_env):
     obs = {"observation": "o"}
     minimal_env.reset.return_value = (obs, {"a": np.array([1]), "b": 10})
 
-    wrapped = wrappers.StackedWrapper(minimal_env, key=["a", "b"], history_size=2)
+    wrapped = wrapper.StackedWrapper(minimal_env, key=["a", "b"], history_size=2)
     _, info = wrapped.reset()
 
     # a should be stacked into shape (2,1), b into shape (2,)

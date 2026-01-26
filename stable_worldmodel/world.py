@@ -19,7 +19,7 @@ from tqdm import tqdm
 
 from stable_worldmodel.data.utils import get_cache_dir
 
-from .wrappers import MegaWrapper, VariationWrapper
+from .wrapper import MegaWrapper, VariationWrapper
 
 
 class World:

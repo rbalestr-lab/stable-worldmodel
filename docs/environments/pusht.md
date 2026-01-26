@@ -1,5 +1,5 @@
 ---
-title: Pusht
+title: Push-T
 summary: TBD
 external_links:
     arxiv: tbd

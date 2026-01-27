@@ -11,7 +11,6 @@ summary: TBD
 ## **[ Recording ]**
 
 ::: stable_worldmodel.World.record_dataset
-::: stable_worldmodel.World.record_video_from_dataset
 ::: stable_worldmodel.World.record_video
 
 ## **[ Evaluation ]**

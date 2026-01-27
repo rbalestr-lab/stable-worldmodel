@@ -1,9 +1,17 @@
 import subprocess
+from pathlib import Path
 from unittest.mock import MagicMock
 
+import numpy as np
 import pytest
+import torch
 
-from stable_worldmodel.utils import flatten_dict, get_in, pretraining
+from stable_worldmodel.utils import (
+    flatten_dict,
+    get_in,
+    pretraining,
+    record_video_from_dataset,
+)
 
 
 #######################
@@ -164,3 +172,75 @@ def test_get_in_missing_intermediate_key_depth_two():
 
 def test_get_in_empty_key_depth_two():
     assert get_in({"a": {"b": 3}}, ["a"]) == {"b": 3}
+
+
+###################################
+## record_video_from_dataset tests ##
+###################################
+
+
+class MockVideoDataset:
+    """Mock dataset for testing record_video_from_dataset."""
+
+    def __init__(self, num_steps=10, height=64, width=64):
+        self.num_steps = num_steps
+        self.height = height
+        self.width = width
+        self._column_names = ["pixels", "pixels_alt", "action"]
+
+    @property
+    def column_names(self):
+        return self._column_names
+
+    def load_episode(self, ep_idx):
+        return {
+            "pixels": torch.randint(0, 255, (self.num_steps, 3, self.height, self.width), dtype=torch.uint8),
+            "pixels_alt": torch.randint(0, 255, (self.num_steps, 3, self.height, self.width), dtype=torch.uint8),
+            "action": torch.randn(self.num_steps, 2),
+        }
+
+
+def test_record_video_single_episode(tmp_path):
+    """Test recording video from a single episode."""
+    dataset = MockVideoDataset(num_steps=10)
+
+    record_video_from_dataset(tmp_path, dataset, episode_idx=0, fps=10)
+
+    video_file = tmp_path / "episode_0.mp4"
+    assert video_file.exists()
+
+
+def test_record_video_multiple_episodes(tmp_path):
+    """Test recording videos from multiple episodes."""
+    dataset = MockVideoDataset(num_steps=10)
+
+    record_video_from_dataset(tmp_path, dataset, episode_idx=[0, 1, 2], fps=10)
+
+    for i in range(3):
+        assert (tmp_path / f"episode_{i}.mp4").exists()
+
+
+def test_record_video_max_steps(tmp_path):
+    """Test that max_steps limits the video length."""
+    dataset = MockVideoDataset(num_steps=100)
+
+    record_video_from_dataset(tmp_path, dataset, episode_idx=0, max_steps=10, fps=10)
+
+    assert (tmp_path / "episode_0.mp4").exists()
+
+
+def test_record_video_multiple_views(tmp_path):
+    """Test recording video with multiple views stacked."""
+    dataset = MockVideoDataset(num_steps=10)
+
+    record_video_from_dataset(tmp_path, dataset, episode_idx=0, viewname=["pixels", "pixels_alt"], fps=10)
+
+    assert (tmp_path / "episode_0.mp4").exists()
+
+
+def test_record_video_invalid_view_raises(tmp_path):
+    """Test that invalid view name raises assertion error."""
+    dataset = MockVideoDataset(num_steps=10)
+
+    with pytest.raises(AssertionError, match="not in dataset key names"):
+        record_video_from_dataset(tmp_path, dataset, episode_idx=0, viewname="nonexistent")

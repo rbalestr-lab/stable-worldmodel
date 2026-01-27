@@ -1,4 +1,4 @@
-__version__ = "0.0.1a0"
+__version__ = '0.0.1a0'
 
 from gymnasium.envs import registration
 
@@ -20,40 +20,34 @@ def register(id, entry_point):
 #     entry_point="stable_worldmodel.envs.image_positioning:ImagePositioning",
 # )
 
-# register(
-#     id="swm/VoidRun-v0",
-#     entry_point="stable_worldmodel.envs.voidrun:VoidRunEnv",
-# )
-
-
 register(
-    id="swm/PushT-v1",
-    entry_point="stable_worldmodel.envs.pusht.env:PushT",
+    id='swm/PushT-v1',
+    entry_point='stable_worldmodel.envs.pusht.env:PushT',
 )
 
 register(
-    id="swm/SimplePointMaze-v0",
-    entry_point="stable_worldmodel.envs.simple_point_maze:SimplePointMazeEnv",
+    id='swm/SimplePointMaze-v0',
+    entry_point='stable_worldmodel.envs.simple_point_maze:SimplePointMazeEnv',
 )
 
 register(
-    id="swm/TwoRoom-v0",
-    entry_point="stable_worldmodel.envs.two_room.env:TwoRoomEnv",
+    id='swm/TwoRoom-v0',
+    entry_point='stable_worldmodel.envs.two_room.env:TwoRoomEnv',
 )
 
 register(
-    id="swm/OGBCube-v0",
-    entry_point="stable_worldmodel.envs.ogbench_manip.cube_env:CubeEnv",
+    id='swm/OGBCube-v0',
+    entry_point='stable_worldmodel.envs.ogbench_manip.cube_env:CubeEnv',
 )
 
 register(
-    id="swm/OGBScene-v0",
-    entry_point="stable_worldmodel.envs.ogbench_manip.scene_env:SceneEnv",
+    id='swm/OGBScene-v0',
+    entry_point='stable_worldmodel.envs.ogbench_manip.scene_env:SceneEnv',
 )
 
 register(
-    id="swm/PFRocketLanding-v0",
-    entry_point="stable_worldmodel.envs.rocket_landing.pyflyt_rocketlanding:RocketLandingEnv",
+    id='swm/PFRocketLanding-v0',
+    entry_point='stable_worldmodel.envs.rocket_landing.pyflyt_rocketlanding:RocketLandingEnv',
 )
 
 
@@ -62,11 +56,11 @@ register(
 ############
 
 register(
-    id="swm/SimpleNavigation-v0",
-    entry_point="stable_worldmodel.envs.simple_nav.env:SimpleNavigationEnv",
+    id='swm/SimpleNavigation-v0',
+    entry_point='stable_worldmodel.envs.simple_nav.env:SimpleNavigationEnv',
 )
 
 register(
-    id="swm/PushT-Discrete-v1",
-    entry_point="stable_worldmodel.envs.pusht:PushTDiscrete",
+    id='swm/PushT-Discrete-v1',
+    entry_point='stable_worldmodel.envs.pusht:PushTDiscrete',
 )

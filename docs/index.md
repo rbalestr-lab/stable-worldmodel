@@ -1,7 +1,7 @@
 ---
 title: stable-worldmodel
 summary: World Model Research Made Simple
-sidebar_title: Getting Started
+sidebar_title: Home
 ---
 
 !!! danger ""
@@ -49,16 +49,9 @@ source .venv/bin/activate
 uv sync --all-extras --group dev
 ```
 
-## Basic Usage
----
-
-
-!!! note ""
-    Just want the environments? All environments are self-contained and follow the standard [Gymnasium](https://gymnasium.farama.org/) API. Simply import the library to register them:
-
-    `import stable_worldmodel`
-
 ## Next Steps
+
+After you have installed stable-worldmodel, try the []()
 
 | | |
 |---|---|

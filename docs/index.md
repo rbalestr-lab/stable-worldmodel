@@ -63,7 +63,7 @@ uv sync --all-extras --group dev
 | | |
 |---|---|
 | **[Tutorials](tutorial/collect_data.md)** | Step-by-step guides for data collection, training, and adding new environments. |
-| **[Environments](env/pusht.md)** | Explore the included environments: PushT, TwoRoom, OGBench, and more. |
+| **[Environments](envs/pusht.md)** | Explore the included environments: PushT, TwoRoom, OGBench, and more. |
 | **[API Reference](api/world.md)** | Detailed documentation for World, Policy, Solver, Dataset, and other modules. |
 
 ## Citation

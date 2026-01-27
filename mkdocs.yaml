@@ -18,10 +18,10 @@ nav:
   - index.md
   - baseline.md
   - Environment:
-      - env/pusht.md
-      - env/dmc.md
-      - env/ogb.md
-      - env/tworoom.md
+      - envs/pusht.md
+      - envs/dmc.md
+      - envs/ogb.md
+      - envs/tworoom.md
   - Tutorial:
       - tutorial/collect_data.md
       - tutorial/new_env.md

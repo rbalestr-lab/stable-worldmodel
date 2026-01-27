@@ -62,7 +62,6 @@ After you have installed stable-worldmodel, try the [Quick Start Guide](quick_st
 
 | | |
 |---|---|
-| **[Tutorials](tutorial/collect_data.md)** | Step-by-step guides for data collection, training, and adding new environments. |
 | **[Environments](envs/pusht.md)** | Explore the included environments: PushT, TwoRoom, OGBench, and more. |
 | **[API Reference](api/world.md)** | Detailed documentation for World, Policy, Solver, Dataset, and other modules. |
 

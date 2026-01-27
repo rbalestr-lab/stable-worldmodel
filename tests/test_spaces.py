@@ -251,7 +251,8 @@ def test_multidiscrete_space_outbound():
 def test_multidiscrete_space_reset():
     init_val = np.array([0, 1, 2])
     space = spaces.MultiDiscrete([3, 4, 5], init_value=init_val)
-    space.sample()
+    # Manually set a different value to avoid flaky random sampling
+    space._value = np.array([2, 3, 4])
     assert not np.array_equal(space.value, space.init_value)
     space.reset()
     assert np.array_equal(space.value, space.init_value)

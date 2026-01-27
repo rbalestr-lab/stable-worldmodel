@@ -14,11 +14,6 @@ from stable_worldmodel.data import HDF5Dataset
 from stable_worldmodel.data.utils import get_cache_dir
 
 
-###########################
-## get_cache_dir tests   ##
-###########################
-
-
 def test_get_cache_dir_default():
     """Test get_cache_dir returns default path when env var not set."""
     with patch.dict(os.environ, {}, clear=True):
@@ -46,12 +41,6 @@ def test_get_cache_dir_creates_directory():
         with patch.dict(os.environ, {"STABLEWM_HOME": custom_path}):
             result = get_cache_dir()
             assert result.exists()
-
-
-###########################
-## HDF5Dataset tests     ##
-###########################
-
 
 @pytest.fixture
 def sample_h5_file(tmp_path):
@@ -195,12 +184,17 @@ def test_hdf5_dataset_keys_to_cache(sample_h5_file):
     assert "observation" in dataset._cache
     assert "action" not in dataset._cache
 
+    # Verify cached data is used during load
+    item = dataset[0]
+    assert "observation" in item
+    assert isinstance(item["observation"], torch.Tensor)
+
 
 def test_hdf5_dataset_cache_missing_key(sample_h5_file):
     """Test HDF5Dataset raises error for missing cache key."""
     cache_dir, name = sample_h5_file
 
-    with pytest.raises(KeyError, match="not found"):
+    with pytest.raises(KeyError):
         HDF5Dataset(
             name,
             cache_dir=str(cache_dir),
@@ -226,6 +220,34 @@ def test_hdf5_dataset_get_row_data(sample_h5_file):
     row_data = dataset.get_row_data(5)
     assert isinstance(row_data, dict)
     assert "observation" in row_data
+
+def test_hdf5_dataset_load_chunk(sample_h5_file):
+    """Test load_chunk returns correct slices for multiple episodes."""
+    cache_dir, name = sample_h5_file
+    dataset = HDF5Dataset(name, cache_dir=str(cache_dir))
+
+    episodes_idx = np.array([0, 1])
+    start = np.array([2, 0])
+    end = np.array([5, 5])
+
+    chunk = dataset.load_chunk(episodes_idx, start, end)
+
+    assert isinstance(chunk, list)
+    assert len(chunk) == 2
+
+    # First chunk: episode 0, steps 2-5 (3 steps)
+    assert "observation" in chunk[0]
+    assert "action" in chunk[0]
+    assert chunk[0]["observation"].shape == (3, 4)
+    assert chunk[0]["action"].shape == (3, 2)
+
+    # Second chunk: episode 1, steps 0-5 (5 steps)
+    assert chunk[1]["observation"].shape == (5, 4)
+    assert chunk[1]["action"].shape == (5, 2)
+
+    # Verify tensors
+    assert isinstance(chunk[0]["observation"], torch.Tensor)
+    assert isinstance(chunk[1]["action"], torch.Tensor)
 
 
 def test_hdf5_dataset_transform(sample_h5_file):

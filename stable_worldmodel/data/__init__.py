@@ -1,8 +1,21 @@
 from . import utils
-from .dataset import HDF5Dataset
-
+from .dataset import (
+    ConcatDataset,
+    Dataset,
+    FolderDataset,
+    HDF5Dataset,
+    ImageDataset,
+    MergeDataset,
+    VideoDataset,
+)
 
 __all__ = [
-    "utils",
-    "HDF5Dataset",
+    'utils',
+    'Dataset',
+    'HDF5Dataset',
+    'FolderDataset',
+    'ImageDataset',
+    'VideoDataset',
+    'MergeDataset',
+    'ConcatDataset',
 ]

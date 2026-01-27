@@ -24,6 +24,7 @@ dependencies = [
   "h5py",
   "hdf5plugin",
   "tqdm",
+  "mkdocstrings[python]>=1.0.2",
 ]
 
 [project.optional-dependencies]
@@ -56,6 +57,7 @@ dev = [
   "pillow",
   "decord",
   "imageio[ffmpeg]",
+  "mkdocstrings[python]",
 ]
 
 [build-system]

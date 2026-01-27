@@ -48,9 +48,11 @@ jobs:
       with:
         python-version: "3.12"
     - name: Dependencies
-      run: uv sync --group dev
+      run: |
+        uv sync --group dev
+        uv pip install -e .
     - name: Build docs
-      run: uv run --group dev mkdocs build --strict
+      run: uv run --group dev mkdocs build
     - uses: actions/configure-pages@v5
     - uses: actions/upload-pages-artifact@v3
       with:

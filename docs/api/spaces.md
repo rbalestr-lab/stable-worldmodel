@@ -1,4 +1,3 @@
----
 title: Spaces
 summary: Extended Gymnasium spaces with state tracking and constraint support
 ---

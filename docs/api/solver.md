@@ -1,4 +1,3 @@
----
 title: solver
 summary: Model-based planning solvers for action optimization
 ---

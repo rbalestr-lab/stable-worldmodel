@@ -1,4 +1,3 @@
----
 title: Policy
 summary: Agent policies for interacting with environments
 ---

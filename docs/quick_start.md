@@ -27,8 +27,15 @@ print(world.infos['terminated'])      # (num_envs,)
 
 See the [World API](api/world.md) for all available parameters and methods.
 
-!!! note ""
+!!! info ""
     Just want the environments? All environments are self-contained and follow the standard [Gymnasium](https://gymnasium.farama.org/) API. Simply import the library to register them.
+
+        :::python                                                                                                            
+        import gymnasium as gym                                                                                              
+        import stable_worldmodel  # registers all environments                                                               
+                                                                                                                            
+        env = gym.make('swm/PushT-v1', render_mode='rgb_array')   
+
 
 ### Factors of Variation (FoV)
 
@@ -107,7 +114,7 @@ class MyPolicy:
     def get_action(self, info: dict) -> np.ndarray:
         """
         Args:
-            info: dict with all informations collected from the environments e.g:
+            info: dict with all information collected from the environments e.g:
                   - 'pixels': current observation images (num_envs, C, H, W)
                   - 'goal': goal images if goal_conditioned (num_envs, C, H, W)
                   - 'state': low-dimensional state if available
@@ -216,7 +223,7 @@ The dataset is compatible with PyTorch `DataLoader` for batched training.
 
 ### Recording Videos
 
-Use `world.record_video()` to visualize the behavior the the current world policy. This is helpful for debugging, qualitative evaluation, or generating figures for papers.
+Use `world.record_video()` to visualize the behavior of the current world policy. This is helpful for debugging, qualitative evaluation, or generating figures for papers.
 
 ```python
 world.record_video(
@@ -252,7 +259,7 @@ Stable World-Model provides two ways to evaluate world models: `evaluate()` and 
 
 Use `world.evaluate_from_dataset()` to evaluate from starting states taken from an existing dataset. This method:
 
-1. Take a **starting state** from a trajectory in the dataset (`start_steps`)
+1. Takes a **starting state** from a trajectory in the dataset (`start_steps`)
 2. Sets the **goal** as the state `goal_offset_steps` ahead in that same trajectory
 
 Because the goal is taken from a completed trajectory, this guarantees the problem is **solvable within the given budget**—the original trajectory already reached that state. This makes evaluation fairer and more interpretable.
@@ -331,6 +338,6 @@ results = world.evaluate(episodes=50, seed=0)
 
 ## And then?
 
-You should have a look at the [baselines](baseline.md) we implemented,tested, and benchmark.
+You should have a look at the [baselines](baseline.md) we implemented, tested, and benchmarked.
 
 Explore the [Environments](envs/pusht.md) documentation for detailed information on each task, or dive into the [API Reference](api/world.md) for complete method signatures.

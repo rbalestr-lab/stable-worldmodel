@@ -31,7 +31,7 @@ Stable World-Model is an open-source library to conduct world model research.  Y
 
 
 !!! note ""
-    (!) The base installation does not include environment (`env`) or training (`train`) dependencies. Install them separately or use the "all dependencies" option above if you need to run simulations or train models.
+    ⚠️ The base installation does not include environment (`env`) or training (`train`) dependencies. Install them separately or use the "all dependencies" option above if you need to run simulations or train models.
 
 A **world model** is a learned simulator that predicts how an environment evolves in response to actions, enabling agents to plan by imagining future outcomes. Stable World-Model provides a unified research ecosystem that simplifies the entire pipeline: from data collection to model training and evaluation.
 
@@ -40,7 +40,7 @@ A **world model** is a learned simulator that predicts how an environment evolve
 ## Development Setup
 ---
 
-Setup a ready-to-go development environment to contribute to the library:
+Set up a ready-to-go development environment to contribute to the library:
 
 ```bash
 git clone https://github.com/galilai-group/stable-worldmodel
@@ -51,13 +51,13 @@ uv sync --all-extras --group dev
 ```
 
 !!! warning ""
-    All datasets and model will be saved in the `$STABLEWM_HOME` environment variable.
+    All datasets and models will be saved in the `$STABLEWM_HOME` environment variable.
     By default the corresponding location is `~/.stable-wm/`. We encourage every user to adapt that directory according to their need and storage.
 
 ## Example
 ---
 
-Here a quick start example: collect a dataset and perform an evaluation.
+Here is a quick start example: collect a dataset and perform an evaluation.
 
 ```python
 import stable_worldmodel as swm
@@ -107,7 +107,7 @@ See the [Quick Start Guide](quick_start.md) for detailed explanations of each co
 ## Next Steps
 ---
 
-After you have installed stable-worldmodel, try the [Quick Start Guide](quick_start.md). You can also explore other part of the documentation:
+After you have installed stable-worldmodel, try the [Quick Start Guide](quick_start.md). You can also explore other parts of the documentation:
 
 | | |
 |---|---|

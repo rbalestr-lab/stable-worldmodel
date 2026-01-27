@@ -5,7 +5,7 @@ sidebar_title: Baseline
 
 ## DINO World-Model
 
-DINO World-Model (DINO-WM) is a self-supervised latent world model introduced by [Zhou et al., 2025](https://arxiv.org/pdf/2411.04983). To avoid learning from scratch and collapse, DINO-WM leverages frozen DINOv2 features to produce visual observation embedding. The model extract patch-level features from a pretrained DINOv2 encoder and trains a latent dynamics model (predictor) to predict future states in the DINO feature space. Optimal actions are determined at test-time by performing planning with the [Cross-Entropy Method](https://www.iro.umontreal.ca/~lecuyer/myftp/papers/handbook13-ce.pdf) (CEM)
+DINO World-Model (DINO-WM) is a self-supervised latent world model introduced by [Zhou et al., 2025](https://arxiv.org/pdf/2411.04983). To avoid learning from scratch and collapse, DINO-WM leverages frozen DINOv2 features to produce visual observation embedding. The model extracts patch-level features from a pretrained DINOv2 encoder and trains a latent dynamics model (predictor) to predict future states in the DINO feature space. Optimal actions are determined at test-time by performing planning with the [Cross-Entropy Method](https://www.iro.umontreal.ca/~lecuyer/myftp/papers/handbook13-ce.pdf) (CEM)
 
 ### Training Objective
 
@@ -35,7 +35,7 @@ Planning with Latent Dynamics Model (PLDM) is a Joint-Embedding Predictive Archi
 - $\mathcal{L}_{\text{temp}}$: temporal smoothness regularizer between consecutive embeddings
 - $\mathcal{L}_{\text{idm}}$: inverse dynamics modeling loss to predict actions from embedding pairs
 
-Optimal actions are search at test-time with planning by leveraging the [Model Path Predictive Integral](https://acdslab.github.io/mppi-generic-website/docs/mppi.html) (MPPI) solver.
+Optimal actions are found at test-time by planning with the [Model Predictive Path Integral](https://acdslab.github.io/mppi-generic-website/docs/mppi.html) (MPPI) solver.
 
 ### Training Objective
 

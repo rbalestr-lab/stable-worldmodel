@@ -1,4 +1,4 @@
 title: Training A World Model
-summary: TDB
+summary: TBD
 sidebar_title: Train World-Model
 ---

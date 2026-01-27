@@ -18,7 +18,7 @@ nav:
   - index.md
   - quick_start.md
   - baselines.md
-  - Environment:
+  - Environments:
       - envs/pusht.md
       - envs/dmc.md
       - envs/ogb.md

@@ -7,6 +7,8 @@ external_links:
 
 <!-- ![pusht](assets/env/pusht/normal.gif) -->
 
+![pusht](../assets/pusht.gif)
+
 ## Description
 
 A 2D contact-rich manipulation task where an agent controls a circular end-effector to push a T-shaped block into a target pose. The environment uses [Pymunk](http://www.pymunk.org/) physics simulation with realistic friction and collision dynamics.

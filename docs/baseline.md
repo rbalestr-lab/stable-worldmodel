@@ -24,8 +24,6 @@ where $z_{t+1}$ represents the frozen DINOv2 features of the next observation.
 |-------------|--------------|------------|
 | [Push-T](envs/pusht.md) | ~86% | NA |
 
-
-
 ## Planning with Latent Dynamics Model
 
 Planning with Latent Dynamics Model (PLDM) is a Joint-Embedding Predictive Architecture (JEPA) proposed by [Sobal et al., 2025](https://arxiv.org/pdf/2502.14819). Unlike DINO-WM which relies on frozen pretrained features, PLDM trains the encoder and predictor jointly from scratch using a combination of losses to prevent representational collapse:

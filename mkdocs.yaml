@@ -16,13 +16,12 @@ theme:
 
 nav:
   - index.md
-  - basic_usage.md
   - baseline.md
   - Environment:
-      - environments/pusht.md
-      - environments/dmc.md
-      - environments/ogb.md
-      - environments/tworoom.md
+      - env/pusht.md
+      - env/dmc.md
+      - env/ogb.md
+      - env/tworoom.md
   - Tutorial:
       - tutorial/collect_data.md
       - tutorial/new_env.md

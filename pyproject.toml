@@ -43,6 +43,7 @@ env = [
     "ogbench",
     "minigrid",
     "gymnasium[all]",
+    "opencv-python",
 ]
 
 [dependency-groups]

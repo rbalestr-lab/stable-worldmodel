@@ -37,7 +37,7 @@ A **world model** is a learned simulator that predicts how an environment evolve
 
 **Why another library?** World models have recently gained a lot of attention from the community. However, each new article re-implements over and over the same baselines, evaluation protocols, and data processing logic. We took that as an opportunity to provide a clean, documented, and tested library that researchers can trust for evaluation or training. More than just re-implementation, stable-worldmodel provides a complete ecosystem for world model research, from data collection to evaluation. We also extended the range of test-beds by providing researchers with a lean and simple API to fully customize the environments in which agents operate: from colors, to shapes, to physics properties. Everything is customizable, allowing for easy continual learning, out-of-distribution, or zero-shot robustness evaluation.
 
-## Development Setup
+## Install
 ---
 
 Set up a ready-to-go development environment to contribute to the library:
@@ -111,7 +111,7 @@ After you have installed stable-worldmodel, try the [Quick Start Guide](quick_st
 
 | | |
 |---|---|
-| **[Environments](envs/pusht.md)** | Explore the included environments: PushT, TwoRoom, OGBench, and more. |
+| **[Environments](envs/pusht.md)** | Explore the included environments: PushT, TwoRoom, OGBench, DMControl, and more. |
 | **[API Reference](api/world.md)** | Detailed documentation for World, Policy, Solver, Dataset, and other modules. |
 
 ## Citation

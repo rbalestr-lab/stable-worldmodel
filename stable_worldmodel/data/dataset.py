@@ -295,6 +295,11 @@ class MergeDataset:
             cols.extend(keys)
         return cols
 
+    @property
+    def lengths(self) -> np.ndarray:
+        """Episode lengths from first dataset (all merged datasets share same structure)."""
+        return self.datasets[0].lengths
+
     def __len__(self) -> int:
         return self._len
 
@@ -350,6 +355,10 @@ class ConcatDataset:
         lengths = [len(ds) for ds in datasets]
         self._cum = np.cumsum([0] + lengths)
 
+        # Cumulative episode counts for load_chunk mapping
+        ep_counts = [len(ds.lengths) for ds in datasets]
+        self._ep_cum = np.cumsum([0] + ep_counts)
+
     @property
     def column_names(self) -> list[str]:
         seen = set()
@@ -379,7 +388,30 @@ class ConcatDataset:
     def load_chunk(
         self, episodes_idx: np.ndarray, start: np.ndarray, end: np.ndarray
     ) -> list[dict]:
-        return self.datasets[0].load_chunk(episodes_idx, start, end)
+        episodes_idx = np.asarray(episodes_idx)
+        start = np.asarray(start)
+        end = np.asarray(end)
+
+        # Map global episode indices to dataset indices
+        ds_indices = np.searchsorted(self._ep_cum[1:], episodes_idx, side='right')
+        local_eps = episodes_idx - self._ep_cum[ds_indices]
+
+        # Group by dataset and collect results
+        results: list[dict | None] = [None] * len(episodes_idx)
+        for ds_idx in range(len(self.datasets)):
+            mask = ds_indices == ds_idx
+            if not np.any(mask):
+                continue
+
+            chunks = self.datasets[ds_idx].load_chunk(
+                local_eps[mask], start[mask], end[mask]
+            )
+
+            # Place results back in original order
+            for i, chunk in zip(np.where(mask)[0], chunks):
+                results[i] = chunk
+
+        return results  # type: ignore[return-value]
 
     def get_col_data(self, col: str) -> np.ndarray:
         data = []

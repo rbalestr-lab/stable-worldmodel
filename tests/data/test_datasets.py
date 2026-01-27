@@ -114,9 +114,11 @@ def sample_video_dataset(tmp_path):
 class MockDataset:
     """A simple mock dataset for testing MergeDataset and ConcatDataset."""
 
-    def __init__(self, data: dict, length: int):
+    def __init__(self, data: dict, length: int, num_episodes: int = 1):
         self._data = data
         self._length = length
+        # Episode structure for load_chunk support
+        self.lengths = np.array([length // num_episodes] * num_episodes)
 
     @property
     def column_names(self) -> list[str]:

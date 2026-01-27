@@ -54,6 +54,55 @@ uv sync --all-extras --group dev
     All datasets and model will be saved in the `$STABLEWM_HOME` environment variable.
     By default the corresponding location is `~/.stable-wm/`. We encourage every user to adapt that directory according to their need and storage.
 
+## Example
+---
+
+Here a quick start example: collect a dataset and perform an evaluation.
+
+```python
+import stable_worldmodel as swm
+from stable_worldmodel.data import HDF5Dataset
+from stable_worldmodel.policy import WorldModelPolicy, PlanConfig
+from stable_worldmodel.solver import CEMSolver
+
+
+world = swm.World('swm/PushT-v1', num_envs=8)
+world.set_policy(your_expert_policy)
+
+world.record_dataset(dataset_name='pusht_demo',
+                     episodes=100,
+                     seed=0,
+                     options={"variation":["all"],
+                })
+
+# ... train your world model with pusht_demo...
+world_model = ... # your world-model implementing get_cost
+
+# evaluation
+dataset = HDF5Dataset(
+    name='pusht_demo',
+    frameskip=1,
+    num_steps=16,
+    keys_to_load=['pixels', 'action', 'state']
+)
+
+# model predictive control
+solver = CEMSolver(model=world_model, num_samples=300, device='cuda')
+policy = WorldModelPolicy(
+    solver=solver,
+    config=PlanConfig(horizon=10, receding_horizon=5)
+)
+
+world.set_policy(policy)
+results = world.evaluate(episodes=50, seed=0)
+
+print(f"Success Rate: {results['success_rate']:.1f}%")
+
+```
+
+See the [Quick Start Guide](quick_start.md) for detailed explanations of each component.
+
+
 
 ## Next Steps
 ---

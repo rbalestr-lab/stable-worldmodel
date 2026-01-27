@@ -158,11 +158,11 @@ class FolderDataset(Dataset):
         offsets = np.load(self.path / 'ep_offset.npz')['arr_0']
 
         if keys_to_load is None:
-            keys_to_load = [
+            keys_to_load = sorted(
                 p.stem if p.suffix == '.npz' else p.name
                 for p in self.path.iterdir()
                 if p.stem not in ('ep_len', 'ep_offset')
-            ]
+            )
         self._keys = keys_to_load
 
         for key in self._keys:
@@ -179,9 +179,11 @@ class FolderDataset(Dataset):
         return self._keys
 
     def _load_file(self, ep_idx: int, step: int, key: str) -> np.ndarray:
-        return np.array(
-            Image.open(self.path / key / f'ep_{ep_idx}_step_{step}.jpeg')
-        )
+        path = self.path / key / f'ep_{ep_idx}_step_{step}'
+        img_path = path.with_suffix('.jpeg')
+        if not img_path.exists():
+            img_path = path.with_suffix('.jpg')
+        return np.array(Image.open(img_path))
 
     def _load_slice(self, ep_idx: int, start: int, end: int) -> dict:
         g_start, g_end = (
@@ -227,19 +229,22 @@ class ImageDataset(FolderDataset):
 class VideoDataset(FolderDataset):
     """Dataset loading video frames from MP4 files."""
 
-    def __init__(self, name: str, video_keys: list[str] | None = None, **kw):
-        try:
-            import decord
+    _decord = None  # Lazy-loaded module reference
 
-            decord.bridge.set_bridge('torch')
-            self._decord = decord
-        except ImportError:
-            raise ImportError('VideoDataset requires decord')
+    def __init__(self, name: str, video_keys: list[str] | None = None, **kw):
+        if VideoDataset._decord is None:
+            try:
+                import decord
+
+                decord.bridge.set_bridge('torch')
+                VideoDataset._decord = decord
+            except ImportError:
+                raise ImportError('VideoDataset requires decord')
         super().__init__(name, folder_keys=video_keys or ['video'], **kw)
 
     @lru_cache(maxsize=8)
     def _reader(self, ep_idx: int, key: str):
-        return self._decord.VideoReader(
+        return VideoDataset._decord.VideoReader(
             str(self.path / key / f'ep_{ep_idx}.mp4'), num_threads=1
         )
 

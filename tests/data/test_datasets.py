@@ -1,8 +1,10 @@
 """Tests for ImageDataset, VideoDataset, MergeDataset, and ConcatDataset."""
 
 import os
+import sys
 import tempfile
 from pathlib import Path
+from unittest.mock import patch
 
 import numpy as np
 import pytest
@@ -15,6 +17,43 @@ from stable_worldmodel.data import (
     MergeDataset,
     ConcatDataset,
 )
+from stable_worldmodel.data.dataset import Dataset
+
+
+class TestDatasetBase:
+    """Tests for the base Dataset class abstract methods."""
+
+    def test_column_names_not_implemented(self):
+        """Test that column_names raises NotImplementedError."""
+        lengths = np.array([10])
+        offsets = np.array([0])
+        dataset = Dataset(lengths, offsets)
+        with pytest.raises(NotImplementedError):
+            _ = dataset.column_names
+
+    def test_load_slice_not_implemented(self):
+        """Test that _load_slice raises NotImplementedError."""
+        lengths = np.array([10])
+        offsets = np.array([0])
+        dataset = Dataset(lengths, offsets)
+        with pytest.raises(NotImplementedError):
+            dataset._load_slice(0, 0, 5)
+
+    def test_get_col_data_not_implemented(self):
+        """Test that get_col_data raises NotImplementedError."""
+        lengths = np.array([10])
+        offsets = np.array([0])
+        dataset = Dataset(lengths, offsets)
+        with pytest.raises(NotImplementedError):
+            dataset.get_col_data("col")
+
+    def test_get_row_data_not_implemented(self):
+        """Test that get_row_data raises NotImplementedError."""
+        lengths = np.array([10])
+        offsets = np.array([0])
+        dataset = Dataset(lengths, offsets)
+        with pytest.raises(NotImplementedError):
+            dataset.get_row_data(0)
 
 
 @pytest.fixture
@@ -109,6 +148,31 @@ def sample_video_dataset(tmp_path):
         iio.imwrite(video_path / f"ep_{ep_idx}.mp4", frames, fps=30)
 
     return tmp_path, "test_video_dataset"
+
+
+@pytest.fixture
+def sample_image_dataset_jpg(tmp_path):
+    """Create a sample ImageDataset with .jpg extension for testing fallback."""
+    dataset_path = tmp_path / "test_image_dataset_jpg"
+    dataset_path.mkdir()
+
+    ep_lengths = np.array([5])
+    ep_offsets = np.array([0])
+    total_steps = 5
+
+    np.savez(dataset_path / "ep_len.npz", ep_lengths)
+    np.savez(dataset_path / "ep_offset.npz", ep_offsets)
+    np.savez(dataset_path / "action.npz", np.random.rand(total_steps, 2).astype(np.float32))
+
+    pixels_path = dataset_path / "pixels"
+    pixels_path.mkdir()
+
+    for step_idx in range(5):
+        img_array = np.random.randint(0, 255, (64, 64, 3), dtype=np.uint8)
+        img = Image.fromarray(img_array)
+        img.save(pixels_path / f"ep_0_step_{step_idx}.jpg")  # .jpg instead of .jpeg
+
+    return tmp_path, "test_image_dataset_jpg"
 
 
 class MockDataset:
@@ -342,6 +406,16 @@ class TestImageDataset:
         assert isinstance(img, np.ndarray)
         assert img.shape == (64, 64, 3)
 
+    def test_load_file_jpg_fallback(self, sample_image_dataset_jpg):
+        """Test _load_file falls back to .jpg when .jpeg doesn't exist."""
+        cache_dir, name = sample_image_dataset_jpg
+        dataset = ImageDataset(name, cache_dir=str(cache_dir))
+
+        img = dataset._load_file(0, 0, "pixels")
+        assert isinstance(img, np.ndarray)
+        assert img.shape == (64, 64, 3)
+
+
 class TestVideoDataset:
     def test_init(self, sample_video_dataset):
         """Test VideoDataset initialization."""
@@ -488,6 +562,18 @@ class TestVideoDataset:
         frame = dataset._load_file(0, 0, "video")
         assert isinstance(frame, np.ndarray)
         assert frame.shape == (64, 64, 3)
+
+    def test_decord_import_error(self, sample_video_dataset):
+        """Test VideoDataset raises ImportError when decord is not available."""
+        cache_dir, name = sample_video_dataset
+
+        # Reset the class-level cached decord module
+        VideoDataset._decord = None
+
+        # Mock the import to raise ImportError
+        with patch.dict(sys.modules, {'decord': None}):
+            with pytest.raises(ImportError, match="VideoDataset requires decord"):
+                VideoDataset(name, cache_dir=str(cache_dir))
 
 
 class TestMergeDataset:

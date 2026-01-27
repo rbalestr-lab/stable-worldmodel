@@ -53,6 +53,9 @@ dev = [
   "twine",
   "mkdocs-shadcn",
   "pymdown-extensions",
+  "pillow",
+  "decord",
+  "imageio[ffmpeg]",
 ]
 
 [build-system]

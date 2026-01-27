@@ -1,6 +1,6 @@
-title: Baseline
+title: Baselines
 summary: Overview & Benchmarking of baseline world models.
-sidebar_title: Baseline
+sidebar_title: Baselines
 ---
 
 ## DINO World-Model
@@ -48,15 +48,47 @@ where $\alpha$, $\beta$, $\delta$, and $\omega$ are hyperparameters controlling 
 | ? | ? | NA |
 
 
-## Goal-Conditioned Behavioural Cloning 
+## Goal-Conditioned Behavioural Cloning
+
+Goal-Conditioned Behavioural Cloning (GCBC) is a simple imitation learning baseline introduced by [Ghosh et al., 2019](https://arxiv.org/pdf/1912.06088). A goal-conditioned policy $\pi_\theta(a \mid s, g)$ is trained via supervised learning to reproduce expert actions given the current state and a goal observation. In our implementation, observations and goals are encoded into DINOv2 patch embeddings before being fed to the policy network.
+
+### Training Objective
+
+The policy is trained to minimize the mean squared error between predicted and ground-truth actions:
+
+$$ \mathcal{L}_{\text{GCBC}} = \mathbb{E}_{(s_t, a_t, g) \sim \mathcal{D}} \left[ \| \pi_\theta(s_t, g) - a_t \|_2^2 \right] $$
+
+where $s_t$ is the observation embedding, $g$ is the goal embedding, and $a_t$ is the expert action.
+
+
+### Benchmark
+
+| Environment | Success Rate | Checkpoint |
+|-------------|--------------|------------|
+| Push-T | ? | NA |
+
+
+## Implicit Q-Learning
+
+Implicit Q-Learning (IQL) is an offline reinforcement learning method introduced by [Kostrikov et al., 2021](https://arxiv.org/pdf/2110.06169). IQL avoids querying out-of-distribution actions by learning a state value function $V(s, g)$ via expectile regression, then extracting a policy through advantage-weighted regression (AWR). In our implementation, observations and goals are encoded into DINOv2 patch embeddings and training proceeds in two phases: value learning followed by policy extraction.
+
+### Training Objective
+
+**Value function.** The value network $V_\theta(s_t, g)$ is trained with expectile regression against bootstrapped targets from a target network $V_{\bar{\theta}}$:
+
+$$ \mathcal{L}_{V} = \mathbb{E}_{(s_t, s_{t+1}, g) \sim \mathcal{D}} \left[ L_\tau^2 \!\left( r(s_t, g) + \gamma \, V_{\bar{\theta}}(s_{t+1}, g) - V_\theta(s_t, g) \right) \right] $$
+
+where $L_\tau^2(u) = |\tau - \mathbb{1}(u < 0)| \, u^2$ is the asymmetric expectile loss, $\gamma = 0.99$ is the discount factor, and $r(s_t, g) = 0$ if $s_t = g$, $-1$ otherwise.
+
+**Policy extraction.** The actor $\pi_\theta(s_t, g)$ is trained via advantage-weighted regression:
+
+$$ \mathcal{L}_{\pi} = \mathbb{E}_{(s_t, a_t, g) \sim \mathcal{D}} \left[ \exp\!\left(\beta \cdot A(s_t, a_t, g)\right) \| \pi_\theta(s_t, g) - a_t \|_2^2 \right] $$
+
+where $A(s_t, a_t, g) = r(s_t, g) + \gamma \, V(s_{t+1}, g) - V(s_t, g)$ is the advantage and $\beta = 3.0$ is the inverse temperature.
+
+### Benchmark
 
 | Environment | Success Rate | Checkpoint |
 |-------------|--------------|------------|
 | ? | ? | NA |
 
-
-## Inverse Q-Learning
-
-| Environment | Success Rate | Checkpoint |
-|-------------|--------------|------------|
-| ? | ? | NA |

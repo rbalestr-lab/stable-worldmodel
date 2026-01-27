@@ -17,7 +17,7 @@ theme:
 nav:
   - index.md
   - quick_start.md
-  - baseline.md
+  - baselines.md
   - Environment:
       - envs/pusht.md
       - envs/dmc.md

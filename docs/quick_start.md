@@ -338,6 +338,6 @@ results = world.evaluate(episodes=50, seed=0)
 
 ## And then?
 
-You should have a look at the [baselines](baseline.md) we implemented, tested, and benchmarked.
+You should have a look at the [baselines](baselines.md) we implemented, tested, and benchmarked.
 
 Explore the [Environments](envs/pusht.md) documentation for detailed information on each task, or dive into the [API Reference](api/world.md) for complete method signatures.

@@ -10,7 +10,7 @@ external_links:
 
 ## Description
 
-A collection of continuous control environments built on the [DeepMind Control Suite](https://github.com/google-deepmind/dm_control) and [MuJoCo](https://mujoco.org/). These environments cover a range of classic locomotion and control tasks.
+A collection of continuous control environments built on the [DeepMind Control Suite](https://github.com/google-deepmind/dm_control). These environments cover a range of classic locomotion and manipulation tasks in the [MuJoCo](https://mujoco.org/) physics engine.
 
 ```python
 import stable_worldmodel as swm
@@ -18,6 +18,22 @@ import stable_worldmodel as swm
 # Example: Cheetah environment
 world = swm.World('swm/CheetahDMControl-v0', num_envs=4)
 ```
+
+### Available Environments
+
+| Environment | Environment ID | Task |
+|-------------|---------------|------|
+| [Humanoid](#humanoid) | `swm/HumanoidDMControl-v0` | Walk forward at 1 m/s |
+| [Cheetah](#cheetah) | `swm/CheetahDMControl-v0` | Run forward |
+| [Hopper](#hopper) | `swm/HopperDMControl-v0` | Hop forward |
+| [Reacher](#reacher) | `swm/ReacherDMControl-v0` | Reach a target |
+| [Walker](#walker) | `swm/WalkerDMControl-v0` | Walk forward at 1 m/s |
+| [Acrobot](#acrobot) | `swm/AcrobotDMControl-v0` | Swing up and balance |
+| [Pendulum](#pendulum) | `swm/PendulumDMControl-v0` | Swing up and balance |
+| [Cartpole](#cartpole) | `swm/CartpoleDMControl-v0` | Swing up and balance |
+| [Ball in Cup](#ball-in-cup) | `swm/BallInCupDMControl-v0` | Catch ball in cup |
+| [Finger](#finger) | `swm/FingerDMControl-v0` | Turn spinner to target |
+| [Manipulator](#manipulator) | `swm/ManipulatorDMControl-v0` | Grasp and place ball |
 
 ---
 

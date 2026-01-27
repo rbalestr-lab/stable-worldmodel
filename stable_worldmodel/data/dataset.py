@@ -66,6 +66,10 @@ class Dataset:
             chunk.append(steps)
         return chunk
 
+    def load_episode(self, episode_idx: int) -> dict:
+        """Load full episode by index."""
+        return self._load_slice(episode_idx, 0, self.lengths[episode_idx])
+
     def get_col_data(self, col: str) -> np.ndarray:
         raise NotImplementedError
 
@@ -398,7 +402,9 @@ class ConcatDataset:
         end = np.asarray(end)
 
         # Map global episode indices to dataset indices
-        ds_indices = np.searchsorted(self._ep_cum[1:], episodes_idx, side='right')
+        ds_indices = np.searchsorted(
+            self._ep_cum[1:], episodes_idx, side='right'
+        )
         local_eps = episodes_idx - self._ep_cum[ds_indices]
 
         # Group by dataset and collect results

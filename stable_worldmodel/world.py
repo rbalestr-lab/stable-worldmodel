@@ -45,7 +45,7 @@ class World:
         self.envs = gym.make_vec(
             env_name,
             num_envs=num_envs,
-            vectorization_mode="sync",
+            vectorization_mode='sync',
             wrappers=[
                 lambda x: MegaWrapper(
                     x,
@@ -68,19 +68,19 @@ class World:
         self._history_size = history_size
 
         if verbose > 0:
-            logging.info(f"🌍🌍🌍 World {env_name} initialized 🌍🌍🌍")
+            logging.info(f'🌍🌍🌍 World {env_name} initialized 🌍🌍🌍')
 
-            logging.info("🕹️ 🕹️ 🕹️ Action space 🕹️ 🕹️ 🕹️")
-            logging.info(f"{self.envs.action_space}")
+            logging.info('🕹️ 🕹️ 🕹️ Action space 🕹️ 🕹️ 🕹️')
+            logging.info(f'{self.envs.action_space}')
 
-            logging.info("👁️ 👁️ 👁️ Observation space 👁️ 👁️ 👁️")
-            logging.info(f"{str(self.envs.observation_space)}")
+            logging.info('👁️ 👁️ 👁️ Observation space 👁️ 👁️ 👁️')
+            logging.info(f'{str(self.envs.observation_space)}')
 
             if self.envs.variation_space is not None:
-                logging.info("⚗️ ⚗️ ⚗️ Variation space ⚗️ ⚗️ ⚗️")
+                logging.info('⚗️ ⚗️ ⚗️ Variation space ⚗️ ⚗️ ⚗️')
                 print(self.single_variation_space.to_str())
             else:
-                logging.warning("No variation space provided!")
+                logging.warning('No variation space provided!')
 
         self.seed = seed
 
@@ -127,9 +127,13 @@ class World:
         """Advance all environments by one step using the current policy."""
         # note: reset happens before because of auto-reset, should fix that
         actions = self.policy.get_action(self.infos)
-        self.states, self.rewards, self.terminateds, self.truncateds, self.infos = (
-            self.envs.step(actions)
-        )
+        (
+            self.states,
+            self.rewards,
+            self.terminateds,
+            self.truncateds,
+            self.infos,
+        ) = self.envs.step(actions)
 
     def reset(self, seed=None, options=None):
         """Reset all environments to initial states."""
@@ -140,7 +144,7 @@ class World:
         self.policy = policy
         self.policy.set_env(self.envs)
 
-        if hasattr(self.policy, "seed") and self.policy.seed is not None:
+        if hasattr(self.policy, 'seed') and self.policy.seed is not None:
             self.policy.set_seed(self.policy.seed)
 
     def record_video(
@@ -148,7 +152,7 @@ class World:
         video_path,
         max_steps=500,
         fps=30,
-        viewname="pixels",
+        viewname='pixels',
         seed=None,
         options=None,
     ):
@@ -158,10 +162,10 @@ class World:
         viewname = [viewname] if isinstance(viewname, str) else viewname
         out = [
             imageio.get_writer(
-                Path(video_path) / f"env_{i}.mp4",
-                "output.mp4",
+                Path(video_path) / f'env_{i}.mp4',
+                'output.mp4',
                 fps=fps,
-                codec="libx264",
+                codec='libx264',
             )
             for i in range(self.num_envs)
         ]
@@ -178,8 +182,8 @@ class World:
                 frames_to_stack.append(frame_data)
             frame = np.vstack(frames_to_stack)
 
-            if "goal" in self.infos:
-                goal_data = self.infos["goal"][i]
+            if 'goal' in self.infos:
+                goal_data = self.infos['goal'][i]
                 if goal_data.ndim > 3:
                     goal_data = goal_data[-1]
                 frame = np.vstack([frame, goal_data])
@@ -201,14 +205,14 @@ class World:
                     frames_to_stack.append(frame_data)
                 frame = np.vstack(frames_to_stack)
 
-                if "goal" in self.infos:
-                    goal_data = self.infos["goal"][i]
+                if 'goal' in self.infos:
+                    goal_data = self.infos['goal'][i]
                     if goal_data.ndim > 3:
                         goal_data = goal_data[-1]
                     frame = np.vstack([frame, goal_data])
                 o.append_data(frame)
         [o.close() for o in out]
-        print(f"Video saved to {video_path}")
+        print(f'Video saved to {video_path}')
 
     def record_dataset(
         self,
@@ -221,10 +225,10 @@ class World:
         """Records episodes from the environment into an HDF5 dataset."""
         if self._history_size > 1:
             raise NotImplementedError(
-                "Frame history > 1 not supported for dataset recording."
+                'Frame history > 1 not supported for dataset recording.'
             )
 
-        path = Path(cache_dir or get_cache_dir()) / f"{dataset_name}.h5"
+        path = Path(cache_dir or get_cache_dir()) / f'{dataset_name}.h5'
         path.parent.mkdir(parents=True, exist_ok=True)
 
         self.terminateds = np.zeros(self.num_envs, dtype=bool)
@@ -233,25 +237,31 @@ class World:
         episode_buffers = [defaultdict(list) for _ in range(self.num_envs)]
 
         h5_kwargs = {
-            "name": str(path),
-            "mode": "a" if path.exists() else "w",
-            "libver": "latest",
+            'name': str(path),
+            'mode': 'a' if path.exists() else 'w',
+            'libver': 'latest',
         }
 
         if not path.exists():  # creation only args
-            h5_kwargs.update({"fs_strategy": "page", "fs_page_size": 4 * 1024 * 1024})
+            h5_kwargs.update(
+                {'fs_strategy': 'page', 'fs_page_size': 4 * 1024 * 1024}
+            )
 
         with h5py.File(**h5_kwargs) as f:
             f.swmr_mode = True  # avoid issue when killed
 
-            if "ep_len" in f:
-                n_ep_recorded = f["ep_len"].shape[0]
+            if 'ep_len' in f:
+                n_ep_recorded = f['ep_len'].shape[0]
                 global_step_ptr = (
-                    f["ep_offset"][-1] + f["ep_len"][-1] if n_ep_recorded > 0 else 0
+                    f['ep_offset'][-1] + f['ep_len'][-1]
+                    if n_ep_recorded > 0
+                    else 0
                 )
                 initialized = True
                 seed = None if seed is None else (seed + n_ep_recorded)
-                logging.info(f"Resuming: {n_ep_recorded} episodes already on disk.")
+                logging.info(
+                    f'Resuming: {n_ep_recorded} episodes already on disk.'
+                )
             else:
                 n_ep_recorded = 0
                 global_step_ptr = 0
@@ -261,7 +271,9 @@ class World:
             seed = None if seed is None else (seed + self.num_envs)
             self._dump_step_data(episode_buffers)  # record initial state
 
-            with tqdm(total=episodes, initial=n_ep_recorded, desc="Recording") as pbar:
+            with tqdm(
+                total=episodes, initial=n_ep_recorded, desc='Recording'
+            ) as pbar:
                 while n_ep_recorded < episodes:
                     self.step()
                     self._dump_step_data(episode_buffers)
@@ -291,15 +303,17 @@ class World:
                                 break
 
                             # reset terminated env and record initial state
-                            self._reset_single_env(i, seed + n_ep_recorded, options)
+                            self._reset_single_env(
+                                i, seed + n_ep_recorded, options
+                            )
                             self._dump_step_data(episode_buffers, env_idx=i)
 
-        logging.info(f"Recording complete. Total frames: {global_step_ptr}")
+        logging.info(f'Recording complete. Total frames: {global_step_ptr}')
 
     def _init_h5_datasets(self, f, sample_episode):
         """Initialize resizable HDF5 datasets based on the first episode."""
         for key, data_list in sample_episode.items():
-            if key in ["ep_len", "ep_idx", "policy"]:
+            if key in ['ep_len', 'ep_idx', 'policy']:
                 continue
 
             # determine array shape and dtype from sample data
@@ -311,7 +325,7 @@ class World:
             if sample_data.ndim >= 2:
                 chunks = (100,) + sample_data.shape
                 compression = hdf5plugin.Blosc(
-                    cname="lz4", clevel=5, shuffle=hdf5plugin.Blosc.SHUFFLE
+                    cname='lz4', clevel=5, shuffle=hdf5plugin.Blosc.SHUFFLE
                 )
 
             else:
@@ -328,8 +342,12 @@ class World:
             )
 
         # index metadata
-        f.create_dataset("ep_offset", shape=(0,), maxshape=(None,), dtype=np.int64)
-        f.create_dataset("ep_len", shape=(0,), maxshape=(None,), dtype=np.int32)
+        f.create_dataset(
+            'ep_offset', shape=(0,), maxshape=(None,), dtype=np.int64
+        )
+        f.create_dataset(
+            'ep_len', shape=(0,), maxshape=(None,), dtype=np.int32
+        )
 
     def _reset_single_env(self, env_idx, seed=None, options=None):
         """Reset a single environment and update infos dict."""
@@ -344,8 +362,8 @@ class World:
         ep_buffer = tmp_buffer[env_idx]
 
         # left-shift actions to align with observations i.e. (o_t, a_t)
-        if "action" in ep_buffer:
-            actions = ep_buffer["action"]
+        if 'action' in ep_buffer:
+            actions = ep_buffer['action']
             nan = actions.pop(0)
             actions.append(nan)
 
@@ -358,11 +376,11 @@ class World:
 
     def _write_episode(self, f, ep_data, global_ptr):
         """Write a single contiguous episode to the HDF5 file."""
-        ep_len = len(ep_data["step_idx"])
+        ep_len = len(ep_data['step_idx'])
 
         # append data to each dataset
         for key in f.keys():
-            if key in ["ep_offset", "ep_len"]:
+            if key in ['ep_offset', 'ep_len']:
                 continue
 
             ds = f[key]
@@ -371,12 +389,12 @@ class World:
             ds[curr_size:] = np.array(ep_data[key])
 
         # update metadata
-        meta_idx = f["ep_offset"].shape[0]
-        f["ep_offset"].resize(meta_idx + 1, axis=0)
-        f["ep_len"].resize(meta_idx + 1, axis=0)
+        meta_idx = f['ep_offset'].shape[0]
+        f['ep_offset'].resize(meta_idx + 1, axis=0)
+        f['ep_len'].resize(meta_idx + 1, axis=0)
 
-        f["ep_offset"][meta_idx] = global_ptr
-        f["ep_len"][meta_idx] = ep_len
+        f['ep_offset'][meta_idx] = global_ptr
+        f['ep_len'][meta_idx] = ep_len
 
         return ep_len
 
@@ -385,7 +403,7 @@ class World:
         env_indices = range(self.num_envs) if env_idx is None else [env_idx]
 
         for col, data in self.infos.items():
-            if col.startswith("_"):
+            if col.startswith('_'):
                 continue
 
             # normalize data shape and type
@@ -401,89 +419,29 @@ class World:
             # append to buffers
             for i in env_indices:
                 env_data = (
-                    data[i].copy() if isinstance(data[i], np.ndarray) else data[i]
+                    data[i].copy()
+                    if isinstance(data[i], np.ndarray)
+                    else data[i]
                 )
                 tmp_buffer[i][col].append(env_data)
 
-    def record_video_from_dataset(
-        self,
-        video_path,
-        dataset,
-        episode_idx,
-        max_steps=500,
-        fps=30,
-        num_proc=4,
-        viewname: str | list[str] = "pixels",
-    ):
-        """Replay stored dataset episodes and export them as MP4 videos."""
-        import imageio
-        import imageio.v3 as iio
-        from PIL import Image
-
-        episode_idx = [episode_idx] if isinstance(episode_idx, int) else episode_idx
-        viewname = [viewname] if isinstance(viewname, str) else viewname
-
-        out = [
-            imageio.get_writer(
-                Path(video_path) / f"episode_{i}.mp4",
-                "output.mp4",
-                fps=fps,
-                codec="libx264",
-            )
-            for i in episode_idx
-        ]
-
-        for i, o in zip(episode_idx, out):
-            episode = dataset.dataset.filter(
-                lambda ex: ex["episode_idx"] == i, num_proc=num_proc
-            )
-            episode = episode.sort("step_idx")
-            episode_len = len(episode)
-
-            all_lengths = episode["episode_len"][:].tolist()
-
-            assert len(set(all_lengths)) == 1, (
-                "'episode_len' contains different values for the same episode"
-            )
-            assert len(episode) == episode["episode_len"][0], (
-                f"Episode {i} has {len(episode)} steps, but 'episode_len' is {episode['episode_len'][0]}"
-            )
-
-            for step_idx in range(min(episode_len, max_steps)):
-                frame = []
-                for view in viewname:
-                    img_path = Path(
-                        episode[step_idx]["data_dir"], episode[step_idx][view]
-                    )
-                    frame.append(
-                        np.array(Image.open(img_path).convert("RGB"), dtype=np.uint8)
-                    )
-                frame = np.vstack(frame)  # should try hstack?
-
-                if "goal" in episode.column_names:
-                    goal_path = Path(
-                        episode[step_idx]["data_dir"], episode[step_idx]["goal"]
-                    )
-                    goal = Image.open(goal_path)
-                    goal = np.array(goal.convert("RGB"), dtype=np.uint8)
-                    frame = np.vstack([frame, goal])
-                o.append_data(frame)
-
-        [o.close() for o in out]
-        print(f"Video saved to {video_path}")
-
     def evaluate(
-        self, episodes=10, eval_keys=None, seed=None, options=None, dump_every=-1
+        self,
+        episodes=10,
+        eval_keys=None,
+        seed=None,
+        options=None,
+        dump_every=-1,
     ):
         """Evaluate the current policy over multiple episodes."""
 
         options = options or {}
 
         results = {
-            "episode_count": 0,
-            "success_rate": 0,
-            "episode_successes": np.zeros(episodes),
-            "seeds": np.zeros(episodes, dtype=np.int32),
+            'episode_count': 0,
+            'success_rate': 0,
+            'episode_successes': np.zeros(episodes),
+            'seeds': np.zeros(episodes, dtype=np.int32),
         }
 
         if eval_keys:
@@ -501,23 +459,23 @@ class World:
 
         # determine "unique" hash for this eval run
         config = {
-            "episodes": episodes,
-            "eval_keys": tuple(sorted(eval_keys)) if eval_keys else None,
-            "seed": seed,
-            "options": tuple(sorted(options.items())) if options else None,
-            "dump_every": dump_every,
+            'episodes': episodes,
+            'eval_keys': tuple(sorted(eval_keys)) if eval_keys else None,
+            'seed': seed,
+            'options': tuple(sorted(options.items())) if options else None,
+            'dump_every': dump_every,
         }
 
         config_str = json.dumps(config, sort_keys=True)
         run_hash = hashlib.sha256(config_str.encode()).hexdigest()[:8]
-        run_tmp_path = Path(f"eval_tmp_{run_hash}.npy")
+        run_tmp_path = Path(f'eval_tmp_{run_hash}.npy')
 
         # load back intermediate results if file exists
         if run_tmp_path.exists():
             tmp_results = np.load(run_tmp_path, allow_pickle=True).item()
             results.update(tmp_results)
 
-            ep_count = results["episode_count"]
+            ep_count = results['episode_count']
             episode_idx = np.arange(ep_count, ep_count + self.num_envs)
 
             # reset seed where we left off
@@ -525,7 +483,7 @@ class World:
             self.reset(seed=last_seed, options=options)
 
             logging.success(
-                f"Found existing eval tmp file {run_tmp_path}, resuming from episode {ep_count}/{episodes}"
+                f'Found existing eval tmp file {run_tmp_path}, resuming from episode {ep_count}/{episodes}'
             )
 
         while True:
@@ -536,43 +494,53 @@ class World:
                 if self.terminateds[i] or self.truncateds[i]:
                     # record eval info
                     ep_idx = episode_idx[i]
-                    results["episode_successes"][ep_idx] = self.terminateds[i]
-                    results["seeds"][ep_idx] = self.envs.envs[
+                    results['episode_successes'][ep_idx] = self.terminateds[i]
+                    results['seeds'][ep_idx] = self.envs.envs[
                         i
                     ].unwrapped.np_random_seed
 
                     if eval_keys:
                         for key in eval_keys:
-                            assert key in self.infos, f"key {key} not found in infos"
+                            assert key in self.infos, (
+                                f'key {key} not found in infos'
+                            )
                             results[key][ep_idx] = self.infos[key][i]
 
                     # determine new episode idx
                     # re-reset env with seed and options (no supported by auto-reset)
                     new_seed = (
-                        root_seed + results["episode_count"]
+                        root_seed + results['episode_count']
                         if seed is not None
                         else None
                     )
                     next_ep_idx = episode_idx.max() + 1
                     episode_idx[i] = next_ep_idx
-                    results["episode_count"] += 1
+                    results['episode_count'] += 1
 
                     # break if enough episodes evaluated
-                    if results["episode_count"] >= episodes:
+                    if results['episode_count'] >= episodes:
                         eval_done = True
                         if run_tmp_path.exists():
-                            logging.info(f"Eval done, deleting tmp file {run_tmp_path}")
+                            logging.info(
+                                f'Eval done, deleting tmp file {run_tmp_path}'
+                            )
                             os.remove(run_tmp_path)
                         break
 
                     # dump temporary results in a file
-                    if dump_every > 0 and (results["episode_count"] % dump_every == 0):
+                    if dump_every > 0 and (
+                        results['episode_count'] % dump_every == 0
+                    ):
                         np.save(run_tmp_path, results)
                         logging.success(
-                            f"Dumped intermediate eval results to {run_tmp_path} ({results['episode_count']}/{episodes})"
+                            f'Dumped intermediate eval results to {run_tmp_path} ({results["episode_count"]}/{episodes})'
                         )
-                    self.envs.unwrapped._autoreset_envs = np.zeros((self.num_envs,))
-                    _, infos = self.envs.envs[i].reset(seed=new_seed, options=options)
+                    self.envs.unwrapped._autoreset_envs = np.zeros(
+                        (self.num_envs,)
+                    )
+                    _, infos = self.envs.envs[i].reset(
+                        seed=new_seed, options=options
+                    )
 
                     for k, v in infos.items():
                         if k not in self.infos:
@@ -584,16 +552,16 @@ class World:
                 break
 
         # compute success rate
-        results["success_rate"] = (
-            float(np.sum(results["episode_successes"])) / episodes * 100.0
+        results['success_rate'] = (
+            float(np.sum(results['episode_successes'])) / episodes * 100.0
         )
 
-        assert results["episode_count"] == episodes, (
-            f"episode_count {results['episode_count']} != episodes {episodes}"
+        assert results['episode_count'] == episodes, (
+            f'episode_count {results["episode_count"]} != episodes {episodes}'
         )
 
-        assert np.unique(results["seeds"]).shape[0] == episodes, (
-            "Some episode seeds are identical!"
+        assert np.unique(results['seeds']).shape[0] == episodes, (
+            'Some episode seeds are identical!'
         )
 
         return results
@@ -607,22 +575,26 @@ class World:
         eval_budget: int,
         callables: dict | None = None,
         save_video: bool = True,
-        video_path="./",
+        video_path='./',
     ):
         assert (
             self.envs.envs[0].spec.max_episode_steps is None
             or self.envs.envs[0].spec.max_episode_steps >= goal_offset_steps
-        ), "env max_episode_steps must be greater than eval_budget"
+        ), 'env max_episode_steps must be greater than eval_budget'
 
         episodes_idx = np.array(episodes_idx)
         start_steps = np.array(start_steps)
         end_steps = start_steps + goal_offset_steps
 
         if not (len(episodes_idx) == len(start_steps)):
-            raise ValueError("episodes_idx and start_steps must have the same length")
+            raise ValueError(
+                'episodes_idx and start_steps must have the same length'
+            )
 
         if len(episodes_idx) != self.num_envs:
-            raise ValueError("Number of episodes to evaluate must match number of envs")
+            raise ValueError(
+                'Number of episodes to evaluate must match number of envs'
+            )
 
         data = dataset.get_chunk_data(episodes_idx, start_steps, end_steps)
         columns = dataset.column_names
@@ -633,9 +605,9 @@ class World:
 
         for i, ep in enumerate(data):
             for col in columns:
-                if col.startswith("goal"):
+                if col.startswith('goal'):
                     continue
-                if col.startswith("pixels"):
+                if col.startswith('pixels'):
                     # permute channel to be last
                     ep[col] = ep[col].permute(0, 2, 3, 1)
 
@@ -648,7 +620,7 @@ class World:
                 # TODO handle that better
                 if not isinstance(init_data, (np.ndarray | torch.Tensor)):
                     logging.warning(
-                        f"Data type {type(init_data)} for column {col} not supported, yet skipping conversion"
+                        f'Data type {type(init_data)} for column {col} not supported, yet skipping conversion'
                     )
                     continue
 
@@ -666,19 +638,23 @@ class World:
                 init_step_per_env[col].append(init_data)
                 goal_step_per_env[col].append(goal_data)
 
-        init_step = {k: np.stack(v) for k, v in deepcopy(init_step_per_env).items()}
+        init_step = {
+            k: np.stack(v) for k, v in deepcopy(init_step_per_env).items()
+        }
 
         goal_step = {}
         for key, value in goal_step_per_env.items():
-            key = "goal" if key == "pixels" else f"goal_{key}"
+            key = 'goal' if key == 'pixels' else f'goal_{key}'
             goal_step[key] = np.stack(value)
 
         # get dataset info
-        seeds = init_step.get("seed")
+        seeds = init_step.get('seed')
         # get dataset variation
-        vkey = "variation."
-        variations = [col.removeprefix(vkey) for col in columns if col.startswith(vkey)]
-        options = {"variations": variations or None}
+        vkey = 'variation.'
+        variations = [
+            col.removeprefix(vkey) for col in columns if col.startswith(vkey)
+        ]
+        options = {'variations': variations or None}
 
         init_step.update(deepcopy(goal_step))
         self.reset(seed=seeds, options=options)  # set seeds for all envs
@@ -692,31 +668,33 @@ class World:
             env = env.unwrapped
 
             for spec in callables:
-                method_name = spec["method"]
+                method_name = spec['method']
                 if not hasattr(env, method_name):
                     logging.warning(
-                        f"Env {env} has no method {method_name}, skipping callable"
+                        f'Env {env} has no method {method_name}, skipping callable'
                     )
                     continue
 
                 method = getattr(env, method_name)
-                args = spec.get("args", spec)
+                args = spec.get('args', spec)
 
                 # prepare args
                 prepared_args = {}
                 for args_name, args_data in args.items():
-                    value = args_data.get("value", None)
-                    is_in_datset = args_data.get("in_dataset", True)
+                    value = args_data.get('value', None)
+                    is_in_datset = args_data.get('in_dataset', True)
 
                     if is_in_datset:
                         if value not in init_step:
                             logging.warning(
-                                f"Col {value} not found in dataset, skipping callable for env {env}"
+                                f'Col {value} not found in dataset, skipping callable for env {env}'
                             )
                             continue
-                        prepared_args[args_name] = deepcopy(init_step[value][i])
+                        prepared_args[args_name] = deepcopy(
+                            init_step[value][i]
+                        )
                     else:
-                        prepared_args[args_name] = args_data.get("value")
+                        prepared_args[args_name] = args_data.get('value')
 
                 # call method with prepared args
                 method(**prepared_args)
@@ -725,15 +703,15 @@ class World:
             env = env.unwrapped
 
             # TODO remove this
-            if "goal_state" in init_step and "goal_state" in goal_step:
+            if 'goal_state' in init_step and 'goal_state' in goal_step:
                 assert np.array_equal(
-                    init_step["goal_state"][i], goal_step["goal_state"][i]
-                ), "Goal state info does not match at reset"
+                    init_step['goal_state'][i], goal_step['goal_state'][i]
+                ), 'Goal state info does not match at reset'
 
         results = {
-            "success_rate": 0,
-            "episode_successes": np.zeros(len(episodes_idx)),
-            "seeds": seeds,
+            'success_rate': 0,
+            'episode_successes': np.zeros(len(episodes_idx)),
+            'seeds': seeds,
         }
 
         # expend all data to the right shape (x, y, (original_shape))
@@ -754,36 +732,36 @@ class World:
         self.infos.update(deepcopy(goal_step))
 
         # assert np.allclose(self.infos["goal"], goal_step["goal"]), "Goal info does not match"
-        if "goal" in goal_step and "goal" in self.infos:
-            assert np.allclose(self.infos["goal"], goal_step["goal"]), (
-                "Goal info does not match"
+        if 'goal' in goal_step and 'goal' in self.infos:
+            assert np.allclose(self.infos['goal'], goal_step['goal']), (
+                'Goal info does not match'
             )
 
-        target_frames = torch.stack([ep["pixels"] for ep in data]).numpy()
+        target_frames = torch.stack([ep['pixels'] for ep in data]).numpy()
         video_frames = np.empty(
-            (self.num_envs, eval_budget, *self.infos["pixels"].shape[-3:]),
+            (self.num_envs, eval_budget, *self.infos['pixels'].shape[-3:]),
             dtype=np.uint8,
         )
 
         # TODO assert goal and start state are identical as in the rollout
         # run normal evaluation for eval_budget and TODO: record video
         for i in range(eval_budget):
-            video_frames[:, i] = self.infos["pixels"][:, -1]
+            video_frames[:, i] = self.infos['pixels'][:, -1]
             self.infos.update(deepcopy(goal_step))
             self.step()
-            results["episode_successes"] = np.logical_or(
-                results["episode_successes"], self.terminateds
+            results['episode_successes'] = np.logical_or(
+                results['episode_successes'], self.terminateds
             )
             # for auto-reset
             self.envs.unwrapped._autoreset_envs = np.zeros((self.num_envs,))
 
-        video_frames[:, -1] = self.infos["pixels"][:, -1]
+        video_frames[:, -1] = self.infos['pixels'][:, -1]
 
         n_episodes = len(episodes_idx)
 
         # compute success rate
-        results["success_rate"] = (
-            float(np.sum(results["episode_successes"])) / n_episodes * 100.0
+        results['success_rate'] = (
+            float(np.sum(results['episode_successes'])) / n_episodes * 100.0
         )
 
         # save video if required
@@ -795,10 +773,10 @@ class World:
             video_path.mkdir(parents=True, exist_ok=True)
             for i in range(self.num_envs):
                 out = imageio.get_writer(
-                    video_path / f"rollout_{i}.mp4",
-                    "output.mp4",
+                    video_path / f'rollout_{i}.mp4',
+                    'output.mp4',
                     fps=15,
-                    codec="libx264",
+                    codec='libx264',
                 )
                 goals = np.vstack([target_frames[i, -1], target_frames[i, -1]])
                 for t in range(eval_budget):
@@ -808,11 +786,11 @@ class World:
                     frame = np.hstack([stacked_frame, goals])
                     out.append_data(frame)
                 out.close()
-            print(f"Video saved to {video_path}")
+            print(f'Video saved to {video_path}')
 
-        if results["seeds"] is not None:
-            assert np.unique(results["seeds"]).shape[0] == n_episodes, (
-                "Some episode seeds are identical!"
+        if results['seeds'] is not None:
+            assert np.unique(results['seeds']).shape[0] == n_episodes, (
+                'Some episode seeds are identical!'
             )
 
         return results

@@ -415,6 +415,21 @@ class TestImageDataset:
         assert isinstance(img, np.ndarray)
         assert img.shape == (64, 64, 3)
 
+    def test_load_episode(self, sample_image_dataset):
+        """Test load_episode loads full episode data."""
+        cache_dir, name = sample_image_dataset
+        dataset = ImageDataset(name, cache_dir=str(cache_dir))
+
+        episode = dataset.load_episode(0)
+
+        assert isinstance(episode, dict)
+        assert "observation" in episode
+        assert "action" in episode
+        assert "pixels" in episode
+        # Episode 0 has 10 steps
+        assert episode["observation"].shape[0] == 10
+        assert episode["pixels"].shape[0] == 10
+
 
 class TestVideoDataset:
     def test_init(self, sample_video_dataset):

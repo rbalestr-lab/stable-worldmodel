@@ -5,8 +5,6 @@ external_links:
     arxiv: https://arxiv.org/abs/2303.04137
 ---
 
-<!-- ![pusht](assets/env/pusht/normal.gif) -->
-
 ![pusht](../assets/pusht.gif)
 
 ## Description
@@ -55,6 +53,10 @@ The `info` dict returned by `step()` and `reset()` contains:
 | `n_contacts` | Number of contact points this step |
 
 ## Variation Space
+
+
+![pusht_fov](../assets/pusht_fov.gif)
+
 
 The environment supports extensive customization through the variation space:
 

@@ -31,6 +31,9 @@ world = swm.World('swm/OGBScene-v0', num_envs=4)
 
 ## Cube Environment
 
+![cube](../assets/cube.gif)
+
+
 Manipulation tasks involving 1-8 colored cubes that must be moved to target positions. Tasks include pick-and-place, swapping positions, and multi-cube stacking.
 
 **Success criteria**: All cubes must be within 4cm of their target positions.
@@ -68,6 +71,10 @@ Manipulation tasks involving 1-8 colored cubes that must be moved to target posi
 
 ### Variation Space
 
+
+![cube_fov](../assets/cube_fov.gif)
+
+
 | Factor | Type | Description |
 |--------|------|-------------|
 | `cube.color` | Box(0, 1, shape=(N, 3)) | RGB colors for each cube |
@@ -80,6 +87,9 @@ Manipulation tasks involving 1-8 colored cubes that must be moved to target posi
 ---
 
 ## Scene Environment
+
+![scene](../assets/scene.gif)
+
 
 A complex manipulation scene with a single cube, two lock buttons, a drawer, and a window. Tasks require interacting with multiple objects in sequence (e.g., press button to unlock drawer, then open drawer).
 
@@ -112,6 +122,8 @@ A complex manipulation scene with a single cube, two lock buttons, a drawer, and
 5. **Rearrange Hard**: Complex multi-step rearrangement
 
 ### Variation Space
+
+![scene_fov](../assets/scene_fov.gif)
 
 | Factor | Type | Description |
 |--------|------|-------------|

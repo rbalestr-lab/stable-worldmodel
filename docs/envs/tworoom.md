@@ -5,7 +5,7 @@ external_links:
     arxiv: https://arxiv.org/abs/2411.04983
 ---
 
-<!-- ![tworoom](assets/env/tworoom/normal.gif) -->
+![pusht](../assets/tworoom.gif)
 
 ## Description
 
@@ -54,6 +54,9 @@ The `info` dict returned by `step()` and `reset()` contains:
 | `n_contacts` | Number of wall contacts this step |
 
 ## Variation Space
+
+![tworoom_fov](../assets/tworoom_fov.gif)
+
 
 The environment supports extensive customization through the variation space:
 

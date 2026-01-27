@@ -121,7 +121,7 @@ If you wish to cite our [pre-print](#):
 ```bibtex
 @article{swm_maes2026,
   title={stable-world model},
-  author={Lucas Maes, Quentin LeLidec, Dan Haramati, Nassim Massaudi, Yann LeCun, Randall Balestriero},
+  author={Lucas Maes, Quentin Le Lidec, Dan Haramati, Nassim Massaudi, Yann LeCun, Randall Balestriero},
   booktitle={stable-worldmodel: World Model Research Made Simple},
   year={2026},
 }

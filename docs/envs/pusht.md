@@ -3,6 +3,7 @@ title: Push-T
 summary: A 2D contact-rich manipulation task
 external_links:
     arxiv: https://arxiv.org/abs/2303.04137
+    github: https://github.com/huggingface/gym-pusht
 ---
 
 ![pusht](../assets/pusht.gif)

@@ -1,17 +1,33 @@
 [![PyPI](https://img.shields.io/pypi/v/stable-worldmodel.svg)](https://pypi.python.org/pypi/stable-worldmodel/#history)
 
-# stable-worldmodel
+# Stable World-Model
 
-`stable-worldmodel` aims to offer a simple api to conduct world model research.
-From data dollection, to evaluation and passing by training. We aim to offer a complete research ecosystem.
-SWM comes with additional features such as factor of variations for some environment. 
+World model research made simple. From data collection to training and evaluation.
 
-```
+```bash
 pip install stable-worldmodel
 ```
 
-**NOTE:** The library is still in active development.
+> **Note:** The library is still in active development.
 
+## Quick Example
+
+```python
+import stable_worldmodel as swm
+
+world = swm.World('swm/PushT-v1', num_envs=8)
+world.set_policy(your_policy)
+world.record_dataset(dataset_name='pusht_demo', episodes=100)
+
+# ... train your world model ...
+
+results = world.evaluate(episodes=50)
+print(f"Success Rate: {results['success_rate']:.1f}%")
+```
+
+## Documentation
+
+See the full documentation at [stable-worldmodel.github.io](https://stable-worldmodel.github.io).
 
 ## Contributing
 
@@ -23,8 +39,17 @@ source .venv/bin/activate
 uv sync --all-extras --group dev
 ```
 
+## Citation
+
+```bibtex
+@article{swm_maes2026,
+  title={stable-world model},
+  author={Lucas Maes, Quentin LeLidec, Dan Haramati, Nassim Massaudi, Yann LeCun, Randall Balestriero},
+  booktitle={stable-worldmodel: World Model Research Made Simple},
+  year={2026},
+}
+```
+
 ## Questions
 
-If you have a question, please [file an issue][issues].
-
-[issues]: https://github.com/lucas-maes/swm/issues
+If you have a question, please [file an issue](https://github.com/lucas-maes/swm/issues).

@@ -251,7 +251,7 @@ world = swm.World('swm/AcrobotDMControl-v0', num_envs=4)
 
 ## Pendulum
 
-![pendulum](../assets/pendulum_spin.gif)
+![pendulum](../assets/swingup.gif)
 
 A single-link pendulum that must swing up and balance. The task uses feature-based observations (angle, angular velocity).
 
@@ -286,7 +286,7 @@ world = swm.World('swm/PendulumDMControl-v0', num_envs=4)
 
 ## Cartpole
 
-![cartpole](../assets/swingup.gif)
+![cartpole](../assets/cartpole.gif)
 
 A cart-pole system that must swing up and balance. The task uses sparse rewards and feature-based observations (cart position, pole angle, velocities).
 

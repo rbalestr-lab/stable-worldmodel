@@ -61,15 +61,3 @@ summary: Model-based planning solvers for action optimization
 ::: stable_worldmodel.solver.PGDSolver.configure
 
 ::: stable_worldmodel.solver.PGDSolver.solve
-
-## **solver.RandomSolver**
-
-::: stable_worldmodel.solver.RandomSolver
-    options:
-        heading_level: 2
-        members: false
-        show_source: false
-
-::: stable_worldmodel.solver.RandomSolver.configure
-
-::: stable_worldmodel.solver.RandomSolver.solve

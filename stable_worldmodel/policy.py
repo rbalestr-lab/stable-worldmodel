@@ -370,3 +370,7 @@ def AutoCostModel(run_name: str, cache_dir: str | Path | None = None) -> torch.n
         return result
 
     raise RuntimeError("No cost model found in the loaded world model.")
+
+
+# Alias for backward compatibility and type hinting
+Policy = BasePolicy

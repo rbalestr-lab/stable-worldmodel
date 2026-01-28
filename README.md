@@ -59,7 +59,7 @@ If you have a question, please [file an issue](https://github.com/lucas-maes/swm
 ```bibtex
 @article{swm_maes2026,
   title={stable-world model},
-  author={Lucas Maes, Quentin LeLidec, Dan Haramati, Nassim Massaudi, Yann LeCun, Randall Balestriero},
+  author={},
   booktitle={stable-worldmodel: World Model Research Made Simple},
   year={2026},
 }

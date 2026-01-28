@@ -4,45 +4,66 @@ import hashlib
 import json
 import os
 from collections import defaultdict
-from collections.abc import Callable
+from collections.abc import Callable, Sequence
 from copy import deepcopy
 from pathlib import Path
+from typing import Any
 
 import gymnasium as gym
 import h5py
 import hdf5plugin
 import numpy as np
 import torch
+from gymnasium.vector import VectorEnv
 from loguru import logger as logging
 from rich import print
 from tqdm import tqdm
 
 from stable_worldmodel.data.utils import get_cache_dir
+from stable_worldmodel.policy import Policy
 
 from .wrapper import MegaWrapper, VariationWrapper
 
 
 class World:
-    """High-level manager for vectorized Gymnasium environments."""
+    """High-level manager for vectorized Gymnasium environments.
+
+    Manages a set of synchronized vectorized environments with automatic
+    preprocessing (resizing, frame stacking, goal conditioning).
+
+    Args:
+        env_name: Name of the Gymnasium environment to create.
+        num_envs: Number of parallel environments.
+        image_shape: Target shape for image observations (H, W).
+        goal_transform: Optional callable to transform goal observations.
+        image_transform: Optional callable to transform image observations.
+        seed: Random seed for reproducibility.
+        history_size: Number of frames to stack.
+        frame_skip: Number of frames to skip per step.
+        max_episode_steps: Maximum steps per episode before truncation.
+        verbose: Verbosity level (0: silent, >0: info).
+        extra_wrappers: List of additional wrappers to apply to each env.
+        goal_conditioned: Whether to separate goal from observation.
+        **kwargs: Additional keyword arguments passed to `gym.make_vec`.
+    """
 
     def __init__(
         self,
         env_name: str,
         num_envs: int,
-        image_shape: tuple,
-        goal_transform: Callable | None = None,
-        image_transform: Callable | None = None,
+        image_shape: tuple[int, int],
+        goal_transform: Callable[[Any], Any] | None = None,
+        image_transform: Callable[[Any], Any] | None = None,
         seed: int = 2349867,
         history_size: int = 1,
         frame_skip: int = 1,
         max_episode_steps: int = 100,
         verbose: int = 1,
-        extra_wrappers: list | None = None,
+        extra_wrappers: list[Callable] | None = None,
         goal_conditioned: bool = True,
-        **kwargs,
-    ):
-        """Initialize the World with vectorized environments."""
-        self.envs = gym.make_vec(
+        **kwargs: Any,
+    ) -> None:
+        self.envs: VectorEnv = gym.make_vec(
             env_name,
             num_envs=num_envs,
             vectorization_mode='sync',
@@ -66,6 +87,12 @@ class World:
         self.envs.unwrapped.autoreset_mode = gym.vector.AutoresetMode.DISABLED
 
         self._history_size = history_size
+        self.policy: Policy | None = None
+        self.states: dict | None = None
+        self.infos: dict = {}
+        self.rewards: np.ndarray | None = None
+        self.terminateds: np.ndarray | None = None
+        self.truncateds: np.ndarray | None = None
 
         if verbose > 0:
             logging.info(f'🌍🌍🌍 World {env_name} initialized 🌍🌍🌍')
@@ -85,47 +112,50 @@ class World:
         self.seed = seed
 
     @property
-    def num_envs(self):
+    def num_envs(self) -> int:
         """Number of parallel environment instances."""
         return self.envs.num_envs
 
     @property
-    def observation_space(self):
+    def observation_space(self) -> gym.Space:
         """Batched observation space for all environments."""
         return self.envs.observation_space
 
     @property
-    def action_space(self):
+    def action_space(self) -> gym.Space:
         """Batched action space for all environments."""
         return self.envs.action_space
 
     @property
-    def variation_space(self):
+    def variation_space(self) -> gym.Space | None:
         """Batched variation space for domain randomization."""
         return self.envs.variation_space
 
     @property
-    def single_variation_space(self):
+    def single_variation_space(self) -> gym.Space | None:
         """Variation space for a single environment instance."""
         return self.envs.single_variation_space
 
     @property
-    def single_action_space(self):
+    def single_action_space(self) -> gym.Space:
         """Action space for a single environment instance."""
         return self.envs.single_action_space
 
     @property
-    def single_observation_space(self):
+    def single_observation_space(self) -> gym.Space:
         """Observation space for a single environment instance."""
         return self.envs.single_observation_space
 
-    def close(self, **kwargs):
+    def close(self, **kwargs: Any) -> None:
         """Close all environments and clean up resources."""
         return self.envs.close(**kwargs)
 
-    def step(self):
+    def step(self) -> None:
         """Advance all environments by one step using the current policy."""
         # note: reset happens before because of auto-reset, should fix that
+        if self.policy is None:
+            raise RuntimeError("No policy set. Call set_policy() first.")
+
         actions = self.policy.get_action(self.infos)
         (
             self.states,
@@ -135,12 +165,25 @@ class World:
             self.infos,
         ) = self.envs.step(actions)
 
-    def reset(self, seed=None, options=None):
-        """Reset all environments to initial states."""
+    def reset(
+        self,
+        seed: int | list[int] | None = None,
+        options: dict | None = None,
+    ) -> None:
+        """Reset all environments to initial states.
+
+        Args:
+            seed: Random seed(s) for the environments.
+            options: Additional options passed to the environment reset.
+        """
         self.states, self.infos = self.envs.reset(seed=seed, options=options)
 
-    def set_policy(self, policy):
-        """Attach a policy to the world."""
+    def set_policy(self, policy: Policy) -> None:
+        """Attach a policy to the world.
+
+        Args:
+            policy: The policy instance to use for determining actions.
+        """
         self.policy = policy
         self.policy.set_env(self.envs)
 
@@ -149,21 +192,29 @@ class World:
 
     def record_video(
         self,
-        video_path,
-        max_steps=500,
-        fps=30,
-        viewname='pixels',
-        seed=None,
-        options=None,
-    ):
-        """Record rollout videos for each environment under the current policy."""
+        video_path: str | Path,
+        max_steps: int = 500,
+        fps: int = 30,
+        viewname: str | list[str] = 'pixels',
+        seed: int | None = None,
+        options: dict | None = None,
+    ) -> None:
+        """Record rollout videos for each environment under the current policy.
+
+        Args:
+            video_path: Directory path to save the videos.
+            max_steps: Maximum steps to record per environment.
+            fps: Frames per second for the output video.
+            viewname: Key(s) in `infos` containing image data to render.
+            seed: Random seed for reset.
+            options: Options for reset.
+        """
         import imageio
 
         viewname = [viewname] if isinstance(viewname, str) else viewname
         out = [
             imageio.get_writer(
                 Path(video_path) / f'env_{i}.mp4',
-                'output.mp4',
                 fps=fps,
                 codec='libx264',
             )
@@ -211,7 +262,8 @@ class World:
                         goal_data = goal_data[-1]
                     frame = np.vstack([frame, goal_data])
                 o.append_data(frame)
-        [o.close() for o in out]
+        for o in out:
+            o.close()
         print(f'Video saved to {video_path}')
 
     def record_dataset(
@@ -219,10 +271,21 @@ class World:
         dataset_name: str,
         episodes: int = 10,
         seed: int | None = None,
-        cache_dir: os.PathLike | None = None,
+        cache_dir: os.PathLike | str | None = None,
         options: dict | None = None,
-    ):
-        """Records episodes from the environment into an HDF5 dataset."""
+    ) -> None:
+        """Records episodes from the environment into an HDF5 dataset.
+
+        Args:
+            dataset_name: Name of the dataset file (without extension).
+            episodes: Total number of episodes to record.
+            seed: Initial random seed.
+            cache_dir: Directory to save the dataset. Defaults to standard cache.
+            options: Reset options passed to environments.
+
+        Raises:
+            NotImplementedError: If history_size > 1.
+        """
         if self._history_size > 1:
             raise NotImplementedError(
                 'Frame history > 1 not supported for dataset recording.'
@@ -310,8 +373,14 @@ class World:
 
         logging.info(f'Recording complete. Total frames: {global_step_ptr}')
 
-    def _init_h5_datasets(self, f, sample_episode):
-        """Initialize resizable HDF5 datasets based on the first episode."""
+    def _init_h5_datasets(self, f: h5py.File, sample_episode: dict[str, list[Any]]) -> None:
+        """Initialize resizable HDF5 datasets based on the first episode.
+
+        Args:
+            f: The open HDF5 file handle.
+            sample_episode: A dictionary containing data from a single episode,
+                used to determine shapes and dtypes.
+        """
         for key, data_list in sample_episode.items():
             if key in ['ep_len', 'ep_idx', 'policy']:
                 continue
@@ -349,16 +418,41 @@ class World:
             'ep_len', shape=(0,), maxshape=(None,), dtype=np.int32
         )
 
-    def _reset_single_env(self, env_idx, seed=None, options=None):
-        """Reset a single environment and update infos dict."""
+    def _reset_single_env(
+        self,
+        env_idx: int,
+        seed: int | None = None,
+        options: dict | None = None,
+    ) -> None:
+        """Reset a single environment and update infos dict.
+
+        Args:
+            env_idx: Index of the environment to reset.
+            seed: Random seed for this specific environment.
+            options: Reset options.
+        """
         self.envs.unwrapped._autoreset_envs = np.zeros(self.num_envs)
         _, infos = self.envs.envs[env_idx].reset(seed=seed, options=options)
 
         for k, v in infos.items():
             self.infos[k][env_idx] = v
 
-    def _handle_done_ep(self, tmp_buffer, env_idx, n_ep_recorded):
-        """Prepare the episode buffer for writing."""
+    def _handle_done_ep(
+        self,
+        tmp_buffer: list[dict[str, list[Any]]],
+        env_idx: int,
+        n_ep_recorded: int,
+    ) -> dict[str, list[Any]]:
+        """Prepare the episode buffer for writing.
+
+        Args:
+            tmp_buffer: List of dictionaries accumulating step data per env.
+            env_idx: Index of the environment that finished an episode.
+            n_ep_recorded: Number of episodes recorded so far.
+
+        Returns:
+            A dictionary containing the complete episode data.
+        """
         ep_buffer = tmp_buffer[env_idx]
 
         # left-shift actions to align with observations i.e. (o_t, a_t)
@@ -374,8 +468,19 @@ class World:
         self.truncateds[env_idx] = False
         return out
 
-    def _write_episode(self, f, ep_data, global_ptr):
-        """Write a single contiguous episode to the HDF5 file."""
+    def _write_episode(
+        self, f: h5py.File, ep_data: dict[str, list[Any]], global_ptr: int
+    ) -> int:
+        """Write a single contiguous episode to the HDF5 file.
+
+        Args:
+            f: The open HDF5 file handle.
+            ep_data: The episode data dictionary.
+            global_ptr: The global step index where this episode starts.
+
+        Returns:
+            The length of the episode written.
+        """
         ep_len = len(ep_data['step_idx'])
 
         # append data to each dataset
@@ -398,8 +503,16 @@ class World:
 
         return ep_len
 
-    def _dump_step_data(self, tmp_buffer, env_idx=None):
-        """Append current step data to temporary episode buffers."""
+    def _dump_step_data(
+        self, tmp_buffer: list[dict[str, list[Any]]], env_idx: int | None = None
+    ) -> None:
+        """Append current step data to temporary episode buffers.
+
+        Args:
+            tmp_buffer: List of dictionaries accumulating step data.
+            env_idx: Optional index to dump data for a single environment.
+                If None, dumps for all environments.
+        """
         env_indices = range(self.num_envs) if env_idx is None else [env_idx]
 
         for col, data in self.infos.items():
@@ -427,19 +540,29 @@ class World:
 
     def evaluate(
         self,
-        episodes=10,
-        eval_keys=None,
-        seed=None,
-        options=None,
-        dump_every=-1,
-    ):
-        """Evaluate the current policy over multiple episodes."""
+        episodes: int = 10,
+        eval_keys: list[str] | None = None,
+        seed: int | None = None,
+        options: dict | None = None,
+        dump_every: int = -1,
+    ) -> dict:
+        """Evaluate the current policy over multiple episodes.
 
+        Args:
+            episodes: Number of episodes to evaluate.
+            eval_keys: List of keys in `infos` to collect and return.
+            seed: Random seed for evaluation.
+            options: Reset options.
+            dump_every: Interval to save intermediate results (for long evals).
+
+        Returns:
+            Dictionary containing success rates, seeds, and collected keys.
+        """
         options = options or {}
 
-        results = {
+        results: dict = {
             'episode_count': 0,
-            'success_rate': 0,
+            'success_rate': 0.0,
             'episode_successes': np.zeros(episodes),
             'seeds': np.zeros(episodes, dtype=np.int32),
         }
@@ -568,40 +691,58 @@ class World:
 
     def evaluate_from_dataset(
         self,
-        dataset,
-        episodes_idx: int | list[int],
-        start_steps: int | list[int],
+        dataset: Any,
+        episodes_idx: Sequence[int],
+        start_steps: Sequence[int],
         goal_offset_steps: int,
         eval_budget: int,
-        callables: dict | None = None,
+        callables: list[dict] | None = None,
         save_video: bool = True,
-        video_path='./',
-    ):
+        video_path: str | Path = './',
+    ) -> dict:
+        """Evaluate the policy starting from states sampled from a dataset.
+
+        Args:
+            dataset: The source dataset to sample initial states/goals from.
+            episodes_idx: Indices of episodes to sample from.
+            start_steps: Step indices within those episodes to start from.
+            goal_offset_steps: Number of steps ahead to look for the goal.
+            eval_budget: Maximum steps allowed for the agent to reach the goal.
+            callables: Optional list of method calls to setup the env.
+            save_video: Whether to save rollout videos.
+            video_path: Path to save videos.
+
+        Returns:
+            Dictionary containing success rates and other metrics.
+
+        Raises:
+            ValueError: If input sequence lengths mismatch or don't match num_envs.
+        """
         assert (
             self.envs.envs[0].spec.max_episode_steps is None
             or self.envs.envs[0].spec.max_episode_steps >= goal_offset_steps
         ), 'env max_episode_steps must be greater than eval_budget'
 
-        episodes_idx = np.array(episodes_idx)
-        start_steps = np.array(start_steps)
-        end_steps = start_steps + goal_offset_steps
+        ep_idx_arr = np.array(episodes_idx)
+        start_steps_arr = np.array(start_steps)
+        end_steps = start_steps_arr + goal_offset_steps
 
-        if not (len(episodes_idx) == len(start_steps)):
+        if not (len(ep_idx_arr) == len(start_steps_arr)):
             raise ValueError(
                 'episodes_idx and start_steps must have the same length'
             )
 
-        if len(episodes_idx) != self.num_envs:
+        if len(ep_idx_arr) != self.num_envs:
             raise ValueError(
                 'Number of episodes to evaluate must match number of envs'
             )
 
-        data = dataset.get_chunk_data(episodes_idx, start_steps, end_steps)
+        data = dataset.get_chunk_data(ep_idx_arr, start_steps_arr, end_steps)
         columns = dataset.column_names
 
         # keep relevant part of the chunk
-        init_step_per_env = defaultdict(list)
-        goal_step_per_env = defaultdict(list)
+        init_step_per_env: dict[str, list[Any]] = defaultdict(list)
+        goal_step_per_env: dict[str, list[Any]] = defaultdict(list)
 
         for i, ep in enumerate(data):
             for col in columns:
@@ -659,23 +800,20 @@ class World:
         init_step.update(deepcopy(goal_step))
         self.reset(seed=seeds, options=options)  # set seeds for all envs
 
-        # init_step = {k: v for k, v in init_step.items() if k in self.infos}
-        # goal_step = {k: v for k, v in goal_step.items() if k in self.infos}
-
         # apply callable list (e.g used for set initial position if not access to seed)
-        callables = callables or {}
+        callables = callables or []
         for i, env in enumerate(self.envs.unwrapped.envs):
-            env = env.unwrapped
+            env_unwrapped = env.unwrapped
 
             for spec in callables:
                 method_name = spec['method']
-                if not hasattr(env, method_name):
+                if not hasattr(env_unwrapped, method_name):
                     logging.warning(
-                        f'Env {env} has no method {method_name}, skipping callable'
+                        f'Env {env_unwrapped} has no method {method_name}, skipping callable'
                     )
                     continue
 
-                method = getattr(env, method_name)
+                method = getattr(env_unwrapped, method_name)
                 args = spec.get('args', spec)
 
                 # prepare args
@@ -687,7 +825,7 @@ class World:
                     if is_in_datset:
                         if value not in init_step:
                             logging.warning(
-                                f'Col {value} not found in dataset, skipping callable for env {env}'
+                                f'Col {value} not found in dataset, skipping callable for env {env_unwrapped}'
                             )
                             continue
                         prepared_args[args_name] = deepcopy(
@@ -700,7 +838,7 @@ class World:
                 method(**prepared_args)
 
         for i, env in enumerate(self.envs.unwrapped.envs):
-            env = env.unwrapped
+            env_unwrapped = env.unwrapped
 
             # TODO remove this
             if 'goal_state' in init_step and 'goal_state' in goal_step:
@@ -708,8 +846,8 @@ class World:
                     init_step['goal_state'][i], goal_step['goal_state'][i]
                 ), 'Goal state info does not match at reset'
 
-        results = {
-            'success_rate': 0,
+        results: dict = {
+            'success_rate': 0.0,
             'episode_successes': np.zeros(len(episodes_idx)),
             'seeds': seeds,
         }
@@ -731,7 +869,6 @@ class World:
         self.infos.update(deepcopy(init_step))
         self.infos.update(deepcopy(goal_step))
 
-        # assert np.allclose(self.infos["goal"], goal_step["goal"]), "Goal info does not match"
         if 'goal' in goal_step and 'goal' in self.infos:
             assert np.allclose(self.infos['goal'], goal_step['goal']), (
                 'Goal info does not match'
@@ -743,8 +880,7 @@ class World:
             dtype=np.uint8,
         )
 
-        # TODO assert goal and start state are identical as in the rollout
-        # run normal evaluation for eval_budget and TODO: record video
+        # run normal evaluation for eval_budget and record video
         for i in range(eval_budget):
             video_frames[:, i] = self.infos['pixels'][:, -1]
             self.infos.update(deepcopy(goal_step))
@@ -769,12 +905,11 @@ class World:
             import imageio
 
             target_len = target_frames.shape[1]
-            video_path = Path(video_path)
-            video_path.mkdir(parents=True, exist_ok=True)
+            video_path_obj = Path(video_path)
+            video_path_obj.mkdir(parents=True, exist_ok=True)
             for i in range(self.num_envs):
                 out = imageio.get_writer(
-                    video_path / f'rollout_{i}.mp4',
-                    'output.mp4',
+                    video_path_obj / f'rollout_{i}.mp4',
                     fps=15,
                     codec='libx264',
                 )
@@ -786,7 +921,7 @@ class World:
                     frame = np.hstack([stacked_frame, goals])
                     out.append_data(frame)
                 out.close()
-            print(f'Video saved to {video_path}')
+            print(f'Video saved to {video_path_obj}')
 
         if results['seeds'] is not None:
             assert np.unique(results['seeds']).shape[0] == n_episodes, (

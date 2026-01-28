@@ -1,5 +1,9 @@
-import time
+"""Projected Gradient Descent solver for discrete action spaces."""
 
+import time
+from typing import Any
+
+import gymnasium as gym
 import numpy as np
 import torch
 from gymnasium.spaces import Discrete
@@ -8,7 +12,18 @@ from .solver import Costable
 
 
 class PGDSolver(torch.nn.Module):
-    """Projected Gradient Descent Solver."""
+    """Projected Gradient Descent solver for discrete action optimization.
+
+    Args:
+        model: World model implementing the Costable protocol.
+        n_steps: Number of gradient descent iterations.
+        batch_size: Number of environments to process in parallel.
+        var_scale: Initial variance scale for action perturbations.
+        num_samples: Number of action samples to optimize in parallel.
+        action_noise: Noise added to actions during optimization.
+        device: Device for tensor computations.
+        seed: Random seed for reproducibility.
+    """
 
     def __init__(
         self,
@@ -18,10 +33,9 @@ class PGDSolver(torch.nn.Module):
         var_scale: float = 1,
         num_samples: int = 1,
         action_noise: float = 0.0,
-        device="cpu",
+        device: str | torch.device = "cpu",
         seed: int = 1234,
-    ):
-        """Initialize the Projected Gradient Descent solver."""
+    ) -> None:
         super().__init__()
         self.model = model
         self.n_steps = n_steps
@@ -38,40 +52,45 @@ class PGDSolver(torch.nn.Module):
         self._action_simplex_dim = None
         self._config = None
 
-    def configure(self, *, action_space, n_envs: int, config) -> None:
-        # for now, only support discrete action spaces
+    def configure(self, *, action_space: gym.Space, n_envs: int, config: Any) -> None:
+        """Configure the solver with environment specifications."""
         assert isinstance(action_space, Discrete), f"Action space must be discrete, got {type(action_space)}"
 
         self._action_space = action_space
         self._n_envs = n_envs
         self._config = config
         self._action_dim = int(np.prod(action_space.shape[1:]))
-        self._action_simplex_dim = int(
-            action_space.n
-        )  # each action is a probability distribution over discrete actions
+        self._action_simplex_dim = int(action_space.n)
         self._configured = True
 
     @property
     def n_envs(self) -> int:
+        """Number of parallel environments."""
         return self._n_envs
 
     @property
     def action_dim(self) -> int:
+        """Flattened action dimension including action_block grouping."""
         return self._action_dim * self._config.action_block
 
     @property
     def action_simplex_dim(self) -> int:
+        """Simplex dimension for discrete action probabilities."""
         return self._action_simplex_dim * self._config.action_block
 
     @property
     def horizon(self) -> int:
+        """Planning horizon in timesteps."""
         return self._config.horizon
 
-    def __call__(self, *args, **kwargs) -> torch.Tensor:
+    def __call__(self, *args: Any, **kwargs: Any) -> dict:
+        """Make solver callable, forwarding to solve()."""
         return self.solve(*args, **kwargs)
 
-    def init_action(self, actions=None, from_scalar=False):
-        """Initialize the action tensor for the solver."""
+    def init_action(
+        self, actions: torch.Tensor | None = None, from_scalar: bool = False
+    ) -> None:
+        """Initialize the action tensor for optimization."""
         if actions is None:
             actions = torch.zeros((self._n_envs, 0, self.action_simplex_dim))
         elif from_scalar:
@@ -103,8 +122,13 @@ class PGDSolver(torch.nn.Module):
         else:
             self.register_parameter("init", torch.nn.Parameter(actions))
 
-    def solve(self, info_dict, init_action=None, from_scalar=False) -> dict:
-        """Solve the planning optimization problem using gradient descent."""
+    def solve(
+        self,
+        info_dict: dict,
+        init_action: torch.Tensor | None = None,
+        from_scalar: bool = False,
+    ) -> dict:
+        """Solve the planning problem using projected gradient descent."""
         start_time = time.time()
         outputs = {
             "cost": [],  # Will store list of cost histories per batch
@@ -199,16 +223,15 @@ class PGDSolver(torch.nn.Module):
 
         return outputs
 
-    def _factor_action_block(self, actions):
+    def _factor_action_block(self, actions: torch.Tensor) -> torch.Tensor:
         """Factor the action block dimension from action_simplex_dim."""
-        # actions shape (n_envs, horizon, action_simplex_dim)
         original_shape = actions.shape
         action_block = self._config.action_block
         simplex_dim = self._action_simplex_dim
         return actions.reshape(*original_shape[:-1], action_block, simplex_dim)
 
-    def _project_action_simplex(self, actions):
-        """Project the action onto the simplex."""
+    def _project_action_simplex(self, actions: torch.Tensor) -> torch.Tensor:
+        """Project the action onto the probability simplex."""
         original_shape = actions.shape
 
         s = self._factor_action_block(actions).reshape(-1, self._action_simplex_dim)

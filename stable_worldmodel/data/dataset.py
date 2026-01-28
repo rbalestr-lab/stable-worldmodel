@@ -1,7 +1,10 @@
+"""Dataset classes for episode-based reinforcement learning data."""
+
 import logging
 from collections.abc import Callable
 from functools import lru_cache
 from pathlib import Path
+from typing import Any
 
 import h5py
 import hdf5plugin  # noqa: F401
@@ -13,7 +16,15 @@ from stable_worldmodel.data.utils import get_cache_dir
 
 
 class Dataset:
-    """Base class for episode-based datasets."""
+    """Base class for episode-based datasets.
+
+    Args:
+        lengths: Array of episode lengths.
+        offsets: Array of episode start offsets in the data.
+        frameskip: Number of frames to skip between samples.
+        num_steps: Number of steps per sample.
+        transform: Optional transform to apply to loaded data.
+    """
 
     def __init__(
         self,
@@ -21,8 +32,8 @@ class Dataset:
         offsets: np.ndarray,
         frameskip: int = 1,
         num_steps: int = 1,
-        transform: Callable | None = None,
-    ):
+        transform: Callable[[dict], dict] | None = None,
+    ) -> None:
         self.lengths = lengths
         self.offsets = offsets
         self.frameskip = frameskip
@@ -78,21 +89,34 @@ class Dataset:
 
 
 class HDF5Dataset(Dataset):
-    """Dataset loading from HDF5 file."""
+    """Dataset loading from HDF5 file.
+
+    Reads data from a single .h5 file containing all episode data.
+    Uses SWMR mode for robust reading while writing.
+
+    Args:
+        name: Name of the dataset (filename without extension).
+        frameskip: Number of frames to skip between samples.
+        num_steps: Number of steps per sample sequence.
+        transform: Optional data transform callable.
+        keys_to_load: Specific keys to load (defaults to all except metadata).
+        keys_to_cache: Keys to load entirely into memory for faster access.
+        cache_dir: Directory containing the dataset file.
+    """
 
     def __init__(
         self,
         name: str,
         frameskip: int = 1,
         num_steps: int = 1,
-        transform: Callable | None = None,
+        transform: Callable[[dict], dict] | None = None,
         keys_to_load: list[str] | None = None,
         keys_to_cache: list[str] | None = None,
-        cache_dir: str | None = None,
-    ):
+        cache_dir: str | Path | None = None,
+    ) -> None:
         self.h5_path = Path(cache_dir or get_cache_dir(), f'{name}.h5')
-        self.h5_file = None
-        self._cache = {}
+        self.h5_file: h5py.File | None = None
+        self._cache: dict[str, np.ndarray] = {}
 
         with h5py.File(self.h5_path, 'r') as f:
             lengths, offsets = f['ep_len'][:], f['ep_offset'][:]
@@ -109,7 +133,7 @@ class HDF5Dataset(Dataset):
     def column_names(self) -> list[str]:
         return self._keys
 
-    def _open(self):
+    def _open(self) -> None:
         if self.h5_file is None:
             self.h5_file = h5py.File(
                 self.h5_path, 'r', swmr=True, rdcc_nbytes=256 * 1024 * 1024
@@ -138,25 +162,40 @@ class HDF5Dataset(Dataset):
 
     def get_row_data(self, row_idx: int | list[int]) -> dict:
         self._open()
+        # h5py supports boolean masks or list of indices for selection
+        # but for optimal performance usually one by one or slicing is preferred
+        # Here we rely on h5py's fancy indexing support
         return {col: self.h5_file[col][row_idx] for col in self._keys}
 
 
 class FolderDataset(Dataset):
-    """Dataset loading from folder with images/videos."""
+    """Dataset loading from folder structure.
+
+    Metadata is stored in .npz files, heavy media (images) can be stored as individual files.
+
+    Args:
+        name: Name of the dataset folder.
+        frameskip: Number of frames to skip.
+        num_steps: Sequence length.
+        transform: Optional transform.
+        keys_to_load: Specific keys to load.
+        folder_keys: Keys that correspond to folders of image files.
+        cache_dir: Base directory containing the dataset folder.
+    """
 
     def __init__(
         self,
         name: str,
         frameskip: int = 1,
         num_steps: int = 1,
-        transform: Callable | None = None,
+        transform: Callable[[dict], dict] | None = None,
         keys_to_load: list[str] | None = None,
         folder_keys: list[str] | None = None,
-        cache_dir: str | None = None,
-    ):
+        cache_dir: str | Path | None = None,
+    ) -> None:
         self.path = Path(cache_dir or get_cache_dir()) / name
         self.folder_keys = folder_keys or []
-        self._cache = {}
+        self._cache: dict[str, np.ndarray] = {}
 
         lengths = np.load(self.path / 'ep_len.npz')['arr_0']
         offsets = np.load(self.path / 'ep_offset.npz')['arr_0']
@@ -214,7 +253,7 @@ class FolderDataset(Dataset):
 
     def get_col_data(self, col: str) -> np.ndarray:
         if col not in self._cache:
-            raise KeyError(f"'{col}' not in cache")
+            raise KeyError(f"'{col}' not in cache (folder keys cannot be retrieved as full array)")
         return self._cache[col]
 
     def get_row_data(self, row_idx: int | list[int]) -> dict:
@@ -224,18 +263,24 @@ class FolderDataset(Dataset):
 
 
 class ImageDataset(FolderDataset):
-    """Convenience alias for FolderDataset with image defaults."""
+    """Convenience alias for FolderDataset with image defaults.
 
-    def __init__(self, name: str, image_keys: list[str] | None = None, **kw):
+    Assumes 'pixels' is a folder of images.
+    """
+
+    def __init__(self, name: str, image_keys: list[str] | None = None, **kw: Any) -> None:
         super().__init__(name, folder_keys=image_keys or ['pixels'], **kw)
 
 
 class VideoDataset(FolderDataset):
-    """Dataset loading video frames from MP4 files."""
+    """Dataset loading video frames from MP4 files using decord.
 
-    _decord = None  # Lazy-loaded module reference
+    Assumes video files are stored in a folder structure.
+    """
 
-    def __init__(self, name: str, video_keys: list[str] | None = None, **kw):
+    _decord: Any = None  # Lazy-loaded module reference
+
+    def __init__(self, name: str, video_keys: list[str] | None = None, **kw: Any) -> None:
         if VideoDataset._decord is None:
             try:
                 import decord
@@ -247,7 +292,7 @@ class VideoDataset(FolderDataset):
         super().__init__(name, folder_keys=video_keys or ['video'], **kw)
 
     @lru_cache(maxsize=8)
-    def _reader(self, ep_idx: int, key: str):
+    def _reader(self, ep_idx: int, key: str) -> Any:
         return VideoDataset._decord.VideoReader(
             str(self.path / key / f'ep_{ep_idx}.mp4'), num_threads=1
         )
@@ -263,6 +308,7 @@ class VideoDataset(FolderDataset):
         steps = {}
         for col in self._keys:
             if col in self.folder_keys:
+                # Decord efficient batch loading
                 frames = self._reader(ep_idx, col).get_batch(
                     list(range(start, end, self.frameskip))
                 )
@@ -276,11 +322,19 @@ class VideoDataset(FolderDataset):
 
 
 class MergeDataset:
-    """Merges multiple datasets of same length."""
+    """Merges multiple datasets of same length (horizontal join).
+
+    Combines columns from different datasets (e.g. one dataset has 'pixels',
+    another has 'rewards') into a single view.
+
+    Args:
+        datasets: List of dataset instances to merge.
+        keys_from_dataset: Optional list of keys to take from each dataset.
+    """
 
     def __init__(
-        self, datasets: list, keys_from_dataset: list[list[str]] | None = None
-    ):
+        self, datasets: list[Any], keys_from_dataset: list[list[str]] | None = None
+    ) -> None:
         if not datasets:
             raise ValueError('Need at least one dataset')
         self.datasets = datasets
@@ -290,7 +344,7 @@ class MergeDataset:
             self.keys_map = keys_from_dataset
         else:
             # Auto-deduplicate: each dataset provides keys not seen in previous datasets
-            seen = set()
+            seen: set[str] = set()
             self.keys_map = []
             for ds in datasets:
                 keys = [c for c in ds.column_names if c not in seen]
@@ -353,9 +407,15 @@ class MergeDataset:
 
 
 class ConcatDataset:
-    """Concatenates multiple datasets."""
+    """Concatenates multiple datasets (vertical join).
 
-    def __init__(self, datasets: list):
+    Combines datasets sequentially to increase the total number of episodes/samples.
+
+    Args:
+        datasets: List of datasets to concatenate.
+    """
+
+    def __init__(self, datasets: list[Any]) -> None:
         if not datasets:
             raise ValueError('Need at least one dataset')
         self.datasets = datasets
@@ -386,7 +446,7 @@ class ConcatDataset:
         """Map global index to (dataset_index, local_index)."""
         if idx < 0:
             idx += len(self)
-        ds_idx = np.searchsorted(self._cum[1:], idx, side='right')
+        ds_idx = int(np.searchsorted(self._cum[1:], idx, side='right'))
         local_idx = idx - self._cum[ds_idx]
         return ds_idx, local_idx
 
@@ -439,7 +499,7 @@ class ConcatDataset:
             return self.datasets[ds_idx].get_row_data(local_idx)
 
         # Multiple indices: collect and stack results
-        results = {}
+        results: dict[str, list[Any]] = {}
         for idx in row_idx:
             ds_idx, local_idx = self._loc(idx)
             row = self.datasets[ds_idx].get_row_data(local_idx)

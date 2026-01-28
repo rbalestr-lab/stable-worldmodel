@@ -1,8 +1,5 @@
 title: World
-summary: TBD
 ---
-
-# World Manager
 
 The `World` class is the central entry point for managing vectorized environments in `stable_worldmodel`. It handles synchronization, preprocessing (resizing, stacking), and interaction with policies.
 

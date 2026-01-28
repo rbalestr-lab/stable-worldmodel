@@ -52,6 +52,54 @@ world.record_video(
 ```
 ///
 
+/// tab | Recording Dataset
+```python
+from stable_worldmodel import World
+from stable_worldmodel.policy import RandomPolicy
+
+world = World(
+    env_name="swm/PushT-v1",
+    num_envs=4,  # Collect 4 episodes in parallel
+    image_shape=(64, 64)
+)
+world.set_policy(RandomPolicy())
+
+# Record 50 episodes to a .h5 dataset
+world.record_dataset(
+    dataset_name="pusht_random",
+    episodes=50,
+    cache_dir="./data"
+)
+# Result: ./data/pusht_random.h5
+```
+///
+
+/// tab | Evaluation
+```python
+from stable_worldmodel import World
+from stable_worldmodel.data import HDF5Dataset
+from stable_worldmodel.policy import RandomPolicy # or your trained policy
+
+# 1. Load a dataset for initial states
+dataset = HDF5Dataset("pusht_random", cache_dir="./data")
+
+# 2. Setup World
+world = World(env_name="swm/PushT-v1", num_envs=4, image_shape=(64, 64))
+world.set_policy(RandomPolicy())
+
+# 3. Evaluate starting from dataset states
+results = world.evaluate_from_dataset(
+    dataset=dataset,
+    episodes_idx=[0, 1, 2, 3],  # Episodes to test on
+    start_steps=[0, 0, 0, 0],   # Start from beginning
+    goal_offset_steps=50,       # Goal is state at t=50
+    eval_budget=100             # Max steps to reach goal
+)
+
+print(f"Success Rate: {results['success_rate']}%")
+```
+///
+
 !!! tip "Performance"
     The `World` class uses `gymnasium.vector.SyncVectorEnv` for synchronized execution, ensuring deterministic and batched stepping across multiple environments.
 

@@ -34,7 +34,7 @@ class World:
     Args:
         env_name: Name of the Gymnasium environment to create.
         num_envs: Number of parallel environments.
-        image_shape: Target shape for image observations (C, H, W) or (H, W).
+        image_shape: Target shape for image observations (H, W).
         goal_transform: Optional callable to transform goal observations.
         image_transform: Optional callable to transform image observations.
         seed: Random seed for reproducibility.
@@ -51,7 +51,7 @@ class World:
         self,
         env_name: str,
         num_envs: int,
-        image_shape: tuple[int, ...],
+        image_shape: tuple[int, int],
         goal_transform: Callable[[Any], Any] | None = None,
         image_transform: Callable[[Any], Any] | None = None,
         seed: int = 2349867,

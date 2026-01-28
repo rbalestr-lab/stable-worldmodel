@@ -1,7 +1,7 @@
 ---
-title: stable-worldmodel
+title: Stable World-Model
 summary: World Model Research Made Simple
-sidebar_title: Getting Started
+sidebar_title: Home
 ---
 
 !!! danger ""
@@ -14,32 +14,33 @@ Stable World-Model is an open-source library to conduct world model research.  Y
         :::bash
         uv add stable-worldmodel
 
-
 === "pip"
 
         :::bash
         pip install stable-worldmodel
 
+=== "uv (all dependencies)"
+
+        :::bash
+        uv add stable-worldmodel --all-extras
+
+=== "pip (all dependencies)"
+
+        :::bash
+        pip install stable-worldmodel[env, train]
+
+
+!!! note ""
+    ⚠️ The base installation does not include environment (`env`) or training (`train`) dependencies. Install them separately or use the "all dependencies" option above if you need to run simulations or train models.
 
 A **world model** is a learned simulator that predicts how an environment evolves in response to actions, enabling agents to plan by imagining future outcomes. Stable World-Model provides a unified research ecosystem that simplifies the entire pipeline: from data collection to model training and evaluation.
 
 **Why another library?** World models have recently gained a lot of attention from the community. However, each new article re-implements over and over the same baselines, evaluation protocols, and data processing logic. We took that as an opportunity to provide a clean, documented, and tested library that researchers can trust for evaluation or training. More than just re-implementation, stable-worldmodel provides a complete ecosystem for world model research, from data collection to evaluation. We also extended the range of test-beds by providing researchers with a lean and simple API to fully customize the environments in which agents operate: from colors, to shapes, to physics properties. Everything is customizable, allowing for easy continual learning, out-of-distribution, or zero-shot robustness evaluation.
 
-
-
-## Setup
+## Install
 ---
 
-### Cache Directory
-
-All datasets and model will be saved in the `$STABLEWM_HOME` environment variable.
-
-By default the corresponding location is `~/.stable-wm/`. We encourage every user to adapt that directory according to their need and storage.
-
-
-### Development Setup
-
-Setup a ready-to-go development environment to contribute to the library:
+Set up a ready-to-go development environment to contribute to the library:
 
 ```bash
 git clone https://github.com/galilai-group/stable-worldmodel
@@ -49,21 +50,68 @@ source .venv/bin/activate
 uv sync --all-extras --group dev
 ```
 
-## Basic Usage
+!!! warning ""
+    All datasets and models will be saved in the `$STABLEWM_HOME` environment variable.
+    By default the corresponding location is `~/.stable-wm/`. We encourage every user to adapt that directory according to their need and storage.
+
+## Example
 ---
 
+Here is a quick start example: collect a dataset and perform an evaluation.
 
-!!! note ""
-    Just want the environments? All environments are self-contained and follow the standard [Gymnasium](https://gymnasium.farama.org/) API. Simply import the library to register them:
+```python
+import stable_worldmodel as swm
+from stable_worldmodel.data import HDF5Dataset
+from stable_worldmodel.policy import WorldModelPolicy, PlanConfig
+from stable_worldmodel.solver import CEMSolver
 
-    `import stable_worldmodel`
+
+world = swm.World('swm/PushT-v1', num_envs=8)
+world.set_policy(your_expert_policy)
+
+world.record_dataset(dataset_name='pusht_demo',
+                     episodes=100,
+                     seed=0,
+                     options={"variation":["all"],
+                })
+
+# ... train your world model with pusht_demo...
+world_model = ... # your world-model implementing get_cost
+
+# evaluation
+dataset = HDF5Dataset(
+    name='pusht_demo',
+    frameskip=1,
+    num_steps=16,
+    keys_to_load=['pixels', 'action', 'state']
+)
+
+# model predictive control
+solver = CEMSolver(model=world_model, num_samples=300, device='cuda')
+policy = WorldModelPolicy(
+    solver=solver,
+    config=PlanConfig(horizon=10, receding_horizon=5)
+)
+
+world.set_policy(policy)
+results = world.evaluate(episodes=50, seed=0)
+
+print(f"Success Rate: {results['success_rate']:.1f}%")
+
+```
+
+See the [Quick Start Guide](quick_start.md) for detailed explanations of each component.
+
+
 
 ## Next Steps
+---
+
+After you have installed stable-worldmodel, try the [Quick Start Guide](quick_start.md). You can also explore other parts of the documentation:
 
 | | |
 |---|---|
-| **[Tutorials](tutorial/collect_data.md)** | Step-by-step guides for data collection, training, and adding new environments. |
-| **[Environments](env/pusht.md)** | Explore the included environments: PushT, TwoRoom, OGBench, and more. |
+| **[Environments](envs/pusht.md)** | Explore the included environments: PushT, TwoRoom, OGBench, DMControl, and more. |
 | **[API Reference](api/world.md)** | Detailed documentation for World, Policy, Solver, Dataset, and other modules. |
 
 ## Citation
@@ -73,8 +121,8 @@ If you wish to cite our [pre-print](#):
 ```bibtex
 @article{swm_maes2026,
   title={stable-world model},
-  author={stable-team},
-  booktitle={...},
+  author={Lucas Maes, Quentin Le Lidec, Dan Haramati, Nassim Massaudi, Yann LeCun, Randall Balestriero},
+  booktitle={stable-worldmodel: World Model Research Made Simple},
   year={2026},
 }
 ```

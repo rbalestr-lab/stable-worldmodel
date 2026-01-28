@@ -1,4 +1,4 @@
 title: Collect Dataset
-summary: TDB
+summary: TBD
 sidebar_title: New Dataset
 ---

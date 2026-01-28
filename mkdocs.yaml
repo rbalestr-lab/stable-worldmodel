@@ -1,4 +1,4 @@
-site_name: swm
+site_name: stable-worldmodel
 
 site_url: https://lucas-maes.github.io/swm/
 repo_url: https://github.com/lucas-maes/swm/
@@ -16,16 +16,17 @@ theme:
 
 nav:
   - index.md
-  - baseline.md
-  - Environment:
-      - env/pusht.md
-      - env/dmc.md
-      - env/ogb.md
-      - env/tworoom.md
-  - Tutorial:
-      - tutorial/collect_data.md
-      - tutorial/new_env.md
-      - tutorial/training_wm.md 
+  - quick_start.md
+  - baselines.md
+  - Environments:
+      - envs/pusht.md
+      - envs/dmc.md
+      - envs/ogb.md
+      - envs/tworoom.md
+  # - Tutorial:
+  #     - tutorial/collect_data.md
+  #     - tutorial/new_env.md
+  #     - tutorial/training_wm.md 
   - API:
       - api/world.md
       - api/policy.md

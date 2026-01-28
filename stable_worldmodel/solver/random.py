@@ -1,5 +1,8 @@
 """Random action sampling solver for planning problems."""
 
+from typing import Any
+
+import gymnasium as gym
 import numpy as np
 import torch
 
@@ -7,15 +10,15 @@ import torch
 class RandomSolver:
     """Random action sampling solver for model-based planning."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize an unconfigured RandomSolver."""
         self._configured = False
-        self._action_space = None
-        self._n_envs = None
-        self._action_dim = None
-        self._config = None
+        self._action_space: gym.Space | None = None
+        self._n_envs: int | None = None
+        self._action_dim: int | None = None
+        self._config: Any = None
 
-    def configure(self, *, action_space, n_envs: int, config) -> None:
+    def configure(self, *, action_space: gym.Space, n_envs: int, config: Any) -> None:
         """Configure the solver with environment and planning specifications."""
         self._action_space = action_space
         self._n_envs = n_envs
@@ -25,24 +28,26 @@ class RandomSolver:
 
     @property
     def n_envs(self) -> int:
-        """Number of parallel environments the solver plans for."""
+        """Number of parallel environments."""
         return self._n_envs
 
     @property
     def action_dim(self) -> int:
-        """Total action dimensionality including action blocking."""
+        """Flattened action dimension including action_block grouping."""
         return self._action_dim * self._config.action_block
 
     @property
     def horizon(self) -> int:
-        """Planning horizon in steps."""
+        """Planning horizon in timesteps."""
         return self._config.horizon
 
-    def __call__(self, *args, **kwargs) -> dict:
-        """Make the solver callable, forwarding to solve()."""
+    def __call__(self, *args: Any, **kwargs: Any) -> dict[str, Any]:
+        """Make solver callable, forwarding to solve()."""
         return self.solve(*args, **kwargs)
 
-    def solve(self, info_dict, init_action=None) -> dict:
+    def solve(
+        self, info_dict: dict[str, Any], init_action: torch.Tensor | None = None
+    ) -> dict[str, Any]:
         """Generate random action sequences for the planning horizon."""
         outputs = {}
         actions = init_action

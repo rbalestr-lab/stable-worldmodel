@@ -1,4 +1,5 @@
-title: solver
+---
+title: Solver
 summary: Model-based planning solvers for action optimization
 ---
 
@@ -13,6 +14,12 @@ summary: Model-based planning solvers for action optimization
 ::: stable_worldmodel.solver.Solver.configure
 
 ::: stable_worldmodel.solver.Solver.solve
+
+### **[ Properties ]**
+
+::: stable_worldmodel.solver.Solver.action_dim
+::: stable_worldmodel.solver.Solver.n_envs
+::: stable_worldmodel.solver.Solver.horizon
 
 ## **solver.CEMSolver**
 

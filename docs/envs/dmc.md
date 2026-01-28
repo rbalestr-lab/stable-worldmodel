@@ -6,7 +6,7 @@ external_links:
     github: https://github.com/google-deepmind/dm_control
 ---
 
-<!-- ![dmc](#) -->
+![dmc](../assets/cheetah_run.gif)
 
 ## Description
 
@@ -73,6 +73,8 @@ world = swm.World('swm/HumanoidDMControl-v0', num_envs=4)
 
 ## Cheetah
 
+![cheetah](../assets/cheetah_run.gif)
+
 A planar biped (half-cheetah) that must learn to run forward as fast as possible. The task uses feature-based observations (joint angles and velocities).
 
 **Task**: Run forward (maximize forward velocity).
@@ -107,6 +109,8 @@ world = swm.World('swm/CheetahDMControl-v0', num_envs=4)
 
 ## Hopper
 
+![hopper](../assets/hooper_backward.gif)
+
 A planar one-legged hopper that must learn to hop forward. The task uses feature-based observations (joint angles, velocities, touch sensor).
 
 **Task**: Hop forward (maximize forward velocity).
@@ -140,6 +144,8 @@ world = swm.World('swm/HopperDMControl-v0', num_envs=4)
 ---
 
 ## Reacher
+
+![reacher](../assets/reacher.gif)
 
 A planar two-link arm that must reach a small target. The task uses feature-based observations (joint angles, velocities, finger-to-target distance).
 
@@ -210,6 +216,8 @@ world = swm.World('swm/WalkerDMControl-v0', num_envs=4)
 
 ## Acrobot
 
+![acrobot](../assets/acrobot_10.gif)
+
 A two-link acrobot that must swing up and balance. The task uses sparse rewards and feature-based observations (joint angles, velocities).
 
 **Task**: Swing up and balance both links upright (sparse reward).
@@ -245,6 +253,8 @@ world = swm.World('swm/AcrobotDMControl-v0', num_envs=4)
 
 ## Pendulum
 
+![pendulum](../assets/pendulum_spin.gif)
+
 A single-link pendulum that must swing up and balance. The task uses feature-based observations (angle, angular velocity).
 
 **Task**: Swing up and balance the pendulum upright.
@@ -278,6 +288,8 @@ world = swm.World('swm/PendulumDMControl-v0', num_envs=4)
 
 ## Cartpole
 
+![cartpole](../assets/swingup.gif)
+
 A cart-pole system that must swing up and balance. The task uses sparse rewards and feature-based observations (cart position, pole angle, velocities).
 
 **Task**: Swing up and balance the pole upright (sparse reward).
@@ -310,6 +322,8 @@ world = swm.World('swm/CartpoleDMControl-v0', num_envs=4)
 ---
 
 ## Ball in Cup
+
+![cup](../assets/cup_catch.gif)
 
 A planar ball-in-cup system where a cup must catch and hold a ball attached by a string. The task uses feature-based observations (cup position, ball position, velocities).
 

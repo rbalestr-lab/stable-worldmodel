@@ -166,7 +166,9 @@ class World:
         ) = self.envs.step(actions)
 
     def reset(
-        self, seed: int | list[int] | None = None, options: dict | None = None
+        self,
+        seed: int | list[int] | None = None,
+        options: dict[str, Any] | None = None,
     ) -> None:
         """Reset all environments to initial states.
 
@@ -195,7 +197,7 @@ class World:
         fps: int = 30,
         viewname: str | list[str] = 'pixels',
         seed: int | None = None,
-        options: dict | None = None,
+        options: dict[str, Any] | None = None,
     ) -> None:
         """Record rollout videos for each environment under the current policy.
 
@@ -213,7 +215,6 @@ class World:
         out = [
             imageio.get_writer(
                 Path(video_path) / f'env_{i}.mp4',
-                'output.mp4',
                 fps=fps,
                 codec='libx264',
             )
@@ -271,7 +272,7 @@ class World:
         episodes: int = 10,
         seed: int | None = None,
         cache_dir: os.PathLike | str | None = None,
-        options: dict | None = None,
+        options: dict[str, Any] | None = None,
     ) -> None:
         """Records episodes from the environment into an HDF5 dataset.
 
@@ -372,7 +373,7 @@ class World:
 
         logging.info(f'Recording complete. Total frames: {global_step_ptr}')
 
-    def _init_h5_datasets(self, f: h5py.File, sample_episode: dict) -> None:
+    def _init_h5_datasets(self, f: h5py.File, sample_episode: dict[str, list[Any]]) -> None:
         """Initialize resizable HDF5 datasets based on the first episode.
 
         Args:
@@ -418,7 +419,10 @@ class World:
         )
 
     def _reset_single_env(
-        self, env_idx: int, seed: int | None = None, options: dict | None = None
+        self,
+        env_idx: int,
+        seed: int | None = None,
+        options: dict[str, Any] | None = None,
     ) -> None:
         """Reset a single environment and update infos dict.
 
@@ -434,14 +438,17 @@ class World:
             self.infos[k][env_idx] = v
 
     def _handle_done_ep(
-        self, tmp_buffer: list[dict], env_idx: int, n_ep_recorded: int
-    ) -> dict[str, list]:
+        self,
+        tmp_buffer: list[dict[str, list[Any]]],
+        env_idx: int,
+        n_ep_recorded: int,
+    ) -> dict[str, list[Any]]:
         """Prepare the episode buffer for writing.
 
         Args:
             tmp_buffer: List of dictionaries accumulating step data per env.
             env_idx: Index of the environment that finished an episode.
-            n_ep_recorded: Number of episodes recorded so far (unused but kept for API).
+            n_ep_recorded: Number of episodes recorded so far.
 
         Returns:
             A dictionary containing the complete episode data.
@@ -462,7 +469,7 @@ class World:
         return out
 
     def _write_episode(
-        self, f: h5py.File, ep_data: dict, global_ptr: int
+        self, f: h5py.File, ep_data: dict[str, list[Any]], global_ptr: int
     ) -> int:
         """Write a single contiguous episode to the HDF5 file.
 
@@ -497,7 +504,7 @@ class World:
         return ep_len
 
     def _dump_step_data(
-        self, tmp_buffer: list[dict], env_idx: int | None = None
+        self, tmp_buffer: list[dict[str, list[Any]]], env_idx: int | None = None
     ) -> None:
         """Append current step data to temporary episode buffers.
 
@@ -536,7 +543,7 @@ class World:
         episodes: int = 10,
         eval_keys: list[str] | None = None,
         seed: int | None = None,
-        options: dict | None = None,
+        options: dict[str, Any] | None = None,
         dump_every: int = -1,
     ) -> dict[str, Any]:
         """Evaluate the current policy over multiple episodes.
@@ -553,9 +560,9 @@ class World:
         """
         options = options or {}
 
-        results = {
+        results: dict[str, Any] = {
             'episode_count': 0,
-            'success_rate': 0,
+            'success_rate': 0.0,
             'episode_successes': np.zeros(episodes),
             'seeds': np.zeros(episodes, dtype=np.int32),
         }
@@ -685,13 +692,13 @@ class World:
     def evaluate_from_dataset(
         self,
         dataset: Any,
-        episodes_idx: int | Sequence[int],
-        start_steps: int | Sequence[int],
+        episodes_idx: Sequence[int],
+        start_steps: Sequence[int],
         goal_offset_steps: int,
         eval_budget: int,
-        callables: dict | None = None,
+        callables: list[dict[str, Any]] | None = None,
         save_video: bool = True,
-        video_path: str = './',
+        video_path: str | Path = './',
     ) -> dict[str, Any]:
         """Evaluate the policy starting from states sampled from a dataset.
 
@@ -701,38 +708,41 @@ class World:
             start_steps: Step indices within those episodes to start from.
             goal_offset_steps: Number of steps ahead to look for the goal.
             eval_budget: Maximum steps allowed for the agent to reach the goal.
-            callables: Optional dictionary of method calls to setup the env.
+            callables: Optional list of method calls to setup the env.
             save_video: Whether to save rollout videos.
             video_path: Path to save videos.
 
         Returns:
             Dictionary containing success rates and other metrics.
+
+        Raises:
+            ValueError: If input sequence lengths mismatch or don't match num_envs.
         """
         assert (
             self.envs.envs[0].spec.max_episode_steps is None
             or self.envs.envs[0].spec.max_episode_steps >= goal_offset_steps
         ), 'env max_episode_steps must be greater than eval_budget'
 
-        episodes_idx = np.array(episodes_idx)
-        start_steps = np.array(start_steps)
-        end_steps = start_steps + goal_offset_steps
+        ep_idx_arr = np.array(episodes_idx)
+        start_steps_arr = np.array(start_steps)
+        end_steps = start_steps_arr + goal_offset_steps
 
-        if not (len(episodes_idx) == len(start_steps)):
+        if not (len(ep_idx_arr) == len(start_steps_arr)):
             raise ValueError(
                 'episodes_idx and start_steps must have the same length'
             )
 
-        if len(episodes_idx) != self.num_envs:
+        if len(ep_idx_arr) != self.num_envs:
             raise ValueError(
                 'Number of episodes to evaluate must match number of envs'
             )
 
-        data = dataset.get_chunk_data(episodes_idx, start_steps, end_steps)
+        data = dataset.get_chunk_data(ep_idx_arr, start_steps_arr, end_steps)
         columns = dataset.column_names
 
         # keep relevant part of the chunk
-        init_step_per_env = defaultdict(list)
-        goal_step_per_env = defaultdict(list)
+        init_step_per_env: dict[str, list[Any]] = defaultdict(list)
+        goal_step_per_env: dict[str, list[Any]] = defaultdict(list)
 
         for i, ep in enumerate(data):
             for col in columns:
@@ -790,23 +800,20 @@ class World:
         init_step.update(deepcopy(goal_step))
         self.reset(seed=seeds, options=options)  # set seeds for all envs
 
-        # init_step = {k: v for k, v in init_step.items() if k in self.infos}
-        # goal_step = {k: v for k, v in goal_step.items() if k in self.infos}
-
         # apply callable list (e.g used for set initial position if not access to seed)
-        callables = callables or {}
+        callables = callables or []
         for i, env in enumerate(self.envs.unwrapped.envs):
-            env = env.unwrapped
+            env_unwrapped = env.unwrapped
 
             for spec in callables:
                 method_name = spec['method']
-                if not hasattr(env, method_name):
+                if not hasattr(env_unwrapped, method_name):
                     logging.warning(
-                        f'Env {env} has no method {method_name}, skipping callable'
+                        f'Env {env_unwrapped} has no method {method_name}, skipping callable'
                     )
                     continue
 
-                method = getattr(env, method_name)
+                method = getattr(env_unwrapped, method_name)
                 args = spec.get('args', spec)
 
                 # prepare args
@@ -818,7 +825,7 @@ class World:
                     if is_in_datset:
                         if value not in init_step:
                             logging.warning(
-                                f'Col {value} not found in dataset, skipping callable for env {env}'
+                                f'Col {value} not found in dataset, skipping callable for env {env_unwrapped}'
                             )
                             continue
                         prepared_args[args_name] = deepcopy(
@@ -831,7 +838,7 @@ class World:
                 method(**prepared_args)
 
         for i, env in enumerate(self.envs.unwrapped.envs):
-            env = env.unwrapped
+            env_unwrapped = env.unwrapped
 
             # TODO remove this
             if 'goal_state' in init_step and 'goal_state' in goal_step:
@@ -839,8 +846,8 @@ class World:
                     init_step['goal_state'][i], goal_step['goal_state'][i]
                 ), 'Goal state info does not match at reset'
 
-        results = {
-            'success_rate': 0,
+        results: dict[str, Any] = {
+            'success_rate': 0.0,
             'episode_successes': np.zeros(len(episodes_idx)),
             'seeds': seeds,
         }
@@ -862,7 +869,6 @@ class World:
         self.infos.update(deepcopy(init_step))
         self.infos.update(deepcopy(goal_step))
 
-        # assert np.allclose(self.infos["goal"], goal_step["goal"]), "Goal info does not match"
         if 'goal' in goal_step and 'goal' in self.infos:
             assert np.allclose(self.infos['goal'], goal_step['goal']), (
                 'Goal info does not match'
@@ -874,8 +880,7 @@ class World:
             dtype=np.uint8,
         )
 
-        # TODO assert goal and start state are identical as in the rollout
-        # run normal evaluation for eval_budget and TODO: record video
+        # run normal evaluation for eval_budget and record video
         for i in range(eval_budget):
             video_frames[:, i] = self.infos['pixels'][:, -1]
             self.infos.update(deepcopy(goal_step))
@@ -900,12 +905,11 @@ class World:
             import imageio
 
             target_len = target_frames.shape[1]
-            video_path = Path(video_path)
-            video_path.mkdir(parents=True, exist_ok=True)
+            video_path_obj = Path(video_path)
+            video_path_obj.mkdir(parents=True, exist_ok=True)
             for i in range(self.num_envs):
                 out = imageio.get_writer(
-                    video_path / f'rollout_{i}.mp4',
-                    'output.mp4',
+                    video_path_obj / f'rollout_{i}.mp4',
                     fps=15,
                     codec='libx264',
                 )
@@ -917,7 +921,7 @@ class World:
                     frame = np.hstack([stacked_frame, goals])
                     out.append_data(frame)
                 out.close()
-            print(f'Video saved to {video_path}')
+            print(f'Video saved to {video_path_obj}')
 
         if results['seeds'] is not None:
             assert np.unique(results['seeds']).shape[0] == n_episodes, (

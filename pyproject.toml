@@ -24,7 +24,6 @@ dependencies = [
   "h5py",
   "hdf5plugin",
   "tqdm",
-  "mkdocstrings[python]>=1.0.2",
 ]
 
 [project.optional-dependencies]
@@ -35,7 +34,7 @@ train = [
     "hydra-submitit-launcher",
     "wandb",
 ]
-
+  
 env = [
     "pygame",
     "pymunk",
@@ -75,3 +74,6 @@ indent-width = 4
 [tool.ruff.format]
 indent-style = "space"
 quote-style = "single"
+
+[tool.coverage.run]
+omit = ["stable_worldmodel/envs/*"]

@@ -171,8 +171,7 @@ def _download_and_save(
             f.attrs["end_date"] = processed_end.isoformat()
 
 
-def load_market_data(tickers, start_time, end_time, freq):
-    hdf_path = "dataset.h5"
+def load_market_data(hdf_path, tickers, start_time, end_time, freq):
 
     # Check if HDF5 file exists
     if not os.path.exists(hdf_path):
@@ -231,6 +230,8 @@ def load_market_data(tickers, start_time, end_time, freq):
 
     logger.info(f"Reading data from {hdf_path}")
 
+    logger.info(f"start_time: {start_time}, end_time: {end_time}, tickers: {tickers}")
+
     with pd.HDFStore(hdf_path, "r") as store:
         df = store.select(
             "bars",
@@ -240,6 +241,8 @@ def load_market_data(tickers, start_time, end_time, freq):
                 f"index <= '{pd.Timestamp(end_time)}'",
             ],
         )
+
+    logger.info(f"Loaded {len(df)} rows from HDF5 store for tickers {tickers}")
 
     if df.empty:
         raise ValueError(f"No data found for tickers {tickers} between {start_time} and {end_time}")
@@ -252,6 +255,8 @@ def load_market_data(tickers, start_time, end_time, freq):
         # Drop duplicate timestamps, keeping the last value
         symbol_df = symbol_df[~symbol_df.index.duplicated(keep="last")]
         symbol_df = symbol_df.resample(freq).ffill()  # Resample
+        # Drop rows that are all NaN (non-trading times created by resample)
+        # symbol_df = symbol_df.dropna(how="all")
         symbol_df["symbol"] = symbol  # Add symbol back
         df_resampled.append(symbol_df)
 

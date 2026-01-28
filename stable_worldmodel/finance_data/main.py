@@ -101,38 +101,38 @@ if __name__ == "__main__":
     # )
     # logger.success(f"Generated {len(dataset)} with shape {dataset.shape}")
 
-    # Option 2: PyTorch DataLoader (fetches each T, caches later Ts)
-    stock_dataset = StockDataset(
-        start_time="2020-10-24",
-        end_time="2025-10-30",
-        processing_methods=["return", "volume"],
-        sector_config=sector_config,
-        freq="1min",
-    )
+    # # Option 2: PyTorch DataLoader (fetches each T, caches later Ts)
+    # stock_dataset = StockDataset(
+    #     start_time="2020-10-24",
+    #     end_time="2025-10-30",
+    #     processing_methods=["return", "volume"],
+    #     sector_config=sector_config,
+    #     freq="1min",
+    # )
 
-    # Create DataLoader
-    dataloader = DataLoader(
-        stock_dataset,
-        batch_size=1,  # Process one timestep at a time
-        shuffle=False,  # Keep temporal order
-        num_workers=0,  # Single process (data is already cached)
-    )
+    # # Create DataLoader
+    # dataloader = DataLoader(
+    #     stock_dataset,
+    #     batch_size=1,  # Process one timestep at a time
+    #     shuffle=False,  # Keep temporal order
+    #     num_workers=0,  # Single process (data is already cached)
+    # )
 
-    logger.success(f"Created DataLoader with {len(stock_dataset)} timesteps")
+    # logger.success(f"Created DataLoader with {len(stock_dataset)} timesteps")
 
-    # Example: Iterate through timesteps
-    for t_idx, timestep_data in enumerate(dataloader):
-        # timestep_data shape: (batch_size=1, num_sectors, max_stocks_per_sector, channels)
-        logger.info(f"Timestep {t_idx}: {timestep_data.shape}")
+    # # Example: Iterate through timesteps
+    # for t_idx, timestep_data in enumerate(dataloader):
+    #     # timestep_data shape: (batch_size=1, num_sectors, max_stocks_per_sector, channels)
+    #     logger.info(f"Timestep {t_idx}: {timestep_data.shape}")
 
-        # Your world model training code here
-        # ...
+    #     # Your world model training code here
+    #     # ...
 
-        if t_idx >= 2:  # Just show first few for demo
-            logger.info("...")
-            break
+    #     if t_idx >= 2:  # Just show first few for demo
+    #         logger.info("...")
+    #         break
 
-    logger.success("Completed processing timesteps")
+    # logger.success("Completed processing timesteps")
 
 
 """

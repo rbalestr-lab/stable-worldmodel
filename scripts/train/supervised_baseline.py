@@ -358,7 +358,7 @@ def main(args):
          return
 
     # 1. Get Tickers
-    all_tickers = get_all_tickers()[:5]
+    all_tickers = get_all_tickers()
     print(f"Loading metadata for {len(all_tickers)} tickers...")
 
     # 2. LOAD RAW DATA INTO RAM (FASTEST METHOD)

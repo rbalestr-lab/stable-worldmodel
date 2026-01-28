@@ -225,5 +225,5 @@ results/
 local_scripts/
 
 
-dataset.h5
+*.h5
 

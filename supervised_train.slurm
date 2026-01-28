@@ -1,48 +1,23 @@
 #!/bin/bash
-#SBATCH --job-name=fin_ablation
+#SBATCH --job-name=fin_baseline
 #SBATCH --partition=gpu
 #SBATCH --gres=gpu:1
 #SBATCH --cpus-per-task=4
 #SBATCH --mem=32G
 #SBATCH --time=24:00:00
-#SBATCH --output=logs/%x-%A_%a.out
-#SBATCH --error=logs/%x-%A_%a.err
-#SBATCH --array=0-11                 # <--- 12 JOBS TOTAL (0 to 11)
+#SBATCH --output=logs/%x-%j.out
+#SBATCH --error=logs/%x-%j.err
 
 # --- Environment setup ---
 mkdir -p logs
 source .venv/bin/activate
 
-# --- Hyperparameter Grid Definition ---
-# Define the values you want to test for each parameter
-LRS=(1e-4)        # 3 values
-WINDOWS=(30)             # 2 values
-BATCHES=(64)             # 2 values
+# --- Hyperparameters ---
+MY_LR=1e-4
+MY_WINDOW=30
+MY_BATCH=64
 
-# Get the lengths of the arrays
-NUM_LRS=${#LRS[@]}
-NUM_WINDOWS=${#WINDOWS[@]}
-NUM_BATCHES=${#BATCHES[@]}
-
-# --- Auto-calculate Combinations ---
-# Use modulo logic to map the single SLURM_ARRAY_TASK_ID to 3 indices
-# This creates a "Cartesian Product" of all arrays
-
-# 1. Get Batch index (changes fastest)
-BATCH_IDX=$(( SLURM_ARRAY_TASK_ID % NUM_BATCHES ))
-
-# 2. Get Window index (changes medium speed)
-WINDOW_IDX=$(( (SLURM_ARRAY_TASK_ID / NUM_BATCHES) % NUM_WINDOWS ))
-
-# 3. Get LR index (changes slowest)
-LR_IDX=$(( SLURM_ARRAY_TASK_ID / (NUM_BATCHES * NUM_WINDOWS) ))
-
-# Extract the actual values
-MY_LR=${LRS[$LR_IDX]}
-MY_WINDOW=${WINDOWS[$WINDOW_IDX]}
-MY_BATCH=${BATCHES[$BATCH_IDX]}
-
-echo "Job ID: $SLURM_ARRAY_TASK_ID"
+echo "Job ID: $SLURM_JOB_ID"
 echo "Running with: LR=$MY_LR, Window=$MY_WINDOW, Batch=$MY_BATCH"
 
 # --- Run the Script ---

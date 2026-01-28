@@ -23,10 +23,21 @@ DEFAULT_VARIATIONS = (
 
 
 class SimpleNavigationEnv(MiniGridEnv):
-    """Simple Navigation Environment."""
+    """Simple Navigation Environment
+
+    The environment is a MiniGrid with a random maze. The agent is a point agent that can move in the maze. The goal is to reach the goal square.
+    The agent can move in the maze by moving forward, turning left, or turning right.
+    """
 
     def __init__(self, size=9, render_mode="rgb_array", *args, **kwargs):
-        """Initialize the Simple Navigation Environment."""
+        """Initialize the Simple Navigation Environment
+
+        Args:
+            size: size of the maze (width and height)
+            render_mode: mode to render the environment
+            *args: additional arguments to pass to the parent class
+            **kwargs: additional keyword arguments to pass to the parent class
+        """
 
         super().__init__(
             grid_size=size,
@@ -268,7 +279,17 @@ class SimpleNavigationEnv(MiniGridEnv):
 
 
 def ellers_maze(width, height, seed=None, p_horizontal=0.5, p_vertical=0.5):
-    """Generate a maze using Eller's algorithm."""
+    """Generate a maze using the Eller's algorithm.
+
+    Args:
+        width: width of the maze
+        height: height of the maze
+        seed: seed for the random number generator
+        p_horizontal: probability of horizontal walls
+        p_vertical: probability of vertical walls
+    Returns:
+        List of (x, y) coordinates of walls in the maze.
+    """
     assert width >= 3 and height >= 3
     assert width % 2 == 1 and height % 2 == 1
     assert 0.0 < p_horizontal < 1.0

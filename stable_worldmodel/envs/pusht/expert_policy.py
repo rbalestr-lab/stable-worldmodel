@@ -11,7 +11,11 @@ class WeakPolicy(BasePolicy):
         dist_constraint=100,
         **kwargs,
     ):
-        """Initialize the weak policy."""
+        """
+        Args:
+            dist_constraint (int, optional): pixels square constraint around the block for sampling actions.
+            **kwargs: Arbitrary keyword arguments passed to parent BasePolicy.
+        """
         super().__init__(**kwargs)
 
         self.dist_constraint = dist_constraint

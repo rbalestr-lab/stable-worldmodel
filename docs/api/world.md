@@ -1,4 +1,5 @@
 title: World
+summary: A unified interface for orchestrating vectorized environments, managing policy interactions, and handling data collection (HDF5/Video) and evaluation pipelines.
 ---
 
 The `World` class is the central entry point for managing vectorized environments in `stable_worldmodel`. It handles synchronization, preprocessing (resizing, stacking), and interaction with policies.

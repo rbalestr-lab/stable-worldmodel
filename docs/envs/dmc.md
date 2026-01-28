@@ -6,8 +6,6 @@ external_links:
     github: https://github.com/google-deepmind/dm_control
 ---
 
-![dmc](../assets/cheetah_run.gif)
-
 ## Description
 
 A collection of continuous control environments built on the [DeepMind Control Suite](https://github.com/google-deepmind/dm_control). These environments cover a range of classic locomotion and manipulation tasks in the [MuJoCo](https://mujoco.org/) physics engine.

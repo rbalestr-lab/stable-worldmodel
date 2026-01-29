@@ -19,7 +19,10 @@ _WALK_SPEED = 0.5
 
 class QuadrupedDMControlWrapper(DMControlWrapper):
     def __init__(self, seed=None, environment_kwargs=None):
-        xml, assets = quadruped.get_model_and_assets()
+        xml = quadruped.make_model(
+            floor_size=_DEFAULT_TIME_LIMIT * _WALK_SPEED
+        )
+        assets = quadruped.common.ASSETS
         xml = xml.replace(b'file="./common/', b'file="common/')
         suite_dir = os.path.dirname(quadruped.__file__)  # .../dm_control/suite
         self._mjcf_model = mjcf.from_xml_string(

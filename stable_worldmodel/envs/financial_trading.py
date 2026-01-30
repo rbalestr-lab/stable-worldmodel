@@ -335,6 +335,19 @@ class FinancialEnvironment(gym.Env):
         self.current_data_index = 0
         self.data_timestamps = None
 
+        # Market impact tracking
+        self.price_impacts = {}  # {timestamp: impact_amount}
+        self.impact_decay_rate = 0.95  # Per-step decay (5% decay per step)
+        self.impact_half_life = 20  # Steps for impact to halve
+        self.cumulative_impact = 0.0  # Current total impact on price (temporary + permanent)
+        self.permanent_impact = 0.0  # Permanent price shift (doesn't decay)
+        self.temporary_impact = 0.0  # Temporary impact (decays quickly)
+
+        # Impact coefficients in basis points (bps)
+        # 1 bps = 0.0001 = 0.01%
+        self.impact_coeff = 0.0005  # 5 bps at 100% ADV participation (default: retail)
+        self.permanent_ratio = 0.1  # 10% of impact is permanent, 90% temporary
+
         # Performance tracking
         self.start_time = None
         self.benchmark_returns = []
@@ -512,6 +525,12 @@ class FinancialEnvironment(gym.Env):
         self.trade_history = []
         self.price_history = []
 
+        # Reset market impact tracking
+        self.price_impacts = {}
+        self.cumulative_impact = 0.0
+        self.temporary_impact = 0.0
+        self.permanent_impact = 0.0
+
         # Performance tracking
         self.start_time = self.market_data.index[self.current_data_index]
         self.benchmark_returns = []
@@ -561,7 +580,8 @@ class FinancialEnvironment(gym.Env):
 
         # Get current market data
         current_row = self.market_data.iloc[self.current_data_index]
-        current_price = current_row["close"]
+        base_price = current_row["close"]  # Historical market price
+        current_price = self._get_adjusted_price(base_price)  # Price including our cumulative impact
         current_timestamp = self.market_data.index[self.current_data_index]
 
         # Apply time acceleration
@@ -644,6 +664,10 @@ class FinancialEnvironment(gym.Env):
             "shares_held": self.shares_held,
             "action_taken": action_taken,
             "current_price": current_price,
+            "base_price": base_price,  # Original historical price
+            "cumulative_impact": self.cumulative_impact,  # Total price impact from our trades
+            "temporary_impact": self.temporary_impact,  # Temporary (decaying) component
+            "permanent_impact": self.permanent_impact,  # Permanent component
             "portfolio_return": portfolio_return,
             "benchmark_return": benchmark_return,
             "total_return": (self.portfolio_value - self.initial_portfolio_value)
@@ -660,14 +684,162 @@ class FinancialEnvironment(gym.Env):
 
         return observation, reward, terminated, truncated, info
 
+    def set_trader_profile(self, profile: str = "institutional") -> None:
+        """Configure market impact parameters based on trader type.
+
+        Parameters
+        ----------
+        profile : str
+            Trader profile type:
+            - "retail": Small retail trader (< 0.1% volume, minimal impact)
+            - "institutional": Mid-size institutional trader (1-5% volume, moderate impact)
+            - "large_fund": Large fund/whale (> 10% volume, significant impact)
+            - "hft": High-frequency trader (rapid small trades, fast decay)
+        """
+        profiles = {
+            "retail": {
+                "impact_coeff": 0.0002,  # 2 bps at 100% ADV participation
+                "permanent_ratio": 0.05,  # Only 5% permanent
+                "impact_half_life": 10,  # Quick decay (retail doesn't move markets long)
+                "description": "Small retail trader with minimal market impact (~2 bps)",
+            },
+            "institutional": {
+                "impact_coeff": 0.001,  # 10 bps at 100% ADV participation
+                "permanent_ratio": 0.1,  # 10% permanent
+                "impact_half_life": 20,  # Medium decay
+                "description": "Institutional trader with moderate market impact (~10 bps)",
+            },
+            "large_fund": {
+                "impact_coeff": 0.003,  # 30 bps at 100% ADV participation
+                "permanent_ratio": 0.2,  # 20% permanent (whale moves stick)
+                "impact_half_life": 40,  # Slow decay (large moves persist)
+                "description": "Large fund/whale with significant market impact (~30 bps)",
+            },
+            "hft": {
+                "impact_coeff": 0.0001,  # 1 bps at 100% ADV participation
+                "permanent_ratio": 0.01,  # Almost no permanent impact
+                "impact_half_life": 5,  # Very fast decay
+                "description": "High-frequency trader with minimal impact (~1 bps)",
+            },
+        }
+
+        if profile not in profiles:
+            raise ValueError(f"Unknown profile '{profile}'. Choose from: {list(profiles.keys())}")
+
+        config = profiles[profile]
+        self.impact_coeff = config["impact_coeff"]
+        self.permanent_ratio = config["permanent_ratio"]
+        self.impact_half_life = config["impact_half_life"]
+
+        logging.info(f"Set trader profile: {profile}")
+        logging.info(f"  {config['description']}")
+        logging.info(f"  Impact coefficient: {self.impact_coeff:.6f} ({self.impact_coeff * 10000:.1f} bps)")
+        logging.info(f"  Permanent ratio: {self.permanent_ratio:.1%}")
+        logging.info(f"  Impact half-life: {self.impact_half_life} steps")
+
+    def _calculate_market_impact(self, trade_size: float, current_price: float, current_volume: float) -> float:
+        """Calculate price impact from a trade based on trade size relative to volume.
+
+        Uses square root market impact model: impact ∝ sqrt(trade_size / volume)
+        This is a standard model in quantitative finance (see Almgren & Chriss, 2000)
+
+        Parameters
+        ----------
+        trade_size : float
+            Absolute value of shares being traded
+        current_price : float
+            Current market price
+        current_volume : float
+            Current market volume
+
+        Returns
+        -------
+        float
+            Price impact amount (positive = price increase)
+        """
+        if current_volume <= 0 or trade_size <= 0:
+            return 0.0
+
+        # Volume participation rate (what % of current volume are we trading?)
+        participation_rate = trade_size / current_volume
+
+        # Almgren-Chriss square-root impact model:
+        # impact ∝ sqrt(trade_size / volume)
+        # This prevents impact from exploding with large trades
+        #
+        # Coefficient is in basis points at 100% participation:
+        # - 0.0001 = 1 bps (0.01%)
+        # - 0.001 = 10 bps (0.1%)
+        # - 0.01 = 100 bps (1%)
+        relative_impact = self.impact_coeff * np.sqrt(participation_rate)
+
+        # Convert to absolute price impact
+        price_impact = current_price * relative_impact
+
+        return price_impact
+
+    def _update_cumulative_impact(self, new_impact: float, timestamp: Any) -> None:
+        """Update cumulative price impact with decay.
+
+        Splits impact into temporary (decays fast) and permanent (persists) components.
+        This models:
+        - Temporary: Bid-ask bounce, liquidity provision, mean reversion
+        - Permanent: Information content, inventory effects, informed trading
+
+        Parameters
+        ----------
+        new_impact : float
+            New price impact to add (positive = upward pressure)
+        timestamp : datetime-like
+            Timestamp of the new impact
+        """
+        # Split into temporary and permanent components
+        permanent_component = new_impact * self.permanent_ratio
+        temporary_component = new_impact * (1 - self.permanent_ratio)
+
+        # Decay existing temporary impact (exponential decay)
+        decay_factor = np.exp(-np.log(2) / self.impact_half_life)
+        self.temporary_impact *= decay_factor
+
+        # Add new impacts
+        self.temporary_impact += temporary_component
+        self.permanent_impact += permanent_component
+
+        # Total cumulative impact
+        self.cumulative_impact = self.temporary_impact + self.permanent_impact
+
+        # Store individual impact for tracking
+        if timestamp not in self.price_impacts:
+            self.price_impacts[timestamp] = 0.0
+        self.price_impacts[timestamp] += new_impact
+
+    def _get_adjusted_price(self, base_price: float) -> float:
+        """Get market price adjusted for accumulated trading impact.
+
+        Parameters
+        ----------
+        base_price : float
+            Original historical market price
+
+        Returns
+        -------
+        float
+            Price adjusted for cumulative market impact from agent's trades
+        """
+        return base_price + self.cumulative_impact
+
     def _execute_buy_order(self, price: float, transaction_cost_bps: float, slippage_multiplier: float) -> str:
-        """Execute a buy order with realistic transaction costs."""
+        """Execute a buy order with realistic transaction costs and market impact."""
         if self.balance <= 0:
             return "hold"  # No money to buy
 
         # If we have a short position, close it first
         if self.shares_held < 0:
             return self._close_short_position(price, transaction_cost_bps, slippage_multiplier)
+
+        # Get current volume for impact calculation
+        current_row = self.market_data.iloc[self.current_data_index]
+        current_volume = current_row.get("volume", 1000000.0)
 
         # Calculate shares to buy (use only a fraction of balance to prevent extreme leverage)
         max_position_size = 0.95  # Use 95% of balance to leave buffer
@@ -679,7 +851,13 @@ class FinancialEnvironment(gym.Env):
         shares_to_buy = available_capital / (effective_price * (1 + transaction_cost))
 
         if shares_to_buy > 0:
-            total_cost = shares_to_buy * effective_price * (1 + transaction_cost)
+            # Calculate market impact from this trade
+            trade_impact = self._calculate_market_impact(shares_to_buy, price, current_volume)
+
+            # Impact pushes price UP for buy orders
+            effective_price_with_impact = effective_price + trade_impact
+
+            total_cost = shares_to_buy * effective_price_with_impact * (1 + transaction_cost)
 
             if total_cost <= self.balance:
                 self.shares_held += shares_to_buy
@@ -690,20 +868,35 @@ class FinancialEnvironment(gym.Env):
         return "hold"
 
     def _execute_sell_order(self, price: float, transaction_cost_bps: float, slippage_multiplier: float) -> str:
-        """Execute a sell order with realistic transaction costs."""
+        """Execute a sell order with realistic transaction costs and market impact."""
         if self.shares_held <= 0 and not self.enable_shorting:
             return "hold"  # No shares to sell and shorting disabled
+
+        # Get current volume for impact calculation
+        current_row = self.market_data.iloc[self.current_data_index]
+        current_volume = current_row.get("volume", 1000000.0)
 
         transaction_cost = transaction_cost_bps / 10000.0
         slippage = price * 0.0001 * slippage_multiplier
         effective_price = price - slippage
 
         if self.shares_held > 0:
+            # Calculate market impact from selling
+            trade_impact = self._calculate_market_impact(self.shares_held, price, current_volume)
+
+            # Impact pushes price DOWN for sell orders (negative impact)
+            effective_price_with_impact = effective_price - trade_impact
+
             # Sell existing long position
-            revenue = self.shares_held * effective_price * (1 - transaction_cost)
+            revenue = self.shares_held * effective_price_with_impact * (1 - transaction_cost)
             self.balance += revenue
             self.shares_held = 0.0
             self.position = 0.0
+
+            # Update cumulative market impact (negative for sells)
+            timestamp = self.market_data.index[self.current_data_index]
+            self._update_cumulative_impact(-trade_impact, timestamp)
+
             return "sell"
 
         elif self.enable_shorting and self.shares_held == 0:
@@ -713,12 +906,23 @@ class FinancialEnvironment(gym.Env):
             shares_to_short = max_short_value / (effective_price * (1 + transaction_cost))
 
             if shares_to_short > 0:
+                # Calculate market impact from short selling
+                trade_impact = self._calculate_market_impact(shares_to_short, price, current_volume)
+
+                # Impact pushes price DOWN for short sales (negative impact)
+                effective_price_with_impact = effective_price - trade_impact
+
                 # When shorting, we receive cash but owe shares
                 # The cash goes into our balance, but we track the liability via negative shares_held
-                revenue = shares_to_short * effective_price * (1 - transaction_cost)
+                revenue = shares_to_short * effective_price_with_impact * (1 - transaction_cost)
                 self.balance += revenue  # Receive proceeds from short sale
                 self.shares_held = -shares_to_short  # Track short position as negative shares
                 self.position = self.shares_held  # Negative position
+
+                # Update cumulative market impact (negative for short sales)
+                timestamp = self.market_data.index[self.current_data_index]
+                self._update_cumulative_impact(-trade_impact, timestamp)
+
                 return "short"
 
         return "hold"
@@ -728,18 +932,34 @@ class FinancialEnvironment(gym.Env):
         if self.shares_held >= 0:
             return "hold"  # No short position to close
 
+        # Get current volume for impact calculation
+        current_row = self.market_data.iloc[self.current_data_index]
+        current_volume = current_row.get("volume", 1000000.0)
+
         transaction_cost = transaction_cost_bps / 10000.0
         slippage = price * 0.0001 * slippage_multiplier
         effective_price = price + slippage  # Pay ask price when buying to cover
 
         shares_to_cover = abs(self.shares_held)
-        total_cost = shares_to_cover * effective_price * (1 + transaction_cost)
+
+        # Calculate market impact from covering short
+        trade_impact = self._calculate_market_impact(shares_to_cover, price, current_volume)
+
+        # Impact pushes price UP when buying to cover
+        effective_price_with_impact = effective_price + trade_impact
+
+        total_cost = shares_to_cover * effective_price_with_impact * (1 + transaction_cost)
 
         if total_cost <= self.balance:
             # Buy back the shares to close short
             self.balance -= total_cost
             self.shares_held = 0.0
             self.position = 0.0
+
+            # Update cumulative market impact (positive for buy to cover)
+            timestamp = self.market_data.index[self.current_data_index]
+            self._update_cumulative_impact(trade_impact, timestamp)
+
             return "cover_short"
         else:
             # Not enough cash to cover - this is a margin call situation

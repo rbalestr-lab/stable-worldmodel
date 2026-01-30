@@ -4,15 +4,16 @@ from einops import rearrange, repeat
 from torch import nn
 
 
-# TODO encode is very similar to the one in prejepa.py - consider refactoring
-# TODO models are very similar to the ones in prejepa.py - consider refactoring
+# TODO encode is very similar to the one in pyro.py - consider refactoring
+# TODO models are very similar to the ones in pyro.py - consider refactoring
 
 
-class GCBC(torch.nn.Module):
+class GCIQL(torch.nn.Module):
     def __init__(
         self,
         encoder,
-        predictor,
+        value_predictor,
+        action_predictor,
         extra_encoders=None,
         history_size=3,
         num_pred=1,
@@ -20,8 +21,9 @@ class GCBC(torch.nn.Module):
     ):
         super().__init__()
 
-        self.backbone = encoder
-        self.predictor = predictor
+        self.encoder = encoder
+        self.value_predictor = value_predictor
+        self.action_predictor = action_predictor
         self.extra_encoders = extra_encoders or {}
         self.history_size = history_size
         self.num_pred = num_pred
@@ -31,15 +33,15 @@ class GCBC(torch.nn.Module):
     def encode(
         self,
         info,
-        pixels_key='pixels',
+        pixels_key="pixels",
         emb_keys=None,
         prefix=None,
-        target='embed',
+        target="embed",
         is_video=False,
     ):
-        assert target not in info, f'{target} key already in info_dict'
+        assert target not in info, f"{target} key already in info_dict"
         emb_keys = emb_keys or self.extra_encoders.keys()
-        prefix = prefix or ''
+        prefix = prefix or ""
 
         encode_fn = self._encode_video if is_video else self._encode_image
         pixels_embed = encode_fn(info[pixels_key].float())  # (B, T, 3, H, W)
@@ -47,20 +49,16 @@ class GCBC(torch.nn.Module):
         # == improve the embedding
         n_patches = pixels_embed.shape[2]
         embedding = pixels_embed
-        info[f'pixels_{target}'] = pixels_embed
+        info[f"pixels_{target}"] = pixels_embed
 
         for key in emb_keys:
             extr_enc = self.extra_encoders[key]
-            extra_input = info[f'{prefix}{key}'].float()  # (B, T, dim)
-            extra_embed = extr_enc(
-                extra_input
-            )  # (B, T, dim) -> (B, T, emb_dim)
-            info[f'{key}_{target}'] = extra_embed
+            extra_input = info[f"{prefix}{key}"].float()  # (B, T, dim)
+            extra_embed = extr_enc(extra_input)  # (B, T, dim) -> (B, T, emb_dim)
+            info[f"{key}_{target}"] = extra_embed
 
             # copy extra embedding across patches for each time step
-            extra_tiled = repeat(
-                extra_embed.unsqueeze(2), 'b t 1 d -> b t p d', p=n_patches
-            )
+            extra_tiled = repeat(extra_embed.unsqueeze(2), "b t 1 d -> b t p d", p=n_patches)
 
             # concatenate along feature dimension
             embedding = torch.cat([embedding, extra_tiled], dim=3)
@@ -72,36 +70,24 @@ class GCBC(torch.nn.Module):
     def _encode_image(self, pixels):
         # == pixels embedding
         B = pixels.shape[0]
-        pixels = rearrange(pixels, 'b t ... -> (b t) ...')
+        pixels = rearrange(pixels, "b t ... -> (b t) ...")
 
-        kwargs = (
-            {'interpolate_pos_encoding': True}
-            if self.interpolate_pos_encoding
-            else {}
-        )
-        pixels_embed = self.backbone(pixels, **kwargs)
+        kwargs = {"interpolate_pos_encoding": True} if self.interpolate_pos_encoding else {}
+        pixels_embed = self.encoder(pixels, **kwargs)
 
-        if hasattr(pixels_embed, 'last_hidden_state'):
+        if hasattr(pixels_embed, "last_hidden_state"):
             pixels_embed = pixels_embed.last_hidden_state
             pixels_embed = pixels_embed[:, 1:, :]  # drop cls token
         else:
-            pixels_embed = pixels_embed.logits.unsqueeze(
-                1
-            )  # (B*T, 1, emb_dim)
+            pixels_embed = pixels_embed.logits.unsqueeze(1)  # (B*T, 1, emb_dim)
 
-        pixels_embed = rearrange(
-            pixels_embed.detach(), '(b t) p d -> b t p d', b=B
-        )
+        pixels_embed = rearrange(pixels_embed.detach(), "(b t) p d -> b t p d", b=B)
 
         return pixels_embed
 
     def _encode_video(self, pixels):
         B, T, C, H, W = pixels.shape
-        kwargs = (
-            {'interpolate_pos_encoding': True}
-            if self.interpolate_pos_encoding
-            else {}
-        )
+        kwargs = {"interpolate_pos_encoding": True} if self.interpolate_pos_encoding else {}
 
         pixels_embeddings = []
 
@@ -111,24 +97,18 @@ class GCBC(torch.nn.Module):
             past_frames = pixels[:, : t + 1, :, :, :]  # (B, t+1, C, H, W)
 
             # repeat last frame to pad
-            pad_frames = past_frames[:, -1:, :, :, :].repeat(
-                1, padding, 1, 1, 1
-            )  # (B, padding, C, H, W)
-            frames = torch.cat(
-                [past_frames, pad_frames], dim=1
-            )  # (B, T, C, H, W)
+            pad_frames = past_frames[:, -1:, :, :, :].repeat(1, padding, 1, 1, 1)  # (B, padding, C, H, W)
+            frames = torch.cat([past_frames, pad_frames], dim=1)  # (B, T, C, H, W)
 
-            frame_embed = self.backbone(frames, **kwargs)  # (B, 1, P, emb_dim)
+            frame_embed = self.encoder(frames, **kwargs)  # (B, 1, P, emb_dim)
             frame_embed = frame_embed.last_hidden_state
             pixels_embeddings.append(frame_embed)
 
-        pixels_embed = torch.stack(
-            pixels_embeddings, dim=1
-        )  # (B, T, P, emb_dim)
+        pixels_embed = torch.stack(pixels_embeddings, dim=1)  # (B, T, P, emb_dim)
 
         return pixels_embed
 
-    def predict(self, embedding, embedding_goal):
+    def predict_actions(self, embedding, embedding_goal):
         """predict actions per frame
         Args:
             embedding: (B, T, P, d)
@@ -137,28 +117,35 @@ class GCBC(torch.nn.Module):
             preds: (B, T, action_dim)
         """
 
-        embedding = rearrange(embedding, 'b t p d -> b (t p) d')
-        embedding_goal = rearrange(embedding_goal, 'b t p d -> b (t p) d')
-        preds = self.predictor(embedding, embedding_goal)
+        embedding = rearrange(embedding, "b t p d -> b (t p) d")
+        embedding_goal = rearrange(embedding_goal, "b t p d -> b (t p) d")
+        preds = self.action_predictor(embedding, embedding_goal)
+
+        return preds
+
+    def predict_values(self, embedding, embedding_goal):
+        """predict values per frame
+        Args:
+            embedding: (B, T, P, d)
+            embedding_goal: (B, 1, P, d)
+        Returns:
+            preds: (B, T, 1)
+        """
+
+        embedding = rearrange(embedding, "b t p d -> b (t p) d")
+        embedding_goal = rearrange(embedding_goal, "b t p d -> b (t p) d")
+        preds = self.value_predictor(embedding, embedding_goal)
 
         return preds
 
     def get_action(self, info):
         """Get action given observation and goal (uses last frame's prediction)."""
         # first encode observation
-        info = self.encode(
-            info, pixels_key='pixels', emb_keys=['proprio'], target='embed'
-        )
+        info = self.encode(info, pixels_key="pixels", emb_keys=["proprio"], target="embed")
         # encode goal
-        info = self.encode(
-            info,
-            pixels_key='goal',
-            emb_keys=['proprio'],
-            prefix='goal_',
-            target='goal_embed',
-        )
+        info = self.encode(info, pixels_key="goal", emb_keys=["proprio"], prefix="goal_", target="goal_embed")
         # then predict action
-        actions = self.predict(info["embed"], info["goal_embed"])
+        actions = self.predict_actions(info["embed"], info["goal_embed"])
         # return last frame's action prediction
         actions = actions[:, -1, :]
         return actions
@@ -178,9 +165,7 @@ class Embedder(torch.nn.Module):
         self.tubelet_size = tubelet_size
         self.in_chans = in_chans
         self.emb_dim = emb_dim
-        self.patch_embed = torch.nn.Conv1d(
-            in_chans, emb_dim, kernel_size=tubelet_size, stride=tubelet_size
-        )
+        self.patch_embed = torch.nn.Conv1d(in_chans, emb_dim, kernel_size=tubelet_size, stride=tubelet_size)
 
     def forward(self, x):
         with torch.amp.autocast(enabled=False, device_type=x.device.type):
@@ -211,9 +196,7 @@ class Predictor(nn.Module):
         self.num_patches = num_patches
         self.num_frames = num_frames
 
-        self.pos_embedding = nn.Parameter(
-            torch.randn(1, num_frames * (num_patches), dim)
-        )  # dim for the pos encodings
+        self.pos_embedding = nn.Parameter(torch.randn(1, num_frames * (num_patches), dim))  # dim for the pos encodings
         self.pos_embedding_goal = nn.Parameter(
             torch.randn(1, (num_patches), dim)
         )  # dim for the pos encodings of goal (assumed single image)
@@ -274,7 +257,7 @@ class Attention(nn.Module):
         self.heads = heads
         self.scale = dim_head**-0.5
         self.norm = nn.LayerNorm(dim)
-        if self.att_type == 'cross':
+        if self.att_type == "cross":
             self.norm_c = nn.LayerNorm(dim)
         self.attend = nn.Softmax(dim=-1)
         self.dropout = nn.Dropout(dropout)
@@ -320,7 +303,7 @@ class Attention(nn.Module):
     def forward(self, x, c=None):
         B, N, C = x.size()
         x = self.norm(x)
-        if self.att_type == 'cross':
+        if self.att_type == "cross":
             c = self.norm_c(c)
             q_in = x
             kv_in = c
@@ -336,10 +319,7 @@ class Attention(nn.Module):
         # q, k, v: (B, heads, T, dim_head)
         q = self.to_q(q_in)
         k, v = self.to_kv(kv_in).chunk(2, dim=-1)
-        q, k, v = (
-            rearrange(t, 'b n (h d) -> b h n d', h=self.heads)
-            for t in (q, k, v)
-        )
+        q, k, v = (rearrange(t, "b n (h d) -> b h n d", h=self.heads) for t in (q, k, v))
 
         # Apply causal mask if enabled
         if self.causal:
@@ -353,15 +333,10 @@ class Attention(nn.Module):
             attn_mask = None
 
         out = F.scaled_dot_product_attention(
-            q,
-            k,
-            v,
-            attn_mask=attn_mask,
-            dropout_p=self.dropout.p if self.training else 0.0,
-            is_causal=False,
+            q, k, v, attn_mask=attn_mask, dropout_p=self.dropout.p if self.training else 0.0, is_causal=False
         )
 
-        out = rearrange(out, 'b h n d -> b n (h d)')
+        out = rearrange(out, "b h n d -> b n (h d)")
 
         return self.to_out(out)
 
@@ -391,9 +366,9 @@ class Transformer(nn.Module):
             if i == depth - 1:  # last layer: frame-wise aggregation (T*P -> T)
                 att_type = "frame_agg"
             elif i % 2 == 0:
-                att_type = 'self'
+                att_type = "self"
             else:
-                att_type = 'cross'
+                att_type = "cross"
             self.layers.append(
                 nn.ModuleList(
                     [
@@ -432,3 +407,16 @@ class Transformer(nn.Module):
                 x = ff(x) + x
 
         return self.norm(x)
+
+
+class ExpectileLoss(nn.Module):
+    def __init__(self, tau=0.9):
+        super().__init__()
+        self.tau = tau
+
+    def forward(self, preds: torch.Tensor, targets: torch.Tensor):
+        residual = targets - preds
+        # expectile weights
+        weight = torch.abs(self.tau - (residual < 0).float())
+        loss = (weight * residual.pow(2)).mean()
+        return loss
